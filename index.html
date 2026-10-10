@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SICOM - Panel de Control V2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+          colors: { brand: { accent: '#0071e3' } }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="flex flex-col h-screen w-screen bg-black text-gray-200">
+
+  <!-- LOADER -->
+  <div id="cloudLoader"><div class="spinner mb-4"></div><h2 class="text-white font-medium text-sm tracking-widest uppercase">Conectando...</h2></div>
+  
+  <!-- TOAST -->
+  <div id="toast">✅ Guardado</div>
+
+  <!-- LOGIN LIQUID GLASS -->
+  <div id="loginOverlay" class="fixed inset-0 z-[99999] bg-black hidden transition-opacity duration-700 flex items-center justify-center">
+      <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+      <div class="liquid-glass rounded-[2rem] p-10 max-w-sm w-full mx-4 flex flex-col items-center transform transition-all duration-700 scale-95 opacity-0 relative z-10" id="loginCard">
+          <div class="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-brand-accent to-[#004080] flex items-center justify-center shadow-[0_10px_30px_rgba(0,113,227,0.4)] mb-6 border border-white/20 overflow-hidden">
+              <img id="loginLogo" src="https://placehold.co/150x150/0071e3/ffffff?text=STGT" alt="STGT" class="w-full h-full object-cover" />
+          </div>
+          <h2 class="text-3xl font-semibold text-white mb-1 tracking-tight">SICOM</h2>
+          <p class="text-[10px] text-gray-400 font-medium mb-10 tracking-widest uppercase">Espacio de Trabajo</p>
+
+          <div class="w-full space-y-5">
+              <div>
+                  <label class="block text-[10px] text-gray-400 font-semibold mb-2 ml-1 uppercase tracking-widest">Identificación</label>
+                  <select id="loginUserSelect" onchange="handleLoginUserChange()" class="w-full liquid-input rounded-2xl p-3.5 text-sm cursor-pointer appearance-none">
+                      <option value="">-- Seleccionar Perfil --</option>
+                  </select>
+              </div>
+              
+              <div id="loginPasswordDiv" class="hidden overflow-hidden transition-all duration-500 opacity-0 transform translate-y-2">
+                  <label id="loginPasswordLabel" class="block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-brand-accent">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      Contraseña
+                  </label>
+                  <div class="relative">
+                      <input type="password" id="loginPasswordInput" placeholder="Ingresa contraseña" class="w-full liquid-input rounded-2xl p-3.5 pr-10 text-sm">
+                      <button type="button" onclick="togglePasswordVisibility('loginPasswordInput', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition">
+                          <svg id="eyeIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      </button>
+                  </div>
+              </div>
+              
+              <div id="loginLectorNameDiv" class="hidden overflow-hidden transition-all duration-500 opacity-0 transform translate-y-2 mt-2">
+                  <label class="block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-gray-400">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      Tu Nombre (Registro de Auditoría)
+                  </label>
+                  <input type="text" id="loginLectorNameInput" placeholder="Ej. Ing. Roberto..." class="w-full liquid-input rounded-2xl p-3.5 text-sm">
+              </div>
+              
+              <button onclick="attemptLogin()" class="pill-btn w-full py-4 bg-white text-black hover:bg-gray-200 font-semibold mt-4 shadow-[0_0_20px_rgba(255,255,255,0.2)]">Ingresar</button>
+          </div>
+      </div>
+  </div>
+
+  
+  <!-- BOTÓN GUÍA FLOTANTE -->
+  <button onclick="openManual()" class="fixed bottom-6 left-6 z-[45] w-12 h-12 liquid-glass flex items-center justify-center rounded-full text-white shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-white/10 transition-all group border border-white/20" title="Guía Rápida de Uso">
+      <svg class="w-6 h-6 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+  </button>
+
+  <!-- MODAL MANUAL DE USUARIO -->
+  <div id="manualModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-400 max-h-[85vh] overflow-y-auto scrollbar-thin relative">
+          <button onclick="closeManual()" class="absolute top-6 right-6 text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+          <div class="flex items-center gap-3 mb-6 pr-10">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-accent to-[#004080] flex items-center justify-center shadow-[0_0_15px_rgba(0,113,227,0.3)] shrink-0 border border-white/20">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </div>
+              <div>
+                  <h2 class="text-xl font-bold text-white tracking-tight leading-tight">Guía Rápida de Uso</h2>
+                  <p class="text-[10px] text-gray-400 uppercase tracking-widest">Panel de Control SICOM</p>
+              </div>
+          </div>
+          <div id="manualContent" class="space-y-4"></div>
+          <button onclick="closeManual()" class="pill-btn w-full py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold mt-6 shadow-inner border border-white/10">Entendido</button>
+      </div>
+  </div>
+
+  
+  <!-- MODAL RETROALIMENTACIÓN TAREA -->
+  <div id="taskFeedbackModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <h3 class="text-xl font-semibold text-white mb-2">Completar Tarea</h3>
+          <p class="text-xs text-gray-400 mb-5">Agrega una observación, enlace o evidencia de la tarea completada.</p>
+          <input type="hidden" id="feedbackTaskId">
+          <input type="hidden" id="feedbackTaskType"> <!-- 'global' o 'project' -->
+          <input type="hidden" id="feedbackProjectId">
+          <textarea id="taskFeedbackText" rows="3" class="w-full liquid-input rounded-2xl p-4 text-sm text-white mb-6 resize-none" placeholder="Escribe aquí tu evidencia o retroalimentación..."></textarea>
+          <div class="flex gap-4">
+              <button onclick="closeTaskFeedbackModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="submitTaskFeedback()" class="flex-1 py-3.5 bg-[#30d158] hover:bg-[#28b34b] text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(48,209,88,0.4)] text-sm">Enviar a Validación</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODALS SEGUROS -->
+
+  <div id="deleteConfirmModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <div class="flex items-center justify-center w-14 h-14 rounded-full bg-[#ff453a]/20 text-[#ff453a] mb-5 mx-auto border border-[#ff453a]/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
+          <h3 id="deleteModalTitle" class="text-xl font-semibold text-white text-center mb-2 tracking-tight">¿Estás seguro?</h3>
+          <p id="deleteModalText" class="text-sm text-gray-400 text-center mb-8">Esta acción borrará el elemento permanentemente.</p>
+          <div class="flex gap-4">
+              <button onclick="closeDeleteModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="confirmDeleteSelection()" class="flex-1 py-3.5 bg-[#ff453a] hover:bg-red-500 text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(255,69,58,0.4)] text-sm">Eliminar</button>
+          </div>
+      </div>
+  </div>
+  
+  
+  <div id="passwordModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-brand-accent/20 text-brand-accent mb-4 border border-brand-accent/30"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></div>
+          <h3 class="text-xl font-semibold text-white mb-2">Contraseña Privada</h3>
+          <p class="text-xs text-gray-400 mb-5">Define una contraseña para <span id="passConsultantName" class="font-bold text-white"></span>. Si la dejas en blanco, usará la predeterminada de su rol.</p>
+          <input type="hidden" id="passConsultantId">
+          <input type="text" id="passNewValue" class="w-full liquid-input rounded-2xl p-4 text-sm text-white mb-6" placeholder="Nueva contraseña...">
+          <div class="flex gap-4">
+              <button onclick="closePasswordModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="confirmPasswordChange()" class="flex-1 py-3.5 bg-brand-accent hover:bg-blue-500 text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(0,113,227,0.4)] text-sm">Guardar</button>
+          </div>
+      </div>
+  </div>
+  
+  <div id="renameModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <h3 class="text-xl font-semibold text-white mb-2">Renombrar Consultor</h3>
+          <p class="text-xs text-gray-400 mb-5">El cambio se aplicará a todos sus proyectos asignados.</p>
+          <input type="hidden" id="renameOldName">
+          <input type="text" id="renameNewName" class="w-full liquid-input rounded-2xl p-4 text-sm text-white mb-6" placeholder="Nuevo nombre...">
+          <div class="flex gap-4">
+              <button onclick="closeRenameModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="confirmRenameConsultant()" class="flex-1 py-3.5 bg-brand-accent hover:bg-blue-500 text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(0,113,227,0.4)] text-sm">Guardar</button>
+          </div>
+      </div>
+  </div>
+
+  
+  <!-- MODAL ASIGNAR TAREA GLOBAL -->
+  <div id="globalTaskModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <h3 class="text-xl font-semibold text-white mb-2">Asignar Tarea Global</h3>
+          <p class="text-xs text-gray-400 mb-5">Crea y asigna una tarea a cualquier consultor sin tener que buscar el proyecto en el mapa.</p>
+          
+          <div class="space-y-4 mb-6">
+              <div>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Proyecto Destino (Opcional)</label>
+                  <select id="gtProject" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none text-white"></select>
+              </div>
+              <div>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Descripción de la Tarea</label>
+                  <input type="text" id="gtDescription" placeholder="Ej. Actualizar formato..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none">
+              </div>
+              <div class="flex gap-3">
+                  <div class="flex-1">
+                      <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Asignar a</label>
+                      <select id="gtAssignee" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none"></select>
+                  </div>
+                  <div class="flex-1">
+                      <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Límite</label>
+                      <input type="date" id="gtDate" class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none [color-scheme:dark]">
+                  </div>
+              </div>
+          </div>
+          
+          <div class="flex gap-4">
+              <button onclick="closeGlobalTaskModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="saveGlobalTask()" class="flex-1 py-3.5 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(191,90,242,0.4)] text-sm">Asignar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- NAVEGACIÓN -->
+  <header class="h-16 shrink-0 border-b border-white/10 bg-black/40 backdrop-blur-2xl flex items-center justify-between px-4 sm:px-6 z-20 relative">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-accent to-[#004080] flex items-center justify-center shadow-[0_0_15px_rgba(0,113,227,0.3)] shrink-0 border border-white/20 border-t-white/40 overflow-hidden">
+          <img id="headerLogo" src="https://placehold.co/100x100/0071e3/ffffff?text=STGT" alt="STGT" class="w-full h-full object-cover" />
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-semibold text-white tracking-tight leading-tight flex items-center gap-2">
+            SICOM
+            <span id="connectionStatusDot" class="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_#30d158] animate-pulse transition-all duration-300" title="En Línea"></span>
+        </h1>
+        <p id="topBarWelcome" class="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide"></p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end flex-1 pl-4">
+      <div class="relative flex items-center group">
+          <button id="searchBtnIcon" onclick="toggleSearch()" class="p-2 text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 border border-white/10 rounded-full z-10 relative">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+          <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="Buscar proyecto..." class="absolute right-0 opacity-0 w-0 pointer-events-none bg-black/60 border border-white/20 rounded-full py-1.5 px-4 text-sm text-white focus:outline-none transition-all duration-300 ease-in-out backdrop-blur-md">
+          <datalist id="projectsDatalist"></datalist>
+      </div>
+
+      <div id="filterConsultantWrapper" class="flex items-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors rounded-full px-3 sm:px-4 py-1.5 transition-all duration-300">
+        <select id="consultantFilter" onchange="handleFilterChange()" class="bg-transparent text-[11px] sm:text-xs text-white focus:outline-none cursor-pointer font-medium w-full max-w-[90px] sm:max-w-none appearance-none"><option value="ALL">👥 Todos</option></select>
+      </div>
+
+      <div id="filterStatusWrapper" class="flex items-center bg-white/5 border border-white/10 hover:bg-white/10 transition-colors rounded-full px-3 sm:px-4 py-1.5 transition-all duration-300">
+        <select id="statusFilter" onchange="handleFilterChange()" class="bg-transparent text-[11px] sm:text-xs text-white focus:outline-none cursor-pointer font-medium w-full max-w-[100px] sm:max-w-none appearance-none">
+          <option value="ALL">📋 Proyectos</option>
+          <option value="No Iniciado">⏸️ No Iniciado</option>
+          <option value="Pendiente">⏳ Pendiente</option>
+          <option value="En Progreso">🚀 En Progreso</option>
+          <option value="Completado">✅ Completado</option>
+        </select>
+      </div>
+      
+      <!-- BOTÓN CAMPANA DE ALERTAS -->
+      <button onclick="toggleAlertsDrawer()" class="relative shrink-0 pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white font-medium flex items-center gap-1.5 transition ml-1" title="Alertas">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="alertsBadge" class="absolute -top-0.5 -right-0.5 bg-[#ff453a] text-white text-[9px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(255,69,58,0.6)] hidden">0</span>
+      </button>
+
+      <div class="hidden md:flex items-center gap-1.5">
+<div class="flex bg-white/5 border border-white/10 rounded-full overflow-hidden hidden xl:flex ml-1 shrink-0">
+          <button onclick="recenterCanvas()" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors border-r border-white/10" title="Centrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></button>
+          <button onclick="zoomCanvas(0.15)" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors border-r border-white/10" title="Acercar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg></button>
+          <button onclick="zoomCanvas(-0.15)" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors" title="Alejar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/></svg></button>
+      </div>
+
+            <button onclick="openGlobalTaskModal()" class="supervisor-up pill-btn shrink-0 p-1.5 sm:px-3 sm:py-1.5 bg-[#30d158] text-white hover:bg-[#28b34b] font-semibold flex items-center gap-1.5 ml-1 shadow-[0_0_15px_rgba(48,209,88,0.3)] border border-[#30d158]/50 text-[11px] sm:text-xs hidden">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span class="hidden lg:inline text-xs">Asignar Tarea</span>
+      </button>
+
+      <button onclick="openFastCreateProject()" class="lector-hide pill-btn shrink-0 p-1.5 sm:px-3 sm:py-1.5 bg-[#ff9f0a] text-white hover:bg-[#ffb340] font-semibold flex items-center gap-1.5 ml-1 shadow-[0_0_15px_rgba(255,159,10,0.3)] border border-[#ff9f0a]/50 text-[11px] sm:text-xs">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        <span class="hidden lg:inline text-xs">Añadir Proyecto</span>
+      </button>
+
+      <button onclick="togglePriorityDrawer()" class="pill-btn shrink-0 p-1.5 sm:px-4 sm:py-1.5 bg-transparent border border-white/20 text-white hover:bg-white/10 font-medium flex items-center gap-1.5 ml-1 text-xs">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span class="hidden md:inline text-xs">Prioridades</span>
+      </button>
+
+      <button onclick="toggleConfigDrawer()" class="pill-btn shrink-0 p-1.5 sm:px-4 sm:py-1.5 bg-brand-accent text-white hover:bg-blue-400 font-bold flex items-center gap-1.5 ml-1 shadow-[0_0_15px_rgba(0,113,227,0.4)] border border-brand-accent text-xs">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="hidden md:inline text-xs">Panel</span>
+      </button>
+
+      <div class="h-5 w-px bg-white/20 mx-1 hidden sm:block"></div>
+
+      <button onclick="logout()" class="pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-[#ff453a]/20 hover:text-[#ff453a] font-medium flex items-center gap-1.5 transition ml-1" title="Cerrar Sesión">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      </button>
+</div>
+
+      <!-- BOTÓN 3 PUNTOS MÓVIL -->
+      <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="pill-btn p-2 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white transition md:hidden flex items-center justify-center ml-1 border border-white/10 rounded-xl" title="Menú">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+      </button>
+
+      <!-- MENÚ DESPLEGABLE MÓVIL -->
+      <div id="mobileMenuDropdown" class="absolute top-[60px] right-0 w-56 liquid-glass rounded-2xl p-2 z-[100] transform scale-95 opacity-0 pointer-events-none transition-all duration-300 origin-top-right flex flex-col gap-1 md:hidden shadow-2xl border border-white/20">
+          <button onclick="openGlobalTaskModal(); toggleMobileMenu()" class="supervisor-up hidden w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              Asignar Tarea
+          </button>
+          <button onclick="openFastCreateProject(); toggleMobileMenu()" class="lector-hide w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#ff9f0a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              Añadir Proyecto
+          </button>
+          <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              Prioridades
+          </button>
+          <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-bold flex items-center gap-3">
+              <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              Panel
+          </button>
+          <div class="h-px w-full bg-white/10 my-1"></div>
+          <button onclick="logout()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-[#ff453a]/20 text-[#ff453a] text-xs font-medium flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              Cerrar Sesión
+          </button>
+      </div>
+    
+    </div>
+  </header>
+
+  <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
+    <svg id="mindmapCanvas" class="w-full h-full absolute inset-0 pointer-events-none">
+      <defs id="svgDefs">
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="8" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>
+        <filter id="glow-intense" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="20" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>
+      </defs>
+      <g id="canvasGroup" class="pointer-events-auto transition-transform duration-100 ease-out"></g>
+    </svg>
+
+    <div id="infoCard" class="absolute bottom-4 left-4 right-4 md:left-auto md:bottom-8 md:right-8 md:w-[400px] liquid-glass rounded-[2rem] p-6 hidden opacity-0 transition-opacity duration-400 z-10 max-h-[85vh] overflow-y-auto scrollbar-thin">
+      <div class="flex justify-between items-start mb-4">
+        <span id="infoType" class="text-[9px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-white/10 text-gray-300 border border-white/5">TIPO</span>
+        <button onclick="closeInfoCardSafe()" class="text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition bg-black/20"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <h3 id="infoTitle" class="text-xl font-semibold text-white mb-1.5 tracking-tight leading-tight">Nombre</h3>
+      <p id="infoParent" class="text-xs text-gray-400 mb-5 hidden"></p>
+      
+      <a id="infoDriveBtn" href="#" target="_blank" class="hidden pill-btn w-full py-3.5 mb-3 bg-[#0071e3]/20 hover:bg-[#0071e3]/40 text-[#0071e3] font-bold text-xs border border-[#0071e3]/50 flex justify-center items-center gap-2 transition shadow-inner">
+        📁 Abrir Carpeta Drive
+      </a>
+      <a id="infoInvgateBtn" href="#" target="_blank" class="hidden pill-btn w-full py-3.5 mb-5 bg-[#30d158]/20 hover:bg-[#30d158]/40 text-[#30d158] font-bold text-xs border border-[#30d158]/50 flex justify-center items-center gap-2 transition shadow-inner">
+        🎫 Abrir Ticket Invgate
+      </a>
+      
+      <div id="infoRelativeTime" class="hidden text-xs font-semibold px-3 py-2 rounded-xl mb-5 border flex items-center gap-2"></div>
+      
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="bg-black/30 rounded-2xl p-4 border border-white/5 border-t-white/10 shadow-inner">
+          <span class="block text-[9px] text-gray-500 font-semibold mb-2 uppercase tracking-widest">Consultor(es)</span>
+          <div id="infoConsultant" class="flex flex-col gap-2 text-sm text-white font-medium"></div>
+        </div>
+        <div class="bg-black/30 rounded-2xl p-4 border border-white/5 border-t-white/10 shadow-inner">
+          <span id="infoMetricLabel" class="block text-[9px] text-gray-500 font-semibold mb-2 uppercase tracking-widest">Prioridad</span>
+          <div id="infoMetricValue" class="flex items-center gap-1.5 text-sm font-semibold text-white"></div>
+        </div>
+      </div>
+      
+      <div id="infoQuickEditContainer" class="hidden mb-5 bg-black/40 rounded-2xl p-5 border border-white/5 border-t-white/10 flex flex-col gap-5 relative overflow-hidden shadow-inner">
+          <div id="quickSaveIndicator" class="absolute top-0 left-0 right-0 h-1 bg-white opacity-0 transition-opacity duration-300 shadow-[0_0_10px_white]"></div>
+          
+          <div class="grid grid-cols-2 gap-4">
+              <div>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Estado</label>
+                  <select id="quickEditStatus" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none appearance-none font-medium">
+                      <option value="No Iniciado">⏸️ No Iniciado</option><option value="Pendiente">⏳ Pendiente</option><option value="En Progreso">🚀 En Progreso</option><option value="Completado">✅ Completado</option>
+                  </select>
+              </div>
+              <div>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Límite / Entrega</label>
+                  <input type="date" id="quickEditDeadline" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]">
+              </div>
+          </div>
+          
+          <div class="flex items-end gap-4 pt-3 border-t border-white/10 min-h-[60px]">
+              <div class="flex-1">
+                  <label class="block text-[8px] text-[#35aee8] font-bold mb-2 uppercase tracking-widest leading-tight">Envío Propuesta<br>(Indicador)</label>
+                  <input type="date" id="quickEditDeliveryDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]">
+              </div>
+              <div class="flex-1">
+                  <label class="block text-[8px] text-[#30d158] font-bold mb-2 uppercase tracking-widest leading-tight">Autorización<br>(Indicador)</label>
+                  <input type="date" id="quickEditReturnDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#30d158]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]">
+              </div>
+          </div>
+
+          <div class="border-t border-white/10 pt-4 mb-2">
+             <div class="flex justify-between items-center mb-3">
+                <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest">Tareas del Proyecto</label>
+             </div>
+             <div id="quickTasksList" class="space-y-2 max-h-40 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
+             <div class="flex flex-col gap-2" id="quickTaskInputBlock">
+                 <input type="text" id="newQuickTaskInput" placeholder="Descripción de la tarea..." class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none">
+                 <div class="flex gap-2">
+                     <select id="newQuickTaskAssignee" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none appearance-none cursor-pointer"><option value="">👤 Asignar a...</option></select>
+                     <input type="date" id="newQuickTaskDate" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none [color-scheme:dark]">
+                     <button onclick="addQuickTask()" class="pill-btn px-3 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0">Añadir</button>
+                 </div>
+             </div>
+          </div>
+
+          <div class="border-t border-white/10 pt-4">
+             <div class="flex justify-between items-center mb-3">
+                <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest">Documentación</label>
+                <span id="quickEditProgressLabel" class="text-[11px] font-bold text-white bg-white/10 px-2.5 py-1 rounded-full border border-white/5 shadow-inner">0%</span>
+             </div>
+             <div id="quickDocsContainer" class="space-y-3 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
+             <input type="hidden" id="quickEditProgress" value="0">
+             <div id="quickSliderContainer" class="hidden mt-3">
+                 <input type="range" id="quickEditSlider" min="0" max="100" value="0" oninput="document.getElementById('quickEditProgress').value=this.value; document.getElementById('quickEditProgressLabel').textContent=this.value+'%'; silentSaveInfoCard();" class="w-full accent-white h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer">
+             </div>
+             
+             <!-- ENLACES DRIVE E INVGATE IN-SITU -->
+             <div id="quickLinksInputContainer" class="hidden mt-4 pt-4 border-t border-white/10 space-y-3">
+                 <div>
+                     <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Carpeta Drive (URL)</label>
+                     <div class="flex gap-2">
+                         <input type="url" id="quickEditDriveLink" class="flex-1 liquid-input rounded-xl p-2.5 text-xs text-[#0071e3] focus:outline-none" placeholder="Pegar enlace de Drive...">
+                         <button onclick="saveQuickLinks()" class="pill-btn px-4 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0">Guardar</button>
+                     </div>
+                 </div>
+                 <div>
+                     <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Ticket Invgate (URL)</label>
+                     <div class="flex gap-2">
+                         <input type="url" id="quickEditInvgateLink" class="flex-1 liquid-input rounded-xl p-2.5 text-xs text-[#30d158] focus:outline-none" placeholder="Pegar enlace de Invgate...">
+                         <button onclick="saveQuickLinks()" class="pill-btn px-4 bg-[#30d158] hover:bg-[#28b34b] text-white font-bold text-[10px] transition shrink-0">Guardar</button>
+                     </div>
+                 </div>
+             </div>
+          </div>
+      </div>
+      
+      
+      <div id="infoNotesContainer" class="hidden mb-6 pt-4 border-t border-white/10">
+        <h4 class="text-[10px] font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2"><svg class="w-3.5 h-3.5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Detalles y Notas Técnicas</h4>
+        <div id="infoNotes" class="flex flex-col gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1"></div>
+        <!-- FORO: escribir/responder desde la tarjeta (todos excepto Lector) -->
+        <div class="lector-hide mt-3">
+          <div class="flex gap-2">
+            <textarea id="infoNoteInput" rows="2" maxlength="1000" class="flex-1 liquid-input rounded-2xl p-3 text-xs resize-none" placeholder="Escribe un comentario o responde..."></textarea>
+            <button type="button" onclick="addProjectNote('info')" class="pill-btn px-4 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(191,90,242,0.3)]">Publicar</button>
+          </div>
+        </div>
+      </div>
+
+      
+      <button onclick="editFromInfoCard()" id="btnFullEditInfoCard" class="w-full py-3.5 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-semibold rounded-2xl transition flex justify-center items-center gap-2 backdrop-blur-md shadow-sm supervisor-up hidden">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edición Completa en Panel
+      </button>
+    </div>
+  </main>
+
+  <!-- DRAWER ALERTAS -->
+  <div id="alertsDrawer" class="fixed top-0 right-0 h-full w-full md:w-[400px] liquid-glass-panel z-50 transform translate-x-full drawer-transition flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20">
+      <div class="flex items-center gap-3 text-white">
+        <div class="p-2 bg-[#ff453a]/20 rounded-xl border border-[#ff453a]/30 text-[#ff453a]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h2 class="font-semibold tracking-tight text-lg">Mis Alertas</h2>
+      </div>
+      <button onclick="toggleAlertsDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div id="alertsListContainer" class="flex-1 overflow-y-auto p-6 scrollbar-thin space-y-4"></div>
+  </div>
+
+  <!-- DRAWER PRIORIDADES -->
+  <div id="priorityDrawer" class="fixed top-0 right-0 h-full w-full md:w-[440px] liquid-glass-panel z-40 transform translate-x-full drawer-transition flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20">
+      <div class="flex items-center gap-3 text-white">
+        <div class="p-2 bg-white/10 rounded-xl border border-white/5"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></div>
+        <h2 class="font-semibold tracking-tight text-lg">Lista de Prioridades</h2>
+      </div>
+      <button onclick="closePriorityDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div id="priorityListContainer" class="flex-1 overflow-y-auto p-6 scrollbar-thin flex flex-col"></div>
+  </div>
+
+  <!-- DRAWER CONFIGURACION -->
+  <div id="configDrawer" class="fixed top-0 right-0 h-full w-full md:w-[480px] liquid-glass-panel z-50 transform translate-x-full drawer-transition flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20">
+      <div class="flex items-center gap-3 text-white">
+        <div class="p-2 bg-white/10 rounded-xl border border-white/5"><svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <h2 class="font-semibold tracking-tight text-lg">Centro de Control</h2>
+      </div>
+      <button onclick="closeConfigDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+
+    <!-- Pestañas Modificadas con Reglas de Permisos -->
+    <div class="px-5 py-4 bg-black/20 border-b border-white/10 shrink-0">
+        <div class="flex p-1 bg-black/40 rounded-2xl border border-white/5 overflow-x-auto scrollbar-thin">
+          <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn flex-1 min-w-[80px] py-2 text-[11px] font-semibold rounded-xl bg-white/10 text-white shadow-sm transition">📊 Tablero</button>
+          <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn supervisor-up hidden flex-1 min-w-[70px] py-2 text-[11px] font-semibold rounded-xl text-gray-400 hover:text-white transition">✏️ Editar</button>
+          <button onclick="switchTab('new')" id="tabBtn-new" class="tab-btn lector-hide flex-1 min-w-[70px] py-2 text-[11px] font-semibold rounded-xl text-gray-400 hover:text-white transition">➕ Nuevo</button>
+          <button onclick="switchTab('history')" id="tabBtn-history" class="tab-btn supervisor-up hidden flex-1 min-w-[80px] py-2 text-[11px] font-semibold rounded-xl text-gray-400 hover:text-white transition">⏱️ Historial</button>
+          <button onclick="switchTab('consultants')" id="tabBtn-consultants" class="tab-btn supremo-only hidden flex-1 min-w-[90px] py-2 text-[11px] font-semibold rounded-xl text-gray-400 hover:text-white transition">👥 Equipo</button>
+          <button onclick="switchTab('docs')" id="tabBtn-docs" class="tab-btn supremo-only hidden flex-1 min-w-[90px] py-2 text-[11px] font-semibold rounded-xl text-gray-400 hover:text-white transition">📄 Docs Base</button>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 scrollbar-thin flex flex-col justify-between">
+      <div>
+        
+        <!-- DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content block space-y-6">
+           <h3 class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 ml-1">Métricas Generales</h3>
+           <div class="grid grid-cols-2 gap-4 mb-6">
+              <div class="bg-black/30 p-5 rounded-3xl border border-white/10 shadow-inner">
+                  <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Proyectos</p>
+                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashTotal">0</p>
+              </div>
+              <div class="bg-gradient-to-br from-[#30d158]/20 to-transparent p-5 rounded-3xl border border-[#30d158]/30 shadow-inner">
+                  <p class="text-[10px] text-[#30d158] uppercase font-semibold tracking-widest">Completados</p>
+                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashCompleted">0</p>
+              </div>
+              <div class="bg-gradient-to-br from-[#0071e3]/20 to-transparent p-5 rounded-3xl border border-[#0071e3]/30 shadow-inner">
+                  <p class="text-[10px] text-[#0071e3] uppercase font-semibold tracking-widest">En Progreso</p>
+                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashProgress">0</p>
+              </div>
+              <div class="bg-gradient-to-br from-[#ff453a]/20 to-transparent p-5 rounded-3xl border border-[#ff453a]/30 shadow-inner">
+                  <p class="text-[10px] text-[#ff453a] uppercase font-semibold tracking-widest">Vencidos ⚠️</p>
+                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashOverdue">0</p>
+              </div>
+           </div>
+           
+           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 mb-6 shadow-inner">
+              <div class="flex justify-between items-center mb-3">
+                 <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Avance Global</p>
+                 <p class="text-sm font-semibold text-white bg-white/10 px-3 py-1 rounded-full border border-white/5" id="dashGlobalText">0%</p>
+              </div>
+              <div class="w-full h-3 bg-black/50 rounded-full overflow-hidden border border-white/5">
+                  <div id="dashGlobalBar" class="h-full bg-brand-accent transition-all duration-1000 ease-out shadow-[0_0_10px_#0071e3]" style="width: 0%"></div>
+              </div>
+           </div>
+
+           <h3 class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 ml-1">Gráficas de Control</h3>
+           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 mb-4 flex justify-center shadow-inner">
+              <div class="w-[240px] h-[240px]"><canvas id="statusChart"></canvas></div>
+           </div>
+           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 shadow-inner">
+              <div class="w-full h-[240px]"><canvas id="consultantChart"></canvas></div>
+           </div>
+        </div>
+
+        <!-- EDITAR COMPLETO -->
+        <div id="tab-edit" class="tab-content hidden space-y-6">
+          <div class="space-y-3">
+            <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Elemento a Editar</label>
+            <select id="globalEditSelector" onchange="handleGlobalEditSelectionChange()" class="w-full liquid-input rounded-2xl p-4 text-sm appearance-none font-medium text-white">
+              <option value="" class="bg-black text-gray-400">-- Selecciona en el mapa --</option>
+            </select>
+          </div>
+          
+          <div id="editFormArea" class="hidden space-y-6 pt-4 border-t border-white/10">
+            <div class="flex justify-between items-center">
+              <span id="editTypeBadge" class="text-[9px] uppercase tracking-widest font-bold text-gray-300 bg-white/10 px-3 py-1.5 rounded-full border border-white/5">TIPO</span>
+              <button id="btnDeleteElement" onclick="requestDeleteCurrentSelection()" class="text-xs text-[#ff453a] hover:text-red-400 font-medium flex items-center gap-1.5 bg-[#ff453a]/10 hover:bg-[#ff453a]/20 px-4 py-2 rounded-full transition border border-[#ff453a]/20 supremo-only hidden">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Eliminar
+              </button>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre</label>
+              <input type="text" id="editName" class="w-full liquid-input rounded-2xl p-4 text-sm font-medium">
+            </div>
+            
+            <div id="editProjectFields" class="space-y-6 hidden">
+              <div class="space-y-2 sm:col-span-2">
+                  <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Carpeta Drive (URL)</label>
+                  <div class="flex gap-2">
+                      <input type="url" id="editDriveLink" class="flex-1 liquid-input rounded-2xl p-4 text-sm text-[#0071e3]" placeholder="https://drive.google.com/...">
+                      <a id="btnOpenEditDrive" href="#" target="_blank" class="hidden pill-btn px-6 bg-[#0071e3]/20 hover:bg-[#0071e3]/40 text-[#0071e3] border border-[#0071e3]/50 font-bold text-xs flex justify-center items-center transition shadow-inner">Abrir</a>
+                  </div>
+              </div>
+              <div class="space-y-2 sm:col-span-2">
+                  <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Ticket Invgate (URL)</label>
+                  <div class="flex gap-2">
+                      <input type="url" id="editInvgateLink" class="flex-1 liquid-input rounded-2xl p-4 text-sm text-[#30d158]" placeholder="https://stgt.invgate.com/...">
+                      <a id="btnOpenEditInvgate" href="#" target="_blank" class="hidden pill-btn px-6 bg-[#30d158]/20 hover:bg-[#30d158]/40 text-[#30d158] border border-[#30d158]/50 font-bold text-xs flex justify-center items-center transition shadow-inner">Abrir</a>
+                  </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-black/30 border border-white/10 border-t-white/20 rounded-[2rem] shadow-inner">
+                  <div class="space-y-2">
+                      <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Estado</label>
+                      <select id="editStatus" class="w-full liquid-input rounded-xl p-3 text-sm appearance-none font-medium">
+                          <option value="No Iniciado">⏸️ No Iniciado</option><option value="Pendiente">⏳ Pendiente</option><option value="En Progreso">🚀 En Progreso</option><option value="Completado">✅ Completado</option>
+                      </select>
+                  </div>
+                  <div class="space-y-2">
+                      <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Fecha Entrega</label>
+                      <input type="date" id="editDeadline" max="2099-12-31" class="w-full liquid-input rounded-xl p-3 text-sm [color-scheme:dark]">
+                  </div>
+                  
+                  <div class="flex items-end gap-4 mt-2 border-t border-white/10 pt-4 sm:col-span-2 min-h-[60px]">
+                      <div class="flex-1">
+                          <label class="block text-[8px] text-[#35aee8] font-bold mb-2 uppercase tracking-widest leading-tight">Envío Propuesta<br>(Indicador)</label>
+                          <input type="date" id="editDeliveryDate" max="2099-12-31" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-3 text-sm [color-scheme:dark]">
+                      </div>
+                      <div class="flex-1">
+                          <label class="block text-[8px] text-[#30d158] font-bold mb-2 uppercase tracking-widest leading-tight">Autorización<br>(Indicador)</label>
+                          <input type="date" id="editReturnDate" max="2099-12-31" class="w-full liquid-input border-[#30d158]/30 rounded-xl p-3 text-sm [color-scheme:dark]">
+                      </div>
+                  </div>
+
+                  <div class="sm:col-span-2 mt-2 pt-4 border-t border-white/10">
+                     <div class="flex justify-between items-center mb-4">
+                        <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Documentación Base</label>
+                        <span id="editProgressLabel" class="text-[12px] font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-white/5 shadow-inner">0%</span>
+                     </div>
+                     <div id="editDocsContainer" class="space-y-3 max-h-72 overflow-y-auto scrollbar-thin pr-1"></div>
+                     <input type="hidden" id="editProgress" value="0">
+                     <div id="editSliderContainer" class="hidden mt-4">
+                        <input type="range" id="editSlider" min="0" max="100" value="0" oninput="document.getElementById('editProgress').value=this.value; document.getElementById('editProgressLabel').textContent=this.value+'%';" class="w-full accent-brand-accent h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer">
+                     </div>
+                  </div>
+              </div>
+              
+              <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Prioridad (Numérica)</label>
+                <input type="number" step="any" id="editPriority" class="w-full liquid-input rounded-2xl p-4 text-sm" placeholder="1 = urgencia máxima">
+              </div>
+              
+              <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Consultor(es)</label>
+                <div id="editConsultantsChecks" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl grid grid-cols-1 gap-2 max-h-48 overflow-y-auto scrollbar-thin shadow-inner"></div>
+              </div>
+              
+              <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Foro / Notas Técnicas</label>
+                <div id="editNotesHistory" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl flex flex-col gap-3 max-h-48 overflow-y-auto scrollbar-thin shadow-inner mb-2 hidden"></div>
+                <div class="flex gap-2">
+                    <textarea id="editNotes" rows="2" class="flex-1 liquid-input rounded-2xl p-3 text-sm resize-none" placeholder="Añadir un nuevo comentario..."></textarea>
+                    <button type="button" onclick="addProjectNote()" class="pill-btn px-4 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(191,90,242,0.3)]">Publicar</button>
+                </div>
+              </div>
+            </div>
+            
+            <div id="editModuleFields" class="space-y-6 hidden">
+              <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Color Temático</label>
+                <div class="flex gap-3">
+                  <div class="w-14 h-14 rounded-2xl overflow-hidden border border-white/20 relative shrink-0">
+                      <input type="color" id="editModuleColor" class="absolute -top-2 -left-2 w-20 h-20 cursor-pointer border-0 p-0">
+                  </div>
+                  <input type="text" id="editModuleColorHex" class="flex-1 liquid-input rounded-2xl p-4 text-sm font-mono uppercase" readonly>
+                </div>
+              </div>
+            </div>
+            
+            <button onclick="saveEditChanges()" class="pill-btn w-full py-4 bg-brand-accent hover:bg-[#005bb5] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(0,113,227,0.3)] flex justify-center items-center gap-2">Guardar Cambios Completos</button>
+          </div>
+          
+          <div id="editEmptyState" class="text-center py-20 opacity-50">
+             <svg class="w-16 h-16 text-gray-400 mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+             <p class="text-sm text-gray-300 font-medium tracking-wide">Selecciona un elemento en el mapa</p>
+          </div>
+        </div>
+
+        <!-- NUEVO -->
+        <div id="tab-new" class="tab-content hidden space-y-6">
+          <div class="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 mb-8 shadow-inner">
+            <button onclick="setCreateType('project')" id="btnCreateTypeProject" class="flex-1 py-3 text-xs font-semibold rounded-xl bg-white/10 text-white shadow-sm transition border border-white/5">Proyectos</button>
+            <button onclick="setCreateType('module')" id="btnCreateTypeModule" class="flex-1 py-3 text-xs font-semibold rounded-xl text-gray-400 hover:text-white transition border border-transparent supremo-only hidden">Módulos</button>
+          </div>
+          
+          <div id="createProjectForm" class="space-y-5">
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Ubicación</label>
+                <select id="newProjLocation" class="w-full liquid-input rounded-2xl p-4 text-sm appearance-none font-medium text-white"></select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre</label>
+                <input type="text" id="newProjName" class="w-full liquid-input rounded-2xl p-4 text-sm">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Carpeta Drive (Opcional)</label>
+                <input type="url" id="newProjDrive" class="w-full liquid-input rounded-2xl p-4 text-sm text-[#0071e3]" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Ticket Invgate (Opcional)</label>
+                <input type="url" id="newProjInvgate" class="w-full liquid-input rounded-2xl p-4 text-sm text-[#30d158]" placeholder="https://stgt.invgate.com/...">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Prioridad (Numérica)</label>
+                <input type="number" id="newProjPriority" value="1" class="w-full liquid-input rounded-2xl p-4 text-sm">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1 block mb-1">Consultor(es)</label>
+                <div id="newProjConsultantsChecks" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl grid grid-cols-1 gap-2 max-h-48 overflow-y-auto scrollbar-thin shadow-inner"></div>
+            </div>
+            <button onclick="createNewProject()" class="pill-btn w-full py-4 bg-[#ff9f0a] hover:bg-[#ffb340] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(255,159,10,0.3)] flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Añadir Proyecto
+            </button>
+          </div>
+          
+          <div id="createModuleForm" class="space-y-5 hidden">
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre del Módulo</label>
+                <input type="text" id="newModName" class="w-full liquid-input rounded-2xl p-4 text-sm">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Color Distintivo</label>
+                <div class="flex gap-3">
+                  <div class="w-14 h-14 rounded-2xl overflow-hidden border border-white/20 relative shrink-0">
+                      <input type="color" id="newModColor" value="#8b5cf6" class="absolute -top-2 -left-2 w-20 h-20 cursor-pointer border-0 p-0">
+                  </div>
+                  <input type="text" id="newModColorHex" value="#8b5cf6" class="flex-1 liquid-input rounded-2xl p-4 text-sm font-mono uppercase" readonly>
+                </div>
+            </div>
+            <button onclick="createNewModule()" class="pill-btn w-full py-4 bg-brand-accent hover:bg-[#005bb5] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(0,113,227,0.3)] flex justify-center items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Crear Módulo
+            </button>
+          </div>
+        </div>
+
+        <!-- HISTORIAL -->
+        <div id="tab-history" class="tab-content hidden space-y-5">
+            <div class="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-inner">
+                <div>
+                    <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest mb-1">Filtrar por Fecha</label>
+                    <input type="date" id="historyDateFilter" onchange="renderHistory()" class="liquid-input rounded-xl p-2.5 text-xs text-white [color-scheme:dark]">
+                </div>
+                <button onclick="document.getElementById('historyDateFilter').value = ''; renderHistory();" class="pill-btn px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/5 mt-4">Ver Todos</button>
+            </div>
+            <div id="historyListContainer" class="space-y-3"></div>
+            <div id="historyEmptyState" class="text-center py-20 opacity-50 hidden">
+                <svg class="w-14 h-14 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm text-gray-300 font-medium tracking-wide">No hay registros para la fecha seleccionada.</p>
+            </div>
+        </div>
+
+        <!-- CONSULTORES -->
+        <div id="tab-consultants" class="tab-content hidden space-y-8">
+          <div class="bg-black/30 border border-white/10 border-t-white/20 rounded-[2rem] p-6 mb-8 shadow-inner">
+            <h3 class="text-[11px] font-semibold text-white uppercase tracking-widest mb-5 flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Nuevo Consultor</h3>
+            <div class="space-y-4">
+              <div>
+                 <label class="text-[9px] text-gray-500 font-semibold uppercase tracking-widest block mb-2 ml-1">Nombre</label>
+                 <input type="text" id="newConsultantName" placeholder="Ej. Carlos" class="w-full liquid-input rounded-xl p-3.5 text-sm">
+              </div>
+              
+              <div>
+                  <label class="text-[9px] text-gray-500 font-semibold uppercase tracking-widest block mb-2 ml-1">Nivel de Permisos</label>
+                  <select id="newConsultantRole" class="w-full liquid-input rounded-xl p-3.5 text-sm appearance-none cursor-pointer text-gray-300">
+                      <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
+                      <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
+                      <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
+                      <option value="Lector">Lector (Solo vista - Para jefatura)</option>
+                  </select>
+              </div>
+
+              <div>
+                  <label class="text-[9px] text-gray-500 font-semibold uppercase tracking-widest block mb-2 ml-1">Color</label>
+                  <div class="flex gap-3">
+                      <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/20 relative shrink-0">
+                          <input type="color" id="newConsultantColor" value="#bf5af2" onchange="document.getElementById('newConsultantColorHex').value=this.value" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0">
+                      </div>
+                      <input type="text" id="newConsultantColorHex" value="#BF5AF2" class="flex-1 liquid-input rounded-xl p-3.5 text-sm font-mono uppercase" readonly>
+                  </div>
+              </div>
+              <button onclick="registerConsultant()" class="pill-btn w-full py-3.5 bg-brand-accent text-white font-semibold text-sm mt-4 shadow-[0_0_15px_rgba(0,113,227,0.3)]">Guardar</button>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-5 px-2">
+                <h3 class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Activos</h3>
+                <span id="consultantsCountBadge" class="bg-white/10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/5">0</span>
+            </div>
+            <div id="registeredConsultantsList" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- DOC GENERAL -->
+        <div id="tab-docs" class="tab-content hidden space-y-8">
+           <div class="bg-black/30 border border-white/10 border-t-white/20 rounded-[2rem] p-6 mb-6 shadow-inner">
+               <h3 class="text-[11px] font-semibold text-white uppercase tracking-widest mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Nuevo Documento Base</h3>
+               <p class="text-[10px] text-gray-400 mb-5 leading-relaxed">Agrega requisitos para el cálculo automático de avance.</p>
+               <div class="space-y-4">
+                   <input type="text" id="newDocName" placeholder="Ej. Contrato..." class="w-full liquid-input rounded-xl p-3.5 text-sm">
+                   <button onclick="registerGlobalDocument()" class="pill-btn w-full py-3.5 bg-brand-accent text-white font-semibold text-sm shadow-[0_0_15px_rgba(0,113,227,0.3)]">Añadir Requisito</button>
+               </div>
+           </div>
+           <div>
+               <div class="flex justify-between px-2 mb-4"><h3 class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Documentos Actuales</h3></div>
+               <div id="registeredDocsList" class="space-y-2 max-h-72 overflow-y-auto scrollbar-thin"></div>
+           </div>
+        </div>
+      </div>
+
+      <div class="mt-8 border-t border-white/10 pt-6 space-y-4 shrink-0">
+        <div id="backupControls" class="supremo-only hidden">
+            <h4 class="text-[9px] font-semibold text-gray-500 uppercase tracking-widest mb-3 ml-1">Respaldo de Datos</h4>
+            <div class="flex gap-3 flex-wrap">
+              <button onclick="exportData()" class="pill-btn flex-1 min-w-[100px] py-2.5 bg-black/40 border border-white/10 text-gray-300 text-xs font-medium hover:bg-white/10 transition hover:text-white shadow-inner">JSON</button>
+              <button onclick="exportCSV()" class="pill-btn flex-1 min-w-[100px] py-2.5 bg-[#30d158]/10 border border-[#30d158]/30 text-[#30d158] font-semibold text-xs hover:bg-[#30d158]/20 transition shadow-inner">Excel</button>
+              <button onclick="document.getElementById('importFile').click()" class="pill-btn w-full py-2.5 bg-black/40 border border-white/10 text-gray-300 text-xs font-medium hover:bg-white/10 transition mt-1 hover:text-white shadow-inner">Importar JSON</button>
+              <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+              <button onclick="forceCloudSync()" class="pill-btn w-full py-3 bg-brand-accent text-white font-bold mt-2 shadow-[0_0_15px_rgba(0,113,227,0.4)]">⬆️ Forzar Restauración a la Nube</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script type="module" src="app.js"></script>
+
+</body>
+</html>
