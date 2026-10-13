@@ -8,9 +8,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let translateX = 0, translateY = 0, scale = 1;
     let isPanning = false, startX, startY;
     let initialPinchDistance = null;
-    let activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeSearchQuery = '';
-    let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false;
-    let currentSelection = { type: null, id: null };
+    let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
+    let activeSearchQuery = '';
+    let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL';
+    let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false;    let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
     
@@ -135,7 +136,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!appData.core) appData.core = { id: 'sicom', name: 'SICOM' };
         if(!appData.directProjects) appData.directProjects = [];
         if(!appData.modules) appData.modules = [];
+        if(!appData.dailyTasks) appData.dailyTasks = [];
         if(!appData.globalTasks) appData.globalTasks = [];
+
+        // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
+        const idsVistos = new Set();
+        const repararProyectos = (lista) => (lista || []).filter(p => p && typeof p === 'object').map(p => {
+            if (!p.id || idsVistos.has(p.id)) { let n = 1, base = p.id || 'p', nuevo = base + '_r' + n; while (idsVistos.has(nuevo)) nuevo = base + '_r' + (++n); p.id = nuevo; }
+            idsVistos.add(p.id);
+            p.tasks = Array.isArray(p.tasks) ? p.tasks.filter(t => t && typeof t === 'object') : [];
+            if (typeof p.notes !== 'string') p.notes = Array.isArray(p.notes) ? p.notes.filter(n => n && typeof n === 'object') : [];
+            if (p.docs === null || typeof p.docs !== 'object') p.docs = {};
+            if (p.deadline && typeof p.deadline !== 'string') p.deadline = '';
+            if (p.driveLink && typeof p.driveLink !== 'string') p.driveLink = '';
+            if (p.invgateLink && typeof p.invgateLink !== 'string') p.invgateLink = '';
+            return p;
+        });
+        appData.directProjects = repararProyectos(appData.directProjects);
+        appData.modules = appData.modules.filter(m => m && typeof m === 'object');
+        appData.modules.forEach(m => { m.projects = repararProyectos(m.projects); });
     }
 
     function loadLocalFallback() {
@@ -317,8 +336,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 window.saveData(false);
                 window.renderAlerts();
             }
+        } else if (taskType === 'daily') {
+            const t = appData.dailyTasks.find(x => x.id === taskId);
+            if (t) {
+                t.done = finalStatus;
+                t.feedback = feedback;
+                logActivity('daily', 'Actividades Diarias', isSuper ? `Validó tarea diaria: ${t.text}` : `Envió tarea diaria a validación: ${t.text}`, localAuthor);
+                window.saveData(false);
+                window.renderAlerts();
+            }
         } else {
-            // Project quick task
             let item = null;
             if (projectId) {
                 item = appData.directProjects.find(p => p.id === projectId);
@@ -902,7 +929,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.updateCanvasTransform = function() {
         if(!canvasGroup) return; 
         const limit = 4000; translateX = Math.max(-limit, Math.min(limit, translateX)); translateY = Math.max(-limit, Math.min(limit, translateY));
-        canvasGroup.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        
+        // FIX MAESTRO: Forzamos el transform nativo de SVG en vez del de CSS.
+        // Esto recalcula el área sólida del mapa y permite dar clic sin importar qué tan a la orilla esté.
+        canvasGroup.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+        if(svgElem) svgElem.style.overflow = 'visible';
     }
 
     let animationFrameId = null;
@@ -1317,7 +1348,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.renderTasksQuick = function(item) {
         const c = document.getElementById('quickTasksList');
-        if(!item.tasks || item.tasks.length === 0) { c.innerHTML = '<p class="text-[10px] text-gray-500 italic">No hay tareas específicas.</p>'; return; }
+        const badge = document.getElementById('badge-acc-tasks');
+        
+        if(!item.tasks || item.tasks.length === 0) { 
+            c.innerHTML = '<p class="text-[10px] text-gray-500 italic">No hay tareas específicas.</p>'; 
+            if(badge) badge.classList.add('hidden');
+            return; 
+        }
+
+        const pendingCount = item.tasks.filter(t => t.done === 'pending').length;
+        if(badge) {
+            if(pendingCount > 0) {
+                badge.textContent = `${pendingCount} Rev`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
         c.innerHTML = item.tasks.map(t => {
             let isOverdue = false;
             let isChecked = t.done === true;
@@ -1588,9 +1636,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if(isLector) qTaskBlock.classList.add('hidden'); else qTaskBlock.classList.remove('hidden');
         }
 
-        const qLinksCont = document.getElementById('quickLinksInputContainer');
+        const qLinksCont = document.getElementById('acc-links-details'); 
         if (qLinksCont) {
-            if (canEditProject) {
+            // Regla de Seguridad: Solo Supremo y Supervisor pueden inyectar o modificar las URLs base
+            if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') {
                 qLinksCont.classList.remove('hidden');
                 document.getElementById('quickEditDriveLink').value = item.driveLink || '';
                 document.getElementById('quickEditInvgateLink').value = item.invgateLink || '';
@@ -1843,22 +1892,69 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.renderMindMap = function() {
       if (!canvasGroup) return; canvasGroup.innerHTML = '';
       const q = activeSearchQuery.toLowerCase();
+      
       const isFiltered = (p) => {
+          if (isFocusMode) {
+              let isOverdue = false, isSoon = false;
+              if (p.deadline && p.status !== 'Completado') {
+                  const [y,m,d] = p.deadline.split('-'); 
+                  const diff = Math.ceil((new Date(y, m-1, d) - new Date(new Date().setHours(0,0,0,0))) / 86400000);
+                  if (diff < 0) isOverdue = true;
+                  if (diff >= 0 && diff <= 3) isSoon = true;
+              }
+              const hasVal = (p.tasks||[]).some(t => t.done === 'pending');
+              return isOverdue || isSoon || hasVal;
+          }
+
+          if (activeFilterModule !== 'ALL' && p._modId !== activeFilterModule) return false;
           if (activeFilterStatus !== 'ALL' && p.status !== activeFilterStatus) return false;
           if (activeFilterConsultant !== 'ALL' && !getProjectConsultants(p).includes(activeFilterConsultant)) return false;
+          
+          if (activeFilterUrgency !== 'ALL') {
+              if (p.status === 'Completado') return false;
+              let isOver = false, isSoon = false, is30 = false;
+              if (p.deadline) {
+                  const [y,m,d] = p.deadline.split('-'); 
+                  const diff = Math.ceil((new Date(y, m-1, d) - new Date(new Date().setHours(0,0,0,0))) / 86400000);
+                  if (diff < 0) isOver = true; if (diff >= 0 && diff <= 7) isSoon = true; if (diff >= 0 && diff <= 30) is30 = true;
+              }
+              if (activeFilterUrgency === 'OVERDUE' && !isOver) return false;
+              if (activeFilterUrgency === 'WEEK' && !isSoon) return false;
+              if (activeFilterUrgency === 'MONTH' && !is30) return false;
+              if (activeFilterUrgency === 'NONE' && p.deadline) return false;
+          }
+
+          if (activeFilterPriority !== 'ALL') {
+              const prio = parseFloat(p.priority || 1);
+              if (activeFilterPriority === 'HIGH' && prio > 3) return false;
+              if (activeFilterPriority === 'MED' && (prio < 4 || prio > 6)) return false;
+              if (activeFilterPriority === 'LOW' && prio < 7) return false;
+          }
+
+          if (activeFilterBottleneck !== 'ALL') {
+              if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || p.status === 'Completado')) return false;
+              if (activeFilterBottleneck === 'VALIDATION' && !(p.tasks||[]).some(t => t.done === 'pending')) return false;
+              if (activeFilterBottleneck === 'NA') {
+                  let unv = false; if(p.docs) Object.keys(p.docs).forEach(k => { if(p.docs[k].na && !p.docs[k].naValidated) unv = true; });
+                  if(!unv) return false;
+              }
+          }
+
           if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q))) return false;
           return true;
       };
 
-      const isDefaultState = activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && !q;
+      const isDefaultState = !isFocusMode && activeFilterModule === 'ALL' && activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && activeFilterUrgency === 'ALL' && activeFilterPriority === 'ALL' && activeFilterBottleneck === 'ALL' && !q;
       
-      // MODO GHOSTING: Se conservan TODOS los proyectos en memoria para no colapsar la estructura visual
       const visDir = appData.directProjects || [];
       const activeMods = appData.modules || [];
       
       let lNodes = [], rNodes = [], lSlots = 0, rSlots = 0;
       
+      // PARCHE: Contabilizamos el peso real del Agrupador Directo para balancear el mapa
+      const directLen = Math.max(1, visDir.length);
       lNodes.push({ type: 'direct-hub', item: appData.directHub, projects: visDir });
+      lSlots += directLen; 
       
       activeMods.forEach(m => {
           const modData = { type: 'module', item: m, projects: m.projects || [] };
@@ -1876,13 +1972,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               if (pCount > 0) {
                   n.projects.forEach(p => { 
                       const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
-                      p._renderData = { x: px, y: cy, color: col, type: n.type==='direct-hub'?'direct-project':'project' }; ey = cy; cy += slotH;
+                      
+                      // EL FIX ESTÁ AQUÍ: Inyectamos explícitamente y bloqueamos las propiedades del render
+                      // asegurándonos de que JavaScript asigne variables nuevas por ciclo y no por referencia global.
+                      const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
+                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : n.item.id;
+                      p._renderData = { x: px, y: cy, color: col, type: strictType, realId: p.id }; 
+                      ey = cy; cy += slotH;
                   });
               } else { ey = cy; cy += slotH; }
               const my = (sy + ey) / 2; n._renderData = { x: mx, y: my, isLeft };
 
-              // Evaluar si el módulo o alguno de sus proyectos coincide
-              const modMatches = isDefaultState || n.type === 'direct-hub' || (n.projects.some(isFiltered) || (n.item.name && n.item.name.toLowerCase().includes(q)));
+              // PARCHE: Evaluación estricta de módulos y ghosting de líneas
+              const modMatches = isDefaultState || n.projects.some(p => isFiltered(p)) || (q !== '' && n.item.name && n.item.name.toLowerCase().includes(q));
               const lineOpacity = modMatches ? '1' : '0.15';
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1911,81 +2013,135 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       [...lNodes, ...rNodes].forEach(n => {
         n.projects.forEach(p => {
-          const { x, y, color, type } = p._renderData; const isSel = currentSelection.id === p.id;
+          // EL FIX CONTINÚA AQUÍ: Extraemos strictType y realId
+          const { x, y, color, type: strictType, realId } = p._renderData; 
+          const isSel = currentSelection.id === realId;
           const pMatches = isDefaultState || isFiltered(p);
           
           let isOver = false; if(p.deadline && p.status !== 'Completado') { const [dy, dm, dd] = p.deadline.split('-'); if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true; }
           const sCol = p.status==='En Progreso'?'#0071e3':(p.status==='Completado'?'#30d158':(p.status==='No Iniciado'?'#48484a':'#8e8e93'));
 
+          // 1. CREACIÓN DEL CONTENEDOR PRINCIPAL
           const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-          g.setAttribute('transform', `translate(${x - 160}, ${y - 28})`); g.classList.add('interactive-node');
+          g.setAttribute('transform', `translate(${x - 160}, ${y - 28})`);
           
-          // GHOSTING LOGIC
-          if (!pMatches) {
+          // ESTADO DE VISIBILIDAD Y BLOQUEO DURO
+          const forceInteractive = isDefaultState;
+          if (!pMatches && !forceInteractive) {
               g.setAttribute('opacity', '0.15');
               g.style.pointerEvents = 'none';
+              g.classList.remove('interactive-node'); 
           } else {
               g.setAttribute('opacity', '1');
-              g.style.pointerEvents = 'auto';
-              if(isOver) g.classList.add('node-overdue');
+              g.style.pointerEvents = 'all'; // Captura total en el contenedor
+              g.classList.add('interactive-node');
+              if(isOver) g.setAttribute('filter', 'drop-shadow(0 0 8px rgba(255, 69, 58, 0.4))'); // Indicador estático de vencido
           }
-          
-          g.onclick = (e) => { e.stopPropagation(); window.selectNode(type, p.id); };
 
+          // 2. CONGELAMIENTO LÉXICO (Cierre Perfecto)
+          const currentNodeType = strictType;
+          const currentNodeId = realId;
+          
+          g.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              try { window.selectNode(currentNodeType, currentNodeId); } catch (err) { console.error('No se pudo abrir el proyecto:', p, err); window.showToast('⚠️ No se pudo abrir "' + p.name + '": ' + err.message, true); }
+          }, false);
+
+           // El false es vital para evitar el bubbling inverso
+
+          // 3. CAPA VISUAL (Sin interferencia de eventos)
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '16'); 
           r.setAttribute('fill', 'rgba(20, 20, 22, 0.9)'); 
-          r.setAttribute('stroke', isOver ? '#ff453a' : color); r.setAttribute('stroke-width', isSel ? '2' : '1');
-          if(isSel || (!isDefaultState && pMatches)) r.setAttribute('filter', 'url(#glow)'); g.appendChild(r);
+          r.setAttribute('stroke', isOver ? '#ff453a' : color); 
+          r.setAttribute('stroke-width', isSel ? '2' : '1');
+          r.style.pointerEvents = 'none'; // Los hijos no deben capturar clics
+          if(isSel || (!isDefaultState && pMatches)) r.setAttribute('filter', 'url(#glow)'); 
+          g.appendChild(r);
 
           const sC = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '4'); sC.setAttribute('fill', sCol); 
-          if(pMatches) sC.setAttribute('filter', `drop-shadow(0 0 5px ${sCol})`); g.appendChild(sC);
+          sC.style.pointerEvents = 'none';
+          if(pMatches) sC.setAttribute('filter', `drop-shadow(0 0 5px ${sCol})`); 
+          g.appendChild(sC);
 
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           nT.setAttribute('x', '34'); nT.setAttribute('y', '22'); nT.setAttribute('fill', '#ffffff'); nT.classList.add('svg-text', 'svg-text-bold');
-          
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
-          nT.setAttribute('style', `font-size: ${fontSize}px;`);
+          nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
           nT.textContent = fullText.length > 55 ? fullText.substring(0, 52)+'...' : fullText;
           g.appendChild(nT);
           
           if(p.progress > 0) {
-             const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pbBg.setAttribute('x', '34'); pbBg.setAttribute('y', '38'); pbBg.setAttribute('width', '265'); pbBg.setAttribute('height', '3'); pbBg.setAttribute('rx', '1.5'); pbBg.setAttribute('fill', 'rgba(255,255,255,0.1)'); g.appendChild(pbBg);
-             const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pb.setAttribute('x', '34'); pb.setAttribute('y', '38'); pb.setAttribute('width', 265 * (p.progress/100)); pb.setAttribute('height', '3'); pb.setAttribute('rx', '1.5'); pb.setAttribute('fill', sCol); 
+             const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pbBg.setAttribute('x', '34'); pbBg.setAttribute('y', '38'); pbBg.setAttribute('width', '265'); pbBg.setAttribute('height', '3'); pbBg.setAttribute('rx', '1.5'); pbBg.setAttribute('fill', 'rgba(255,255,255,0.1)'); pbBg.style.pointerEvents = 'none'; g.appendChild(pbBg);
+             const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pb.setAttribute('x', '34'); pb.setAttribute('y', '38'); pb.setAttribute('width', 265 * (p.progress/100)); pb.setAttribute('height', '3'); pb.setAttribute('rx', '1.5'); pb.setAttribute('fill', sCol); pb.style.pointerEvents = 'none';
              if(pMatches) pb.setAttribute('filter', `drop-shadow(0 0 3px ${sCol})`); g.appendChild(pb);
           }
+
+          // 4. CAPA DE INTERCEPCIÓN (Caja invisible final)
+          const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          hitBox.setAttribute('width', '320'); hitBox.setAttribute('height', '56'); hitBox.setAttribute('rx', '16');
+          hitBox.setAttribute('fill', 'transparent');
+          hitBox.style.cursor = 'pointer';
+          g.appendChild(hitBox);
+          
           canvasGroup.appendChild(g);
         });
 
-        const modMatches = isDefaultState || n.type === 'direct-hub' || (n.projects.some(isFiltered) || (n.item.name && n.item.name.toLowerCase().includes(q)));
+        // PARCHE: Evaluación estricta de módulos y ghosting de bloques
+        const modMatches = isDefaultState || n.projects.some(p => isFiltered(p)) || (q !== '' && n.item.name && n.item.name.toLowerCase().includes(q));
         const { x, y } = n._renderData, isSel = currentSelection.id === n.item.id;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.setAttribute('transform', `translate(${x - 110}, ${y - 24})`); g.classList.add('interactive-node'); 
+        g.setAttribute('transform', `translate(${x - 110}, ${y - 24})`);
         
-        if (!modMatches && n.type === 'module') {
+        if (!modMatches) {
              g.setAttribute('opacity', '0.15');
              g.style.pointerEvents = 'none';
+             g.classList.remove('interactive-node');
         } else {
              g.setAttribute('opacity', '1');
-             g.style.pointerEvents = 'auto';
+             g.style.pointerEvents = 'all';
+             g.classList.add('interactive-node');
         }
         
-        g.onclick = (e) => { e.stopPropagation(); window.selectNode(n.type==='direct-hub'?'direct-hub':'module', n.item.id); };
+        const currentModType = n.type === 'direct-hub' ? 'direct-hub' : 'module';
+        const currentModId = n.item.id;
         
+        g.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.selectNode(currentModType, currentModId);
+        }, false);
+
         const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         r.setAttribute('width', '220'); r.setAttribute('height', '48'); r.setAttribute('rx', '24'); 
         r.setAttribute('fill', n.type==='direct-hub'?'rgba(0,0,0,0.8)':'rgba(30, 30, 30, 0.9)');
         r.setAttribute('stroke', n.item.color); r.setAttribute('stroke-width', isSel ? '2.5' : '1');
-        if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '5,5'); if(isSel || (!isDefaultState && modMatches)) r.setAttribute('filter', 'url(#glow)'); g.appendChild(r);
+        r.style.pointerEvents = 'none'; // Importante para que no capture clics
+        if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '5,5'); 
+        if(isSel || (!isDefaultState && modMatches)) r.setAttribute('filter', 'url(#glow)'); 
+        g.appendChild(r);
         
-        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', '110'); t.setAttribute('y', '28'); t.setAttribute('fill', '#ffffff'); t.setAttribute('text-anchor', 'middle'); t.classList.add('svg-text', 'svg-text-bold'); 
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
+        t.setAttribute('x', '110'); t.setAttribute('y', '28'); 
+        t.setAttribute('fill', '#ffffff'); t.setAttribute('text-anchor', 'middle'); 
+        t.classList.add('svg-text', 'svg-text-bold'); 
+        t.style.pointerEvents = 'none'; // Importante para que no capture clics
         
         let mFontSize = n.item.name.length > 20 ? 10 : 12;
-        t.setAttribute('style', `font-size: ${mFontSize}px;`);
+        t.setAttribute('style', `font-size: ${mFontSize}px; pointer-events: none;`);
         t.textContent = n.item.name; 
         g.appendChild(t);
+
+        // Capa invisible para módulos
+        const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        hitBox.setAttribute('width', '220'); hitBox.setAttribute('height', '48'); hitBox.setAttribute('rx', '24');
+        hitBox.setAttribute('fill', 'transparent');
+        hitBox.style.cursor = 'pointer';
+        g.appendChild(hitBox);
+
         canvasGroup.appendChild(g);
       });
 
@@ -2000,7 +2156,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const sct = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sct.setAttribute('x', '60'); sct.setAttribute('y', '65'); sct.setAttribute('fill', 'white'); sct.setAttribute('text-anchor', 'middle'); sct.classList.add('svg-text', 'svg-text-base', 'svg-text-bold'); sct.textContent = 'SUCOM'; sucomG.appendChild(sct);
           canvasGroup.appendChild(sucomG);
       }
-    }
+    };
 
     window.renderHistory = function() {
         const c = document.getElementById('historyListContainer'), e = document.getElementById('historyEmptyState');
@@ -2096,4 +2252,290 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     // Inicialización directa
+
+// === LÓGICA DE ACTIVIDADES DIARIAS ===
+window.toggleDailyDrawer = function() {
+        const btnDaily = document.getElementById('btnDailyTasks');
+        const btnManual = document.getElementById('btnManual');
+
+        if(isDailyDrawerOpen) {
+            document.getElementById('dailyDrawer').classList.add('-translate-x-full');
+            isDailyDrawerOpen = false;
+            
+            // Restaurar botones al cerrar
+            if (btnDaily) btnDaily.classList.remove('hidden');
+            if (btnManual) btnManual.classList.remove('hidden');
+        } else {
+            if(isDrawerOpen) window.closeConfigDrawer();
+            if(isPriorityDrawerOpen) window.closePriorityDrawer();
+            if(isAlertsDrawerOpen) { document.getElementById('alertsDrawer').classList.add('translate-x-full'); isAlertsDrawerOpen = false; }
+            document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
+            isDailyDrawerOpen = true;
+            
+            // Ocultar botones para limpiar la interfaz
+            if (btnDaily) btnDaily.classList.add('hidden');
+            if (btnManual) btnManual.classList.add('hidden');
+
+            window.populateDailyAssignee();
+            window.renderDailyTasks();
+        }
+    };
+
+    // Parches de cierre automático para evitar colisiones visuales
+    const ogOpenManual = window.openManual; window.openManual = function() { if (isDailyDrawerOpen) window.toggleDailyDrawer(); ogOpenManual(); };
+    const ogOpenConfig = window.openConfigDrawer; window.openConfigDrawer = function() { if (isDailyDrawerOpen) window.toggleDailyDrawer(); ogOpenConfig(); };
+    const ogOpenPriority = window.openPriorityDrawer; window.openPriorityDrawer = function() { if (isDailyDrawerOpen) window.toggleDailyDrawer(); ogOpenPriority(); };
+    const ogToggleAlerts = window.toggleAlertsDrawer; window.toggleAlertsDrawer = function() { if (isDailyDrawerOpen && !isAlertsDrawerOpen) window.toggleDailyDrawer(); ogToggleAlerts(); };
+    
+    // Parches a Refresh y SaveData para mantener la vista sincronizada
+    const ogRefreshUI = refreshUI; refreshUI = function() { ogRefreshUI(); if(isDailyDrawerOpen) window.renderDailyTasks(); };
+    const ogSaveData = window.saveData; window.saveData = function(b) { ogSaveData(b); if(isDailyDrawerOpen) window.renderDailyTasks(); };
+
+    window.populateDailyAssignee = function() {
+        const sel = document.getElementById('newDailyTaskAssignee'); if (!sel) return;
+        sel.innerHTML = '';
+        if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') {
+            sel.innerHTML = '<option value="">(Asignar a mí mismo)</option>';
+            Object.keys(consultants).filter(k => consultants[k].role !== 'Lector').sort().forEach(c => { sel.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
+            sel.disabled = false;
+        } else {
+            sel.innerHTML = `<option value="${escapeHtml(localAuthor)}">Para: ${escapeHtml(localAuthor)}</option>`;
+            sel.disabled = true;
+        }
+    };
+
+    window.addDailyTask = function() {
+        if (currentUserRole === 'Lector') return;
+        const input = document.getElementById('newDailyTaskInput'); const text = input.value.trim(); if (!text) return;
+        const assigneeSel = document.getElementById('newDailyTaskAssignee').value;
+        const assignee = assigneeSel || localAuthor;
+        
+        appData.dailyTasks = appData.dailyTasks || [];
+        appData.dailyTasks.push({ id: 'dt_' + Date.now(), text: text, assignee: assignee, assignedBy: localAuthor, date: new Date().toLocaleDateString('es-MX'), done: false });
+        input.value = ''; logActivity('daily', 'Actividades Diarias', `Añadió tarea diaria para ${assignee}`, localAuthor);
+        window.saveData(false);
+    };
+
+window.toggleDailyTask = function(taskId) {
+        if (currentUserRole === 'Lector') return;
+        const t = appData.dailyTasks.find(x => x.id === taskId);
+        if (t) {
+            const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+            const isAssigner = t.assignedBy === localAuthor;
+            
+            if (t.done === true) {
+                if (isSuper || isAssigner) {
+                    t.done = false; delete t.feedback;
+                    logActivity('daily', 'Actividades Diarias', `Desmarcó tarea: ${t.text}`, localAuthor);
+                    window.saveData(false);
+                }
+            } else if (t.done === 'pending') {
+                if (isSuper || isAssigner) {
+                    t.done = true;
+                    logActivity('daily', 'Actividades Diarias', `Validó tarea: ${t.text}`, localAuthor);
+                    window.saveData(false);
+                } else if (t.assignee === localAuthor) {
+                    t.done = false; delete t.feedback;
+                    logActivity('daily', 'Actividades Diarias', `Canceló envío a validación`, localAuthor);
+                    window.saveData(false);
+                }
+            } else {
+                window.openTaskFeedbackModal(taskId, 'daily');
+                setTimeout(() => window.renderDailyTasks(), 100);
+            }
+        }
+    };
+
+    window.deleteDailyTask = function(taskId) {
+        const t = appData.dailyTasks.find(x => x.id === taskId); if (!t) return;
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor' && t.assignedBy !== localAuthor) { 
+            window.showToast("Solo quien asignó la tarea puede eliminarla", true); return; 
+        }
+        appData.dailyTasks = appData.dailyTasks.filter(x => x.id !== taskId); 
+        logActivity('daily', 'Actividades Diarias', `Borró tarea: ${t.text}`, localAuthor);
+        window.saveData(false);
+    };
+
+window.renderDailyTasks = function() {
+        const container = document.getElementById('dailyTasksContainer'); 
+        const badge = document.getElementById('dailyAlertsBadge');
+        
+        let alertCount = 0;
+        const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+
+        if (!appData.dailyTasks || appData.dailyTasks.length === 0) { 
+            if(badge) badge.classList.add('hidden');
+            if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No hay actividades diarias registradas.</p></div>`; 
+            return; 
+        }
+        
+        let grouped = {};
+        appData.dailyTasks.forEach(t => {
+            // Lógica para agrupar
+            if (isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor) {
+                if (!grouped[t.assignee]) grouped[t.assignee] = [];
+                grouped[t.assignee].push(t);
+            }
+            
+            // Lógica matemática para el Badge de Alerta
+            if (t.done === 'pending' && (isSuper || t.assignedBy === localAuthor)) {
+                alertCount++; // Validaciones pendientes para los jefes
+            } else if (t.done === false && t.assignee === localAuthor) {
+                alertCount++; // Tareas nuevas/pendientes para el consultor
+            }
+        });
+
+        if(badge) {
+            if (alertCount > 0) {
+                badge.textContent = alertCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
+        if (Object.keys(grouped).length === 0) { 
+            if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No tienes actividades asignadas hoy.</p></div>`; 
+            return; 
+        }
+
+        const sorted = Object.keys(grouped).sort((a, b) => { if (a === localAuthor) return -1; if (b === localAuthor) return 1; return a.localeCompare(b); });
+        
+        if(container) container.innerHTML = sorted.map(cons => {
+            const tasks = grouped[cons].sort((a, b) => b.id.localeCompare(a.id));
+            const cData = consultants[cons] || { color: '#8e8e93' };
+            const pCount = tasks.filter(t => t.done !== true).length;
+            
+            return `<div class="mb-2">
+                <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2" style="color: ${cData.color}">
+                    <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}
+                    ${pCount === 0 ? `<span class="bg-[#30d158]/20 text-[#30d158] px-2 py-0.5 rounded border border-[#30d158]/30 shadow-inner ml-auto">Al Día ✅</span>` : `<span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${pCount} pdtes.</span>`}
+                </h3>
+                <div class="space-y-2">
+                ${tasks.map(t => {
+                    const isMyTask = t.assignee === localAuthor;
+                    const isAssigner = t.assignedBy === localAuthor;
+                    const canEdit = isSuper || isMyTask || isAssigner;
+                    const canDel = isSuper || isAssigner;
+                    
+                    let statusBadge = '';
+                    let boxUI = '';
+                    
+                    if (t.done === 'pending') {
+                        statusBadge = `<span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">⏳ En Validación</span>`;
+                        if (isSuper || isAssigner) {
+                            boxUI = `<button onclick="toggleDailyTask('${t.id}')" class="h-4 w-4 rounded border border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ff9f0a]/40 transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></button>`;
+                        } else {
+                            boxUI = `<input type="checkbox" checked onchange="toggleDailyTask('${t.id}')" class="rounded border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] focus:ring-[#ff9f0a] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
+                        }
+                    } else if (t.done === true) {
+                        statusBadge = `<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">✅ Validada</span>`;
+                        boxUI = `<input type="checkbox" checked onchange="toggleDailyTask('${t.id}')" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] focus:ring-[#30d158] h-4 w-4 shrink-0 cursor-pointer mt-0.5" ${!(isSuper || isAssigner) ? 'disabled class="... opacity-50 cursor-not-allowed"' : ''}>`;
+                    } else {
+                        boxUI = `<input type="checkbox" onchange="toggleDailyTask('${t.id}')" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''}>`;
+                    }
+
+                    return `
+                    <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 group transition ${t.done === true ? 'opacity-50' : (t.done === 'pending' ? 'border-[#ff9f0a]/30 bg-[#ff9f0a]/5' : 'shadow-inner')}">
+                        ${boxUI}
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <div class="flex items-start justify-between">
+                                <span class="text-xs text-white break-words pr-2 ${t.done === true ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>${statusBadge}
+                            </div>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="text-[9px] text-gray-500">📅 ${escapeHtml(t.date)}</span>${t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                            </div>
+                            ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/60 border border-white/10 p-2 rounded shadow-inner">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+                        </div>
+                        ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                    </div>`
+                }).join('')}
+                </div></div>`;
+        }).join('');
+    };
+
+// === LÓGICA DE FILTROS AVANZADOS Y MODO ENFOQUE ===
+    window.toggleFilterDrawer = function() {
+        if(isFilterDrawerOpen) {
+            document.getElementById('filterDrawer').classList.add('translate-x-full');
+            isFilterDrawerOpen = false;
+        } else {
+            if(isDrawerOpen) window.closeConfigDrawer();
+            if(isPriorityDrawerOpen) window.closePriorityDrawer();
+            if(isAlertsDrawerOpen) window.toggleAlertsDrawer();
+            document.getElementById('filterDrawer').classList.remove('translate-x-full');
+            isFilterDrawerOpen = true;
+            window.populateAdvFilters();
+        }
+    };
+
+    window.populateAdvFilters = function() {
+        const modSel = document.getElementById('advFilterModule');
+        const consSel = document.getElementById('advFilterConsultant');
+        if(!modSel || !consSel) return;
+        
+        modSel.innerHTML = `<option value="ALL">Todos los módulos</option><option value="direct-hub">⚡ ${escapeHtml(appData.directHub.name)}</option>` + appData.modules.map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join('');
+        modSel.value = activeFilterModule;
+        
+        const allC = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
+        consSel.innerHTML = `<option value="ALL">Todos los consultores</option>` + allC.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+        consSel.value = activeFilterConsultant;
+        
+        document.getElementById('advFilterStatus').value = activeFilterStatus;
+        document.getElementById('advFilterUrgency').value = activeFilterUrgency;
+        document.getElementById('advFilterPriority').value = activeFilterPriority;
+        document.getElementById('advFilterBottleneck').value = activeFilterBottleneck;
+    };
+
+    window.handleAdvFilter = function() {
+        activeFilterModule = document.getElementById('advFilterModule').value;
+        activeFilterConsultant = document.getElementById('advFilterConsultant').value;
+        activeFilterStatus = document.getElementById('advFilterStatus').value;
+        activeFilterUrgency = document.getElementById('advFilterUrgency').value;
+        activeFilterPriority = document.getElementById('advFilterPriority').value;
+        activeFilterBottleneck = document.getElementById('advFilterBottleneck').value;
+        
+        let c = 0;
+        if(activeFilterModule !== 'ALL') c++; if(activeFilterConsultant !== 'ALL') c++; if(activeFilterStatus !== 'ALL') c++;
+        if(activeFilterUrgency !== 'ALL') c++; if(activeFilterPriority !== 'ALL') c++; if(activeFilterBottleneck !== 'ALL') c++;
+        const badge = document.getElementById('activeFiltersBadge');
+        if(c > 0) { badge.textContent = c; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+        
+        if(isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
+        else window.renderMindMap();
+    };
+
+    window.resetAdvFilters = function() {
+        activeFilterModule = 'ALL'; activeFilterConsultant = 'ALL'; activeFilterStatus = 'ALL';
+        activeFilterUrgency = 'ALL'; activeFilterPriority = 'ALL'; activeFilterBottleneck = 'ALL';
+        document.getElementById('activeFiltersBadge').classList.add('hidden');
+        
+        // Apaga el Modo Enfoque si estaba encendido al limpiar filtros
+        if (isFocusMode) {
+            isFocusMode = false;
+            const btn = document.getElementById('btnFocusMode');
+            if (btn) {
+                btn.classList.remove('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+                btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+            }
+        }
+        
+        window.populateAdvFilters(); 
+        window.renderMindMap();
+    };
+
+    window.toggleFocusMode = function() {
+        isFocusMode = !isFocusMode;
+        const btn = document.getElementById('btnFocusMode');
+        if (isFocusMode) {
+            btn.classList.add('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+            btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-400');
+            window.showToast("Modo Enfoque: Mostrando Riesgos", false);
+        } else {
+            btn.classList.remove('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+            btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+        }
+        window.renderMindMap();
+    };
+
     initData();
