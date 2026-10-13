@@ -73,8 +73,8 @@
       </div>
   </div>
 
-  <!-- BOTÓN ACTIVIDADES DIARIAS FLOTANTE -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-6 z-[45] w-12 h-12 liquid-glass flex items-center justify-center rounded-full text-white shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-white/10 transition-all group border border-white/20" title="Actividades Diarias">
+  <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE -->
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-6 z-[45] w-12 h-12 liquid-glass flex items-center justify-center rounded-full text-white shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-white/10 transition-all group border border-white/20" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-brand-accent group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1 -right-1 bg-[#ff9f0a] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(255,159,10,0.6)] hidden">0</span>
   </button>
@@ -83,6 +83,78 @@
   <button id="btnManual" onclick="openManual()" class="fixed bottom-6 left-6 z-[45] w-12 h-12 liquid-glass flex items-center justify-center rounded-full text-white shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-white/10 transition-all group border border-white/20" title="Guía Rápida de Uso">
       <svg class="w-6 h-6 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
   </button>
+
+  <!-- SPEED DIAL: NÚCLEO DE CREACIÓN (abajo a la derecha) -->
+
+  <style>
+    /* El contenedor secundario inicia invisible y desplazado */
+    #speedDial .sd-items { opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden; transition: opacity .2s ease-out, transform .2s ease-out, visibility 0s linear .2s; }
+    /* Solo se hace visible cuando el contenedor principal tiene la clase 'sd-open' */
+    #speedDial.sd-open .sd-items { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+    
+    #speedDial .sd-item { background-color: rgba(28,28,31,.96); transition: background-color .15s ease-out, transform .15s ease-out; }
+    #speedDial .sd-item:hover { background-color: rgba(52,52,57,.98); }
+    #speedDial .sd-item:active { transform: scale(.97); }
+    
+    /* Animación del botón principal */
+    #speedDial .sd-plus { transition: transform .2s ease-out; }
+    #speedDial.sd-open .sd-plus { transform: rotate(45deg); }
+    
+    #speedDial { transition: right .3s ease-out, opacity .2s ease-out; }
+    /* Lógica para apartarse si abres paneles (Drawers) */
+    body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-full), #priorityDrawer:not(.translate-x-full)) #speedDial { opacity: 0; pointer-events: none; }
+    @media (min-width: 768px) { body:has(#infoCard:not(.hidden)) #speedDial { right: 440px; } }
+    @media (max-width: 767px) { body:has(#infoCard:not(.hidden), #dailyDrawer:not(.-translate-x-full)) #speedDial { opacity: 0; pointer-events: none; } }
+    @media (prefers-reduced-motion: reduce) { #speedDial, #speedDial * { transition: none !important; } }
+  </style>
+  
+  <div id="speedDial" class="lector-hide fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
+      <!-- BOTÓN GATILLO (Activa/Desactiva la clase sd-open al hacer clic) -->
+      <button id="speedDialTrigger" type="button" onclick="toggleSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Crear nuevo" class="w-14 h-14 rounded-full bg-brand-accent hover:bg-[#1a82ec] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(0,113,227,0.45)] border border-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+          <svg class="sd-plus w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+      </button>
+      
+      <div class="sd-items flex flex-col-reverse items-end gap-3 pb-3" role="menu" aria-label="Crear">
+          
+          <!-- NUEVA TAREA DIARIA (Todos menos lector) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastDailyTaskModal()" class="sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
+              Nueva tarea diaria (Personal)
+              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#0071e3]/20 text-[#35aee8] border border-[#0071e3]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+          </button>
+
+          <!-- TAREA GLOBAL (Solo Supervisor/Supremo) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openGlobalTaskModal()" class="supervisor-up hidden sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
+              Nueva tarea global
+              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+          </button>
+
+          <!-- NUEVO PROYECTO (Todos) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastCreateProject()" class="sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
+              Nuevo proyecto
+              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+          </button>
+
+          <!-- NUEVO MÓDULO (Solo Supremo) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => document.getElementById('newModName').focus(), 300)" class="supremo-only hidden sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
+              Nuevo módulo
+              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#bf5af2]/20 text-[#bf5af2] border border-[#bf5af2]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
+          </button>
+      </div>
+  </div>
+
+  <script>
+    (function () {
+      var dial = document.getElementById('speedDial'), trig = document.getElementById('speedDialTrigger');
+      function setOpen(o) { dial.classList.toggle('sd-open', o); trig.setAttribute('aria-expanded', o ? 'true' : 'false'); }
+      // El toggle ahora funciona solo en el clic
+      window.toggleSpeedDial = function () { setOpen(!dial.classList.contains('sd-open')); };
+      window.closeSpeedDial = function () { setOpen(false); };
+      
+      // Si haces clic en cualquier otro lado, se cierra
+      document.addEventListener('click', function (e) { if (!dial.contains(e.target)) setOpen(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { setOpen(false); trig.focus(); } });
+    })();
+  </script>
 
   <!-- MODAL MANUAL DE USUARIO -->
   <div id="manualModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
@@ -196,6 +268,24 @@
       </div>
   </div>
 
+   <!-- MODAL ASIGNAR TAREA DIARIA RÁPIDA (Speed Dial) -->
+  <div id="fastDailyTaskModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
+      <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
+          <h3 class="text-xl font-semibold text-white mb-2">Mi Tarea Diaria</h3>
+          <p class="text-xs text-gray-400 mb-5">Agrega una tarea rápida a tu lista del día.</p>
+          <div class="space-y-4 mb-6">
+              <div>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">¿Qué harás hoy?</label>
+                  <input type="text" id="fdtDescription" placeholder="Ej. Actualizar formato..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none">
+              </div>
+          </div>
+          <div class="flex gap-4">
+              <button onclick="closeFastDailyTaskModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
+              <button onclick="saveFastDailyTask()" class="flex-1 py-3.5 bg-[#0071e3] hover:bg-[#1a82ec] text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(0,113,227,0.4)] text-sm">Añadir a mi lista</button>
+          </div>
+      </div>
+  </div>
+
   <!-- NAVEGACIÓN -->
   <header class="h-16 shrink-0 border-b border-white/10 bg-black/40 backdrop-blur-2xl flex items-center justify-between px-4 sm:px-6 z-20 relative">
     <div class="flex items-center gap-4">
@@ -234,7 +324,7 @@
       </button>
       
       <!-- BOTÓN CAMPANA DE ALERTAS -->
-      <button onclick="toggleAlertsDrawer()" class="relative shrink-0 pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white font-medium flex items-center gap-1.5 transition ml-1" title="Alertas">
+      <button onclick="toggleDailyDrawer()" class="relative shrink-0 pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white font-medium flex items-center gap-1.5 transition ml-1" title="Notificaciones">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
           <span id="alertsBadge" class="absolute -top-0.5 -right-0.5 bg-[#ff453a] text-white text-[9px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(255,69,58,0.6)] hidden">0</span>
       </button>
@@ -246,15 +336,6 @@
           <button onclick="zoomCanvas(-0.15)" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors" title="Alejar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/></svg></button>
       </div>
 
-            <button onclick="openGlobalTaskModal()" class="supervisor-up pill-btn shrink-0 p-1.5 sm:px-3 sm:py-1.5 bg-[#30d158] text-white hover:bg-[#28b34b] font-semibold flex items-center gap-1.5 ml-1 shadow-[0_0_15px_rgba(48,209,88,0.3)] border border-[#30d158]/50 text-[11px] sm:text-xs hidden">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-        <span class="hidden lg:inline text-xs">Asignar Tarea</span>
-      </button>
-
-      <button onclick="openFastCreateProject()" class="lector-hide pill-btn shrink-0 p-1.5 sm:px-3 sm:py-1.5 bg-[#ff9f0a] text-white hover:bg-[#ffb340] font-semibold flex items-center gap-1.5 ml-1 shadow-[0_0_15px_rgba(255,159,10,0.3)] border border-[#ff9f0a]/50 text-[11px] sm:text-xs">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-        <span class="hidden lg:inline text-xs">Añadir Proyecto</span>
-      </button>
 
       <button onclick="togglePriorityDrawer()" class="pill-btn shrink-0 p-1.5 sm:px-4 sm:py-1.5 bg-transparent border border-white/20 text-white hover:bg-white/10 font-medium flex items-center gap-1.5 ml-1 text-xs">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -280,14 +361,6 @@
 
       <!-- MENÚ DESPLEGABLE MÓVIL -->
       <div id="mobileMenuDropdown" class="absolute top-[60px] right-0 w-56 liquid-glass rounded-2xl p-2 z-[100] transform scale-95 opacity-0 pointer-events-none transition-all duration-300 origin-top-right flex flex-col gap-1 md:hidden shadow-2xl border border-white/20">
-          <button onclick="openGlobalTaskModal(); toggleMobileMenu()" class="supervisor-up hidden w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-              Asignar Tarea
-          </button>
-          <button onclick="openFastCreateProject(); toggleMobileMenu()" class="lector-hide w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#ff9f0a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-              Añadir Proyecto
-          </button>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
@@ -441,18 +514,6 @@
               </div>
           </details>
       </div>  
-      
-      <div id="infoNotesContainer" class="hidden mb-6 pt-4 border-t border-white/10">
-        <h4 class="text-[10px] font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2"><svg class="w-3.5 h-3.5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Detalles y Notas Técnicas</h4>
-        <div id="infoNotes" class="flex flex-col gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1"></div>
-        <!-- FORO: escribir/responder desde la tarjeta (todos excepto Lector) -->
-        <div class="lector-hide mt-3">
-          <div class="flex gap-2">
-            <textarea id="infoNoteInput" rows="2" maxlength="1000" class="flex-1 liquid-input rounded-2xl p-3 text-xs resize-none" placeholder="Escribe un comentario o responde..."></textarea>
-            <button type="button" onclick="addProjectNote('info')" class="pill-btn px-4 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(191,90,242,0.3)]">Publicar</button>
-          </div>
-        </div>
-      </div>
 
       
       <button onclick="editFromInfoCard()" id="btnFullEditInfoCard" class="w-full py-3.5 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-semibold rounded-2xl transition flex justify-center items-center gap-2 backdrop-blur-md shadow-sm supervisor-up hidden">
@@ -482,13 +543,14 @@
         <div class="p-2 bg-brand-accent/20 rounded-xl border border-brand-accent/30 text-brand-accent">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
         </div>
-        <h2 class="font-semibold tracking-tight text-lg">Actividades Diarias</h2>
+        <h2 class="font-semibold tracking-tight text-lg">Notificaciones y Trabajo</h2>
       </div>
       <button onclick="toggleDailyDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
     
     <div class="p-5 border-b border-white/10 bg-black/40 lector-hide">
-        <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Añadir Tarea Diaria</label>
+    <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Anotar Tarea Rápida Personal</label>
+      
         <div class="flex flex-col gap-2">
             <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none text-white">
             <div class="flex gap-2">

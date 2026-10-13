@@ -1,4 +1,6 @@
-const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
+const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
+    // Escapa un valor para usarlo como argumento string en un handler inline: onclick="fn('${jsArg(valor)}')"
+    const jsArg = (u) => escapeHtml((u == null ? '' : String(u)).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' '));
     
     let appId, db, auth, isFirebaseReady = false, unsubscribeSnapshot = null;
     let globalDoc, globalSetDoc;
@@ -87,7 +89,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
                             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
                             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
-                            if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
                             Object.keys(consultants).forEach(k => { if(!consultants[k].role) consultants[k].role = "Consultor"; });
                         }
                         globalDocs = data.globalDocs || []; ensureDataStructure();
@@ -170,7 +171,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (consultants["Osvaldo Avilés"]) consultants["Osvaldo Avilés"].role = "Supremo";
             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
-                            if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
                             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
             Object.keys(consultants).forEach(k => { if(!consultants[k].role) consultants[k].role = "Consultor"; });
             globalDocs = localDocs ? JSON.parse(localDocs) : []; 
@@ -556,6 +556,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const container = document.getElementById('alertsListContainer');
         const badge = document.getElementById('alertsBadge');
         if (currentUserRole === 'Lector') {
+            window.__lastAlerts = [];
             if(badge) badge.classList.add('hidden');
             const badgeMobile = document.getElementById('alertsBadgeMobile'); if(badgeMobile) badgeMobile.classList.add('hidden');
             if(container) container.innerHTML = `<div class="text-center py-10 opacity-50"><p class="text-sm text-gray-300">Modo Lector Activo. Las alertas son exclusivas para el equipo operativo.</p></div>`;
@@ -590,14 +591,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     myAlerts.push({ 
                         id: p.id, name: p.name || 'Sin nombre', pType, parentName: pParent, 
                         alertType: 'info', icon: '🆕',
-                        reason: `Nuevo proyecto asignado`,
+                        reason: `Estado "No Iniciado". Por favor revisa las fechas y empieza.`,
                         users: pConsArray
                     });
                 } else if (canSeeAll) {
                     myAlerts.push({ 
                         id: p.id, name: p.name || 'Sin nombre', pType, parentName: pParent, 
                         alertType: 'info', icon: '📦',
-                        reason: `Proyecto sin iniciar`,
+                        reason: `Estado "No Iniciado". Proyecto asignado a tu equipo.`,
                         users: pConsArray
                     });
                 }
@@ -695,6 +696,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         }
         
+        window.__lastAlerts = myAlerts; // Lo consume el panel izquierdo (Notificaciones y Trabajo)
         if(myAlerts.length > 0) {
             if (badge) {
                 badge.textContent = myAlerts.length;
@@ -1118,7 +1120,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.handleSearch = function() { activeSearchQuery = document.getElementById('searchInput').value.trim(); window.renderMindMap(); }
-    window.handleFilterChange = function() { activeFilterConsultant = document.getElementById('consultantFilter').value; activeFilterStatus = document.getElementById('statusFilter').value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
+    window.handleFilterChange = function() { const fc = document.getElementById('consultantFilter'), fs = document.getElementById('statusFilter'); if (fc) activeFilterConsultant = fc.value; if (fs) activeFilterStatus = fs.value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
     window.closeInfoCardSafe = function() { if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return; } document.getElementById('infoCard').classList.add('opacity-0'); setTimeout(() => document.getElementById('infoCard').classList.add('hidden'), 400); }
@@ -1844,16 +1846,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         return `<div class="flex flex-col w-full p-4 bg-black/40 rounded-2xl border border-white/10 mb-3 shadow-inner group">
                    <div class="flex items-center justify-between gap-3 mb-2">
                        <div class="w-10 h-10 rounded-xl overflow-hidden border border-white/20 relative shrink-0">
-                          <input type="color" value="${cData.color}" onchange="handleUpdateExistingConsultantColor('${escapeHtml(n)}', this.value)" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
+                          <input type="color" value="${cData.color}" onchange="handleUpdateExistingConsultantColor('${jsArg(n)}', this.value)" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
                        </div>
                        <div class="flex-1 min-w-0"><span class="text-sm text-white font-bold block truncate">${escapeHtml(n)}</span><span class="text-[10px] text-gray-500 font-medium tracking-widest block mt-0.5">${cnt} proyectos</span></div>
-                       <button onclick="openPasswordModal('${escapeHtml(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Cambiar Contraseña"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></button>
-                       <button onclick="openRenameModal('${escapeHtml(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Renombrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                       <button onclick="requestDeleteConsultant('${escapeHtml(n)}')" class="p-2 hover:bg-[#ff453a]/20 text-gray-400 hover:text-[#ff453a] rounded-xl transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                       <button onclick="openPasswordModal('${jsArg(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Cambiar Contraseña"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></button>
+                       <button onclick="openRenameModal('${jsArg(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Renombrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                       <button onclick="requestDeleteConsultant('${jsArg(n)}')" class="p-2 hover:bg-[#ff453a]/20 text-gray-400 hover:text-[#ff453a] rounded-xl transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                    </div>
                    <div class="flex items-center gap-2 border-t border-white/5 pt-2 mt-1">
                        <span class="text-[9px] text-gray-500 uppercase tracking-widest">Rol asignado:</span>
-                       <select onchange="updateConsultantRole('${escapeHtml(n)}', this.value)" class="bg-transparent text-[10px] text-gray-300 border border-white/10 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer">
+                       <select onchange="updateConsultantRole('${jsArg(n)}', this.value)" class="bg-transparent text-[10px] text-gray-300 border border-white/10 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer">
                            <option value="Consultor" ${cData.role==='Consultor'?'selected':''}>Consultor</option>
                            <option value="Supervisor" ${cData.role==='Supervisor'?'selected':''}>Supervisor</option>
                            <option value="Supremo" ${cData.role==='Supremo'?'selected':''}>Supremo</option>
@@ -2316,6 +2318,43 @@ window.toggleDailyDrawer = function() {
         window.saveData(false);
     };
 
+// NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD DIARIA
+    window.openFastDailyTaskModal = function() {
+        if (isDrawerOpen) window.closeConfigDrawer();
+        if (isPriorityDrawerOpen) window.closePriorityDrawer();
+        if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
+        
+        document.getElementById('fdtDescription').value = '';
+        document.getElementById('fastDailyTaskModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('fastDailyTaskModal').classList.remove('opacity-0'), 10);
+    }
+    
+    window.closeFastDailyTaskModal = function() {
+        document.getElementById('fastDailyTaskModal').classList.add('opacity-0');
+        setTimeout(() => document.getElementById('fastDailyTaskModal').classList.add('hidden'), 400);
+    }
+
+    window.saveFastDailyTask = function() {
+        if (currentUserRole === 'Lector') return;
+        const text = document.getElementById('fdtDescription').value.trim();
+        if (!text) { window.showToast("La descripción es obligatoria", true); return; }
+        
+        appData.dailyTasks = appData.dailyTasks || [];
+        appData.dailyTasks.push({ 
+            id: 'dt_' + Date.now(), 
+            text: text, 
+            assignee: localAuthor, 
+            assignedBy: localAuthor, 
+            date: new Date().toLocaleDateString('es-MX'), 
+            done: false 
+        });
+        
+        logActivity('daily', 'Actividades Diarias', `Añadió tarea diaria personal`, localAuthor);
+        window.saveData(true);
+        window.closeFastDailyTaskModal();
+        if (isDailyDrawerOpen) window.renderDailyTasks();
+    }
+
 window.toggleDailyTask = function(taskId) {
         if (currentUserRole === 'Lector') return;
         const t = appData.dailyTasks.find(x => x.id === taskId);
@@ -2348,8 +2387,9 @@ window.toggleDailyTask = function(taskId) {
 
     window.deleteDailyTask = function(taskId) {
         const t = appData.dailyTasks.find(x => x.id === taskId); if (!t) return;
-        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor' && t.assignedBy !== localAuthor) { 
-            window.showToast("Solo quien asignó la tarea puede eliminarla", true); return; 
+        // BLOQUEO ABSOLUTO: Ningún consultor puede borrar tareas de esta lista, ni siquiera las suyas.
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') { 
+            window.showToast("Solo Supervisores o Supremacia pueden borrar de la bitácora.", true); return; 
         }
         appData.dailyTasks = appData.dailyTasks.filter(x => x.id !== taskId); 
         logActivity('daily', 'Actividades Diarias', `Borró tarea: ${t.text}`, localAuthor);
@@ -2357,102 +2397,216 @@ window.toggleDailyTask = function(taskId) {
     };
 
 window.renderDailyTasks = function() {
-        const container = document.getElementById('dailyTasksContainer'); 
-        const badge = document.getElementById('dailyAlertsBadge');
-        
-        let alertCount = 0;
-        const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+    const container = document.getElementById('dailyTasksContainer'); 
+    const badge = document.getElementById('dailyAlertsBadge');
+    
+    let alertCount = 0;
+    const shownIds = new Set(); window.__dailyShownIds = shownIds; // ids de tareas listadas (evita duplicarlas como alerta)
+    const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
 
-        if (!appData.dailyTasks || appData.dailyTasks.length === 0) { 
-            if(badge) badge.classList.add('hidden');
-            if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No hay actividades diarias registradas.</p></div>`; 
-            return; 
-        }
-        
-        let grouped = {};
-        appData.dailyTasks.forEach(t => {
-            // Lógica para agrupar
-            if (isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor) {
-                if (!grouped[t.assignee]) grouped[t.assignee] = [];
-                grouped[t.assignee].push(t);
-            }
-            
-            // Lógica matemática para el Badge de Alerta
-            if (t.done === 'pending' && (isSuper || t.assignedBy === localAuthor)) {
-                alertCount++; // Validaciones pendientes para los jefes
-            } else if (t.done === false && t.assignee === localAuthor) {
-                alertCount++; // Tareas nuevas/pendientes para el consultor
+    // 1. RECOLECTOR MAESTRO: Unifica todas las fuentes
+    let allTasks = [];
+    
+    // A. Tareas Diarias
+    if(appData.dailyTasks) {
+        appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea Diaria'}));
+    }
+    // B. Tareas Globales
+    if(appData.globalTasks) {
+        appData.globalTasks.forEach(t => allTasks.push({...t, sourceType: 'global', pName: 'Asignación Global'}));
+    }
+    // C. Tareas de Proyectos Directos
+    if(appData.directProjects) {
+        appData.directProjects.forEach(p => {
+            if(p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'direct-project'}));
+        });
+    }
+    // D. Tareas de Módulos
+    if(appData.modules) {
+        appData.modules.forEach(m => {
+            if(m.projects) {
+                m.projects.forEach(p => {
+                    if(p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'project'}));
+                });
             }
         });
+    }
 
-        if(badge) {
-            if (alertCount > 0) {
-                badge.textContent = alertCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-        
-        if (Object.keys(grouped).length === 0) { 
-            if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No tienes actividades asignadas hoy.</p></div>`; 
-            return; 
-        }
-
-        const sorted = Object.keys(grouped).sort((a, b) => { if (a === localAuthor) return -1; if (b === localAuthor) return 1; return a.localeCompare(b); });
-        
-        if(container) container.innerHTML = sorted.map(cons => {
-            const tasks = grouped[cons].sort((a, b) => b.id.localeCompare(a.id));
-            const cData = consultants[cons] || { color: '#8e8e93' };
-            const pCount = tasks.filter(t => t.done !== true).length;
+    if (allTasks.length === 0) { 
+        if(badge) badge.classList.add('hidden');
+        if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No hay notificaciones ni trabajo pendiente.</p></div>`; 
+        return; 
+    }
+    
+    let grouped = {};
+    
+    // 2. FILTRADO INTELIGENTE Y AGRUPACIÓN
+    allTasks.forEach(t => {
+        // Regla: Consultor solo ve las suyas (asignadas A él, o POR él en caso de que sea el autor y siga pendiente).
+        // Jefes ven TODO.
+        if (isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor) {
+            let groupKey = t.assignee;
+            // Si el jefe lo está viendo y no tiene asignado, va a un grupo "Sin Asignar"
+            if (!groupKey) groupKey = 'Sin Asignar';
             
-            return `<div class="mb-2">
-                <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2" style="color: ${cData.color}">
-                    <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}
-                    ${pCount === 0 ? `<span class="bg-[#30d158]/20 text-[#30d158] px-2 py-0.5 rounded border border-[#30d158]/30 shadow-inner ml-auto">Al Día ✅</span>` : `<span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${pCount} pdtes.</span>`}
-                </h3>
-                <div class="space-y-2">
-                ${tasks.map(t => {
-                    const isMyTask = t.assignee === localAuthor;
-                    const isAssigner = t.assignedBy === localAuthor;
-                    const canEdit = isSuper || isMyTask || isAssigner;
-                    const canDel = isSuper || isAssigner;
-                    
-                    let statusBadge = '';
-                    let boxUI = '';
-                    
-                    if (t.done === 'pending') {
-                        statusBadge = `<span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">⏳ En Validación</span>`;
-                        if (isSuper || isAssigner) {
-                            boxUI = `<button onclick="toggleDailyTask('${t.id}')" class="h-4 w-4 rounded border border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ff9f0a]/40 transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></button>`;
-                        } else {
-                            boxUI = `<input type="checkbox" checked onchange="toggleDailyTask('${t.id}')" class="rounded border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] focus:ring-[#ff9f0a] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
-                        }
-                    } else if (t.done === true) {
-                        statusBadge = `<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">✅ Validada</span>`;
-                        boxUI = `<input type="checkbox" checked onchange="toggleDailyTask('${t.id}')" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] focus:ring-[#30d158] h-4 w-4 shrink-0 cursor-pointer mt-0.5" ${!(isSuper || isAssigner) ? 'disabled class="... opacity-50 cursor-not-allowed"' : ''}>`;
-                    } else {
-                        boxUI = `<input type="checkbox" onchange="toggleDailyTask('${t.id}')" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''}>`;
-                    }
+            if (!grouped[groupKey]) grouped[groupKey] = [];
+            grouped[groupKey].push(t); shownIds.add(t.id);
+        }
+        
+        // Lógica de Alertas (Globo Rojo)
+        // 1. Tareas en validación (pendientes de jefe)
+        if (t.done === 'pending' && (isSuper || t.assignedBy === localAuthor)) alertCount++; 
+        // 2. Tareas activas (No hechas) para el consultor
+        else if (t.done === false && t.assignee === localAuthor) alertCount++; 
+    });
 
-                    return `
-                    <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 group transition ${t.done === true ? 'opacity-50' : (t.done === 'pending' ? 'border-[#ff9f0a]/30 bg-[#ff9f0a]/5' : 'shadow-inner')}">
-                        ${boxUI}
-                        <div class="flex flex-col flex-1 min-w-0">
-                            <div class="flex items-start justify-between">
-                                <span class="text-xs text-white break-words pr-2 ${t.done === true ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>${statusBadge}
-                            </div>
-                            <div class="flex items-center gap-2 mt-1.5">
-                                <span class="text-[9px] text-gray-500">📅 ${escapeHtml(t.date)}</span>${t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
-                            </div>
-                            ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/60 border border-white/10 p-2 rounded shadow-inner">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+    if(badge) {
+        if (alertCount > 0) { badge.textContent = alertCount; badge.classList.remove('hidden'); } 
+        else { badge.classList.add('hidden'); }
+    }
+    
+    if (Object.keys(grouped).length === 0) { 
+        if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No tienes notificaciones hoy.</p></div>`; 
+        return; 
+    }
+
+    // Ordenar grupos: Primero yo, luego los demás alfabéticamente
+    const sorted = Object.keys(grouped).sort((a, b) => { 
+        if (a === localAuthor) return -1; 
+        if (b === localAuthor) return 1; 
+        return a.localeCompare(b); 
+    });
+    
+    if(container) container.innerHTML = sorted.map(cons => {
+        // FIX MATEMÁTICO: Ordenamos las tareas de más nuevas a más viejas leyendo el timestamp del ID
+        const tasks = grouped[cons].sort((a, b) => (parseInt((b.id.split('_')[1]) || 0)) - (parseInt((a.id.split('_')[1]) || 0)));
+        const cData = consultants[cons] || { color: '#8e8e93' };
+        const pCount = tasks.filter(t => t.done !== true).length;
+        
+        return `<div class="mb-6">
+            <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2" style="color: ${cData.color}">
+                <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}
+                ${pCount === 0 ? `<span class="bg-[#30d158]/20 text-[#30d158] px-2 py-0.5 rounded border border-[#30d158]/30 shadow-inner ml-auto">Al Día ✅</span>` : `<span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${pCount} pdtes.</span>`}
+            </h3>
+            <div class="space-y-2">
+            ${tasks.map(t => {
+                const isMyTask = t.assignee === localAuthor;
+                const isAssigner = t.assignedBy === localAuthor;
+                const canEdit = isSuper || isMyTask || isAssigner;
+                const canDel = isSuper || isAssigner;
+                
+                let statusBadge = '';
+                let boxUI = '';
+                
+                // Enrutador de acciones dependiendo del tipo de tarea
+                let toggleAction = `toggleDailyTask('${t.id}')`;
+                let openAction = '';
+                if(t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`; // Para jefe (Aprobar directo) o llamar feedback (abajo)
+                if(t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}'); currentSelection.id='${t.projectId}'; currentSelection.type='${t.strictType}';`;
+                
+                if (t.sourceType === 'project' || t.sourceType === 'global') {
+                     openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openGlobalTaskModal();`;
+                }
+
+                if (t.done === 'pending') {
+                    statusBadge = `<span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">⏳ En Validación</span>`;
+                    if (isSuper || isAssigner) {
+                        boxUI = `<button onclick="if('${t.sourceType}'==='daily'){toggleDailyTask('${t.id}')} else if('${t.sourceType}'==='global'){validateGlobalTask('${t.id}', true)} else {validateProjectTask('${t.strictType}', '${t.projectId}', '${t.id}', true)}" class="h-4 w-4 rounded border border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ff9f0a]/40 transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></button>`;
+                    } else {
+                        boxUI = `<input type="checkbox" checked onchange="${toggleAction}" class="rounded border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] focus:ring-[#ff9f0a] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
+                    }
+                } else if (t.done === true) {
+                    statusBadge = `<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">✅ Validada</span>`;
+                    boxUI = `<input type="checkbox" checked onchange="${toggleAction}" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] focus:ring-[#30d158] h-4 w-4 shrink-0 cursor-pointer mt-0.5" ${!(isSuper || isAssigner) ? 'disabled class="... opacity-50 cursor-not-allowed"' : ''}>`;
+                } else {
+                    boxUI = `<input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''}>`;
+                }
+
+                // Definimos el color del ícono de origen
+                let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+
+                return `
+                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 group transition hover:bg-white/5 ${t.done === true ? 'opacity-50' : (t.done === 'pending' ? 'border-[#ff9f0a]/30 bg-[#ff9f0a]/5' : 'shadow-inner')}" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') {${openAction} }">
+                    ${boxUI}
+                    <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
+                        <div class="flex items-start justify-between">
+                            <span class="text-xs text-white break-words pr-2 ${t.done === true ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>${statusBadge}
                         </div>
-                        ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
-                    </div>`
-                }).join('')}
-                </div></div>`;
-        }).join('');
-    };
+                        <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>${t.deadline || t.date ? `<span class="text-[9px] text-gray-500 font-mono">📅 ${escapeHtml(t.deadline || t.date)}</span>` : ''}
+                            ${t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner border border-white/5">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                        </div>
+                        ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/60 border border-white/10 p-2 rounded shadow-inner w-full">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+                    </div>
+                    ${canDel && t.sourceType === 'daily' ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                </div>`
+            }).join('')}
+            </div></div>`;
+    }).join('');
+};
+
+// === UNIFICACIÓN DE NOTIFICACIONES EN EL PANEL IZQUIERDO ===
+// Todas las notificaciones (tareas + alertas de proyecto) se muestran en "Notificaciones y Trabajo".
+// renderAlerts() calcula las alertas (window.__lastAlerts); aquí se pintan arriba de la lista de tareas.
+const baseRenderDailyTasks = window.renderDailyTasks;
+window.renderDailyTasks = function() {
+    baseRenderDailyTasks();
+    try {
+        const container = document.getElementById('dailyTasksContainer');
+        const badge = document.getElementById('dailyAlertsBadge');
+        const bellBadge = document.getElementById('alertsBadge');
+        if (!container) return;
+
+        // Alertas que NO son tareas ya listadas abajo (proyecto vencido, "No Iniciado", tareas no visibles en la lista)
+        const shown = window.__dailyShownIds || new Set();
+        const extra = (window.__lastAlerts || []).filter(a => { const t = a.taskInfo || a.globalTaskInfo; return !(t && shown.has(t.id)); });
+
+        if (extra.length > 0) {
+            const style = { danger: ['text-[#ff453a]', 'bg-[#ff453a]/10', 'border-[#ff453a]/30'], warning: ['text-[#ff9f0a]', 'bg-[#ff9f0a]/10', 'border-[#ff9f0a]/30'], info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'] };
+            const cards = extra.map(a => {
+                const [txt, bg, br] = style[a.alertType] || style.info;
+                const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
+                const canOpen = a.pType !== 'global';
+                const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
+                return `<div class="${bg} border ${br} rounded-xl p-3 ${canOpen ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} transition shadow-inner"${click}>
+                    <div class="flex items-start gap-2">
+                        <span class="text-base leading-none mt-0.5">${a.icon}</span>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-semibold ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
+                            <p class="text-[9px] text-gray-400 uppercase tracking-widest truncate">└ ${escapeHtml(a.parentName)}</p>
+                            <p class="text-[10px] ${txt} mt-1.5 leading-snug break-words">${escapeHtml(a.reason)}</p>
+                            <p class="text-[9px] text-gray-400 font-mono mt-1 truncate">👤 ${escapeHtml(users)}</p>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Si la lista estaba vacía, quitar el mensaje "No hay notificaciones" (ya hay alertas que mostrar)
+            container.querySelectorAll(':scope > div.py-20').forEach(el => el.remove());
+            container.insertAdjacentHTML('afterbegin', `<div class="mb-6" data-alerts-section>
+                <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-[#ff453a]">⚠️ Alertas
+                    <span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${extra.length}</span>
+                </h3>
+                <div class="space-y-2">${cards}</div>
+            </div>`);
+        }
+
+        // Contador único: tareas pendientes de atención + alertas. Lo muestran el botón flotante y la campana del encabezado.
+        const baseCount = (badge && !badge.classList.contains('hidden')) ? (parseInt(badge.textContent) || 0) : 0;
+        const total = baseCount + extra.length;
+        [badge, bellBadge].forEach(b => {
+            if (!b) return;
+            if (total > 0) { b.textContent = total; b.classList.remove('hidden'); } else { b.classList.add('hidden'); }
+        });
+    } catch (e) { console.warn('No se pudieron mostrar las alertas en el panel de notificaciones:', e); }
+};
+
+// Cada vez que se recalculan las alertas, se refresca el panel (así el contador siempre está al día, aunque el panel esté cerrado).
+const baseRenderAlerts = window.renderAlerts;
+window.renderAlerts = function() {
+    baseRenderAlerts();
+    window.renderDailyTasks();
+};
 
 // === LÓGICA DE FILTROS AVANZADOS Y MODO ENFOQUE ===
     window.toggleFilterDrawer = function() {
