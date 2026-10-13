@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
@@ -33,8 +33,11 @@ console.log('📌 1. AUDITORÍA DEL MOTOR DE INTERACCIÓN TÁCTIL Y ESCRITORIO (
 assert(jsContent.includes('suppressClickUntil = Date.now() + 350'), 'Supresor de clics fantasmas en canvas implementado tras arrastre');
 assert(jsContent.includes('window.addEventListener(\'click\','), 'Listener global en fase de captura para interceptar falsos toques tras paneo');
 assert(jsContent.includes('touchTotalDistance > 6'), 'Umbral de detección de paneo (6px) configurado para diferenciar toque vs arrastre');
-assert(jsContent.includes('if (e.cancelable) e.preventDefault();'), 'Prevención de rebote del navegador en movimiento táctil');
-assert(jsContent.includes('initialPinchDistance) * 0.004'), 'Pellizco táctil de dos dedos (pinch-to-zoom) calculado con factor suave');
+assert(jsContent.includes('const factor = 1 + (rawRatio - 1) * 0.60;'), 'Pellizco táctil de dos dedos (pinch-to-zoom) calculado con factor proporcional amortiguado (60%)');
+assert(jsContent.includes('window.toggleMobileMenu = function(e)'), 'Función toggleMobileMenu con detención de propagación de eventos');
+assert(htmlContent.includes('id="mobileMenuBtn" onclick="toggleMobileMenu(event)"'), 'Botón de 3 puntos móvil correctamente conectado con evento');
+assert(htmlContent.includes('id="mobileMenuDropdown" class="absolute top-[58px] right-0 w-56 liquid-glass rounded-2xl p-2 z-[9999]'), 'Menú desplegable móvil elevado a z-[9999]');
+assert(!htmlContent.includes('relative justify-end flex-1 pl-2 sm:pl-4 overflow-hidden'), 'Contenedor del menú en cabecera sin overflow-hidden para evitar recorte del dropdown');
 assert(jsContent.includes('minFloor = window.innerWidth < 640 ? 0.12 : 0.35'), 'Piso mínimo dinámico de zoom para móviles (0.12) vs escritorio (0.35)');
 assert(jsContent.includes('targetScale = window.innerWidth < 640 ? 0.80 : 1.05'), 'Escala óptima de enfoque responsive adaptada para móvil (0.80) y escritorio (1.05)');
 assert(jsContent.includes('padding = isMobile ? 16 : 70'), 'Padding responsive en centrado de canvas (16px móvil / 70px escritorio)');

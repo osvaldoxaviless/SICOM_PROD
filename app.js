@@ -507,9 +507,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     
-    window.toggleMobileMenu = function() {
+    window.toggleMobileMenu = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         const menu = document.getElementById('mobileMenuDropdown');
-        if (menu.classList.contains('opacity-0')) {
+        if (!menu) return;
+        const isHidden = menu.classList.contains('opacity-0');
+        if (isHidden) {
             menu.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
             menu.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
         } else {
@@ -518,14 +521,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     };
     
-    // Close mobile menu if clicked outside
-    document.addEventListener('click', (e) => {
+    // Cerrar menú móvil al hacer clic o tocar fuera
+    const handleCloseMobileMenuOutside = (e) => {
         const menu = document.getElementById('mobileMenuDropdown');
-        const btn = document.getElementById('mobileMenuBtn');
-        if (menu && btn && !menu.classList.contains('opacity-0') && !menu.contains(e.target) && !btn.contains(e.target)) {
-            window.toggleMobileMenu();
+        if (menu && !menu.classList.contains('opacity-0')) {
+            if (e.target.closest('#mobileMenuBtn') || e.target.closest('#mobileMenuDropdown')) return;
+            menu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            menu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
         }
-    });
+    };
+    document.addEventListener('click', handleCloseMobileMenuOutside);
+    document.addEventListener('touchend', handleCloseMobileMenuOutside, { passive: true });
 
     window.logout = function() { document.getElementById('cloudLoader').style.display = 'flex'; document.getElementById('cloudLoader').style.opacity = '1'; setTimeout(() => { localStorage.removeItem('sicom_author'); localStorage.removeItem('sicom_role'); location.reload(); }, 500); }
 
@@ -1210,6 +1216,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let touchTotalDistance = 0;
     let suppressClickUntil = 0;
     let isTouchActive = false;
+    let initialPinchMidX = 0;
+    let initialPinchMidY = 0;
 
     // Supresor global de clics fantasmas tras arrastrar el mapa en móvil
     window.addEventListener('click', (e) => {
@@ -1237,11 +1245,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 touchPanOriginY = e.touches[0].clientY - translateY; 
                 touchTotalDistance = 0;
                 isPanning = false;
+                initialPinchDistance = null;
             } else if (e.touches.length === 2) { 
                 isTouchActive = true;
                 isPanning = false; 
                 touchTotalDistance = 50; 
                 initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); 
+                initialPinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                initialPinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                ws.classList.add('is-panning'); // Desactiva transiciones CSS para respuesta táctil a 120 FPS
             }
         }, {passive: true});
 
@@ -1272,19 +1284,64 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 if (e.cancelable) e.preventDefault();
                 touchTotalDistance = 50;
                 const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); 
-                if(initialPinchDistance && initialPinchDistance > 10) { 
-                    const delta = (currentDist - initialPinchDistance) * 0.004; 
-                    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                    window.zoomCanvas(delta, midX, midY); 
-                    initialPinchDistance = currentDist; 
+                const currentMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const currentMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+                if (initialPinchDistance && initialPinchDistance > 10 && currentDist > 10) {
+                    // Zoom proporcional multiplicativo con amortiguación sedosa (evita saltos bruscos)
+                    const rawRatio = currentDist / initialPinchDistance;
+                    const factor = 1 + (rawRatio - 1) * 0.60;
+                    
+                    const minScale = window.getMinZoomLimit();
+                    const maxScale = 2.2;
+                    const newScale = Math.max(minScale, Math.min(maxScale, scale * factor));
+                    
+                    const panDx = currentMidX - initialPinchMidX;
+                    const panDy = currentMidY - initialPinchMidY;
+                    
+                    if (Math.abs(newScale - scale) > 0.00005) {
+                        if (!svgElem) window.ensureDomReferences();
+                        const rect = svgElem.getBoundingClientRect();
+                        const focalX = currentMidX - rect.left;
+                        const focalY = currentMidY - rect.top;
+                        
+                        translateX = focalX - (focalX - translateX) * (newScale / scale) + panDx;
+                        translateY = focalY - (focalY - translateY) * (newScale / scale) + panDy;
+                        scale = newScale;
+                    } else {
+                        translateX += panDx;
+                        translateY += panDy;
+                    }
+                    
+                    initialPinchDistance = currentDist;
+                    initialPinchMidX = currentMidX;
+                    initialPinchMidY = currentMidY;
+
+                    if(!animationFrameId) {
+                        animationFrameId = requestAnimationFrame(() => {
+                            window.updateCanvasTransform();
+                            animationFrameId = null;
+                        });
+                    }
                 } 
             }
         }, {passive: false});
 
-        const handleTouchEnd = () => { 
+        const handleTouchEnd = (e) => { 
             if (touchTotalDistance > 6) {
                 suppressClickUntil = Date.now() + 350;
+            }
+            if (e && e.touches && e.touches.length === 1) {
+                // Continuidad fluida si se levanta un dedo durante el pellizco
+                isTouchActive = true;
+                isPanning = true;
+                initialPinchDistance = null;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchPanOriginX = e.touches[0].clientX - translateX;
+                touchPanOriginY = e.touches[0].clientY - translateY;
+                ws.classList.add('is-panning');
+                return;
             }
             isTouchActive = false;
             isPanning = false; 
