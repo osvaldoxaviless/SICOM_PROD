@@ -35,11 +35,115 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       "Lector (Jefatura)": {"color": "#8e8e93", "role": "Lector"}
     };
 
-    let appData = {}; 
+    let appData = {
+      core: { id: 'sicom', name: 'SICOM' },
+      secondaryCore: { id: 'sucom', name: 'SUCOM', active: false },
+      directHub: { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' },
+      directProjects: [],
+      modules: [],
+      history: []
+    }; 
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
     let globalDocs = [];
 
-    Chart.defaults.color = '#8e8e93'; Chart.defaults.borderColor = 'rgba(255,255,255,0.05)'; Chart.defaults.font.family = 'Inter';
+    if (typeof Chart !== 'undefined') {
+      Chart.defaults.color = '#8e8e93'; 
+      Chart.defaults.borderColor = 'rgba(255,255,255,0.05)'; 
+      Chart.defaults.font.family = 'Inter';
+    }
+
+    // --- SISTEMA DE TEMAS DUAL (DARK / LIGHT MODO APPLE) ---
+    // NOTA: Por directiva de UX, el modo Claro está temporalmente bloqueado y restringido al perfil 'Supremo'.
+    window.setTheme = function(theme) {
+        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
+            theme = 'dark';
+        }
+        const isLight = theme === 'light';
+        if (isLight) {
+            document.body.classList.add('theme-light');
+            document.documentElement.classList.add('theme-light');
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.body.classList.remove('theme-light');
+            document.documentElement.classList.remove('theme-light');
+            document.documentElement.classList.add('dark');
+        }
+        localStorage.setItem('sicom_theme', isLight ? 'light' : 'dark');
+
+        const sunIcon = document.getElementById('themeIconSun');
+        const moonIcon = document.getElementById('themeIconMoon');
+        const themeLabel = document.getElementById('themeToggleLabel');
+        const mobileThemeText = document.getElementById('mobileThemeText');
+
+        if (sunIcon && moonIcon) {
+            if (isLight) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                if (themeLabel) themeLabel.textContent = 'Claro';
+                if (mobileThemeText) mobileThemeText.textContent = 'Modo Oscuro';
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                if (themeLabel) themeLabel.textContent = 'Oscuro';
+                if (mobileThemeText) mobileThemeText.textContent = 'Modo Claro';
+            }
+        }
+
+        if (window.Chart) {
+            Chart.defaults.color = isLight ? '#6e6e73' : '#8e8e93';
+            Chart.defaults.borderColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
+        }
+
+        if (typeof window.renderMindMap === 'function' && canvasGroup) {
+            window.renderMindMap();
+        }
+    };
+
+    window.toggleTheme = function() {
+        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
+            window.showToast('🔒 El cambio de tema está bloqueado. Exclusivo para perfil Supremo.', true);
+            return;
+        }
+        const currentTheme = localStorage.getItem('sicom_theme') || 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        window.setTheme(newTheme);
+        window.showToast(newTheme === 'light' ? '☀️ Modo Claro activado (Supremo)' : '🌙 Modo Oscuro activado (Supremo)');
+    };
+
+    window.initTheme = function() {
+        let savedTheme = localStorage.getItem('sicom_theme') || 'dark';
+        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
+            savedTheme = 'dark';
+        }
+        window.setTheme(savedTheme);
+    };
+
+    // --- EXPERIENCIA DELEITE (CONFETTI CELEBRACIÓN DUOLINGO) ---
+    window.triggerCelebration = function(originX = 0.5, originY = 0.6) {
+        if (typeof confetti === 'function') {
+            try {
+                confetti({
+                    particleCount: 55,
+                    spread: 65,
+                    origin: { x: originX, y: originY },
+                    colors: ['#0071e3', '#30d158', '#ffd60a', '#bf5af2', '#ff9f0a'],
+                    ticks: 200,
+                    gravity: 1.2,
+                    scalar: 0.9,
+                    disableForReducedMotion: true
+                });
+            } catch (e) {
+                console.warn('Celebration confetti:', e);
+            }
+        }
+    };
+
+    // Inicialización inmediata de tema
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', window.initTheme);
+    } else {
+        window.initTheme();
+    }
 
     const defaultTestingData = {
       core: { id: 'sicom', name: 'SICOM' },
@@ -326,13 +430,23 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
         const finalStatus = isSuper ? true : 'pending';
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-MX');
+        const timeStr = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         
         if (taskType === 'global') {
             const t = appData.globalTasks.find(x => x.id === taskId);
             if (t) {
                 t.done = finalStatus;
                 t.feedback = feedback;
-                logActivity('global', 'General', isSuper ? `Validó tarea general: ${t.text}` : `Envió tarea a validación: ${t.text}`, localAuthor);
+                if (isSuper) {
+                    t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
+                    const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
+                    logActivity('global', 'General', `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
+                } else {
+                    t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
+                    logActivity('global', 'General', `Envió tarea a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
+                }
                 window.saveData(false);
                 window.renderAlerts();
             }
@@ -341,7 +455,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (t) {
                 t.done = finalStatus;
                 t.feedback = feedback;
-                logActivity('daily', 'Actividades Diarias', isSuper ? `Validó tarea diaria: ${t.text}` : `Envió tarea diaria a validación: ${t.text}`, localAuthor);
+                if (isSuper) {
+                    t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
+                    const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
+                    logActivity('daily', 'Actividades Diarias', `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
+                } else {
+                    t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
+                    logActivity('daily', 'Actividades Diarias', `Envió tarea diaria a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
+                }
                 window.saveData(false);
                 window.renderAlerts();
             }
@@ -364,7 +485,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 if (t) {
                     t.done = finalStatus;
                     t.feedback = feedback;
-                    logActivity(item.id, item.name, isSuper ? 'Validó una tarea' : 'Envió tarea a validación', localAuthor); 
+                    if (isSuper) {
+                        t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
+                        const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
+                        logActivity(item.id, item.name, `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
+                    } else {
+                        t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
+                        logActivity(item.id, item.name, `Envió tarea a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
+                    }
                     window.saveData(false); 
                     window.renderTasksQuick(item); 
                     window.renderAlerts();
@@ -372,7 +500,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         }
         
+        window.renderDailyTasks();
         window.showToast("Enviado correctamente");
+        window.triggerCelebration();
         window.closeTaskFeedbackModal();
     };
 
@@ -420,48 +550,140 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
         if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
+        if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer();
         
         const content = document.getElementById('manualContent');
         if (currentUserRole === 'Supremo') {
             content.innerHTML = `
-            <h3 class="text-lg font-bold text-[#ff453a] mb-2">Supremo (Administración Total)</h3>
-            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Como Supremo, tienes el control absoluto de la arquitectura, usuarios y datos críticos del Panel de Control SICOM.</p>
-            <ul class="text-xs space-y-4 text-gray-300 list-disc pl-4 leading-relaxed">
-                <li><strong class="text-white">Gestión de Usuarios y Contraseñas:</strong> En el menú <strong>Panel > Equipo</strong>, puedes dar de alta nuevos consultores o modificar los existentes. Haz clic en el ícono de la llave (🔑) para asignar o resetear la contraseña privada de cualquier usuario, o cambia sus niveles de acceso al instante.</li>
-                <li><strong class="text-white">Estructura del Sistema:</strong> Eres el único con la capacidad de crear nuevos "Módulos" (agrupadores visuales). Además, al editar un proyecto o módulo, verás un botón rojo de "Eliminar" que borra los datos permanentemente de la base de datos.</li>
-                <li><strong class="text-white">Auditoría y Validación de Tareas:</strong> Las tareas que terminan los consultores entrarán en estado ⏳ En Validación. Desde tu campana de alertas (🔔) puedes <strong>✅ Aprobarlas</strong> o <strong>❌ Rechazarlas</strong>. Si tú completas una tarea manualmente desde el proyecto, se validará de inmediato.</li>
-                <li><strong class="text-white">Documentación Base (Estandarización):</strong> En Panel > <strong>Docs Base</strong>, defines los requisitos globales que todo proyecto debe cumplir. El avance automático (0 a 100%) se calcula matemáticamente según cuántos de estos documentos han sido palomeados o marcados como N/A (validado) en cada proyecto.</li>
-                <li><strong class="text-white">Auditoría Global y Respaldos:</strong> El sistema registra silenciosamente cada movimiento. En la pestaña <strong>Historial</strong> puedes auditar quién hizo qué modificación y a qué hora. Al final del Panel, tienes controles para exportar a Excel (CSV), respaldar en JSON o forzar una sincronización con la nube (Firebase).</li>
+            <div class="border-b border-white/10 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-[#ff453a] flex items-center gap-2">
+                    <span>👑</span> Supremo (Dirección General)
+                </h3>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Supremo, tienes el control absoluto de la arquitectura, configuración, usuarios y datos críticos del Mini-ERP SICOM.</p>
+            </div>
+            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🔑 Gestión de Accesos y Equipo:</strong>
+                    En <strong>Panel > Equipo</strong>, puedes dar de alta nuevos consultores o modificar existentes. Haz clic en la llave para asignar o resetear la contraseña privada de cualquier usuario, o cambiar sus niveles de acceso al instante.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🏗️ Arquitectura y Estructura:</strong>
+                    Eres el único con la capacidad de crear nuevos <strong>Módulos</strong> (agrupadores departamentales). Además, al editar un proyecto o módulo, tienes la facultad exclusiva de eliminarlo permanentemente.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📋 Panel Notificaciones y Trabajo (Izquierdo):</strong>
+                    Supervisa todo el ciclo operativo en sus 4 pestañas: 
+                    <span class="text-[#ff453a] font-semibold">⚠️ Alertas</span> (proyectos vencidos), 
+                    <span class="text-[#35aee8] font-semibold">📌 Pendientes</span> (agrupadas por consultor), 
+                    <span class="text-[#ff9f0a] font-semibold">⏳ Validación</span> (evidencias por auditar) y 
+                    <span class="text-[#30d158] font-semibold">✅ Hechas</span> (tareas validadas). 
+                    Puedes <strong>Aprobar</strong> o <strong>Rechazar</strong> entregas de cualquier miembro.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">➕ Acciones Rápidas (Speed Dial +):</strong>
+                    Desde el botón flotante inferior puedes crear proyectos, registrar tus tareas personales, asignar <strong>Tareas por proyecto</strong> o abrir un nuevo módulo directamente sin buscar en el mapa.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📊 Docs Base y Estandarización:</strong>
+                    En <strong>Panel > Docs Base</strong>, defines los documentos obligatorios de calidad. El avance porcentual (0 a 100%) de cada proyecto se calcula matemáticamente según los documentos validados.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🔒 Auditoría Inmutable y Respaldos:</strong>
+                    En <strong>Panel > Historial</strong> puedes auditar quién hizo qué modificación y a qué hora. Al final del Panel dispones de herramientas para exportar a Excel (CSV), descargar respaldo JSON y forzar sincronización con Firebase.
+                </li>
             </ul>`;
         } else if (currentUserRole === 'Supervisor') {
             content.innerHTML = `
-            <h3 class="text-lg font-bold text-[#ff9f0a] mb-2">Supervisor (Coordinador)</h3>
-            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Como Supervisor, eres responsable de la calidad del trabajo, la auditoría de tareas y el control de tiempos del equipo.</p>
-            <ul class="text-xs space-y-4 text-gray-300 list-disc pl-4 leading-relaxed">
-                <li><strong class="text-white">Auditoría y Validación:</strong> Cuando un consultor termina una tarea, recibirás una alerta. Abre la campana (🔔) y verás la tarea en color naranja. Tendrás dos opciones: <span class="text-[#30d158] font-bold">✅ Aprobar</span> (la tarea se marca como completada verde y suma al historial) o <span class="text-[#ff453a] font-bold">❌ Rechazar</span> (se devuelve al consultor como pendiente).</li>
-                <li><strong class="text-white">Edición de Proyectos:</strong> Tienes permisos para modificar los detalles de cualquier proyecto. Selecciónalo en el mapa y abre el <strong>Panel > Editar</strong>. Podrás cambiar su estatus, ajustar fechas de entrega, actualizar el porcentaje de avance y pegar los enlaces oficiales de Drive e Invgate.</li>
-                <li><strong class="text-white">Asignación de Tareas:</strong> Usa el botón verde "Asignar Tarea" en el menú superior para delegar actividades. Puedes asignarlas a un proyecto específico o crear "Tareas Generales" independientes. Tú decides la fecha límite y el responsable.</li>
-                <li><strong class="text-white">Radiografía Operativa:</strong> Entra al <strong>Panel > Tablero</strong>. Al final, encontrarás una tabla analítica que mide en tiempo real la carga de proyectos activos por consultor, su avance promedio y, lo más importante, cuántos <strong>Atrasos (🚨)</strong> tiene acumulados por incumplimiento de fechas límite.</li>
+            <div class="border-b border-white/10 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-[#ff9f0a] flex items-center gap-2">
+                    <span>🛡️</span> Supervisor (Coordinador de Operaciones)
+                </h3>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Supervisor, eres responsable del flujo operativo, la auditoría de calidad de las entregas y el cumplimiento de tiempos del equipo.</p>
+            </div>
+            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">⏳ Auditoría y Validación de Entregas:</strong>
+                    Abre el panel izquierdo <strong>Notificaciones y Trabajo</strong> en la pestaña <strong>Validación</strong>. Verás las tareas concluidas por los consultores junto con su evidencia registrada. Podrás <span class="text-[#30d158] font-bold">✅ Aprobar</span> (pasa a Hechas y registra la firma) o <span class="text-[#ff453a] font-bold">❌ Rechazar</span> (se devuelve a pendientes para corrección).
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📌 Asignación de Tareas por Proyecto:</strong>
+                    Utiliza el botón <strong>"+" > Tarea por proyecto</strong> para delegar actividades vinculadas directamente a cualquier proyecto, definiendo el responsable y la fecha límite sin necesidad de buscar el proyecto en el mapa.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🛠️ Control Operativo de Proyectos:</strong>
+                    Selecciona cualquier proyecto para editar su estatus (No Iniciado, Pendiente, En Progreso, Completado), fechas compromiso (propuesta/autorización/límite), porcentaje de avance y enlaces oficiales de Drive e InvGate.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📈 Tablero y Radiografía Operativa:</strong>
+                    Entra a <strong>Panel > Tablero</strong> para medir en tiempo real la carga de proyectos por consultor, su avance promedio y los proyectos con atrasos acumulados (<span class="text-[#ff453a]">🚨</span>).
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">💬 Foro Técnico y Notas:</strong>
+                    Comunícate y registra acuerdos operativos en la sección de Foro y Notas Técnicas de cada proyecto.
+                </li>
             </ul>`;
         } else if (currentUserRole === 'Lector') {
             content.innerHTML = `
-            <h3 class="text-lg font-bold text-gray-400 mb-2">Lector (Solo Vista)</h3>
-            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Como Lector, tienes acceso de auditoría visual a todo el sistema, sin riesgo de modificar o alterar los datos operativos.</p>
-            <ul class="text-xs space-y-4 text-gray-300 list-disc pl-4 leading-relaxed">
-                <li><strong class="text-white">Exploración de Proyectos:</strong> Puedes navegar libremente por el mapa mental, buscar proyectos por nombre usando la Lupa, o filtrar por consultor y estatus para evaluar el rendimiento de áreas específicas.</li>
-                <li><strong class="text-white">Auditoría Transparente:</strong> Al hacer clic en cualquier proyecto, podrás inspeccionar su tarjeta de información. Verás su estatus exacto, fechas de entrega, tareas pendientes y completadas, así como el desglose de documentos que justifican su nivel de avance matemático.</li>
-                <li><strong class="text-white">Accesos Directos (Drive e Invgate):</strong> Si los coordinadores han enlazado documentación o tickets oficiales, los botones azules (Drive) y verdes (Invgate) estarán activos para que puedas revisarlos directamente.</li>
-                <li><strong class="text-white">Historial y Tablero:</strong> En el menú <strong>Panel</strong>, tienes acceso al Tablero para revisar métricas generales y la Radiografía Operativa de todo el equipo, y a la pestaña <strong>Historial</strong> para trazar cada movimiento realizado por los operadores.</li>
+            <div class="border-b border-white/10 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-400 flex items-center gap-2">
+                    <span>👁️</span> Lector (Auditoría y Supervisión Ejecutiva)
+                </h3>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Lector, tienes acceso de auditoría visual total a todo el sistema SICOM, con protección absoluta contra alteraciones involuntarias.</p>
+            </div>
+            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🔍 Navegación y Búsqueda:</strong>
+                    Explora libremente el mapa mental arrastrando con el ratón o el dedo. Usa la Lupa superior para localizar proyectos al instante o aplica filtros por consultor y estatus para evaluar áreas específicas.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📋 Inspección Detallada de Proyectos:</strong>
+                    Haz clic en cualquier proyecto para ver su tarjeta informativa: estatus, fechas límite, tareas concluidas y el desglose de documentos base que acreditan matemáticamente su avance.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📁 Evidencias y Tickets Oficiales:</strong>
+                    Accede directamente a los botones de <strong class="text-[#0071e3]">Drive</strong> e <strong class="text-[#30d158]">InvGate</strong> si han sido enlazados al proyecto.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📊 Métricas y Trazabilidad:</strong>
+                    En el menú <strong>Panel</strong>, consulta el <strong>Tablero</strong> para evaluar el rendimiento global del equipo y la pestaña <strong>Historial</strong> para auditar cada movimiento registrado por los operadores.
+                </li>
             </ul>`;
         } else {
             content.innerHTML = `
-            <h3 class="text-lg font-bold text-brand-accent mb-2">Consultor Operativo</h3>
-            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Como Consultor, tu objetivo principal es ejecutar y reportar el progreso de tus asignaciones con precisión.</p>
-            <ul class="text-xs space-y-4 text-gray-300 list-disc pl-4 leading-relaxed">
-                <li><strong class="text-white">Navegación y Búsqueda:</strong> Utiliza el mapa arrastrando con el ratón o el dedo. En la barra superior, usa la Lupa para buscar proyectos específicos por nombre, o utiliza el filtro de "Consultor" para ver únicamente tu carga de trabajo.</li>
-                <li><strong class="text-white">Gestión de Tareas:</strong> Haz clic en cualquier proyecto que tengas asignado para abrir su tarjeta. Al hacer clic en la casilla de una tarea pendiente, esta cambiará a color naranja (<span class="text-[#ff9f0a] font-bold">⏳ En Validación</span>). Esto notificará automáticamente a tus supervisores para que auditen tu trabajo. Si te equivocaste, haz clic de nuevo para cancelar el envío.</li>
-                <li><strong class="text-white">Enlaces Rápidos (Drive e Invgate):</strong> Dentro de la tarjeta de tu proyecto, si el equipo configuró enlaces, verás los botones <strong class="text-[#0071e3]">📁 Drive</strong> o <strong class="text-[#30d158]">🎫 Invgate</strong> para abrir directamente la documentación o el ticket oficial en una pestaña nueva sin perder tu trabajo.</li>
-                <li><strong class="text-white">Alertas (Campanita):</strong> Revisa la campana (🔔) en la parte superior derecha. El sistema te notificará automáticamente si te han asignado tareas nuevas o si alguno de tus proyectos está próximo a vencer o ya venció (<span class="text-[#ff453a]">🚨</span>).</li>
+            <div class="border-b border-white/10 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-brand-accent flex items-center gap-2">
+                    <span>🚀</span> Consultor Operativo (Ejecutor)
+                </h3>
+                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Consultor, tu objetivo es ejecutar las asignaciones con precisión, documentar tu avance con evidencias y mantenerte al día con tus entregas.</p>
+            </div>
+            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📌 Centro de Trabajo (Panel Izquierdo):</strong>
+                    Abre el panel <strong>Notificaciones y Trabajo</strong> en el extremo izquierdo. Encontrarás:
+                    <br>• <strong class="text-white">Pendientes:</strong> Tus tareas aparecen al inicio bajo <strong>(Mis Tareas)</strong>. Puedes desplegar o contraer otros compañeros.
+                    <br>• <strong class="text-[#ff453a]">Alertas:</strong> Avisos de proyectos próximos a vencer o con atrasos.
+                    <br>• <strong class="text-[#ff9f0a]">Validación:</strong> Estado de tus entregas enviadas a jefatura (puedes cancelar el envío si necesitas corregir).
+                    <br>• <strong class="text-[#30d158]">Hechas:</strong> Historial de tus tareas validadas y aprobadas.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">➕ Diferenciación de Tareas (Speed Dial +):</strong>
+                    En el botón flotante (+) en la esquina inferior derecha:
+                    <br>• <strong class="text-[#35aee8]">Nueva tarea diaria (Personal):</strong> Registra recordatorios o tareas de tu día a día personal.
+                    <br>• <strong class="text-[#bf5af2]">Tarea por proyecto:</strong> Vincula una tarea directamente a un proyecto del sistema (queda registrada en el proyecto y visible para tu supervisor).
+                    <br>• <strong class="text-[#ff9f0a]">Nuevo proyecto:</strong> Alta rápida de un proyecto en tu área.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📝 Reporte con Evidencia:</strong>
+                    Al marcar una tarea como completada, se abrirá la ventana de evidencia. Escribe tu enlace, observación o resumen del entregable y pulsa <strong>Enviar a Validación</strong>. Tu supervisor la revisará y validará.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">🎯 Modo Enfoque y Filtros:</strong>
+                    Pulsa el botón <strong>Modo Enfoque</strong> en la barra superior para atenuar todo el sistema y concentrarte únicamente en los proyectos donde estás asignado.
+                </li>
+                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
+                    <strong class="text-white block mb-1">📁 Enlaces Rápidos y Foro Técnico:</strong>
+                    En la tarjeta de cada proyecto dispones de botones para abrir carpetas de <strong>Drive</strong> y tickets de <strong>InvGate</strong>, así como publicar notas o comentarios en el <strong>Foro Técnico</strong>.
+                </li>
             </ul>`;
         }
         
@@ -480,7 +702,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     function finishInit() {
         document.getElementById('cloudLoader').style.display = 'none'; document.getElementById('topBarWelcome').textContent = `Bienvenido, ${localAuthor}`;
-        try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
+        try { window.initTheme(); ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
         setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
     }
@@ -488,6 +710,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.applyRolePermissions = function() {
         const isSupremo = currentUserRole === 'Supremo';
         const isSupervisorUp = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+
+        if (!isSupremo) {
+            window.setTheme('dark');
+        }
 
         document.querySelectorAll('.supremo-only').forEach(el => { 
             if(isSupremo) el.classList.remove('hidden'); else el.classList.add('hidden'); 
@@ -834,18 +1060,56 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     function getProjectConsultants(proj) { return Array.isArray(proj.consultants) ? proj.consultants : (proj.consultants ? [proj.consultants] : []); }
     
+    function hexToRgb(hex) {
+      if (!hex || typeof hex !== 'string') return [142, 142, 147];
+      let clean = hex.replace('#', '').trim();
+      if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+      if (clean.length !== 6) return [142, 142, 147];
+      return [
+        parseInt(clean.substring(0, 2), 16),
+        parseInt(clean.substring(2, 4), 16),
+        parseInt(clean.substring(4, 6), 16)
+      ];
+    }
+
+    function hexToRgba(hex, alpha = 1) {
+      const [r, g, b] = hexToRgb(hex);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function getGlassFill(colorValue, isLight, isOverdue) {
+      if (isOverdue) {
+        return isLight ? 'rgba(255, 69, 58, 0.08)' : 'rgba(255, 69, 58, 0.08)';
+      }
+      // CRISTAL CLARO PURO: sin relleno tintado interior para que la nebulosa cósmica traspase la cápsula nítidamente
+      return isLight ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.03)';
+    }
+
     function generateJointGradient(consultantNames) {
       if (!consultantNames || consultantNames.length === 0) return '#48484a';
       if (consultantNames.length === 1) return consultants[consultantNames[0]] ? consultants[consultantNames[0]].color : '#48484a';
       const validColors = consultantNames.map(name => consultants[name] ? consultants[name].color : null).filter(c => c);
       if (validColors.length === 0) return '#48484a';
       if (validColors.length === 1) return validColors[0];
-      const gradId = `grad-${validColors.map(c => c.replace('#','')).join('-')}`;
+      const gradKey = validColors.map(c => c.replace('#','')).join('-');
+      const gradId = `grad-${gradKey}`;
+      const glassGradId = `grad-glass-${gradKey}`;
+      const darkGlassGradId = `grad-darkglass-${gradKey}`;
       if (!document.getElementById(gradId) && svgDefs) {
         const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
         linearGradient.setAttribute('id', gradId); linearGradient.setAttribute('x1', '0%'); linearGradient.setAttribute('y1', '0%'); linearGradient.setAttribute('x2', '100%'); linearGradient.setAttribute('y2', '100%');
         validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); linearGradient.appendChild(stop); });
         svgDefs.appendChild(linearGradient);
+
+        const glassGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        glassGradient.setAttribute('id', glassGradId); glassGradient.setAttribute('x1', '0%'); glassGradient.setAttribute('y1', '0%'); glassGradient.setAttribute('x2', '100%'); glassGradient.setAttribute('y2', '100%');
+        validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); stop.setAttribute('stop-opacity', '0.12'); glassGradient.appendChild(stop); });
+        svgDefs.appendChild(glassGradient);
+
+        const darkGlassGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        darkGlassGradient.setAttribute('id', darkGlassGradId); darkGlassGradient.setAttribute('x1', '0%'); darkGlassGradient.setAttribute('y1', '0%'); darkGlassGradient.setAttribute('x2', '100%'); darkGlassGradient.setAttribute('y2', '100%');
+        validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); stop.setAttribute('stop-opacity', '0.16'); darkGlassGradient.appendChild(stop); });
+        svgDefs.appendChild(darkGlassGradient);
       }
       return `url(#${gradId})`;
     }
@@ -998,18 +1262,48 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.remove('is-panning');
         }); 
         ws.addEventListener('wheel', (e) => { 
-            if(isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || e.target.closest('#infoCard')) return; 
+            if(isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
             e.preventDefault(); 
             window.zoomCanvas(-e.deltaY * 0.001, e.clientX, e.clientY); 
         }, {passive: false});
     }
 
+    // CANDADO DE ZOOM: Calcula dinámicamente el límite mínimo de zoom
+    // para que el mapa NUNCA se aleje más allá de los extremos donde terminan los proyectos.
+    window.getMinZoomLimit = function() {
+        if (!svgElem || !canvasGroup) return 0.55;
+        try {
+            const bbox = canvasGroup.getBBox();
+            if (bbox.width > 0 && bbox.height > 0) {
+                const rect = svgElem.getBoundingClientRect();
+                const padding = window.innerWidth < 640 ? 30 : 75;
+                const fitX = (rect.width - padding * 2) / bbox.width;
+                const fitY = (rect.height - padding * 2) / bbox.height;
+                const fitScale = Math.min(fitX, fitY);
+                // Bloquea el zoom out en el encuadre óptimo de proyectos (piso 0.50, nunca negativo ni diminuto)
+                return Math.max(0.50, Math.min(0.85, fitScale * 0.94));
+            }
+        } catch(e) {}
+        return 0.55;
+    };
+
     window.zoomCanvas = function(delta, mx = window.innerWidth/2, my = window.innerHeight/2) {
       if(!svgElem) window.ensureDomReferences();
-      const newScale = Math.min(Math.max(0.1, 2.5), scale + delta);
-      const rect = svgElem.getBoundingClientRect(); const x = mx - rect.left, y = my - rect.top;
-      translateX = x - (x - translateX) * (newScale / scale); translateY = y - (y - translateY) * (newScale / scale);
-      scale = newScale; window.updateCanvasTransform();
+      const minScale = window.getMinZoomLimit();
+      const maxScale = 2.2;
+      const targetScale = scale + delta;
+      // Previene inversión y asegura el candado estricto
+      const newScale = Math.max(minScale, Math.min(maxScale, targetScale));
+      
+      // Si ya alcanzó el límite del candado, evitar trabajo y saltos
+      if (Math.abs(newScale - scale) < 0.0001) return;
+
+      const rect = svgElem.getBoundingClientRect(); 
+      const x = mx - rect.left, y = my - rect.top;
+      translateX = x - (x - translateX) * (newScale / scale); 
+      translateY = y - (y - translateY) * (newScale / scale);
+      scale = newScale; 
+      window.updateCanvasTransform();
     }
     
     
@@ -1043,34 +1337,34 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const rect = svgElem.getBoundingClientRect();
         try {
             const bbox = canvasGroup.getBBox(); if (bbox.width === 0) throw new Error();
-            const padding = window.innerWidth < 640 ? 20 : 60; // Reducido drásticamente el padding
+            const padding = window.innerWidth < 640 ? 25 : 70;
             
-            // Calculamos la escala ideal para que el mapa ocupe toda la pantalla
             const sX = (rect.width - padding*2) / bbox.width;
             const sY = (rect.height - padding*2) / bbox.height;
             
-            // Incrementamos significativamente el tope máximo de escala (zoom out)
-            // de 0.95 a 1.25 para asegurar que los elementos se vean grandes y legibles.
-            scale = Math.min(sX, sY, 1.25);
-            
-            // Si después del cálculo matemático la escala sigue siendo muy pequeña (alejada)
-            // por la forma del BBox, forzamos un mínimo de zoom.
-            if(window.innerWidth >= 768 && scale < 0.85) {
-                scale = 0.85;
-            }
+            const minAllowed = window.getMinZoomLimit();
+            scale = Math.max(minAllowed, Math.min(1.20, Math.min(sX, sY)));
             
             translateX = (rect.width / 2) - ((bbox.x + bbox.width / 2) * scale); 
             translateY = (rect.height / 2) - ((bbox.y + bbox.height / 2) * scale);
         } catch(e) { 
             translateX = rect.width / 2; 
             translateY = rect.height / 2; 
-            scale = window.innerWidth < 640 ? 0.8 : 1.1; 
+            scale = window.innerWidth < 640 ? 0.75 : 1.0; 
         }
         window.updateCanvasTransform();
     }
 
     window.toggleConfigDrawer = function() { isDrawerOpen ? window.closeConfigDrawer() : window.openConfigDrawer(); }
-    window.openConfigDrawer = function() { if (isPriorityDrawerOpen) window.closePriorityDrawer(); if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); document.getElementById('configDrawer').classList.remove('translate-x-full'); isDrawerOpen = true; window.populateGlobalEditSelector(); }
+    window.openConfigDrawer = function() { 
+        if (isPriorityDrawerOpen) window.closePriorityDrawer(); 
+        if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
+        document.getElementById('configDrawer').classList.remove('translate-x-full'); 
+        isDrawerOpen = true; 
+        window.populateGlobalEditSelector(); 
+        window.renderDashboard();
+        window.applyRolePermissions();
+    }
     window.closeConfigDrawer = function() { document.getElementById('configDrawer').classList.add('translate-x-full'); isDrawerOpen = false; }
     window.togglePriorityDrawer = function() { isPriorityDrawerOpen ? window.closePriorityDrawer() : window.openPriorityDrawer(); }
     window.openPriorityDrawer = function() { if(isDrawerOpen) window.closeConfigDrawer(); if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); document.getElementById('priorityDrawer').classList.remove('translate-x-full'); isPriorityDrawerOpen = true; window.renderPriorityDrawer(); }
@@ -1078,11 +1372,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.openFastCreateProject = function() { window.openConfigDrawer(); window.switchTab('new'); window.setCreateType('project'); setTimeout(() => document.getElementById('newProjName').focus(), 300); }
     
     window.switchTab = function(tabId) {
+      if (tabId === 'history' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
+          window.showToast("Acceso denegado: El Historial solo es accesible para Supervisores y Administrador.", true);
+          return;
+      }
+      if (tabId === 'edit' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
+          window.showToast("Acceso denegado: Función para Supervisores y Administrador.", true);
+          return;
+      }
+      if ((tabId === 'consultants' || tabId === 'docs') && currentUserRole !== 'Supremo') {
+          window.showToast("Acceso exclusivo para Administrador Supremo.", true);
+          return;
+      }
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('bg-white/10','text-white','shadow-sm','text-gray-400'); el.classList.add('text-gray-400'); });
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-      const btn = document.getElementById(`tabBtn-${tabId}`); btn.classList.remove('text-gray-400'); btn.classList.add('bg-white/10','text-white','shadow-sm');
-      if(tabId === 'edit') window.populateGlobalEditSelector(); if(tabId === 'new') window.populateNewProjectLocationSelect(); if(tabId === 'dashboard') window.renderDashboard();
+      const btn = document.getElementById(`tabBtn-${tabId}`); if (btn) { btn.classList.remove('text-gray-400'); btn.classList.add('bg-white/10','text-white','shadow-sm'); }
+      if(tabId === 'edit') {
+          window.populateGlobalEditSelector(); 
+          if(currentSelection && currentSelection.id) {
+              window.selectNode(currentSelection.type, currentSelection.id);
+          }
+      }
+      if(tabId === 'new') window.populateNewProjectLocationSelect(); 
+      if(tabId === 'dashboard') window.renderDashboard();
+      if(tabId === 'history') window.renderHistory();
+      if(tabId === 'consultants') window.renderRegisteredConsultantsList();
+      if(tabId === 'docs') window.renderRegisteredDocsList();
     }
 
     window.setCreateType = function(type) {
@@ -1126,91 +1442,122 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.closeInfoCardSafe = function() { if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return; } document.getElementById('infoCard').classList.add('opacity-0'); setTimeout(() => document.getElementById('infoCard').classList.add('hidden'), 400); }
 
     
-    // === LÓGICA DE TAREA GLOBAL ===
-    window.openGlobalTaskModal = function() {
+    // === LÓGICA DE TAREA POR PROYECTO Y TAREA GLOBAL ===
+    window.openProjectTaskModal = function() {
+        if (currentUserRole === 'Lector') return;
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
         if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
+        if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer();
         
         const projSelect = document.getElementById('gtProject');
-        projSelect.innerHTML = '<option value="" class="bg-black text-gray-400">-- Ninguno (Tarea General) --</option>';
-        appData.directProjects.forEach(p => {
-            projSelect.innerHTML += `<option value="direct-project|${p.id}" class="bg-black text-white">⚡ ${escapeHtml(p.name)}</option>`;
-        });
-        appData.modules.forEach(m => {
-            (m.projects||[]).forEach(p => {
-                projSelect.innerHTML += `<option value="project|${p.id}" class="bg-black text-white">📦 ${escapeHtml(p.name)} (${escapeHtml(m.name)})</option>`;
+        projSelect.innerHTML = '<option value="" class="bg-black text-gray-400">-- Selecciona un Proyecto Destino --</option>';
+        
+        // 1. Proyectos directos
+        if (appData.directProjects && appData.directProjects.length > 0) {
+            appData.directProjects.forEach(p => {
+                const isMyProject = Array.isArray(p.consultants) && p.consultants.includes(localAuthor);
+                projSelect.innerHTML += `<option value="direct-project|${p.id}" class="bg-black text-white">⚡ ${isMyProject ? '⭐ ' : ''}${escapeHtml(p.name)}${isMyProject ? ' (Mi proyecto)' : ''}</option>`;
             });
-        });
+        }
+        
+        // 2. Proyectos dentro de módulos
+        if (appData.modules && appData.modules.length > 0) {
+            appData.modules.forEach(m => {
+                (m.projects || []).forEach(p => {
+                    const isMyProject = Array.isArray(p.consultants) && p.consultants.includes(localAuthor);
+                    projSelect.innerHTML += `<option value="project|${p.id}" class="bg-black text-white">📦 ${isMyProject ? '⭐ ' : ''}${escapeHtml(p.name)} [${escapeHtml(m.name)}]${isMyProject ? ' (Mi proyecto)' : ''}</option>`;
+                });
+            });
+        }
+        
+        // Si el usuario tenía un proyecto seleccionado o abierto en el mapa, preseleccionarlo
+        if (currentSelection && currentSelection.id) {
+            const matchOpt = Array.from(projSelect.options).find(opt => opt.value.endsWith('|' + currentSelection.id));
+            if (matchOpt) projSelect.value = matchOpt.value;
+        }
         
         const assSelect = document.getElementById('gtAssignee');
-        assSelect.innerHTML = '<option value="" class="bg-black text-gray-400">-- Nadie --</option>';
-        Object.keys(consultants).filter(k => consultants[k].role !== 'Lector').sort().forEach(c => {
-            assSelect.innerHTML += `<option value="${escapeHtml(c)}" class="bg-black text-white">${escapeHtml(c)}</option>`;
+        assSelect.innerHTML = '';
+        const activeConsultants = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector').sort();
+        activeConsultants.forEach(c => {
+            const isSelf = c === localAuthor;
+            assSelect.innerHTML += `<option value="${escapeHtml(c)}" class="bg-black text-white" ${isSelf ? 'selected' : ''}>${escapeHtml(c)} ${isSelf ? '(Yo)' : ''}</option>`;
         });
         
         document.getElementById('gtDescription').value = '';
         document.getElementById('gtDate').value = '';
         
-        document.getElementById('globalTaskModal').classList.remove('hidden');
-        setTimeout(() => document.getElementById('globalTaskModal').classList.remove('opacity-0'), 10);
-    }
+        const modal = document.getElementById('globalTaskModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    };
+    window.openGlobalTaskModal = window.openProjectTaskModal;
 
     window.closeGlobalTaskModal = function() {
-        document.getElementById('globalTaskModal').classList.add('opacity-0');
-        setTimeout(() => document.getElementById('globalTaskModal').classList.add('hidden'), 400);
-    }
+        const modal = document.getElementById('globalTaskModal');
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 400);
+    };
 
-    window.saveGlobalTask = function() { if (currentUserRole === 'Lector') return;
+    window.saveGlobalTask = function() { 
+        if (currentUserRole === 'Lector') return;
         const projVal = document.getElementById('gtProject').value;
         const text = document.getElementById('gtDescription').value.trim();
-        const assignee = document.getElementById('gtAssignee').value;
+        const assignee = document.getElementById('gtAssignee').value || localAuthor;
         const deadline = document.getElementById('gtDate').value;
         
-        if(!text) {
-            window.showToast("La descripción es obligatoria", true);
+        if (!projVal) {
+            window.showToast("Debes seleccionar un proyecto destino", true);
+            return;
+        }
+        if (!text) {
+            window.showToast("La descripción de la tarea es obligatoria", true);
             return;
         }
         
         const now = new Date();
         const assignDate = now.toLocaleDateString('es-MX');
-        const assignTime = now.toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
-        
-        if(!projVal) {
-            appData.globalTasks = appData.globalTasks || [];
-            appData.globalTasks.push({ id: 'gt_'+Date.now(), text, deadline, assignee, assignedBy: localAuthor, assignDate, assignTime, done: false });
-            logActivity('global', 'General', `Asignó tarea general a ${assignee || 'equipo'}`, localAuthor);
-            window.saveData(true);
-            window.closeGlobalTaskModal();
-            window.renderAlerts();
-            return;
-        }
+        const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         
         const parts = projVal.split('|');
         const pType = parts[0];
         const pId = parts[1];
         let item = null;
         if (pType === 'direct-project') {
-            item = appData.directProjects.find(p => p.id === pId);
+            item = (appData.directProjects || []).find(p => p.id === pId);
         } else {
-            appData.modules.forEach(m => {
-                const p = (m.projects||[]).find(proj => proj.id === pId);
-                if(p) item = p;
+            (appData.modules || []).forEach(m => {
+                const p = (m.projects || []).find(proj => proj.id === pId);
+                if (p) item = p;
             });
         }
         
-        if(item) {
+        if (item) {
             item.tasks = item.tasks || [];
-            item.tasks.push({ id: 't_'+Date.now(), text, deadline, assignee, assignedBy: localAuthor, assignDate, assignTime, done: false });
-            logActivity(item.id, item.name, `Asignó tarea a ${assignee || 'equipo'}`, localAuthor);
+            item.tasks.push({ 
+                id: 't_' + Date.now(), 
+                text, 
+                deadline, 
+                assignee, 
+                assignedBy: localAuthor, 
+                assignDate, 
+                assignTime, 
+                done: false 
+            });
+            logActivity(item.id, item.name, `Asignó tarea de proyecto a ${assignee}`, localAuthor);
             window.saveData(true);
             window.closeGlobalTaskModal();
             window.renderAlerts(); 
-            if(currentSelection.id === item.id) {
+            window.renderDailyTasks();
+            if (currentSelection && currentSelection.id === item.id) {
                 window.renderTasksQuick(item);
             }
+            window.showToast("Tarea asignada al proyecto con éxito");
+        } else {
+            window.showToast("Error: No se encontró el proyecto seleccionado", true);
         }
-    }
+    };
     
     window.completeGlobalTask = function(taskId) {
         window.openTaskFeedbackModal(taskId, 'global');
@@ -1219,24 +1566,52 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!appData.globalTasks) return;
         const t = appData.globalTasks.find(x => x.id === taskId);
         if(t) {
+            const now = new Date();
+            const valDate = now.toLocaleDateString('es-MX');
+            const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             t.done = approve ? true : false;
-            logActivity('global', 'General', approve ? `Aprobó tarea general: ${t.text}` : `Rechazó tarea general: ${t.text}`, localAuthor);
+            if(approve) {
+                t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
+            } else {
+                delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                delete t.feedback;
+            }
+            const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
+            logActivity('global', 'General', approve ? `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea general: "${t.text}"`, localAuthor);
             window.saveData(false);
             window.renderAlerts();
+            window.renderDailyTasks();
+            if (approve) window.triggerCelebration();
         }
     };
     window.validateProjectTask = function(pType, pId, taskId, approve) {
         let item = null;
-        if (pType === 'direct-project') { item = appData.directProjects.find(p => p.id === pId); } 
-        else { appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === pId); if(p) item = p; }); }
+        if (pType === 'direct-project') { item = (appData.directProjects || []).find(p => p.id === pId); } 
+        else { (appData.modules || []).forEach(m => { const p = (m.projects||[]).find(proj => proj.id === pId); if(p) item = p; }); }
+        if (!item && pId) {
+            item = (appData.directProjects || []).find(p => p.id === pId);
+            if (!item) { (appData.modules || []).forEach(m => { const p = (m.projects||[]).find(proj => proj.id === pId); if(p) item = p; }); }
+        }
         if (item && item.tasks) {
             const t = item.tasks.find(x => x.id === taskId);
             if(t) {
+                const now = new Date();
+                const valDate = now.toLocaleDateString('es-MX');
+                const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
                 t.done = approve ? true : false;
-                logActivity(item.id, item.name, approve ? `Aprobó tarea: ${t.text}` : `Rechazó tarea: ${t.text}`, localAuthor);
+                if(approve) {
+                    t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
+                } else {
+                    delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                    delete t.feedback;
+                }
+                const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
+                logActivity(item.id, item.name, approve ? `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea: "${t.text}"`, localAuthor);
                 window.saveData(false);
                 window.renderAlerts();
-                if(currentSelection.id === item.id) window.renderTasksQuick(item);
+                if(currentSelection && currentSelection.id === item.id) window.renderTasksQuick(item);
+                window.renderDailyTasks();
+                if (approve) window.triggerCelebration();
             }
         }
     };
@@ -1258,6 +1633,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         logActivity('global', 'General', `Eliminó la tarea general: ${t.text}`, localAuthor);
         window.saveData(false);
         window.renderAlerts();
+        window.renderDailyTasks();
     };
 
     // === LÓGICA DE TAREAS ===
@@ -1284,43 +1660,68 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const assignTime = now.toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
             item.tasks.push({ id: 't_'+Date.now(), text, deadline, assignee, assignedBy: localAuthor, assignDate, assignTime, done: false });
             input.value = ''; dateInput.value = ''; if(assigneeInput && !assigneeInput.disabled) assigneeInput.value = '';
-            logActivity(item.id, item.name, 'Agregó nueva tarea', localAuthor); window.saveData(false); window.renderTasksQuick(item);
+            logActivity(item.id, item.name, 'Agregó nueva tarea', localAuthor); 
+            window.saveData(false); 
+            window.renderTasksQuick(item);
+            window.renderDailyTasks();
         }
     };
 
-    window.toggleQuickTask = function(taskId) {
-        let item = getSelectedItem();
+    window.toggleQuickTask = function(taskId, directProjectId = null) {
+        let item = null;
+        if (directProjectId) {
+            item = (appData.directProjects || []).find(p => p.id === directProjectId);
+            if (!item) {
+                (appData.modules || []).forEach(m => {
+                    const p = (m.projects || []).find(proj => proj.id === directProjectId);
+                    if (p) item = p;
+                });
+            }
+        }
+        if (!item) item = getSelectedItem();
         if(item && item.tasks) {
             const t = item.tasks.find(x => x.id === taskId);
             if(t) {
                 const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+                const now = new Date();
+                const valDate = now.toLocaleDateString('es-MX');
+                const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
                 if (t.done === true) {
-                    // Desmarcar
+                    // Desmarcar / Reabrir
                     if (isSuper) {
                         t.done = false;
-                        delete t.feedback;
-                        logActivity(item.id, item.name, 'Desmarcó una tarea', localAuthor); 
-                        window.saveData(false); window.renderTasksQuick(item); window.renderAlerts();
+                        delete t.feedback; delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                        logActivity(item.id, item.name, `Reabrió tarea de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor); 
+                        window.saveData(false); 
+                        window.renderTasksQuick(item); 
+                        window.renderAlerts(); 
+                        window.renderDailyTasks();
                     }
                 } else if (t.done === 'pending') {
                     // Supervisor aprueba o Consultor cancela envío
                     if (isSuper) {
                         t.done = true;
-                        logActivity(item.id, item.name, 'Validó una tarea', localAuthor); 
-                        window.saveData(false); window.renderTasksQuick(item); window.renderAlerts();
+                        t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
+                        const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
+                        logActivity(item.id, item.name, `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor); 
+                        window.saveData(false); 
+                        window.renderTasksQuick(item); 
+                        window.renderAlerts(); 
+                        window.renderDailyTasks();
+                        window.triggerCelebration();
                     } else {
                         t.done = false;
                         delete t.feedback;
-                        logActivity(item.id, item.name, 'Canceló envío a validación', localAuthor); 
-                        window.saveData(false); window.renderTasksQuick(item); window.renderAlerts();
+                        logActivity(item.id, item.name, `Canceló envío a validación: "${t.text}"`, localAuthor); 
+                        window.saveData(false); 
+                        window.renderTasksQuick(item); 
+                        window.renderAlerts(); 
+                        window.renderDailyTasks();
                     }
                 } else {
                     // Completar / Enviar a validar (abre modal)
-                    // If unchecked -> check/pending
-                    // Instead of doing it directly, open feedback modal
                     window.openTaskFeedbackModal(taskId, 'project', item.id);
-                    // The UI checkbox will temporarily toggle, but we will handle the state inside the modal submit.
-                    // To prevent UI mismatch if user cancels modal, we re-render immediately.
                     setTimeout(() => window.renderTasksQuick(item), 100); 
                 }
             }
@@ -1415,9 +1816,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         <span class="text-xs text-white break-words pr-2 ${isChecked ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>
                         ${statusBadge}
                     </div>
-                    <div class="flex items-center gap-2 mt-1.5">
-                        ${t.deadline ? `<span class="text-[9px] ${dateColor}">📅 ${t.deadline}</span>` : ''}
-                        ${t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-300 border border-white/10 px-1.5 py-0.5 rounded shadow-inner truncate max-w-[100px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
+                    <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                        ${t.validatedDate ? `<span class="text-[9px] text-[#30d158] font-mono font-bold bg-[#30d158]/10 border border-[#30d158]/30 px-1.5 py-0.5 rounded">✅ Validada: ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
+                        ${t.deadline ? `<span class="text-[9px] ${dateColor}">🎯 Límite: ${escapeHtml(t.deadline)}</span>` : ''}
+                        ${t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-300 border border-white/10 px-1.5 py-0.5 rounded shadow-inner truncate max-w-[120px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
+                        ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/5 text-gray-400 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
                     ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/40 border border-white/10 p-2 rounded shadow-inner">💬 ${escapeHtml(t.feedback)}</div>` : ''}
                 </div>
@@ -1555,32 +1959,112 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         });
     }
 
-    window.saveEditChanges = function() { if (currentUserRole === 'Lector') return;
-      if (!currentSelection.id) return; if(hasUnvalidatedNA('edit')) { window.showToast("⚠️ N/A sin validar.", true); return; }
-      const newName = document.getElementById('editName').value.trim(); if (!newName) return;
-      const { type, id } = currentSelection; let item = null;
-      if (type === 'core') { appData.core.name = newName; logActivity('core', newName, 'Renombró el núcleo central', localAuthor); } 
-      else if (type === 'direct-hub') { appData.directHub.name = newName; appData.directHub.color = document.getElementById('editModuleColor').value; logActivity('hub', newName, 'Editó el agrupador principal', localAuthor); } 
-      else if (type === 'module') { item = appData.modules.find(m => m.id === id); if (item) { item.name = newName; item.color = document.getElementById('editModuleColor').value; logActivity(item.id, item.name, 'Editó diseño del módulo', localAuthor); } } 
+    window.saveEditChanges = function() { 
+      if (currentUserRole === 'Lector') return;
+      if (!currentSelection.id) return; 
+      if (hasUnvalidatedNA('edit')) { window.showToast("⚠️ N/A sin validar.", true); return; }
+      const newName = document.getElementById('editName').value.trim(); 
+      if (!newName) { window.showToast("⚠️ El nombre no puede estar vacío.", true); return; }
+      let { type, id } = currentSelection; 
+      let item = null;
+      if (type === 'core') { 
+        appData.core.name = newName; 
+        logActivity('core', newName, 'Renombró el núcleo central', localAuthor); 
+      } 
+      else if (type === 'direct-hub') { 
+        appData.directHub.name = newName; 
+        appData.directHub.color = document.getElementById('editModuleColor').value; 
+        logActivity('hub', newName, 'Editó el agrupador principal', localAuthor); 
+      } 
+      else if (type === 'module') { 
+        item = appData.modules.find(m => m.id === id); 
+        if (item) { 
+          item.name = newName; 
+          item.color = document.getElementById('editModuleColor').value; 
+          logActivity(item.id, item.name, 'Editó diseño del módulo', localAuthor); 
+        } 
+      } 
       else {
-        if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); 
+        else appData.modules.forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
         if (item) {
-          const oldStatus = item.status; const oldProg = item.progress;
-          item.name = newName; item.priority = parseFloat(document.getElementById('editPriority').value || 1); 
+          const oldStatus = item.status; 
+          const oldProg = item.progress;
+          item.name = newName; 
+          item.priority = parseFloat(document.getElementById('editPriority').value || 1); 
           item.driveLink = document.getElementById('editDriveLink').value.trim(); 
           item.invgateLink = document.getElementById('editInvgateLink').value.trim(); 
-          item.status = document.getElementById('editStatus').value; item.deadline = document.getElementById('editDeadline').value; 
-          item.clientDeliveryDate = document.getElementById('editDeliveryDate').value; item.clientReturnDate = document.getElementById('editReturnDate').value; 
+          item.status = document.getElementById('editStatus').value; 
+          item.deadline = document.getElementById('editDeadline').value; 
+          item.clientDeliveryDate = document.getElementById('editDeliveryDate').value; 
+          item.clientReturnDate = document.getElementById('editReturnDate').value; 
           item.progress = parseInt(document.getElementById('editProgress').value);
-          item.docs = {}; globalDocs.forEach(d => { item.docs[d.id] = { checked: document.getElementById(`editDoc${d.id}`)?.checked||false, obs: document.getElementById(`editObs${d.id}`)?.value||'', na: document.getElementById(`editNa${d.id}`)?.checked||false, naValidated: document.getElementById(`editNaValidated${d.id}`)?.value==="true" }; });
+          item.docs = {}; 
+          globalDocs.forEach(d => { 
+            item.docs[d.id] = { 
+              checked: document.getElementById(`editDoc${d.id}`)?.checked || false, 
+              obs: document.getElementById(`editObs${d.id}`)?.value || '', 
+              na: document.getElementById(`editNa${d.id}`)?.checked || false, 
+              naValidated: document.getElementById(`editNaValidated${d.id}`)?.value === "true" 
+            }; 
+          });
           item.consultants = Array.from(document.querySelectorAll('.editProjCons-chk:checked')).map(cb => cb.value);
           
-          if(oldStatus !== item.status) logActivity(item.id, item.name, `Actualizó estado a [${item.status}]`, localAuthor);
-          else if(oldProg !== item.progress) logActivity(item.id, item.name, `Actualizó avance a ${item.progress}%`, localAuthor);
+          // Reubicación de proyecto entre módulos o directo
+          const targetLoc = document.getElementById('editProjectLocation')?.value;
+          if (targetLoc) {
+            let currentLoc = (type === 'direct-project') ? 'DIRECT' : null;
+            let currentParentName = appData.directHub.name;
+            if (!currentLoc) {
+              const srcMod = appData.modules.find(m => (m.projects || []).some(p => p.id === id));
+              if (srcMod) {
+                currentLoc = srcMod.id;
+                currentParentName = srcMod.name;
+              }
+            }
+            if (currentLoc && targetLoc !== currentLoc) {
+              // 1. Quitar de la ubicación anterior
+              if (currentLoc === 'DIRECT') {
+                appData.directProjects = appData.directProjects.filter(p => p.id !== id);
+              } else {
+                const srcMod = appData.modules.find(m => m.id === currentLoc);
+                if (srcMod && srcMod.projects) {
+                  srcMod.projects = srcMod.projects.filter(p => p.id !== id);
+                }
+              }
+              // 2. Insertar en la nueva ubicación
+              let targetParentName = '';
+              if (targetLoc === 'DIRECT') {
+                if (!appData.directProjects) appData.directProjects = [];
+                appData.directProjects.push(item);
+                type = 'direct-project';
+                currentSelection.type = 'direct-project';
+                targetParentName = appData.directHub.name;
+              } else {
+                const destMod = appData.modules.find(m => m.id === targetLoc);
+                if (destMod) {
+                  if (!destMod.projects) destMod.projects = [];
+                  destMod.projects.push(item);
+                  targetParentName = destMod.name;
+                }
+                type = 'project';
+                currentSelection.type = 'project';
+              }
+              logActivity(item.id, item.name, `Reubicó proyecto de [${currentParentName}] hacia [${targetParentName}]`, localAuthor);
+            }
+          }
+
+          if (oldStatus !== item.status) logActivity(item.id, item.name, `Actualizó estado a [${item.status}]`, localAuthor);
+          else if (oldProg !== item.progress) logActivity(item.id, item.name, `Actualizó avance a ${item.progress}%`, localAuthor);
           else logActivity(item.id, item.name, `Editó detalles internos`, localAuthor);
         }
       }
-      window.saveData(true); window.populateGlobalEditSelector(); window.updateDatalist(); window.renderMindMap(); window.showInfoCard(type, id);
+      window.saveData(true); 
+      window.populateGlobalEditSelector(); 
+      window.updateDatalist(); 
+      window.renderMindMap(); 
+      window.showInfoCard(type, id);
+      window.showToast("Cambios guardados con éxito", false);
     }
 
     window.showInfoCard = function(type, id) {
@@ -1592,9 +2076,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('infoDriveBtn').classList.add('hidden');
       document.getElementById('infoInvgateBtn').classList.add('hidden');
       
-      if (type === 'core') { item = appData.core; document.getElementById('infoType').textContent = 'NÚCLEO'; document.getElementById('infoMetricLabel').textContent = 'MÓDULOS'; document.getElementById('infoMetricValue').innerHTML = appData.modules.length; } else if (type === 'direct-hub' || type === 'module') { item = type === 'module' ? appData.modules.find(m => m.id === id) : appData.directHub; document.getElementById('infoType').textContent = type==='module'?'MÓDULO':'AGRUPADOR'; document.getElementById('infoMetricLabel').textContent = 'PROYECTOS'; document.getElementById('infoMetricValue').innerHTML = (item.projects||appData.directProjects).length; } else {
+      if (type === 'core') {
+        item = appData.core;
+        document.getElementById('infoType').textContent = 'NÚCLEO';
+        const totalProjects = (appData.directProjects || []).length + (appData.modules || []).reduce((acc, m) => acc + (m.projects || []).length, 0);
+        const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'MÓDULOS ACTIVOS';
+        document.getElementById('infoConsultant').innerHTML = `<span class="text-white font-bold text-lg">${appData.modules.length}</span>`;
+        document.getElementById('infoMetricLabel').textContent = 'PROYECTOS TOTALES';
+        document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${totalProjects}</span>`;
+      } else if (type === 'direct-hub' || type === 'module') {
+        item = type === 'module' ? appData.modules.find(m => m.id === id) : appData.directHub;
+        document.getElementById('infoType').textContent = type==='module'?'MÓDULO':'AGRUPADOR';
+        const projs = type === 'module' ? (item.projects || []) : (appData.directProjects || []);
+        const avgProg = projs.length > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / projs.length) : 0;
+        const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'PROYECTOS';
+        document.getElementById('infoConsultant').innerHTML = `<span class="text-white font-bold text-lg">${projs.length}</span>`;
+        document.getElementById('infoMetricLabel').textContent = 'AVANCE PROMEDIO';
+        document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${avgProg}%</span>`;
+        if (type === 'module' && (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor')) {
+          document.getElementById('btnFullEditInfoCard').classList.remove('hidden');
+        }
+      } else {
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
         document.getElementById('infoType').textContent = 'PROYECTO';
+        const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'CONSULTOR(ES)';
         document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<div class="text-xs flex items-center gap-2"><span class="w-3 h-3 rounded-full border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.3)]" style="background-color: ${consultants[n]?consultants[n].color:'#8e8e93'}"></span> ${escapeHtml(n)}</div>`).join('') || 'Sin asignar';
         document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD'; document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold bg-white/10 px-2.5 py-1 rounded-full border border-white/5">*${item.priority}</span>`;
         document.getElementById('infoQuickEditContainer').classList.remove('hidden'); 
@@ -1701,23 +2206,135 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.selectNode = function(type, id) {
       currentSelection = { type, id };
-      document.getElementById('editEmptyState').classList.add('hidden'); document.getElementById('editFormArea').classList.remove('hidden');
-      document.getElementById('editProjectFields').classList.add('hidden'); document.getElementById('editModuleFields').classList.add('hidden');
+      const ges = document.getElementById('globalEditSelector');
+      if (ges) ges.value = `${type}|${id}`;
+      document.getElementById('editEmptyState').classList.add('hidden'); 
+      document.getElementById('editFormArea').classList.remove('hidden');
+      document.getElementById('editProjectFields').classList.add('hidden'); 
+      document.getElementById('editModuleFields').classList.add('hidden');
       let item = null, isProject = false, isModule = false;
       const btnDel = document.getElementById('btnDeleteElement');
       
-      if (type === 'core') { item = appData.core; document.getElementById('editTypeBadge').textContent='NÚCLEO'; if(btnDel) btnDel.classList.add('hidden'); } else if (type === 'direct-hub') { item = appData.directHub; isModule = true; document.getElementById('editTypeBadge').textContent='AGRUPADOR'; if(btnDel) btnDel.classList.add('hidden'); } else if (type === 'module') { item = appData.modules.find(m => m.id === id); isModule = true; document.getElementById('editTypeBadge').textContent='MÓDULO'; if(btnDel && currentUserRole==='Supremo') btnDel.classList.remove('hidden'); } else if (type === 'direct-project') { item = appData.directProjects.find(p => p.id === id); isProject = true; document.getElementById('editTypeBadge').textContent='PROYECTO'; if(btnDel && currentUserRole==='Supremo') btnDel.classList.remove('hidden'); } else if (type === 'project') { appData.modules.forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; }); isProject = true; document.getElementById('editTypeBadge').textContent='PROYECTO'; if(btnDel && currentUserRole==='Supremo') btnDel.classList.remove('hidden'); }
-      if (!item) return; document.getElementById('editName').value = item.name;
+      if (type === 'core') { 
+        item = appData.core; 
+        document.getElementById('editTypeBadge').textContent = 'NÚCLEO'; 
+        if(btnDel) btnDel.classList.add('hidden'); 
+      } else if (type === 'direct-hub') { 
+        item = appData.directHub; 
+        isModule = true; 
+        document.getElementById('editTypeBadge').textContent = 'AGRUPADOR'; 
+        if(btnDel) btnDel.classList.add('hidden'); 
+      } else if (type === 'module') { 
+        item = appData.modules.find(m => m.id === id); 
+        isModule = true; 
+        document.getElementById('editTypeBadge').textContent = 'MÓDULO'; 
+        if(btnDel && currentUserRole === 'Supremo') btnDel.classList.remove('hidden'); 
+      } else if (type === 'direct-project') { 
+        item = appData.directProjects.find(p => p.id === id); 
+        isProject = true; 
+        document.getElementById('editTypeBadge').textContent = 'PROYECTO'; 
+        if(btnDel && currentUserRole === 'Supremo') btnDel.classList.remove('hidden'); 
+      } else if (type === 'project') { 
+        appData.modules.forEach(m => { 
+          const p = (m.projects || []).find(proj => proj.id === id); 
+          if (p) item = p; 
+        }); 
+        isProject = true; 
+        document.getElementById('editTypeBadge').textContent = 'PROYECTO'; 
+        if(btnDel && currentUserRole === 'Supremo') btnDel.classList.remove('hidden'); 
+      }
+      if (!item) return; 
+      document.getElementById('editName').value = item.name;
       if (isProject) {
-        document.getElementById('editProjectFields').classList.remove('hidden'); document.getElementById('editPriority').value = item.priority; document.getElementById('editNotes').value = ''; document.getElementById('editStatus').value = item.status || 'Pendiente';
-        window.renderNotesHistory(item.notes, 'editNotesHistory'); document.getElementById('editDeadline').value = item.deadline || '';
+        document.getElementById('editProjectFields').classList.remove('hidden'); 
+        document.getElementById('editPriority').value = item.priority; 
+        document.getElementById('editNotes').value = ''; 
+        document.getElementById('editStatus').value = item.status || 'Pendiente';
+        window.renderNotesHistory(item.notes, 'editNotesHistory'); 
+        document.getElementById('editDeadline').value = item.deadline || '';
         document.getElementById('editDriveLink').value = item.driveLink || '';
         document.getElementById('editInvgateLink').value = item.invgateLink || '';
-        document.getElementById('editDeliveryDate').value = item.clientDeliveryDate || ''; document.getElementById('editReturnDate').value = item.clientReturnDate || ''; 
-        window.renderDocChecklists('edit', item.docs||{}); window.calculateEditProgress(); document.getElementById('editSlider').value = item.progress || 0;
-        const consultNames = getProjectConsultants(item); document.querySelectorAll('.editProjCons-chk').forEach(chk => chk.checked = consultNames.includes(chk.value));
+        
+        // Reubicación de proyecto
+        let currentLoc = 'DIRECT';
+        if (type === 'project') {
+          const pMod = appData.modules.find(m => (m.projects || []).some(p => p.id === id));
+          if (pMod) currentLoc = pMod.id;
+        }
+        if (typeof window.populateEditProjectLocationSelect === 'function') {
+          window.populateEditProjectLocationSelect(currentLoc);
+        }
+
+        // Botones Abrir Drive e Invgate en vivo
+        const updateEditLinkButtons = () => {
+          const dVal = (document.getElementById('editDriveLink')?.value || '').trim();
+          const btnD = document.getElementById('btnOpenEditDrive');
+          if (btnD) {
+            if (dVal) {
+              btnD.href = (!dVal.startsWith('http://') && !dVal.startsWith('https://')) ? 'https://' + dVal : dVal;
+              btnD.classList.remove('hidden');
+            } else {
+              btnD.classList.add('hidden');
+            }
+          }
+          const iVal = (document.getElementById('editInvgateLink')?.value || '').trim();
+          const btnI = document.getElementById('btnOpenEditInvgate');
+          if (btnI) {
+            if (iVal) {
+              btnI.href = (!iVal.startsWith('http://') && !iVal.startsWith('https://')) ? 'https://' + iVal : iVal;
+              btnI.classList.remove('hidden');
+            } else {
+              btnI.classList.add('hidden');
+            }
+          }
+        };
+        updateEditLinkButtons();
+        document.getElementById('editDriveLink').oninput = updateEditLinkButtons;
+        document.getElementById('editInvgateLink').oninput = updateEditLinkButtons;
+
+        document.getElementById('editDeliveryDate').value = item.clientDeliveryDate || ''; 
+        document.getElementById('editReturnDate').value = item.clientReturnDate || ''; 
+        window.renderDocChecklists('edit', item.docs || {}); 
+        window.calculateEditProgress(); 
+        document.getElementById('editSlider').value = item.progress || 0;
+        const consultNames = getProjectConsultants(item); 
+        document.querySelectorAll('.editProjCons-chk').forEach(chk => chk.checked = consultNames.includes(chk.value));
       }
-      if (isModule) { document.getElementById('editModuleFields').classList.remove('hidden'); document.getElementById('editModuleColor').value = item.color || '#0071e3'; document.getElementById('editModuleColorHex').value = item.color || '#0071e3'; document.getElementById('editModuleColor').onchange = function() { document.getElementById('editModuleColorHex').value = this.value; }; }
+      if (isModule) { 
+        document.getElementById('editModuleFields').classList.remove('hidden'); 
+        document.getElementById('editModuleColor').value = item.color || '#0071e3'; 
+        document.getElementById('editModuleColorHex').value = item.color || '#0071e3'; 
+        document.getElementById('editModuleColor').onchange = function() { 
+          document.getElementById('editModuleColorHex').value = this.value; 
+        }; 
+
+        // Resumen analítico del módulo
+        const sumCont = document.getElementById('editModuleSummary');
+        if (sumCont) {
+          const projs = (type === 'module' ? (item.projects || []) : (appData.directProjects || []));
+          const total = projs.length;
+          const comp = projs.filter(p => p.status === 'Completado').length;
+          const inProg = projs.filter(p => p.status === 'En Progreso').length;
+          const pend = projs.filter(p => p.status === 'Pendiente' || p.status === 'No Iniciado').length;
+          const avgProg = total > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / total) : 0;
+          const assignedCons = Array.from(new Set(projs.flatMap(p => getProjectConsultants(p))));
+          sumCont.innerHTML = `
+            <div class="flex items-center justify-between pb-2 border-b border-white/10 font-bold">
+              <span class="text-white text-xs">${type === 'module' ? 'Módulo' : 'Agrupador'}: ${escapeHtml(item.name)}</span>
+              <span class="text-brand-accent text-xs">${avgProg}% Avance</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 text-[10px]">
+              <div>📁 Proyectos: <b class="text-white">${total}</b></div>
+              <div>✅ Completados: <b class="text-[#30d158]">${comp}</b></div>
+              <div>🚀 En Curso: <b class="text-[#0071e3]">${inProg}</b></div>
+              <div>⏳ Pendientes: <b class="text-[#ffd60a]">${pend}</b></div>
+            </div>
+            <div class="pt-2 text-[10px] text-gray-400 border-t border-white/5 truncate">
+              👥 Consultores (${assignedCons.length}): <span class="text-gray-200">${escapeHtml(assignedCons.join(', ')) || 'Ninguno'}</span>
+            </div>
+          `;
+        }
+      }
       window.showInfoCard(type, id);
       
       setTimeout(() => {
@@ -1800,38 +2417,133 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.closePasswordModal();
     }
 
-    window.createNewProject = function() { if (currentUserRole === 'Lector') return;
-       const name = document.getElementById('newProjName').value.trim(); if(!name) return;
-       const loc = document.getElementById('newProjLocation').value, prio = parseFloat(document.getElementById('newProjPriority').value||1), cons = Array.from(document.querySelectorAll('.newProjCons-chk:checked')).map(cb => cb.value);
-       const driveLink = document.getElementById('newProjDrive').value.trim();
-       const invgateLink = document.getElementById('newProjInvgate').value.trim();
-       const np = { id: 'p_'+Date.now(), name, priority: prio, consultants: cons, notes: '', driveLink, invgateLink, tasks: [], status: 'No Iniciado', deadline: '', progress: 0, docs: {}, clientDeliveryDate: "", clientReturnDate: "" };
-       if (loc === 'DIRECT') appData.directProjects.push(np); else { const mod = appData.modules.find(m => m.id === loc); if(mod) { if(!mod.projects) mod.projects=[]; mod.projects.push(np); } }
-       document.getElementById('newProjName').value = ''; document.getElementById('newProjDrive').value = ''; document.getElementById('newProjInvgate').value = ''; document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); logActivity(np.id, np.name, 'Creó el proyecto', localAuthor); window.saveData(true); window.populateGlobalEditSelector(); window.updateDatalist(); window.renderMindMap();
+    window.createNewProject = function() { 
+      if (currentUserRole === 'Lector') return;
+      const name = document.getElementById('newProjName').value.trim(); 
+      if (!name) { 
+        window.showToast("⚠️ Ingresa un nombre para el proyecto", true); 
+        return; 
+      }
+      const loc = document.getElementById('newProjLocation').value;
+      const prio = parseFloat(document.getElementById('newProjPriority').value || 1);
+      const cons = Array.from(document.querySelectorAll('.newProjCons-chk:checked')).map(cb => cb.value);
+      const driveLink = document.getElementById('newProjDrive').value.trim();
+      const invgateLink = document.getElementById('newProjInvgate').value.trim();
+      const deadline = document.getElementById('newProjDeadline')?.value || '';
+      const status = document.getElementById('newProjStatus')?.value || 'No Iniciado';
+      const progress = (status === 'Completado') ? 100 : 0;
+
+      const np = { 
+        id: 'p_' + Date.now(), 
+        name, 
+        priority: prio, 
+        consultants: cons, 
+        notes: '', 
+        driveLink, 
+        invgateLink, 
+        tasks: [], 
+        status, 
+        deadline, 
+        progress, 
+        docs: {}, 
+        clientDeliveryDate: "", 
+        clientReturnDate: "" 
+      };
+
+      if (loc === 'DIRECT') {
+        if (!appData.directProjects) appData.directProjects = [];
+        appData.directProjects.push(np);
+      } else { 
+        const mod = appData.modules.find(m => m.id === loc); 
+        if (mod) { 
+          if (!mod.projects) mod.projects = []; 
+          mod.projects.push(np); 
+        } 
+      }
+
+      document.getElementById('newProjName').value = ''; 
+      document.getElementById('newProjDrive').value = ''; 
+      document.getElementById('newProjInvgate').value = ''; 
+      if (document.getElementById('newProjDeadline')) document.getElementById('newProjDeadline').value = '';
+      if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'No Iniciado';
+      if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
+      document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); 
+
+      logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]`, localAuthor); 
+      window.saveData(true); 
+      window.populateGlobalEditSelector(); 
+      window.updateDatalist(); 
+      window.renderMindMap();
+      window.showToast(`Proyecto "${name}" creado exitosamente`, false);
+
+      const createdType = (loc === 'DIRECT') ? 'direct-project' : 'project';
+      setTimeout(() => {
+        window.selectNode(createdType, np.id);
+      }, 100);
     }
-    window.createNewModule = function() { if (currentUserRole === 'Lector') return; const name = document.getElementById('newModName').value.trim(); if(!name) return; const newId = 'm_'+Date.now(); appData.modules.push({ id: newId, name, color: document.getElementById('newModColor').value, projects: [] }); document.getElementById('newModName').value = ''; logActivity(newId, name, 'Creó el módulo', localAuthor); window.saveData(true); window.populateGlobalEditSelector(); window.populateNewProjectLocationSelect(); window.updateDatalist(); window.renderMindMap(); }
-    
-    window.registerConsultant = function() { if (currentUserRole === 'Lector') return; 
-        const n = document.getElementById('newConsultantName').value.trim();
-        const c = document.getElementById('newConsultantColor').value; 
-        const r = document.getElementById('newConsultantRole').value; 
-        if (!n || consultants[n]) return; 
-        consultants[n] = { color: c, role: r }; 
-        document.getElementById('newConsultantName').value = ''; 
-        window.saveData(false); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); window.renderMindMap(); 
+
+    window.createNewModule = function() { 
+      if (currentUserRole !== 'Supremo') {
+        window.showToast("⚠️ Solo el Administrador Supremo puede crear módulos", true);
+        return;
+      }
+      const name = document.getElementById('newModName').value.trim(); 
+      if (!name) { 
+        window.showToast("⚠️ Ingresa un nombre para el módulo", true); 
+        return; 
+      }
+      const newId = 'm_' + Date.now(); 
+      const color = document.getElementById('newModColor').value;
+      appData.modules.push({ id: newId, name, color, projects: [] }); 
+      document.getElementById('newModName').value = ''; 
+      logActivity(newId, name, 'Creó el módulo', localAuthor); 
+      window.saveData(true); 
+      window.populateGlobalEditSelector(); 
+      window.populateNewProjectLocationSelect(); 
+      if (typeof window.populateEditProjectLocationSelect === 'function') {
+        window.populateEditProjectLocationSelect();
+      }
+      window.updateDatalist(); 
+      window.renderMindMap(); 
+      window.showToast(`Módulo "${name}" creado exitosamente`, false);
+
+      setTimeout(() => {
+        window.selectNode('module', newId);
+      }, 100);
     }
-    window.handleUpdateExistingConsultantColor = function(name, newColor) { if(consultants[name]) { consultants[name].color = newColor; window.saveData(false); window.renderRegisteredConsultantsList(); window.renderMindMap(); if(currentSelection.id) window.showInfoCard(currentSelection.type, currentSelection.id); } }
-    window.updateConsultantRole = function(name, newRole) { if(consultants[name]) { consultants[name].role = newRole; window.saveData(false); } }
-    window.requestDeleteConsultant = function(name) { itemToDelete = { category: 'consultant', id: name }; document.getElementById('deleteModalTitle').textContent = `¿Eliminar a ${name}?`; document.getElementById('deleteConfirmModal').classList.remove('hidden'); setTimeout(() => document.getElementById('deleteConfirmModal').classList.remove('opacity-0'), 10); }
 
     window.populateGlobalEditSelector = function() {
-      const s = document.getElementById('globalEditSelector'); if(!s) return;
-      s.innerHTML = `<option value="" class="bg-black text-gray-400">-- Selecciona en el mapa --</option><optgroup label="Núcleo" class="text-white bg-white/10"><option value="core|sicom" class="bg-black text-white">🌐 SICOM</option><option value="direct-hub|hub-direct" class="bg-black text-white">⚡ ${escapeHtml(appData.directHub.name)}</option></optgroup>`;
-      if(appData.directProjects.length > 0) s.innerHTML += `<optgroup label="Directos" class="bg-black text-gray-300">${appData.directProjects.map(p => `<option value="direct-project|${p.id}" class="bg-black text-white">└ ${escapeHtml(p.name)}</option>`).join('')}</optgroup>`;
-      appData.modules.forEach(m => { s.innerHTML += `<option value="module|${m.id}" class="bg-white/10 text-white font-bold">📦 ${escapeHtml(m.name)}</option>`; if(m.projects?.length > 0) s.innerHTML += `<optgroup label="Proyectos: ${escapeHtml(m.name)}" class="bg-black text-gray-400">${m.projects.map(p => `<option value="project|${p.id}" class="bg-black text-white">└ ${escapeHtml(p.name)}</option>`).join('')}</optgroup>`; });
-      if(currentSelection.id) s.value = `${currentSelection.type}|${currentSelection.id}`;
-    }
-    window.populateNewProjectLocationSelect = function() { const s = document.getElementById('newProjLocation'); if(!s) return; s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub.name)})</option>` + appData.modules.map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); }
+      const s = document.getElementById('globalEditSelector'); 
+      if (!s) return;
+      s.innerHTML = `<option value="" class="bg-black text-gray-400">-- Selecciona en el mapa --</option><optgroup label="Núcleo" class="text-white bg-white/10"><option value="core|sicom" class="bg-black text-white">🌐 SICOM</option><option value="direct-hub|hub-direct" class="bg-black text-white">⚡ ${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')}</option></optgroup>`;
+      if (appData.directProjects && appData.directProjects.length > 0) {
+        s.innerHTML += `<optgroup label="Directos" class="bg-black text-gray-300">${appData.directProjects.map(p => `<option value="direct-project|${p.id}" class="bg-black text-white">└ ${escapeHtml(p.name)}</option>`).join('')}</optgroup>`;
+      }
+      if (appData.modules) {
+        appData.modules.forEach(m => { 
+          s.innerHTML += `<option value="module|${m.id}" class="bg-white/10 text-white font-bold">📦 ${escapeHtml(m.name)}</option>`; 
+          if (m.projects && m.projects.length > 0) {
+            s.innerHTML += `<optgroup label="Proyectos: ${escapeHtml(m.name)}" class="bg-black text-gray-400">${m.projects.map(p => `<option value="project|${p.id}" class="bg-black text-white">└ ${escapeHtml(p.name)}</option>`).join('')}</optgroup>`;
+          }
+        });
+      }
+      if (currentSelection && currentSelection.id) {
+        s.value = `${currentSelection.type}|${currentSelection.id}`;
+      }
+    };
+
+    window.populateEditProjectLocationSelect = function(currentLoc) { 
+      const s = document.getElementById('editProjectLocation'); 
+      if (!s) return; 
+      s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
+      if (currentLoc) s.value = currentLoc;
+    };
+    
+    window.populateNewProjectLocationSelect = function() { 
+      const s = document.getElementById('newProjLocation'); 
+      if (!s) return; 
+      s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
+    };
     window.populateConsultantSelects = function() {
       const f = document.getElementById('consultantFilter'), all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
       if(f) f.innerHTML = `<option value="ALL" class="bg-black text-white">👥 Todos</option>` + all.map(n => `<option value="${escapeHtml(n)}" class="bg-black text-white">${escapeHtml(n)}</option>`).join('');
@@ -1893,7 +2605,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.renderMindMap = function() {
       if (!canvasGroup) return; canvasGroup.innerHTML = '';
+      const dynamicDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      canvasGroup.appendChild(dynamicDefs);
       const q = activeSearchQuery.toLowerCase();
+      const isLight = document.body.classList.contains('theme-light');
       
       const isFiltered = (p) => {
           if (isFocusMode) {
@@ -1948,65 +2663,142 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       const isDefaultState = !isFocusMode && activeFilterModule === 'ALL' && activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && activeFilterUrgency === 'ALL' && activeFilterPriority === 'ALL' && activeFilterBottleneck === 'ALL' && !q;
       
+      ensureDataStructure();
+      const directHubItem = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
       const visDir = appData.directProjects || [];
-      const activeMods = appData.modules || [];
+      const activeMods = (appData.modules || []).filter(m => m && typeof m === 'object');
       
       let lNodes = [], rNodes = [], lSlots = 0, rSlots = 0;
       
       // PARCHE: Contabilizamos el peso real del Agrupador Directo para balancear el mapa
       const directLen = Math.max(1, visDir.length);
-      lNodes.push({ type: 'direct-hub', item: appData.directHub, projects: visDir });
+      lNodes.push({ type: 'direct-hub', item: directHubItem, projects: visDir });
       lSlots += directLen; 
       
       activeMods.forEach(m => {
+          if (!m.id) m.id = 'm_' + Math.random().toString(36).slice(2, 9);
+          if (!m.name) m.name = 'Módulo';
+          if (!m.color) m.color = '#0071e3';
           const modData = { type: 'module', item: m, projects: m.projects || [] };
           const pLength = Math.max(1, modData.projects.length);
           if (lSlots <= rSlots) { lNodes.push(modData); lSlots += pLength; } 
           else { rNodes.push(modData); rSlots += pLength; }
       });
 
-      const slotH = 75, mOffX = 380, pOffX = 840; 
+      const slotH = 75, mOffX = 400, pOffX = 900; 
       function procSide(nodes, totalSlots, isLeft) {
           const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
           let cy = -(totalSlots * slotH / 2) + (slotH / 2);
           nodes.forEach(n => {
-              const pCount = n.projects.length; let sy = cy, ey = cy;
+              const pCount = (n.projects || []).length; let sy = cy, ey = cy;
+              const nItemId = String(n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod')).replace(/[^a-zA-Z0-9_-]/g, '');
+              const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
+              const nItemName = n.item ? (n.item.name || '') : '';
+
               if (pCount > 0) {
                   n.projects.forEach(p => { 
                       const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
-                      
-                      // EL FIX ESTÁ AQUÍ: Inyectamos explícitamente y bloqueamos las propiedades del render
-                      // asegurándonos de que JavaScript asigne variables nuevas por ciclo y no por referencia global.
                       const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
-                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : n.item.id;
+                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
                       p._renderData = { x: px, y: cy, color: col, type: strictType, realId: p.id }; 
                       ey = cy; cy += slotH;
                   });
               } else { ey = cy; cy += slotH; }
-              const my = (sy + ey) / 2; n._renderData = { x: mx, y: my, isLeft };
+              const my = (sy + ey) / 2;
+              n._renderData = { x: mx, y: my, isLeft };
+              if (n.item) n.item._renderData = n._renderData;
 
               // PARCHE: Evaluación estricta de módulos y ghosting de líneas
-              const modMatches = isDefaultState || n.projects.some(p => isFiltered(p)) || (q !== '' && n.item.name && n.item.name.toLowerCase().includes(q));
+              const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || (q !== '' && nItemName && nItemName.toLowerCase().includes(q));
               const lineOpacity = modMatches ? '1' : '0.15';
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              pC.setAttribute('d', `M ${isLeft?-60:60} 0 C ${isLeft?-120:120} 0, ${isLeft?mx+170:mx-170} ${my}, ${isLeft?mx+110:mx-110} ${my}`);
-              pC.setAttribute('fill', 'none'); pC.setAttribute('stroke', n.type==='direct-hub'?n.item.color:'rgba(255,255,255,0.15)'); pC.setAttribute('stroke-width', '2');
+              pC.classList.add('mindmap-connector');
+              const coreStartX = isLeft ? -60 : 60;
+              const modEndX = isLeft ? mx + 165 : mx - 165;
+              const cp1CoreX = isLeft ? -125 : 125;
+              const cp2CoreX = isLeft ? modEndX + 65 : modEndX - 65;
+              pC.setAttribute('d', `M ${coreStartX} 0 C ${cp1CoreX} 0, ${cp2CoreX} ${my}, ${modEndX} ${my}`);
+              pC.setAttribute('fill', 'none'); 
+
+              // Conector de fibra óptica: Gradiente direccional de Núcleo a Módulo
+              const coreGradId = `grad-c-${nItemId}`;
+              const cGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+              cGrad.setAttribute('id', coreGradId);
+              cGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              cGrad.setAttribute('x1', `${coreStartX}`);
+              cGrad.setAttribute('y1', '0');
+              cGrad.setAttribute('x2', `${modEndX}`);
+              cGrad.setAttribute('y2', `${my}`);
+
+              const cs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+              cs1.setAttribute('offset', '0%');
+              cs1.setAttribute('stop-color', '#0071e3');
+              cs1.setAttribute('stop-opacity', isLight ? '0.40' : '0.50');
+              cGrad.appendChild(cs1);
+
+              const cs2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+              cs2.setAttribute('offset', '100%');
+              cs2.setAttribute('stop-color', nItemColor);
+              cs2.setAttribute('stop-opacity', isLight ? '0.75' : '0.85');
+              cGrad.appendChild(cs2);
+
+              dynamicDefs.appendChild(cGrad);
+
+              pC.setAttribute('stroke', `url(#${coreGradId})`); 
+              pC.setAttribute('stroke-width', '1.8');
               pC.setAttribute('opacity', lineOpacity);
               canvasGroup.appendChild(pC);
 
-              if (pCount > 0) n.projects.forEach(p => {
+              if (pCount > 0) (n.projects || []).forEach(p => {
                   const pMatches = isDefaultState || isFiltered(p);
+                  let isOver = false;
+                  if(p.deadline && p.status !== 'Completado') {
+                      const [dy, dm, dd] = p.deadline.split('-');
+                      if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true;
+                  }
+
                   const pP = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                  const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : '#48484a';
-                  const startX = isLeft ? mx - 110 : mx + 110;
+                  pP.classList.add('mindmap-connector');
+                  const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
+                  const endCol = isOver ? '#ff453a' : solidColor;
+
+                  const startX = isLeft ? mx - 165 : mx + 165;
                   const endX = isLeft ? p._renderData.x + 160 : p._renderData.x - 160;
-                  const cp1X = isLeft ? mx - 50 : mx + 50;
-                  const cp2X = isLeft ? endX + 80 : endX - 80;
+                  const cp1X = isLeft ? startX - 65 : startX + 65;
+                  const cp2X = isLeft ? endX + 65 : endX - 65;
                   
                   pP.setAttribute('d', `M ${startX} ${my} C ${cp1X} ${my}, ${cp2X} ${p._renderData.y}, ${endX} ${p._renderData.y}`);
-                  pP.setAttribute('fill', 'none'); pP.setAttribute('stroke', solidColor); pP.setAttribute('stroke-width', '1.5'); 
-                  pP.setAttribute('opacity', pMatches ? '0.7' : '0.1'); 
+                  pP.setAttribute('fill', 'none'); 
+
+                  // Conector de fibra óptica: Gradiente direccional de Módulo a Proyecto
+                  const pIdClean = String(p.id || Math.random().toString(36).slice(2, 7)).replace(/[^a-zA-Z0-9_-]/g, '');
+                  const pGradId = `grad-p-${pIdClean}`;
+                  const pGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                  pGrad.setAttribute('id', pGradId);
+                  pGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                  pGrad.setAttribute('x1', `${startX}`);
+                  pGrad.setAttribute('y1', `${my}`);
+                  pGrad.setAttribute('x2', `${endX}`);
+                  pGrad.setAttribute('y2', `${p._renderData.y}`);
+
+                  const ps1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  ps1.setAttribute('offset', '0%');
+                  ps1.setAttribute('stop-color', nItemColor);
+                  ps1.setAttribute('stop-opacity', isLight ? '0.45' : '0.50');
+                  pGrad.appendChild(ps1);
+
+                  const ps2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  ps2.setAttribute('offset', '100%');
+                  ps2.setAttribute('stop-color', endCol);
+                  ps2.setAttribute('stop-opacity', isLight ? '0.85' : '0.85');
+                  pGrad.appendChild(ps2);
+
+                  dynamicDefs.appendChild(pGrad);
+
+                  pP.setAttribute('stroke', `url(#${pGradId})`); 
+                  pP.setAttribute('stroke-width', isLight ? '2' : '1.5'); 
+                  pP.setAttribute('opacity', pMatches ? '1' : '0.12'); 
                   canvasGroup.appendChild(pP);
               });
           });
@@ -2037,7 +2829,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               g.setAttribute('opacity', '1');
               g.style.pointerEvents = 'all'; // Captura total en el contenedor
               g.classList.add('interactive-node');
-              if(isOver) g.setAttribute('filter', 'drop-shadow(0 0 8px rgba(255, 69, 58, 0.4))'); // Indicador estático de vencido
           }
 
           // 2. CONGELAMIENTO LÉXICO (Cierre Perfecto)
@@ -2052,37 +2843,91 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
            // El false es vital para evitar el bubbling inverso
 
-          // 3. CAPA VISUAL (Sin interferencia de eventos)
+          // 3. CAPA VISUAL (Píldoras estilo original con liquid glass)
+          // AURA PARPADEANTE / FARO VISUAL PARA PROYECTOS VENCIDOS
+          if (isOver) {
+              const aura = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              aura.setAttribute('x', '-5');
+              aura.setAttribute('y', '-5');
+              aura.setAttribute('width', '330');
+              aura.setAttribute('height', '66');
+              aura.setAttribute('rx', '21');
+              aura.setAttribute('fill', 'rgba(255, 69, 58, 0.12)');
+              aura.setAttribute('stroke', '#ff453a');
+              aura.setAttribute('stroke-width', '1.5');
+              aura.classList.add('overdue-aura-pulse');
+              aura.style.pointerEvents = 'none';
+              g.appendChild(aura);
+          }
+
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '16'); 
-          r.setAttribute('fill', 'rgba(20, 20, 22, 0.9)'); 
+          r.setAttribute('fill', 'rgba(18, 18, 24, 0.65)'); 
           r.setAttribute('stroke', isOver ? '#ff453a' : color); 
-          r.setAttribute('stroke-width', isSel ? '2' : '1');
-          r.style.pointerEvents = 'none'; // Los hijos no deben capturar clics
+          r.setAttribute('stroke-width', isOver ? '2' : (isSel ? '2' : '1')); 
+          r.style.pointerEvents = 'none';
+          if (isOver) r.classList.add('overdue-capsule');
           if(isSel || (!isDefaultState && pMatches)) r.setAttribute('filter', 'url(#glow)'); 
           g.appendChild(r);
 
+          const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rSheen.setAttribute('width', '320'); rSheen.setAttribute('height', '56'); rSheen.setAttribute('rx', '16');
+          rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
+          rSheen.style.pointerEvents = 'none';
+          g.appendChild(rSheen);
+
           const sC = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '4'); sC.setAttribute('fill', sCol); 
+          sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '4'); 
+          sC.setAttribute('fill', isOver ? '#ff453a' : sCol); 
           sC.style.pointerEvents = 'none';
-          if(pMatches) sC.setAttribute('filter', `drop-shadow(0 0 5px ${sCol})`); 
+          if (isOver) {
+              sC.classList.add('overdue-dot');
+          } else if (pMatches) {
+              sC.setAttribute('filter', `drop-shadow(0 0 5px ${sCol})`); 
+          }
           g.appendChild(sC);
 
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          nT.setAttribute('x', '34'); nT.setAttribute('y', '22'); nT.setAttribute('fill', '#ffffff'); nT.classList.add('svg-text', 'svg-text-bold');
+          nT.setAttribute('x', '34'); nT.setAttribute('y', '22'); nT.setAttribute('fill', '#ffffff'); 
+          nT.classList.add('svg-text', 'svg-text-bold');
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
           nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
           nT.textContent = fullText.length > 55 ? fullText.substring(0, 52)+'...' : fullText;
           g.appendChild(nT);
           
-          if(p.progress > 0) {
-             const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pbBg.setAttribute('x', '34'); pbBg.setAttribute('y', '38'); pbBg.setAttribute('width', '265'); pbBg.setAttribute('height', '3'); pbBg.setAttribute('rx', '1.5'); pbBg.setAttribute('fill', 'rgba(255,255,255,0.1)'); pbBg.style.pointerEvents = 'none'; g.appendChild(pbBg);
-             const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); pb.setAttribute('x', '34'); pb.setAttribute('y', '38'); pb.setAttribute('width', 265 * (p.progress/100)); pb.setAttribute('height', '3'); pb.setAttribute('rx', '1.5'); pb.setAttribute('fill', sCol); pb.style.pointerEvents = 'none';
-             if(pMatches) pb.setAttribute('filter', `drop-shadow(0 0 3px ${sCol})`); g.appendChild(pb);
+          const prog = Math.round(p.progress || 0);
+
+          // Pista base de la barra de progreso
+          const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          pbBg.setAttribute('x', '34'); pbBg.setAttribute('y', '38');
+          pbBg.setAttribute('width', '224'); pbBg.setAttribute('height', '3.5');
+          pbBg.setAttribute('rx', '1.75');
+          pbBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)');
+          pbBg.style.pointerEvents = 'none';
+          g.appendChild(pbBg);
+
+          if (prog > 0) {
+             const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+             pb.setAttribute('x', '34'); pb.setAttribute('y', '38');
+             pb.setAttribute('width', Math.max(4, 224 * (prog / 100)));
+             pb.setAttribute('height', '3.5'); pb.setAttribute('rx', '1.75');
+             pb.setAttribute('fill', isOver ? '#ff453a' : sCol);
+             pb.style.pointerEvents = 'none';
+             if (pMatches) pb.setAttribute('filter', `drop-shadow(0 0 4px ${isOver ? '#ff453a' : sCol})`);
+             g.appendChild(pb);
           }
 
-          // 4. CAPA DE INTERCEPCIÓN (Caja invisible final)
+          // Micro indicador numérico exacto de porcentaje a la derecha
+          const pPerc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          pPerc.setAttribute('x', '302'); pPerc.setAttribute('y', '42');
+          pPerc.setAttribute('text-anchor', 'end');
+          pPerc.setAttribute('fill', prog > 0 ? (prog === 100 ? '#30d158' : (isLight ? '#475569' : 'rgba(255,255,255,0.65)')) : (isLight ? '#94a3b8' : 'rgba(255,255,255,0.30)'));
+          pPerc.setAttribute('style', 'font-size: 9.5px; font-weight: 600; font-family: "SF Mono", monospace; pointer-events: none;');
+          pPerc.textContent = `${prog}%`;
+          g.appendChild(pPerc);
+
+          // 4. CAPA DE INTERCEPCIÓN (Caja invisible final con silueta continua)
           const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           hitBox.setAttribute('width', '320'); hitBox.setAttribute('height', '56'); hitBox.setAttribute('rx', '16');
           hitBox.setAttribute('fill', 'transparent');
@@ -2093,10 +2938,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         });
 
         // PARCHE: Evaluación estricta de módulos y ghosting de bloques
-        const modMatches = isDefaultState || n.projects.some(p => isFiltered(p)) || (q !== '' && n.item.name && n.item.name.toLowerCase().includes(q));
-        const { x, y } = n._renderData, isSel = currentSelection.id === n.item.id;
+        const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
+        const modName = n.item ? (n.item.name || '') : '';
+        const modCol = (n.item && n.item.color) ? n.item.color : '#0071e3';
+        const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || (q !== '' && modName && modName.toLowerCase().includes(q));
+        const { x, y } = n._renderData || { x: 0, y: 0 };
+        const isSel = currentSelection.id === modId;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.setAttribute('transform', `translate(${x - 110}, ${y - 24})`);
+        g.setAttribute('transform', `translate(${x - 165}, ${y - 25})`);
         
         if (!modMatches) {
              g.setAttribute('opacity', '0.15');
@@ -2109,7 +2958,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         
         const currentModType = n.type === 'direct-hub' ? 'direct-hub' : 'module';
-        const currentModId = n.item.id;
+        const currentModId = modId;
         
         g.addEventListener('click', function(e) {
             e.preventDefault();
@@ -2118,28 +2967,76 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }, false);
 
         const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        r.setAttribute('width', '220'); r.setAttribute('height', '48'); r.setAttribute('rx', '24'); 
-        r.setAttribute('fill', n.type==='direct-hub'?'rgba(0,0,0,0.8)':'rgba(30, 30, 30, 0.9)');
-        r.setAttribute('stroke', n.item.color); r.setAttribute('stroke-width', isSel ? '2.5' : '1');
-        r.style.pointerEvents = 'none'; // Importante para que no capture clics
+        r.setAttribute('width', '330'); r.setAttribute('height', '50'); r.setAttribute('rx', '25'); 
+        r.setAttribute('fill', n.type==='direct-hub' ? 'rgba(0, 0, 0, 0.55)' : 'rgba(20, 20, 26, 0.65)');
+        r.setAttribute('stroke', modCol); r.setAttribute('stroke-width', isSel ? '2.5' : '1');
+        r.style.pointerEvents = 'none';
         if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '5,5'); 
         if(isSel || (!isDefaultState && modMatches)) r.setAttribute('filter', 'url(#glow)'); 
         g.appendChild(r);
+
+        const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rSheen.setAttribute('width', '330'); rSheen.setAttribute('height', '50'); rSheen.setAttribute('rx', '25');
+        rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
+        rSheen.style.pointerEvents = 'none';
+        g.appendChild(rSheen);
+
+        // Indicador de color del módulo a la izquierda
+        const mDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mDot.setAttribute('cx', '20'); mDot.setAttribute('cy', '25'); mDot.setAttribute('r', '4');
+        mDot.setAttribute('fill', modCol);
+        mDot.style.pointerEvents = 'none';
+        if(modMatches) mDot.setAttribute('filter', `drop-shadow(0 0 5px ${modCol})`);
+        g.appendChild(mDot);
         
+        // Título del módulo completo sin truncamiento
         const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
-        t.setAttribute('x', '110'); t.setAttribute('y', '28'); 
-        t.setAttribute('fill', '#ffffff'); t.setAttribute('text-anchor', 'middle'); 
+        t.setAttribute('x', '34'); t.setAttribute('y', '30'); 
+        t.setAttribute('fill', '#ffffff'); t.setAttribute('text-anchor', 'start'); 
         t.classList.add('svg-text', 'svg-text-bold'); 
-        t.style.pointerEvents = 'none'; // Importante para que no capture clics
+        t.style.pointerEvents = 'none';
         
-        let mFontSize = n.item.name.length > 20 ? 10 : 12;
-        t.setAttribute('style', `font-size: ${mFontSize}px; pointer-events: none;`);
-        t.textContent = n.item.name; 
+        let rawName = n.item.name || '';
+        let len = rawName.length;
+        let mFontSize = 12;
+        if (len > 35) mFontSize = 9.5;
+        else if (len > 28) mFontSize = 10.5;
+        else if (len > 20) mFontSize = 11.5;
+        let displayName = len > 45 ? rawName.substring(0, 42) + '…' : rawName;
+        t.setAttribute('style', `font-size: ${mFontSize}px; font-weight: 600; letter-spacing: -0.01em; pointer-events: none;`);
+        t.textContent = displayName; 
         g.appendChild(t);
 
-        // Capa invisible para módulos
+        const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        titleEl.textContent = rawName;
+        g.appendChild(titleEl);
+
+        // Micro-badge pill de conteo de proyectos a la derecha
+        const pCount = n.projects.length;
+        const countG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        countG.setAttribute('transform', 'translate(262, 16)');
+        countG.style.pointerEvents = 'none';
+        
+        const countBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        countBg.setAttribute('width', '52'); countBg.setAttribute('height', '18');
+        countBg.setAttribute('rx', '9');
+        countBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)');
+        countBg.setAttribute('stroke', isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.14)');
+        countBg.setAttribute('stroke-width', '1');
+        countG.appendChild(countBg);
+        
+        const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        countText.setAttribute('x', '26'); countText.setAttribute('y', '12.5');
+        countText.setAttribute('text-anchor', 'middle');
+        countText.setAttribute('fill', modCol);
+        countText.setAttribute('style', 'font-size: 8.5px; font-weight: 700; font-family: "SF Mono", monospace; letter-spacing: 0.04em;');
+        countText.textContent = `${pCount} ${pCount === 1 ? 'PROY' : 'PROYS'}`;
+        countG.appendChild(countText);
+        g.appendChild(countG);
+
+        // Capa invisible para interacción de módulos
         const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        hitBox.setAttribute('width', '220'); hitBox.setAttribute('height', '48'); hitBox.setAttribute('rx', '24');
+        hitBox.setAttribute('width', '330'); hitBox.setAttribute('height', '50'); hitBox.setAttribute('rx', '25');
         hitBox.setAttribute('fill', 'transparent');
         hitBox.style.cursor = 'pointer';
         g.appendChild(hitBox);
@@ -2147,96 +3044,537 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         canvasGroup.appendChild(g);
       });
 
-      const coreG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); coreG.setAttribute('transform', `translate(-60, -60)`); coreG.classList.add('interactive-node'); coreG.onclick = (e) => { e.stopPropagation(); window.selectNode('core', 'sicom'); };
-      const cc = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cc.setAttribute('cx', '60'); cc.setAttribute('cy', '60'); cc.setAttribute('r', '60'); cc.setAttribute('fill', 'rgba(10, 10, 12, 1)'); cc.setAttribute('stroke', '#0071e3'); cc.setAttribute('stroke-width', '2'); cc.setAttribute('filter', 'url(#glow-intense)'); coreG.appendChild(cc);
-      const ct = document.createElementNS('http://www.w3.org/2000/svg', 'text'); ct.setAttribute('x', '60'); ct.setAttribute('y', '65'); ct.setAttribute('fill', 'white'); ct.setAttribute('text-anchor', 'middle'); ct.classList.add('svg-text', 'svg-text-base', 'svg-text-bold'); ct.textContent = 'SICOM'; coreG.appendChild(ct);
+      const coreG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      coreG.setAttribute('transform', `translate(-60, -60)`);
+      coreG.classList.add('interactive-node');
+      coreG.onclick = (e) => { e.stopPropagation(); window.selectNode('core', 'sicom'); };
+      
+      // Anillo orbital concéntrico
+      const orbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      orbit.setAttribute('cx', '60'); orbit.setAttribute('cy', '60'); orbit.setAttribute('r', '74');
+      orbit.setAttribute('fill', 'none');
+      orbit.setAttribute('stroke', isLight ? 'rgba(0, 113, 227, 0.25)' : 'rgba(0, 113, 227, 0.35)');
+      orbit.setAttribute('stroke-width', '1');
+      orbit.setAttribute('stroke-dasharray', '5 7');
+      orbit.classList.add('core-orbit-ring');
+      orbit.style.pointerEvents = 'none';
+      coreG.appendChild(orbit);
+
+      // Base de cristal oscura y núcleo iluminado
+      const cc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      cc.setAttribute('cx', '60'); cc.setAttribute('cy', '60'); cc.setAttribute('r', '60');
+      cc.setAttribute('fill', isLight ? 'rgba(0, 113, 227, 0.12)' : 'rgba(10, 24, 48, 0.55)');
+      cc.setAttribute('stroke', '#0071e3');
+      cc.setAttribute('stroke-width', '2');
+      cc.style.filter = 'drop-shadow(0 0 24px rgba(0, 113, 227, 0.45))';
+      cc.classList.add('core-bg-circle');
+      cc.style.pointerEvents = 'none';
+      coreG.appendChild(cc);
+
+      // Brillo especular
+      const ccSheen = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ccSheen.setAttribute('cx', '60'); ccSheen.setAttribute('cy', '60'); ccSheen.setAttribute('r', '60');
+      ccSheen.setAttribute('fill', isLight ? 'url(#capsule-sheen-light)' : 'url(#capsule-sheen-dark)');
+      ccSheen.style.pointerEvents = 'none';
+      coreG.appendChild(ccSheen);
+
+      // Faro/Punto de pulso activo del sistema
+      const coreDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      coreDot.setAttribute('cx', '60'); coreDot.setAttribute('cy', '40'); coreDot.setAttribute('r', '2.5');
+      coreDot.setAttribute('fill', '#35aee8');
+      coreDot.classList.add('core-status-beacon');
+      coreDot.style.pointerEvents = 'none';
+      coreG.appendChild(coreDot);
+
+      // Título Principal
+      const ct = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      ct.setAttribute('x', '60'); ct.setAttribute('y', '58');
+      ct.setAttribute('fill', '#ffffff');
+      ct.setAttribute('text-anchor', 'middle');
+      ct.classList.add('svg-text');
+      ct.setAttribute('style', 'font-size: 14px; font-weight: 800; letter-spacing: 0.14em; pointer-events: none;');
+      ct.textContent = 'SICOM';
+      coreG.appendChild(ct);
+
+      // Subtítulo micro-tecnológico
+      const cSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      cSub.setAttribute('x', '60'); cSub.setAttribute('y', '72');
+      cSub.setAttribute('fill', isLight ? '#0071e3' : 'rgba(53, 174, 232, 0.75)');
+      cSub.setAttribute('text-anchor', 'middle');
+      cSub.classList.add('svg-text');
+      cSub.setAttribute('style', 'font-size: 7.5px; font-weight: 700; letter-spacing: 0.16em; font-family: "SF Mono", monospace; pointer-events: none;');
+      cSub.textContent = 'NÚCLEO ERP';
+      coreG.appendChild(cSub);
+
+      // HitBox
+      const coreHit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      coreHit.setAttribute('cx', '60'); coreHit.setAttribute('cy', '60'); coreHit.setAttribute('r', '74');
+      coreHit.setAttribute('fill', 'transparent');
+      coreHit.style.cursor = 'pointer';
+      coreG.appendChild(coreHit);
+
       canvasGroup.appendChild(coreG);
       
       if(appData.secondaryCore && appData.secondaryCore.active) {
           const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(-60, 100)`); sucomG.classList.add('interactive-node');
-          const scc = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); scc.setAttribute('cx', '60'); scc.setAttribute('cy', '60'); scc.setAttribute('r', '60'); scc.setAttribute('fill', 'rgba(10, 10, 12, 1)'); scc.setAttribute('stroke', '#ff9f0a'); scc.setAttribute('stroke-width', '2'); scc.setAttribute('stroke-dasharray', '5,5'); sucomG.appendChild(scc);
-          const sct = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sct.setAttribute('x', '60'); sct.setAttribute('y', '65'); sct.setAttribute('fill', 'white'); sct.setAttribute('text-anchor', 'middle'); sct.classList.add('svg-text', 'svg-text-base', 'svg-text-bold'); sct.textContent = 'SUCOM'; sucomG.appendChild(sct);
+          
+          const sccBase = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          sccBase.setAttribute('cx', '60'); sccBase.setAttribute('cy', '60'); sccBase.setAttribute('r', '60');
+          sccBase.setAttribute('fill', isLight ? 'rgba(255, 255, 255, 0.50)' : 'rgba(14, 14, 20, 0.20)');
+          sccBase.style.pointerEvents = 'none';
+          sucomG.appendChild(sccBase);
+
+          const scc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          scc.setAttribute('cx', '60'); scc.setAttribute('cy', '60'); scc.setAttribute('r', '60');
+          scc.setAttribute('fill', isLight ? 'rgba(255, 159, 10, 0.12)' : 'rgba(255, 159, 10, 0.14)');
+          scc.setAttribute('stroke', '#ff9f0a');
+          scc.setAttribute('stroke-width', '2');
+          scc.setAttribute('stroke-dasharray', '5,5');
+          scc.style.filter = isLight ? 'drop-shadow(0 6px 20px rgba(255, 159, 10, 0.28))' : 'drop-shadow(0 0 24px rgba(255, 159, 10, 0.40))';
+          scc.classList.add('core-bg-circle');
+          scc.style.pointerEvents = 'none';
+          sucomG.appendChild(scc);
+
+          const sccSheen = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          sccSheen.setAttribute('cx', '60'); sccSheen.setAttribute('cy', '60'); sccSheen.setAttribute('r', '60');
+          sccSheen.setAttribute('fill', isLight ? 'url(#capsule-sheen-light)' : 'url(#capsule-sheen-dark)');
+          sccSheen.style.pointerEvents = 'none';
+          sucomG.appendChild(sccSheen);
+
+          const sct = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          sct.setAttribute('x', '60'); sct.setAttribute('y', '65');
+          sct.setAttribute('fill', isLight ? '#ff9f0a' : '#ffffff');
+          sct.setAttribute('text-anchor', 'middle');
+          sct.classList.add('svg-text');
+          sct.setAttribute('style', 'font-size: 15px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--font-heading), \'Inter\', sans-serif; pointer-events: none;');
+          sct.textContent = 'SUCOM';
+          sucomG.appendChild(sct);
+
+          const sucomHit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          sucomHit.setAttribute('cx', '60'); sucomHit.setAttribute('cy', '60'); sucomHit.setAttribute('r', '60');
+          sucomHit.setAttribute('fill', 'transparent');
+          sucomHit.style.cursor = 'pointer';
+          sucomG.appendChild(sucomHit);
+
           canvasGroup.appendChild(sucomG);
       }
     };
 
-    window.renderHistory = function() {
-        const c = document.getElementById('historyListContainer'), e = document.getElementById('historyEmptyState');
-        if(!appData.history || appData.history.length === 0) { c.innerHTML = ''; e.classList.remove('hidden'); return; }
-        
-        const dateInput = document.getElementById('historyDateFilter');
-        let selectedDateStr = dateInput ? dateInput.value : ''; // Format yyyy-mm-dd
-        
-        // Si no hay fecha seleccionada en el input, por defecto mostramos el día de hoy (formato dd/mm/yyyy o similar que viene en timestamp)
-        // El timestamp es de la forma "6/10/2026, 22:47:07" o "DD/MM/YYYY, HH:MM:SS" (toLocaleDateString('es-MX'))
-        let filtered = appData.history.filter(log => {
-            if (!log.timestamp) return false;
-            // log.timestamp empieza con "D/M/YYYY" o "DD/MM/YYYY"
-            const datePart = log.timestamp.split(',')[0].trim(); // "6/10/2026" o "16/10/2026"
-            const parts = datePart.split('/');
-            if (parts.length === 3) {
-                const day = parts[0].padStart(2, '0');
-                const month = parts[1].padStart(2, '0');
-                const year = parts[2];
-                const logFormatted = `${year}-${month}-${day}`;
-                
-                if (selectedDateStr) {
-                    return logFormatted === selectedDateStr;
+    let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
+
+    window.setHistoryCategoryFilter = function(cat) {
+        currentHistoryCategory = cat;
+        ['all', 'validaciones', 'tareas', 'proyectos'].forEach(c => {
+            const btn = document.getElementById(`histCatBtn-${c}`);
+            if (btn) {
+                if (c === cat) {
+                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white border border-white/20 shadow-sm';
                 } else {
-                    // Por defecto: mostrar solo los del día de hoy
-                    const today = new Date();
-                    const tDay = String(today.getDate()).padStart(2, '0');
-                    const tMonth = String(today.getMonth() + 1).padStart(2, '0');
-                    const tYear = today.getFullYear();
-                    const todayFormatted = `${tYear}-${tMonth}-${tDay}`;
-                    return logFormatted === todayFormatted;
+                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent';
                 }
             }
-            return false;
         });
+        window.renderHistory();
+    };
 
-        if(filtered.length === 0) { 
+    window.setHistoryFilterToday = function() {
+        const dateInput = document.getElementById('historyDateFilter');
+        const today = new Date();
+        const tDay = String(today.getDate()).padStart(2, '0');
+        const tMonth = String(today.getMonth() + 1).padStart(2, '0');
+        const tYear = today.getFullYear();
+        if (dateInput) dateInput.value = `${tYear}-${tMonth}-${tDay}`;
+        window.renderHistory();
+    };
+
+    window.clearHistoryFilter = function() {
+        const dateInput = document.getElementById('historyDateFilter');
+        if (dateInput) dateInput.value = '';
+        const searchInput = document.getElementById('historySearchInput');
+        if (searchInput) searchInput.value = '';
+        currentHistoryCategory = 'all';
+        ['all', 'validaciones', 'tareas', 'proyectos'].forEach(c => {
+            const btn = document.getElementById(`histCatBtn-${c}`);
+            if (btn) {
+                btn.className = c === 'all' 
+                    ? 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white border border-white/20 shadow-sm'
+                    : 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent';
+            }
+        });
+        window.renderHistory();
+    };
+
+    window.renderHistory = function() {
+        const c = document.getElementById('historyListContainer');
+        const e = document.getElementById('historyEmptyState');
+        const emptyMsg = document.getElementById('historyEmptyMsg');
+        const filterLabel = document.getElementById('historyFilterLabel');
+        const countBadge = document.getElementById('historyCountBadge');
+        if (!c) return;
+        
+        if (!appData.history || appData.history.length === 0) { 
             c.innerHTML = ''; 
-            e.classList.remove('hidden'); 
+            if (e) e.classList.remove('hidden'); 
+            if (emptyMsg) emptyMsg.textContent = 'Aún no hay actividades registradas en la bitácora.';
+            if (countBadge) countBadge.textContent = '0 registros';
+            if (filterLabel) filterLabel.textContent = 'Historial vacío';
             return; 
         }
         
-        e.classList.add('hidden');
+        const dateInput = document.getElementById('historyDateFilter');
+        const selectedDateStr = dateInput ? dateInput.value : ''; // Formato yyyy-mm-dd
+        const searchInput = document.getElementById('historySearchInput');
+        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        
+        let filtered = appData.history.filter(log => {
+            if (!log.timestamp) return false;
+            
+            // 1. Filtro por fecha si hay fecha seleccionada
+            if (selectedDateStr) {
+                const datePart = log.timestamp.split(',')[0].trim();
+                const parts = datePart.split('/');
+                if (parts.length === 3) {
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    const logFormatted = `${year}-${month}-${day}`;
+                    if (logFormatted !== selectedDateStr) return false;
+                } else {
+                    return false;
+                }
+            }
+
+            // 2. Filtro por categoría
+            if (currentHistoryCategory === 'validaciones') {
+                const act = (log.action || '').toLowerCase();
+                if (!act.includes('validó') && !act.includes('aprobó') && !act.includes('rechazó') && !act.includes('validada')) return false;
+            } else if (currentHistoryCategory === 'tareas') {
+                const act = (log.action || '').toLowerCase();
+                const proj = (log.projectName || '').toLowerCase();
+                if (!act.includes('tarea') && !proj.includes('diaria') && !proj.includes('general')) return false;
+            } else if (currentHistoryCategory === 'proyectos') {
+                const act = (log.action || '').toLowerCase();
+                if (!act.includes('proyecto') && !act.includes('módulo') && !act.includes('estado') && !act.includes('avance') && !act.includes('reubicó')) return false;
+            }
+
+            // 3. Filtro por búsqueda de texto
+            if (q) {
+                const textMatch = (log.projectName || '').toLowerCase().includes(q) ||
+                                  (log.action || '').toLowerCase().includes(q) ||
+                                  (log.by || '').toLowerCase().includes(q) ||
+                                  (log.timestamp || '').toLowerCase().includes(q);
+                if (!textMatch) return false;
+            }
+
+            return true;
+        });
+
+        if (countBadge) countBadge.textContent = `${filtered.length} de ${appData.history.length}`;
+        if (filterLabel) {
+            let labelParts = [];
+            if (selectedDateStr) {
+                const [y, m, d] = selectedDateStr.split('-');
+                labelParts.push(`Fecha: ${d}/${m}/${y}`);
+            }
+            if (currentHistoryCategory !== 'all') {
+                labelParts.push(`Categoría: ${currentHistoryCategory}`);
+            }
+            if (q) {
+                labelParts.push(`Búsqueda: "${q}"`);
+            }
+            filterLabel.textContent = labelParts.length > 0 ? labelParts.join(' | ') : 'Mostrando historial completo';
+        }
+
+        if (filtered.length === 0) { 
+            c.innerHTML = ''; 
+            if (e) e.classList.remove('hidden'); 
+            if (emptyMsg) emptyMsg.textContent = (selectedDateStr || q || currentHistoryCategory !== 'all') ? 'No hay registros que coincidan con los filtros aplicados.' : 'No hay registros en la bitácora.';
+            return; 
+        }
+        
+        if (e) e.classList.add('hidden');
         c.innerHTML = filtered.map(log => {
             const col = consultants[log.by] ? consultants[log.by].color : '#8e8e93';
-            return `<div class="bg-black/30 border border-white/5 rounded-2xl p-4 relative overflow-hidden shadow-inner"><div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-80" style="background-color: ${col}"></div><div class="flex justify-between items-start mb-2"><span class="text-[10px] text-gray-500 font-mono tracking-widest pl-1">${log.timestamp}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/10 border border-white/5 uppercase" style="color: ${col}">${escapeHtml(log.by)}</span></div><p class="text-xs font-semibold text-white mb-1 leading-tight pl-1">${escapeHtml(log.projectName)}</p><p class="text-[11px] text-gray-400 pl-1">${escapeHtml(log.action)}</p></div>`}).join('');
-    }
+            const isVal = (log.action || '').includes('Validó') || (log.action || '').includes('Aprobó');
+            const isRej = (log.action || '').includes('Rechazó');
+            const isDel = (log.action || '').includes('Borró') || (log.action || '').includes('Eliminó');
+            
+            let tagBadge = '';
+            if (isVal) tagBadge = '<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.2 rounded font-bold uppercase">Validación</span>';
+            else if (isRej || isDel) tagBadge = '<span class="text-[8px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 px-1.5 py-0.2 rounded font-bold uppercase">Atención</span>';
+
+            return `<div class="bg-black/30 border border-white/5 rounded-2xl p-4 relative overflow-hidden shadow-inner group hover:border-white/15 transition">
+                <div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-80" style="background-color: ${col}"></div>
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-[10px] text-gray-400 font-mono tracking-widest pl-1">🕒 ${log.timestamp}</span>
+                    <div class="flex items-center gap-1.5">
+                        ${tagBadge}
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/10 border border-white/5 uppercase" style="color: ${col}">👤 ${escapeHtml(log.by)}</span>
+                    </div>
+                </div>
+                <p class="text-xs font-semibold text-white mb-1 leading-tight pl-1">${escapeHtml(log.projectName)}</p>
+                <p class="text-[11px] text-gray-300 pl-1 leading-relaxed">${escapeHtml(log.action)}</p>
+            </div>`;
+        }).join('');
+    };
 
     window.renderDashboard = function() {
-        let t = 0, c = 0, p = 0, pend = 0, noIni = 0, o = 0, totalProg = 0; let consCounts = {};
-        const isOver = (proj) => { if(!proj.deadline || proj.status === 'Completado') return false; const [y,m,d] = proj.deadline.split('-'); return new Date(y, m-1, d) < new Date(new Date().setHours(0,0,0,0)); };
-        const tally = (proj) => { t++; totalProg += (proj.progress || 0); if(proj.status === 'Completado') c++; else if(proj.status === 'En Progreso') p++; else if(proj.status === 'No Iniciado') noIni++; else pend++; if(isOver(proj)) o++; getProjectConsultants(proj).forEach(cons => { consCounts[cons] = (consCounts[cons] || 0) + 1; }); };
-        appData.directProjects.forEach(tally); appData.modules.forEach(m => (m.projects||[]).forEach(tally));
+        let t = 0, c = 0, p = 0, pend = 0, noIni = 0, o = 0, totalProg = 0;
+        let withDeadline = 0;
+        let riskCount = 0;
+        let totalDocsRequired = 0, totalDocsChecked = 0;
+        let consStats = {};
+        let moduleStats = [];
+
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const in72Hours = new Date(todayMidnight.getTime() + (3 * 24 * 60 * 60 * 1000));
+
+        const isOver = (proj) => { 
+            if (!proj.deadline || proj.status === 'Completado') return false; 
+            const [y, m, d] = proj.deadline.split('-'); 
+            return new Date(y, m - 1, d) < todayMidnight; 
+        };
+
+        const isRisk = (proj) => {
+            if (!proj.deadline || proj.status === 'Completado') return false;
+            const [y, m, d] = proj.deadline.split('-');
+            const dDate = new Date(y, m - 1, d);
+            return dDate >= todayMidnight && dDate <= in72Hours && (proj.progress || 0) < 80;
+        };
+
+        const countDocs = (proj) => {
+            if (globalDocs && globalDocs.length > 0) {
+                globalDocs.forEach(d => {
+                    totalDocsRequired++;
+                    const docState = proj.docs ? proj.docs[d.id] : null;
+                    if (docState && (docState.checked || (docState.na && docState.naValidated))) {
+                        totalDocsChecked++;
+                    }
+                });
+            }
+        };
+
+        const tally = (proj) => { 
+            t++; 
+            totalProg += (proj.progress || 0); 
+            if (proj.deadline) withDeadline++;
+            
+            const over = isOver(proj);
+            const risk = isRisk(proj);
+            if (over) o++;
+            if (risk) riskCount++;
+
+            if (proj.status === 'Completado') c++; 
+            else if (proj.status === 'En Progreso') p++; 
+            else if (proj.status === 'No Iniciado') noIni++; 
+            else pend++; 
+
+            countDocs(proj);
+
+            const projCons = getProjectConsultants(proj);
+            projCons.forEach(cons => { 
+                if (!consStats[cons]) {
+                    consStats[cons] = { completed: 0, inProgress: 0, overdue: 0 };
+                }
+                if (proj.status === 'Completado') {
+                    consStats[cons].completed++;
+                } else if (over) {
+                    consStats[cons].overdue++;
+                } else {
+                    consStats[cons].inProgress++;
+                }
+            }); 
+        };
+
+        (appData.directProjects || []).forEach(tally); 
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(tally));
+
+        // Estadísticas por módulo
+        if (appData.directProjects && appData.directProjects.length > 0) {
+            const mProg = appData.directProjects.reduce((acc, x) => acc + (x.progress || 0), 0);
+            moduleStats.push({
+                name: appData.directHub.name || 'Proyectos Directos',
+                count: appData.directProjects.length,
+                avg: Math.round(mProg / appData.directProjects.length),
+                color: appData.directHub.color || '#35aee8'
+            });
+        }
+        (appData.modules || []).forEach(m => {
+            const projs = m.projects || [];
+            if (projs.length > 0) {
+                const mProg = projs.reduce((acc, x) => acc + (x.progress || 0), 0);
+                moduleStats.push({
+                    name: m.name,
+                    count: projs.length,
+                    avg: Math.round(mProg / projs.length),
+                    color: m.color || '#0071e3'
+                });
+            }
+        });
+
+        // 1. KPI Cálculos
+        const slaRate = withDeadline > 0 ? Math.max(0, Math.round(((withDeadline - o) / withDeadline) * 100)) : 100;
+        const docsRate = totalDocsRequired > 0 ? Math.round((totalDocsChecked / totalDocsRequired) * 100) : 100;
+        const avgGlobal = t > 0 ? Math.round(totalProg / t) : 0;
+
+        // 2. Renderizado de Elementos DOM KPI
+        const elTotal = document.getElementById('dashTotal'); if (elTotal) elTotal.textContent = t;
+        const elComp = document.getElementById('dashCompleted'); if (elComp) elComp.textContent = c;
+        const elProg = document.getElementById('dashProgress'); if (elProg) elProg.textContent = p;
+        const elOver = document.getElementById('dashOverdue'); if (elOver) elOver.textContent = o;
+        const elOverBadge = document.getElementById('dashOverdueBadge'); if (elOverBadge) elOverBadge.textContent = o;
         
-        document.getElementById('dashTotal').textContent = t; document.getElementById('dashCompleted').textContent = c; document.getElementById('dashProgress').textContent = p; document.getElementById('dashOverdue').textContent = o;
-        const avg = t > 0 ? Math.round(totalProg / t) : 0; document.getElementById('dashGlobalBar').style.width = `${avg}%`; document.getElementById('dashGlobalText').textContent = `${avg}%`;
+        const elSlaRate = document.getElementById('dashSlaRate'); if (elSlaRate) elSlaRate.textContent = `${slaRate}%`;
+        const elSlaSub = document.getElementById('dashSlaSub');
+        if (elSlaSub) {
+            if (slaRate >= 85) { elSlaSub.textContent = 'Excelente ritmo'; elSlaSub.className = 'text-[9px] text-[#30d158] mt-0.5 font-medium truncate'; }
+            else if (slaRate >= 70) { elSlaSub.textContent = 'En margen regular'; elSlaSub.className = 'text-[9px] text-[#ff9f0a] mt-0.5 font-medium truncate'; }
+            else { elSlaSub.textContent = 'Atención requerida'; elSlaSub.className = 'text-[9px] text-[#ff453a] mt-0.5 font-medium truncate'; }
+        }
 
-        const ctxStatus = document.getElementById('statusChart').getContext('2d');
-        if(window.statusChartInstance) window.statusChartInstance.destroy();
-        window.statusChartInstance = new Chart(ctxStatus, { type: 'doughnut', data: { labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados'], datasets: [{ data: [c, p, pend, noIni], backgroundColor: ['#30d158', '#0071e3', '#ff9f0a', '#48484a'], borderWidth: 0, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8e8e93', font: {size: 10, family: 'Inter'} } } }, cutout: '75%' } });
+        const elRiskCount = document.getElementById('dashRiskCount'); if (elRiskCount) elRiskCount.textContent = riskCount;
+        const elRiskSub = document.getElementById('dashRiskSub'); if (elRiskSub) elRiskSub.textContent = riskCount === 1 ? '1 proyecto en riesgo' : `${riskCount} proyectos en riesgo`;
 
-        const ctxCons = document.getElementById('consultantChart').getContext('2d');
-        if(window.consultantChartInstance) window.consultantChartInstance.destroy();
-        let cLabels = Object.keys(consCounts).sort((a,b) => consCounts[b] - consCounts[a]), cData = cLabels.map(l => consCounts[l]), cColors = cLabels.map(l => consultants[l] ? consultants[l].color : '#48484a');
-        window.consultantChartInstance = new Chart(ctxCons, { type: 'bar', data: { labels: cLabels, datasets: [{ label: 'Proyectos', data: cData, backgroundColor: cColors, borderRadius: 100 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#636366' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8e8e93', font: {size: 10} }, grid: { display: false } } } } });
-    }
+        const elDocsRate = document.getElementById('dashDocsRate'); if (elDocsRate) elDocsRate.textContent = `${docsRate}%`;
+        const elDocsSub = document.getElementById('dashDocsSub'); if (elDocsSub) elDocsSub.textContent = `${totalDocsChecked} de ${totalDocsRequired} validados`;
+
+        const elGlobalBar = document.getElementById('dashGlobalBar'); if (elGlobalBar) elGlobalBar.style.width = `${avgGlobal}%`;
+        const elGlobalText = document.getElementById('dashGlobalText'); if (elGlobalText) elGlobalText.textContent = `${avgGlobal}%`;
+
+        // 3. Gráfica 1: Balance de Carga por Consultor (Stacked Bar)
+        const ctxCons = document.getElementById('consultantChart')?.getContext('2d');
+        if (ctxCons) {
+            if (window.consultantChartInstance) window.consultantChartInstance.destroy();
+            
+            const cLabels = Object.keys(consStats).sort((a, b) => {
+                const totalA = consStats[a].completed + consStats[a].inProgress + consStats[a].overdue;
+                const totalB = consStats[b].completed + consStats[b].inProgress + consStats[b].overdue;
+                return totalB - totalA;
+            });
+
+            const dataDone = cLabels.map(l => consStats[l].completed);
+            const dataProg = cLabels.map(l => consStats[l].inProgress);
+            const dataOver = cLabels.map(l => consStats[l].overdue);
+
+            window.consultantChartInstance = new Chart(ctxCons, {
+                type: 'bar',
+                data: {
+                    labels: cLabels,
+                    datasets: [
+                        { label: 'Completados', data: dataDone, backgroundColor: '#30d158', borderRadius: 4, stack: 'carga' },
+                        { label: 'En Tiempo', data: dataProg, backgroundColor: '#0071e3', borderRadius: 4, stack: 'carga' },
+                        { label: 'Vencidos', data: dataOver, backgroundColor: '#ff453a', borderRadius: 4, stack: 'carga' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#8e8e93', font: { size: 9, family: 'Inter' }, boxWidth: 10, padding: 8 } }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#8e8e93', font: { size: 9 } }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#636366', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        // 4. Gráfica 2: Rendimiento por Módulo de Negocio (Horizontal Bar)
+        const ctxMod = document.getElementById('moduleChart')?.getContext('2d');
+        if (ctxMod) {
+            if (window.moduleChartInstance) window.moduleChartInstance.destroy();
+            
+            moduleStats.sort((a, b) => b.avg - a.avg);
+            const mLabels = moduleStats.map(m => m.name.length > 24 ? m.name.substring(0, 22) + '…' : m.name);
+            const mData = moduleStats.map(m => m.avg);
+            const mColors = moduleStats.map(m => m.color || '#0071e3');
+
+            window.moduleChartInstance = new Chart(ctxMod, {
+                type: 'bar',
+                data: {
+                    labels: mLabels,
+                    datasets: [{
+                        label: 'Avance %',
+                        data: mData,
+                        backgroundColor: mColors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` Avance: ${ctx.parsed.x}% (${moduleStats[ctx.dataIndex]?.count || 0} proyectos)`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8e8e93', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#ffffff', font: { size: 9.5, weight: '600' } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 5. Gráfica 3: Estado General del Portafolio (Doughnut)
+        const ctxStatus = document.getElementById('statusChart')?.getContext('2d');
+        if (ctxStatus) {
+            if (window.statusChartInstance) window.statusChartInstance.destroy();
+            window.statusChartInstance = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados', 'Vencidos'],
+                    datasets: [{
+                        data: [c, p, pend, noIni, o],
+                        backgroundColor: ['#30d158', '#0071e3', '#ff9f0a', '#48484a', '#ff453a'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#8e8e93', font: { size: 9.5, family: 'Inter' }, boxWidth: 10, padding: 8 } }
+                    },
+                    cutout: '72%'
+                }
+            });
+        }
+    };
 
     window.exportCSV = function() {
         let csv = "Tipo,Módulo,Proyecto,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
         const addRow = (t, m, p) => { csv += `"${t}","${m}","${p.name}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; };
         appData.directProjects.forEach(p => addRow('Directo', appData.directHub.name, p)); appData.modules.forEach(m => (m.projects||[]).forEach(p => addRow('Módulo', m.name, p)));
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`; link.click();
-    }
+    };
     
     window.exportData = function() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, consultants, globalDocs }));
       const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", `sicom_backup_${new Date().toISOString().slice(0,10)}.json`); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
-    }
+    };
+
+    window.safeImportJSON = function() {
+        if (confirm("⚠️ ADVERTENCIA DE SEGURIDAD:\n\nAl importar un archivo JSON se reemplazará el estado completo del sistema y se sincronizará con la nube.\n\n¿Estás seguro de que deseas continuar?")) {
+            document.getElementById('importFile').click();
+        }
+    };
+
+    window.safeForceCloudSync = async function() {
+        const confirmation = prompt("⚠️ PELIGRO DE SOBREESCRITURA GLOBAL:\n\nEsta acción forzará los datos que tienes en este navegador hacia la base de datos central en la nube, sobreescribiendo cualquier cambio reciente realizado por otros usuarios concurrentes.\n\nPara confirmar esta acción crítica, escribe exactamente 'CONFIRMAR':");
+        if (confirmation === 'CONFIRMAR') {
+            await window.forceCloudSync();
+        } else if (confirmation !== null) {
+            window.showToast("Acción cancelada. No se alteró la nube.", false);
+        }
+    };
 
     window.importData = function(event) {
       const file = event.target.files[0]; if (!file) return;
@@ -2247,11 +3585,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           if(imported.appData && imported.consultants) {
             appData = imported.appData; consultants = imported.consultants; if(imported.globalDocs) globalDocs = imported.globalDocs;
             ensureDataStructure(); window.saveData(true); refreshUI();
+            window.showToast("Datos importados con éxito");
           }
         } catch (err) { window.showToast("Error al importar", true); }
       };
       reader.readAsText(file);
-    }
+    };
 
     // Inicialización directa
 
@@ -2311,11 +3650,25 @@ window.toggleDailyDrawer = function() {
         const input = document.getElementById('newDailyTaskInput'); const text = input.value.trim(); if (!text) return;
         const assigneeSel = document.getElementById('newDailyTaskAssignee').value;
         const assignee = assigneeSel || localAuthor;
+        const now = new Date();
+        const assignDate = now.toLocaleDateString('es-MX');
+        const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         
         appData.dailyTasks = appData.dailyTasks || [];
-        appData.dailyTasks.push({ id: 'dt_' + Date.now(), text: text, assignee: assignee, assignedBy: localAuthor, date: new Date().toLocaleDateString('es-MX'), done: false });
-        input.value = ''; logActivity('daily', 'Actividades Diarias', `Añadió tarea diaria para ${assignee}`, localAuthor);
+        appData.dailyTasks.push({ 
+            id: 'dt_' + Date.now(), 
+            text: text, 
+            assignee: assignee, 
+            assignedBy: localAuthor, 
+            assignDate: assignDate,
+            assignTime: assignTime,
+            date: assignDate, 
+            done: false 
+        });
+        input.value = ''; 
+        logActivity('daily', 'Actividades Diarias', `Asignó tarea diaria a ${assignee}: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(false);
+        window.renderDailyTasks();
     };
 
 // NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD DIARIA
@@ -2339,17 +3692,23 @@ window.toggleDailyDrawer = function() {
         const text = document.getElementById('fdtDescription').value.trim();
         if (!text) { window.showToast("La descripción es obligatoria", true); return; }
         
+        const now = new Date();
+        const assignDate = now.toLocaleDateString('es-MX');
+        const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+        
         appData.dailyTasks = appData.dailyTasks || [];
         appData.dailyTasks.push({ 
             id: 'dt_' + Date.now(), 
             text: text, 
             assignee: localAuthor, 
             assignedBy: localAuthor, 
-            date: new Date().toLocaleDateString('es-MX'), 
+            assignDate: assignDate,
+            assignTime: assignTime,
+            date: assignDate, 
             done: false 
         });
         
-        logActivity('daily', 'Actividades Diarias', `Añadió tarea diaria personal`, localAuthor);
+        logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea diaria: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(true);
         window.closeFastDailyTaskModal();
         if (isDailyDrawerOpen) window.renderDailyTasks();
@@ -2361,22 +3720,32 @@ window.toggleDailyTask = function(taskId) {
         if (t) {
             const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
             const isAssigner = t.assignedBy === localAuthor;
+            const now = new Date();
+            const valDate = now.toLocaleDateString('es-MX');
+            const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             
             if (t.done === true) {
                 if (isSuper || isAssigner) {
-                    t.done = false; delete t.feedback;
-                    logActivity('daily', 'Actividades Diarias', `Desmarcó tarea: ${t.text}`, localAuthor);
+                    t.done = false; 
+                    delete t.feedback; delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                    logActivity('daily', 'Actividades Diarias', `Reabrió tarea diaria de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor);
                     window.saveData(false);
+                    window.renderDailyTasks();
                 }
             } else if (t.done === 'pending') {
                 if (isSuper || isAssigner) {
                     t.done = true;
-                    logActivity('daily', 'Actividades Diarias', `Validó tarea: ${t.text}`, localAuthor);
+                    t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
+                    const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
+                    logActivity('daily', 'Actividades Diarias', `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
                     window.saveData(false);
+                    window.renderDailyTasks();
+                    window.triggerCelebration();
                 } else if (t.assignee === localAuthor) {
                     t.done = false; delete t.feedback;
-                    logActivity('daily', 'Actividades Diarias', `Canceló envío a validación`, localAuthor);
+                    logActivity('daily', 'Actividades Diarias', `Canceló envío a validación: "${t.text}"`, localAuthor);
                     window.saveData(false);
+                    window.renderDailyTasks();
                 }
             } else {
                 window.openTaskFeedbackModal(taskId, 'daily');
@@ -2396,217 +3765,374 @@ window.toggleDailyTask = function(taskId) {
         window.saveData(false);
     };
 
+// === SISTEMA DE PESTAÑAS Y NOTIFICACIONES UNIFICADAS EN EL PANEL IZQUIERDO ===
+let currentNotifTab = 'pending'; // 'alerts' | 'pending' | 'validation' | 'completed'
+
+window.setNotifTab = function(tabName) {
+    currentNotifTab = tabName;
+    window.updateNotifTabsUI();
+    window.renderDailyTasks();
+};
+
+window.updateNotifTabsUI = function() {
+    ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
+        const btn = document.getElementById(`notifTabBtn-${t}`);
+        if (!btn) return;
+        if (t === currentNotifTab) {
+            btn.className = 'notif-tab-btn flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 bg-white/15 text-white shadow-sm border border-white/20 whitespace-nowrap';
+        } else {
+            btn.className = 'notif-tab-btn flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap';
+        }
+    });
+};
+
+// Helper universal para validar o rechazar cualquier tarea (diaria, global o de proyecto)
+window.validateAnyTask = function(sourceType, strictType, projectId, taskId, approve) {
+    if (sourceType === 'global') {
+        window.validateGlobalTask(taskId, approve);
+    } else if (sourceType === 'project') {
+        window.validateProjectTask(strictType, projectId, taskId, approve);
+    } else if (sourceType === 'daily') {
+        const t = (appData.dailyTasks || []).find(x => x.id === taskId);
+        if (t) {
+            const now = new Date();
+            const valDate = now.toLocaleDateString('es-MX');
+            const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            t.done = approve ? true : false;
+            if (approve) {
+                t.validatedDate = valDate;
+                t.validatedTime = valTime;
+                t.validatedBy = localAuthor;
+            } else {
+                delete t.validatedDate;
+                delete t.validatedTime;
+                delete t.validatedBy;
+                delete t.feedback;
+            }
+            const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
+            logActivity('daily', 'Actividades Diarias', approve ? `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó o reabrió tarea diaria: "${t.text}"`, localAuthor);
+            window.saveData(false);
+            window.renderAlerts();
+            window.renderDailyTasks();
+            if (approve) window.triggerCelebration();
+        }
+    }
+};
+
 window.renderDailyTasks = function() {
     const container = document.getElementById('dailyTasksContainer'); 
     const badge = document.getElementById('dailyAlertsBadge');
-    
-    let alertCount = 0;
-    const shownIds = new Set(); window.__dailyShownIds = shownIds; // ids de tareas listadas (evita duplicarlas como alerta)
+    if (!container) return;
+
+    window.updateNotifTabsUI();
     const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
 
-    // 1. RECOLECTOR MAESTRO: Unifica todas las fuentes
+    // 1. RECOLECTOR MAESTRO DE TAREAS
     let allTasks = [];
-    
-    // A. Tareas Diarias
-    if(appData.dailyTasks) {
+    if (appData.dailyTasks) {
         appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea Diaria'}));
     }
-    // B. Tareas Globales
-    if(appData.globalTasks) {
+    if (appData.globalTasks) {
         appData.globalTasks.forEach(t => allTasks.push({...t, sourceType: 'global', pName: 'Asignación Global'}));
     }
-    // C. Tareas de Proyectos Directos
-    if(appData.directProjects) {
+    if (appData.directProjects) {
         appData.directProjects.forEach(p => {
-            if(p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'direct-project'}));
+            if (p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'direct-project'}));
         });
     }
-    // D. Tareas de Módulos
-    if(appData.modules) {
+    if (appData.modules) {
         appData.modules.forEach(m => {
-            if(m.projects) {
+            if (m.projects) {
                 m.projects.forEach(p => {
-                    if(p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'project'}));
+                    if (p.tasks) p.tasks.forEach(t => allTasks.push({...t, sourceType: 'project', projectId: p.id, pName: p.name, strictType: 'project'}));
                 });
             }
         });
     }
 
-    if (allTasks.length === 0) { 
-        if(badge) badge.classList.add('hidden');
-        if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No hay notificaciones ni trabajo pendiente.</p></div>`; 
-        return; 
+    // 2. ALERTAS (de proyectos vencidos, No Iniciados, etc. calculadas por renderAlerts)
+    const alertsList = window.__lastAlerts || [];
+
+    // 3. CLASIFICACIÓN DE TAREAS SEGÚN PERMISOS Y ESTADO
+    const canViewTask = (t) => isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor;
+    const visibleTasks = allTasks.filter(canViewTask);
+
+    const pendingTasks = visibleTasks.filter(t => t.done === false);
+    const validationTasks = visibleTasks.filter(t => t.done === 'pending');
+    const completedTasks = visibleTasks.filter(t => t.done === true);
+
+    // 4. ACTUALIZACIÓN DE CONTADORES EN LAS PESTAÑAS
+    const tabCounts = {
+        alerts: alertsList.length,
+        pending: pendingTasks.length,
+        validation: validationTasks.length,
+        completed: completedTasks.length
+    };
+    ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
+        const el = document.getElementById(`notifTabCount-${t}`);
+        if (el) el.textContent = tabCounts[t];
+    });
+
+    // 5. GLOBO FLOTANTE DE ATENCIÓN (suma alertas críticas + validaciones pendientes + mis pendientes)
+    let alertBadgeTotal = alertsList.length;
+    if (isSuper) {
+        alertBadgeTotal += validationTasks.length;
+        alertBadgeTotal += pendingTasks.filter(t => t.assignee === localAuthor).length;
+    } else {
+        alertBadgeTotal += validationTasks.filter(t => t.assignedBy === localAuthor).length;
+        alertBadgeTotal += pendingTasks.filter(t => t.assignee === localAuthor).length;
     }
-    
-    let grouped = {};
-    
-    // 2. FILTRADO INTELIGENTE Y AGRUPACIÓN
-    allTasks.forEach(t => {
-        // Regla: Consultor solo ve las suyas (asignadas A él, o POR él en caso de que sea el autor y siga pendiente).
-        // Jefes ven TODO.
-        if (isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor) {
-            let groupKey = t.assignee;
-            // Si el jefe lo está viendo y no tiene asignado, va a un grupo "Sin Asignar"
-            if (!groupKey) groupKey = 'Sin Asignar';
-            
-            if (!grouped[groupKey]) grouped[groupKey] = [];
-            grouped[groupKey].push(t); shownIds.add(t.id);
+    if (badge) {
+        if (alertBadgeTotal > 0) {
+            badge.textContent = alertBadgeTotal;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
         }
-        
-        // Lógica de Alertas (Globo Rojo)
-        // 1. Tareas en validación (pendientes de jefe)
-        if (t.done === 'pending' && (isSuper || t.assignedBy === localAuthor)) alertCount++; 
-        // 2. Tareas activas (No hechas) para el consultor
-        else if (t.done === false && t.assignee === localAuthor) alertCount++; 
-    });
-
-    if(badge) {
-        if (alertCount > 0) { badge.textContent = alertCount; badge.classList.remove('hidden'); } 
-        else { badge.classList.add('hidden'); }
-    }
-    
-    if (Object.keys(grouped).length === 0) { 
-        if(container) container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">No tienes notificaciones hoy.</p></div>`; 
-        return; 
     }
 
-    // Ordenar grupos: Primero yo, luego los demás alfabéticamente
-    const sorted = Object.keys(grouped).sort((a, b) => { 
-        if (a === localAuthor) return -1; 
-        if (b === localAuthor) return 1; 
-        return a.localeCompare(b); 
-    });
-    
-    if(container) container.innerHTML = sorted.map(cons => {
-        // FIX MATEMÁTICO: Ordenamos las tareas de más nuevas a más viejas leyendo el timestamp del ID
-        const tasks = grouped[cons].sort((a, b) => (parseInt((b.id.split('_')[1]) || 0)) - (parseInt((a.id.split('_')[1]) || 0)));
-        const cData = consultants[cons] || { color: '#8e8e93' };
-        const pCount = tasks.filter(t => t.done !== true).length;
-        
-        return `<div class="mb-6">
-            <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2" style="color: ${cData.color}">
-                <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}
-                ${pCount === 0 ? `<span class="bg-[#30d158]/20 text-[#30d158] px-2 py-0.5 rounded border border-[#30d158]/30 shadow-inner ml-auto">Al Día ✅</span>` : `<span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${pCount} pdtes.</span>`}
-            </h3>
-            <div class="space-y-2">
-            ${tasks.map(t => {
-                const isMyTask = t.assignee === localAuthor;
-                const isAssigner = t.assignedBy === localAuthor;
-                const canEdit = isSuper || isMyTask || isAssigner;
-                const canDel = isSuper || isAssigner;
-                
-                let statusBadge = '';
-                let boxUI = '';
-                
-                // Enrutador de acciones dependiendo del tipo de tarea
-                let toggleAction = `toggleDailyTask('${t.id}')`;
-                let openAction = '';
-                if(t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`; // Para jefe (Aprobar directo) o llamar feedback (abajo)
-                if(t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}'); currentSelection.id='${t.projectId}'; currentSelection.type='${t.strictType}';`;
-                
-                if (t.sourceType === 'project' || t.sourceType === 'global') {
-                     openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openGlobalTaskModal();`;
-                }
+    // 6. RENDERIZADO DEL CONTENIDO DE LA PESTAÑA SELECCIONADA
 
-                if (t.done === 'pending') {
-                    statusBadge = `<span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">⏳ En Validación</span>`;
-                    if (isSuper || isAssigner) {
-                        boxUI = `<button onclick="if('${t.sourceType}'==='daily'){toggleDailyTask('${t.id}')} else if('${t.sourceType}'==='global'){validateGlobalTask('${t.id}', true)} else {validateProjectTask('${t.strictType}', '${t.projectId}', '${t.id}', true)}" class="h-4 w-4 rounded border border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ff9f0a]/40 transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></button>`;
-                    } else {
-                        boxUI = `<input type="checkbox" checked onchange="${toggleAction}" class="rounded border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] focus:ring-[#ff9f0a] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
-                    }
-                } else if (t.done === true) {
-                    statusBadge = `<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">✅ Validada</span>`;
-                    boxUI = `<input type="checkbox" checked onchange="${toggleAction}" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] focus:ring-[#30d158] h-4 w-4 shrink-0 cursor-pointer mt-0.5" ${!(isSuper || isAssigner) ? 'disabled class="... opacity-50 cursor-not-allowed"' : ''}>`;
-                } else {
-                    boxUI = `<input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''}>`;
-                }
+    // --- PESTAÑA A: ALERTAS IMPORTANTES ---
+    if (currentNotifTab === 'alerts') {
+        if (alertsList.length === 0) {
+            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">🎉</span><p class="text-xs text-gray-300">¡Al día! No hay proyectos vencidos ni alertas importantes.</p></div>`;
+            return;
+        }
 
-                // Definimos el color del ícono de origen
-                let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+        const style = { 
+            danger: ['text-[#ff453a]', 'bg-[#ff453a]/10', 'border-[#ff453a]/30'], 
+            warning: ['text-[#ff9f0a]', 'bg-[#ff9f0a]/10', 'border-[#ff9f0a]/30'], 
+            info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'] 
+        };
 
-                return `
-                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 group transition hover:bg-white/5 ${t.done === true ? 'opacity-50' : (t.done === 'pending' ? 'border-[#ff9f0a]/30 bg-[#ff9f0a]/5' : 'shadow-inner')}" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') {${openAction} }">
-                    ${boxUI}
-                    <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
-                        <div class="flex items-start justify-between">
-                            <span class="text-xs text-white break-words pr-2 ${t.done === true ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>${statusBadge}
-                        </div>
-                        <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                            <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>${t.deadline || t.date ? `<span class="text-[9px] text-gray-500 font-mono">📅 ${escapeHtml(t.deadline || t.date)}</span>` : ''}
-                            ${t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner border border-white/5">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
-                        </div>
-                        ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/60 border border-white/10 p-2 rounded shadow-inner w-full">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
-                    </div>
-                    ${canDel && t.sourceType === 'daily' ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
-                </div>`
-            }).join('')}
-            </div></div>`;
-    }).join('');
-};
-
-// === UNIFICACIÓN DE NOTIFICACIONES EN EL PANEL IZQUIERDO ===
-// Todas las notificaciones (tareas + alertas de proyecto) se muestran en "Notificaciones y Trabajo".
-// renderAlerts() calcula las alertas (window.__lastAlerts); aquí se pintan arriba de la lista de tareas.
-const baseRenderDailyTasks = window.renderDailyTasks;
-window.renderDailyTasks = function() {
-    baseRenderDailyTasks();
-    try {
-        const container = document.getElementById('dailyTasksContainer');
-        const badge = document.getElementById('dailyAlertsBadge');
-        const bellBadge = document.getElementById('alertsBadge');
-        if (!container) return;
-
-        // Alertas que NO son tareas ya listadas abajo (proyecto vencido, "No Iniciado", tareas no visibles en la lista)
-        const shown = window.__dailyShownIds || new Set();
-        const extra = (window.__lastAlerts || []).filter(a => { const t = a.taskInfo || a.globalTaskInfo; return !(t && shown.has(t.id)); });
-
-        if (extra.length > 0) {
-            const style = { danger: ['text-[#ff453a]', 'bg-[#ff453a]/10', 'border-[#ff453a]/30'], warning: ['text-[#ff9f0a]', 'bg-[#ff9f0a]/10', 'border-[#ff9f0a]/30'], info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'] };
-            const cards = extra.map(a => {
+        container.innerHTML = `
+        <div class="space-y-3 pb-6">
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest px-1">Alertamientos del Sistema (${alertsList.length})</p>
+            ${alertsList.map(a => {
                 const [txt, bg, br] = style[a.alertType] || style.info;
                 const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
-                const canOpen = a.pType !== 'global';
+                const canOpen = a.pType && a.pType !== 'global';
                 const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
-                return `<div class="${bg} border ${br} rounded-xl p-3 ${canOpen ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} transition shadow-inner"${click}>
-                    <div class="flex items-start gap-2">
-                        <span class="text-base leading-none mt-0.5">${a.icon}</span>
+                return `
+                <div class="${bg} border ${br} rounded-2xl p-4 ${canOpen ? 'cursor-pointer hover:opacity-85' : 'cursor-default'} transition shadow-inner" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
+                    <div class="flex items-start gap-2.5">
+                        <span class="text-lg leading-none mt-0.5">${a.icon}</span>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-xs font-semibold ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                            <p class="text-[9px] text-gray-400 uppercase tracking-widest truncate">└ ${escapeHtml(a.parentName)}</p>
-                            <p class="text-[10px] ${txt} mt-1.5 leading-snug break-words">${escapeHtml(a.reason)}</p>
-                            <p class="text-[9px] text-gray-400 font-mono mt-1 truncate">👤 ${escapeHtml(users)}</p>
+                            <div class="flex items-center justify-between gap-2">
+                                <h4 class="text-xs font-semibold ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
+                                ${canOpen ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded border border-white/5 shrink-0">Ver en mapa ↗</span>` : ''}
+                            </div>
+                            <p class="text-[9px] text-gray-400 uppercase tracking-widest truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
+                            <p class="text-[10px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
+                            <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-gray-400 font-mono">
+                                <span class="bg-black/40 px-2 py-0.5 rounded border border-white/5">👤 ${escapeHtml(users)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>`;
-            }).join('');
+            }).join('')}
+        </div>`;
+        return;
+    }
 
-            // Si la lista estaba vacía, quitar el mensaje "No hay notificaciones" (ya hay alertas que mostrar)
-            container.querySelectorAll(':scope > div.py-20').forEach(el => el.remove());
-            container.insertAdjacentHTML('afterbegin', `<div class="mb-6" data-alerts-section>
-                <h3 class="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-[#ff453a]">⚠️ Alertas
-                    <span class="bg-white/10 text-white px-2 py-0.5 rounded border border-white/5 shadow-inner ml-auto">${extra.length}</span>
-                </h3>
-                <div class="space-y-2">${cards}</div>
-            </div>`);
+    // --- PESTAÑA B: PENDIENTES (DESPLEGABLES POR CONSULTOR) ---
+    if (currentNotifTab === 'pending') {
+        if (pendingTasks.length === 0) {
+            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">¡Al día! No tienes tareas pendientes por realizar.</p></div>`;
+            return;
         }
 
-        // Contador único: tareas pendientes de atención + alertas. Lo muestran el botón flotante y la campana del encabezado.
-        const baseCount = (badge && !badge.classList.contains('hidden')) ? (parseInt(badge.textContent) || 0) : 0;
-        const total = baseCount + extra.length;
-        [badge, bellBadge].forEach(b => {
-            if (!b) return;
-            if (total > 0) { b.textContent = total; b.classList.remove('hidden'); } else { b.classList.add('hidden'); }
+        // Agrupar por consultor asignado
+        let grouped = {};
+        pendingTasks.forEach(t => {
+            const key = t.assignee || 'Sin Asignar';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(t);
         });
-    } catch (e) { console.warn('No se pudieron mostrar las alertas en el panel de notificaciones:', e); }
+
+        // Ordenar: primero yo, luego alfabéticamente
+        const sortedConsultants = Object.keys(grouped).sort((a, b) => {
+            if (a === localAuthor) return -1;
+            if (b === localAuthor) return 1;
+            return a.localeCompare(b);
+        });
+
+        container.innerHTML = `<div class="space-y-3 pb-6">${sortedConsultants.map(cons => {
+            const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
+            const cData = consultants[cons] || { color: '#8e8e93' };
+            const isMe = cons === localAuthor;
+
+            return `
+            <details open class="group bg-black/30 border border-white/10 rounded-2xl overflow-hidden transition shadow-inner">
+                <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none hover:bg-white/5 transition list-none [&::-webkit-details-marker]:hidden">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20 shrink-0" style="background-color: ${cData.color}"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider truncate" style="color: ${cData.color}">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
+                        <span class="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono shrink-0">${tasks.length} pdtes.</span>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="p-3 space-y-2.5 border-t border-white/10 bg-black/20">
+                    ${tasks.map(t => {
+                        const isMyTask = t.assignee === localAuthor;
+                        const isAssigner = t.assignedBy === localAuthor;
+                        const canEdit = isSuper || isMyTask || isAssigner;
+                        const canDel = (isSuper || isAssigner) && t.sourceType === 'daily';
+
+                        let toggleAction = `toggleDailyTask('${t.id}')`;
+                        let openAction = '';
+                        if (t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`;
+                        if (t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}', '${t.projectId}')`;
+                        if (t.sourceType === 'project' || t.sourceType === 'global') {
+                            openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openProjectTaskModal();`;
+                        }
+
+                        let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+
+                        return `
+                        <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-white/10 group transition shadow-inner" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
+                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
+                            <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
+                                <span class="text-xs text-white break-words leading-snug">${escapeHtml(t.text)}</span>
+                                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                    <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                                    ${t.deadline ? `<span class="text-[9px] text-[#ff9f0a] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
+                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner border border-white/5">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                                </div>
+                            </div>
+                            ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1 shrink-0" title="Borrar tarea"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                        </div>`;
+                    }).join('')}
+                </div>
+            </details>`;
+        }).join('')}</div>`;
+        return;
+    }
+
+    // --- PESTAÑA C: EN VALIDACIÓN ---
+    if (currentNotifTab === 'validation') {
+        if (validationTasks.length === 0) {
+            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">⏳</span><p class="text-xs text-gray-300">No hay tareas pendientes de validación.</p></div>`;
+            return;
+        }
+
+        container.innerHTML = `
+        <div class="space-y-3 pb-6">
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest px-1">Esperando Aprobación de Jefatura (${validationTasks.length})</p>
+            ${validationTasks.map(t => {
+                const isAssigner = t.assignedBy === localAuthor;
+                const canApprove = isSuper || isAssigner;
+                const isMyTask = t.assignee === localAuthor;
+
+                let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+
+                return `
+                <div class="bg-[#ff9f0a]/5 border border-[#ff9f0a]/30 rounded-2xl p-4 shadow-inner">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="text-xs text-white font-medium break-words">${escapeHtml(t.text)}</span>
+                        <span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner shrink-0">⏳ En Validación</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 mt-2 flex-wrap">
+                        <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>
+                        <span class="text-[9px] text-gray-300 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">👤 Por: ${escapeHtml(t.assignee || 'Sin asignar')}</span>
+                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                        ${t.submittedDate ? `<span class="text-[9px] text-[#ff9f0a] font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
+                        ${t.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                    </div>
+
+                    ${t.feedback ? `<div class="mt-2.5 text-[10px] text-gray-200 bg-black/60 border border-white/10 p-2.5 rounded-xl shadow-inner break-words">💬 <b>Evidencia registrada:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+
+                    <div class="mt-3 pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                        ${canApprove ? `
+                            <div class="flex gap-2 w-full">
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', true)" class="flex-1 py-1.5 px-3 bg-[#30d158]/20 hover:bg-[#30d158]/30 text-[#30d158] border border-[#30d158]/30 font-bold text-[10px] rounded-xl transition shadow-inner flex items-center justify-center gap-1">
+                                    ✅ Aprobar
+                                </button>
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="flex-1 py-1.5 px-3 bg-[#ff453a]/20 hover:bg-[#ff453a]/30 text-[#ff453a] border border-[#ff453a]/30 font-bold text-[10px] rounded-xl transition shadow-inner flex items-center justify-center gap-1">
+                                    ❌ Rechazar
+                                </button>
+                            </div>
+                        ` : (isMyTask ? `
+                            <div class="flex items-center justify-between w-full">
+                                <span class="text-[9px] text-gray-400 italic">Esperando que un supervisor valide tu entrega...</span>
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="py-1 px-2.5 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-[9px] rounded-lg transition">Cancelar envío</button>
+                            </div>
+                        ` : '<span class="text-[9px] text-gray-500 italic">Pendiente de revisión</span>')}
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`;
+        return;
+    }
+
+    // --- PESTAÑA D: COMPLETADAS / HECHAS ---
+    if (currentNotifTab === 'completed') {
+        if (completedTasks.length === 0) {
+            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">✅</span><p class="text-xs text-gray-300">Aún no hay tareas marcadas como completadas.</p></div>`;
+            return;
+        }
+
+        let grouped = {};
+        completedTasks.forEach(t => {
+            const key = t.assignee || 'Sin Asignar';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(t);
+        });
+
+        const sortedConsultants = Object.keys(grouped).sort((a, b) => {
+            if (a === localAuthor) return -1;
+            if (b === localAuthor) return 1;
+            return a.localeCompare(b);
+        });
+
+        container.innerHTML = `<div class="space-y-3 pb-6">${sortedConsultants.map(cons => {
+            const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
+            const cData = consultants[cons] || { color: '#8e8e93' };
+
+            return `
+            <details class="group bg-black/25 border border-white/10 rounded-2xl overflow-hidden transition shadow-inner">
+                <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none hover:bg-white/5 transition list-none [&::-webkit-details-marker]:hidden">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20 shrink-0" style="background-color: ${cData.color}"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider truncate" style="color: ${cData.color}">${escapeHtml(cons)}</span>
+                        <span class="text-[9px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-2 py-0.5 rounded-full font-mono shrink-0">${tasks.length} hechas ✅</span>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="p-3 space-y-2 border-t border-white/10 bg-black/20">
+                    ${tasks.map(t => {
+                        const canRevert = isSuper || t.assignedBy === localAuthor;
+                        return `
+                        <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 opacity-80 hover:opacity-100 transition shadow-inner">
+                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <span class="text-xs text-gray-300 line-through break-words">${escapeHtml(t.text)}</span>
+                                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                    <span class="text-[9px] text-gray-400 font-semibold">${escapeHtml(t.pName)}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                                    <span class="text-[9px] text-[#30d158] font-mono font-bold bg-[#30d158]/15 border border-[#30d158]/30 px-2 py-0.5 rounded">✅ Validada: ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
+                                </div>
+                                ${t.feedback ? `<div class="mt-1.5 text-[9px] text-gray-400 bg-black/60 p-2 rounded-lg border border-white/5">💬 <i>${escapeHtml(t.feedback)}</i></div>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </details>`;
+        }).join('')}</div>`;
+        return;
+    }
 };
 
-// Cada vez que se recalculan las alertas, se refresca el panel (así el contador siempre está al día, aunque el panel esté cerrado).
+// Cada vez que se recalculan las alertas, se refresca el panel
 const baseRenderAlerts = window.renderAlerts;
 window.renderAlerts = function() {
     baseRenderAlerts();
     window.renderDailyTasks();
 };
+
 
 // === LÓGICA DE FILTROS AVANZADOS Y MODO ENFOQUE ===
     window.toggleFilterDrawer = function() {
@@ -2692,4 +4218,5 @@ window.renderAlerts = function() {
         window.renderMindMap();
     };
 
+    // Fondo cósmico de la Nebulosa de Orión renderizado de forma ultraligera y nítida en el DOM
     initData();

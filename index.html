@@ -6,13 +6,20 @@
   <title>SICOM - Panel de Control V2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+          fontFamily: { 
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            body: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
+          },
           colors: { brand: { accent: '#0071e3' } }
         }
       }
@@ -92,9 +99,27 @@
     /* Solo se hace visible cuando el contenedor principal tiene la clase 'sd-open' */
     #speedDial.sd-open .sd-items { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
     
-    #speedDial .sd-item { background-color: rgba(28,28,31,.96); transition: background-color .15s ease-out, transform .15s ease-out; }
-    #speedDial .sd-item:hover { background-color: rgba(52,52,57,.98); }
-    #speedDial .sd-item:active { transform: scale(.97); }
+    #speedDial .sd-item { 
+        background-color: rgba(20, 20, 26, 0.65); 
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-top-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: background-color .15s ease-out, transform .15s ease-out, border-color .15s ease-out; 
+    }
+    #speedDial .sd-item:hover { background-color: rgba(40, 40, 50, 0.75); border-color: rgba(255, 255, 255, 0.3); }
+    #speedDial .sd-item:active { transform: scale(.98); }
+    body.theme-light #speedDial .sd-item {
+        background-color: rgba(255, 255, 255, 0.60) !important;
+        border: 1px solid rgba(255, 255, 255, 0.7) !important;
+        border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+        color: #0f172a !important;
+        box-shadow: 0 10px 30px rgba(0, 40, 90, 0.12) !important;
+    }
+    body.theme-light #speedDial .sd-item:hover {
+        background-color: rgba(255, 255, 255, 0.80) !important;
+    }
     
     /* Animación del botón principal */
     #speedDial .sd-plus { transition: transform .2s ease-out; }
@@ -122,10 +147,10 @@
               <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#0071e3]/20 text-[#35aee8] border border-[#0071e3]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
           </button>
 
-          <!-- TAREA GLOBAL (Solo Supervisor/Supremo) -->
-          <button type="button" role="menuitem" onclick="closeSpeedDial(); openGlobalTaskModal()" class="supervisor-up hidden sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
-              Nueva tarea global
-              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+          <!-- TAREA POR PROYECTO (Todos los roles operativos: Consultor, Supervisor, Supremo) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openProjectTaskModal()" class="sd-item liquid-glass rounded-full pl-4 pr-1.5 py-1.5 items-center gap-3 text-white text-xs font-semibold whitespace-nowrap flex">
+              Tarea por proyecto
+              <span class="w-9 h-9 rounded-full flex items-center justify-center bg-[#bf5af2]/20 text-[#bf5af2] border border-[#bf5af2]/40"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
           </button>
 
           <!-- NUEVO PROYECTO (Todos) -->
@@ -234,25 +259,33 @@
   </div>
 
   
-  <!-- MODAL ASIGNAR TAREA GLOBAL -->
+  <!-- MODAL ASIGNAR TAREA POR PROYECTO -->
   <div id="globalTaskModal" class="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xl hidden flex items-center justify-center opacity-0 transition-opacity duration-400">
       <div class="liquid-glass rounded-[2rem] p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-400">
-          <h3 class="text-xl font-semibold text-white mb-2">Asignar Tarea Global</h3>
-          <p class="text-xs text-gray-400 mb-5">Crea y asigna una tarea a cualquier consultor sin tener que buscar el proyecto en el mapa.</p>
+          <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-xl bg-[#bf5af2]/20 border border-[#bf5af2]/40 flex items-center justify-center text-[#bf5af2] shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+              </div>
+              <div>
+                  <h3 class="text-xl font-bold text-white tracking-tight leading-tight">Tarea por Proyecto</h3>
+                  <p class="text-[9px] text-[#bf5af2] uppercase tracking-widest font-semibold">Asignación Operativa</p>
+              </div>
+          </div>
+          <p class="text-xs text-gray-400 mb-5">Vincula una tarea directamente a un proyecto específico sin tener que buscarlo en el mapa.</p>
           
           <div class="space-y-4 mb-6">
               <div>
-                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Proyecto Destino (Opcional)</label>
-                  <select id="gtProject" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none text-white"></select>
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Proyecto Destino <span class="text-brand-accent">*</span></label>
+                  <select id="gtProject" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none text-white cursor-pointer"></select>
               </div>
               <div>
-                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Descripción de la Tarea</label>
-                  <input type="text" id="gtDescription" placeholder="Ej. Actualizar formato..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none">
+                  <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Descripción de la Tarea <span class="text-brand-accent">*</span></label>
+                  <input type="text" id="gtDescription" placeholder="Ej. Actualizar formato de propuesta..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none text-white">
               </div>
               <div class="flex gap-3">
                   <div class="flex-1">
                       <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Asignar a</label>
-                      <select id="gtAssignee" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none"></select>
+                      <select id="gtAssignee" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none text-white cursor-pointer"></select>
                   </div>
                   <div class="flex-1">
                       <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Límite</label>
@@ -263,7 +296,7 @@
           
           <div class="flex gap-4">
               <button onclick="closeGlobalTaskModal()" class="flex-1 py-3.5 liquid-input hover:bg-white/10 font-medium rounded-2xl transition text-sm">Cancelar</button>
-              <button onclick="saveGlobalTask()" class="flex-1 py-3.5 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-medium rounded-2xl transition shadow-[0_0_20px_rgba(191,90,242,0.4)] text-sm">Asignar</button>
+              <button onclick="saveGlobalTask()" class="flex-1 py-3.5 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-semibold rounded-2xl transition shadow-[0_0_20px_rgba(191,90,242,0.4)] text-sm">Guardar Tarea</button>
           </div>
       </div>
   </div>
@@ -322,15 +355,13 @@
           <span class="hidden sm:inline">Filtros</span>
           <span id="activeFiltersBadge" class="hidden bg-brand-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1">1</span>
       </button>
-      
-      <!-- BOTÓN CAMPANA DE ALERTAS -->
-      <button onclick="toggleDailyDrawer()" class="relative shrink-0 pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white font-medium flex items-center gap-1.5 transition ml-1" title="Notificaciones">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-          <span id="alertsBadge" class="absolute -top-0.5 -right-0.5 bg-[#ff453a] text-white text-[9px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(255,69,58,0.6)] hidden">0</span>
-      </button>
+
+      <!-- NOTIFICACIONES CENTRALIZADAS A LA IZQUIERDA (SPEED DIAL / DRAWER) -->
+      <span id="alertsBadge" style="display:none;"></span>
+      <button id="themeToggleBtn" style="display:none;" onclick="toggleTheme()"></button>
 
       <div class="hidden md:flex items-center gap-1.5">
-<div class="flex bg-white/5 border border-white/10 rounded-full overflow-hidden hidden xl:flex ml-1 shrink-0">
+<div class="flex bg-white/5 border border-white/10 rounded-full overflow-hidden hidden lg:flex ml-1 shrink-0">
           <button onclick="recenterCanvas()" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors border-r border-white/10" title="Centrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></button>
           <button onclick="zoomCanvas(0.15)" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors border-r border-white/10" title="Acercar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg></button>
           <button onclick="zoomCanvas(-0.15)" class="px-3 py-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors" title="Alejar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/></svg></button>
@@ -361,6 +392,12 @@
 
       <!-- MENÚ DESPLEGABLE MÓVIL -->
       <div id="mobileMenuDropdown" class="absolute top-[60px] right-0 w-56 liquid-glass rounded-2xl p-2 z-[100] transform scale-95 opacity-0 pointer-events-none transition-all duration-300 origin-top-right flex flex-col gap-1 md:hidden shadow-2xl border border-white/20">
+          <button id="mobileThemeToggleBtn" onclick="toggleTheme(); toggleMobileMenu()" class="supremo-only hidden w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#ff9f0a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <span id="mobileThemeText">Cambiar Tema</span>
+              <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">Supremo</span>
+          </button>
+          <div class="h-px w-full bg-white/10 my-1"></div>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
@@ -380,10 +417,19 @@
   </header>
 
   <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
-    <svg id="mindmapCanvas" class="w-full h-full absolute inset-0 pointer-events-none">
+    <svg id="mindmapCanvas" class="w-full h-full absolute inset-0 pointer-events-none z-10">
       <defs id="svgDefs">
         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="8" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>
         <filter id="glow-intense" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="20" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter>
+        <linearGradient id="capsule-sheen-light" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+        </linearGradient>
+        <linearGradient id="capsule-sheen-dark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.20"/>
+          <stop offset="30%" stop-color="#ffffff" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+        </linearGradient>
       </defs>
       <g id="canvasGroup" class="pointer-events-auto transition-transform duration-100 ease-out"></g>
     </svg>
@@ -407,7 +453,7 @@
       
       <div class="grid grid-cols-2 gap-3 mb-5">
         <div class="bg-black/30 rounded-2xl p-4 border border-white/5 border-t-white/10 shadow-inner">
-          <span class="block text-[9px] text-gray-500 font-semibold mb-2 uppercase tracking-widest">Consultor(es)</span>
+          <span id="infoBoxLeftLabel" class="block text-[9px] text-gray-500 font-semibold mb-2 uppercase tracking-widest">Consultor(es)</span>
           <div id="infoConsultant" class="flex flex-col gap-2 text-sm text-white font-medium"></div>
         </div>
         <div class="bg-black/30 rounded-2xl p-4 border border-white/5 border-t-white/10 shadow-inner">
@@ -537,8 +583,8 @@
   </div>
 
   <!-- DRAWER ACTIVIDADES DIARIAS -->
-  <div id="dailyDrawer" class="fixed top-0 left-0 h-full w-full md:w-[420px] liquid-glass-panel z-40 transform -translate-x-full drawer-transition flex flex-col shadow-[20px_0_50px_rgba(0,0,0,0.7)]">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20">
+  <div id="dailyDrawer" class="fixed top-0 left-0 h-full max-h-screen w-full md:w-[420px] liquid-glass-panel z-40 transform -translate-x-full drawer-transition flex flex-col shadow-[20px_0_50px_rgba(0,0,0,0.7)] overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20 shrink-0">
       <div class="flex items-center gap-3 text-white">
         <div class="p-2 bg-brand-accent/20 rounded-xl border border-brand-accent/30 text-brand-accent">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -548,18 +594,39 @@
       <button onclick="toggleDailyDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
     
-    <div class="p-5 border-b border-white/10 bg-black/40 lector-hide">
-    <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Anotar Tarea Rápida Personal</label>
-      
-        <div class="flex flex-col gap-2">
-            <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none text-white">
-            <div class="flex gap-2">
-                <select id="newDailyTaskAssignee" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none appearance-none cursor-pointer text-white"></select>
-                <button onclick="addDailyTask()" class="pill-btn px-4 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(0,113,227,0.3)]">Añadir</button>
-            </div>
-        </div>
+    <div class="p-4 border-b border-white/10 bg-black/40 lector-hide shrink-0">
+      <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Anotar Tarea Rápida Personal</label>
+      <div class="flex flex-col gap-2">
+          <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none text-white">
+          <div class="flex gap-2">
+              <select id="newDailyTaskAssignee" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none appearance-none cursor-pointer text-white"></select>
+              <button onclick="addDailyTask()" class="pill-btn px-4 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(0,113,227,0.3)]">Añadir</button>
+          </div>
+      </div>
     </div>
-    <div id="dailyTasksContainer" class="flex-1 overflow-y-auto p-6 scrollbar-thin flex flex-col space-y-6"></div>
+
+    <!-- PESTAÑAS DE CONTROL (SEGMENTED CONTROL ELEGANTE) -->
+    <div class="p-3 border-b border-white/10 bg-black/30 shrink-0">
+      <div class="flex p-1 bg-black/60 rounded-2xl border border-white/10 gap-1 overflow-x-auto scrollbar-none">
+        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
+          <span>⚠️ Alertas</span>
+          <span id="notifTabCount-alerts" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30">0</span>
+        </button>
+        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="flex-1 min-w-[92px] py-1.5 px-2 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 bg-white/15 text-white shadow-sm border border-white/20 whitespace-nowrap">
+          <span>📌 Pendientes</span>
+          <span id="notifTabCount-pending" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-brand-accent text-white">0</span>
+        </button>
+        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="flex-1 min-w-[88px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
+          <span>⏳ Validación</span>
+          <span id="notifTabCount-validation" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30">0</span>
+        </button>
+        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
+          <span>✅ Hechas</span>
+          <span id="notifTabCount-completed" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30">0</span>
+        </button>
+      </div>
+    </div>
+    <div id="dailyTasksContainer" class="flex-1 min-h-0 overflow-y-auto p-4 scrollbar-thin flex flex-col space-y-3" style="overscroll-behavior: contain; touch-action: pan-y;"></div>
   </div>
   <!-- DRAWER PRIORIDADES -->
   <div id="priorityDrawer" class="fixed top-0 right-0 h-full w-full md:w-[440px] liquid-glass-panel z-40 transform translate-x-full drawer-transition flex flex-col">
@@ -623,42 +690,119 @@
         
         <!-- DASHBOARD -->
         <div id="tab-dashboard" class="tab-content block space-y-6">
-           <h3 class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 ml-1">Métricas Generales</h3>
-           <div class="grid grid-cols-2 gap-4 mb-6">
-              <div class="bg-black/30 p-5 rounded-3xl border border-white/10 shadow-inner">
-                  <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Proyectos</p>
-                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashTotal">0</p>
+           <div class="flex items-center justify-between mb-2">
+              <h3 class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Métricas Ejecutivas & KPIs</h3>
+              <span class="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">Tiempo Real</span>
+           </div>
+
+           <!-- 4 TARJETAS DE KPIs EJECUTIVOS -->
+           <div class="grid grid-cols-2 gap-3 mb-4">
+              <!-- KPI 1: Cumplimiento SLA -->
+              <div class="bg-black/30 p-4 rounded-2xl border border-white/10 shadow-inner flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                     <p class="text-[9px] text-gray-400 uppercase font-semibold tracking-widest">SLA en Plazo</p>
+                     <span class="text-sm">🎯</span>
+                  </div>
+                  <div class="mt-2">
+                     <p class="text-3xl font-bold tracking-tight text-white" id="dashSlaRate">0%</p>
+                     <p class="text-[9px] text-[#30d158] mt-0.5 font-medium truncate" id="dashSlaSub">Sin retrasos</p>
+                  </div>
               </div>
-              <div class="bg-gradient-to-br from-[#30d158]/20 to-transparent p-5 rounded-3xl border border-[#30d158]/30 shadow-inner">
-                  <p class="text-[10px] text-[#30d158] uppercase font-semibold tracking-widest">Completados</p>
-                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashCompleted">0</p>
+
+              <!-- KPI 2: Riesgo Inminente (Preventivo) -->
+              <div class="bg-black/30 p-4 rounded-2xl border border-white/10 shadow-inner flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                     <p class="text-[9px] text-gray-400 uppercase font-semibold tracking-widest">Riesgo &le; 72h</p>
+                     <span class="text-sm">⚡</span>
+                  </div>
+                  <div class="mt-2">
+                     <p class="text-3xl font-bold tracking-tight text-[#ff9f0a]" id="dashRiskCount">0</p>
+                     <p class="text-[9px] text-gray-400 mt-0.5 truncate" id="dashRiskSub">Próximos a vencer</p>
+                  </div>
               </div>
-              <div class="bg-gradient-to-br from-[#0071e3]/20 to-transparent p-5 rounded-3xl border border-[#0071e3]/30 shadow-inner">
-                  <p class="text-[10px] text-[#0071e3] uppercase font-semibold tracking-widest">En Progreso</p>
-                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashProgress">0</p>
+
+              <!-- KPI 3: Vencidos Actuales -->
+              <div class="bg-gradient-to-br from-[#ff453a]/15 to-transparent p-4 rounded-2xl border border-[#ff453a]/30 shadow-inner flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                     <p class="text-[9px] text-[#ff453a] uppercase font-semibold tracking-widest">Vencidos ⚠️</p>
+                     <span class="text-xs bg-[#ff453a]/20 text-[#ff453a] px-1.5 py-0.5 rounded font-mono font-bold" id="dashOverdueBadge">0</span>
+                  </div>
+                  <div class="mt-2">
+                     <p class="text-3xl font-bold tracking-tight text-white" id="dashOverdue">0</p>
+                     <p class="text-[9px] text-gray-400 mt-0.5 truncate">Requieren atención</p>
+                  </div>
               </div>
-              <div class="bg-gradient-to-br from-[#ff453a]/20 to-transparent p-5 rounded-3xl border border-[#ff453a]/30 shadow-inner">
-                  <p class="text-[10px] text-[#ff453a] uppercase font-semibold tracking-widest">Vencidos ⚠️</p>
-                  <p class="text-4xl font-semibold text-white mt-2 tracking-tight" id="dashOverdue">0</p>
+
+              <!-- KPI 4: Cumplimiento Documental -->
+              <div class="bg-black/30 p-4 rounded-2xl border border-white/10 shadow-inner flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                     <p class="text-[9px] text-gray-400 uppercase font-semibold tracking-widest">Docs Normativos</p>
+                     <span class="text-sm">📑</span>
+                  </div>
+                  <div class="mt-2">
+                     <p class="text-3xl font-bold tracking-tight text-[#bf5af2]" id="dashDocsRate">0%</p>
+                     <p class="text-[9px] text-gray-400 mt-0.5 truncate" id="dashDocsSub">Docs Base Validados</p>
+                  </div>
               </div>
            </div>
            
-           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 mb-6 shadow-inner">
-              <div class="flex justify-between items-center mb-3">
-                 <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Avance Global</p>
-                 <p class="text-sm font-semibold text-white bg-white/10 px-3 py-1 rounded-full border border-white/5" id="dashGlobalText">0%</p>
+           <!-- AVANCE GLOBAL PONDERADO -->
+           <div class="bg-black/30 p-5 rounded-3xl border border-white/10 mb-4 shadow-inner space-y-3">
+              <div class="flex justify-between items-center">
+                 <div>
+                    <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-widest">Avance Ponderado Global</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5 font-mono"><span id="dashTotal" class="text-white font-bold">0</span> proyectos (<span id="dashCompleted" class="text-[#30d158] font-bold">0</span> listos, <span id="dashProgress" class="text-[#0071e3] font-bold">0</span> en curso)</p>
+                 </div>
+                 <p class="text-sm font-bold text-white bg-white/10 px-3 py-1 rounded-xl border border-white/10 font-mono" id="dashGlobalText">0%</p>
               </div>
-              <div class="w-full h-3 bg-black/50 rounded-full overflow-hidden border border-white/5">
-                  <div id="dashGlobalBar" class="h-full bg-brand-accent transition-all duration-1000 ease-out shadow-[0_0_10px_#0071e3]" style="width: 0%"></div>
+              <div class="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/5">
+                  <div id="dashGlobalBar" class="h-full bg-gradient-to-r from-brand-accent to-[#30d158] transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(0,113,227,0.5)]" style="width: 0%"></div>
               </div>
            </div>
 
-           <h3 class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 ml-1">Gráficas de Control</h3>
-           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 mb-4 flex justify-center shadow-inner">
-              <div class="w-[240px] h-[240px]"><canvas id="statusChart"></canvas></div>
-           </div>
-           <div class="bg-black/30 p-6 rounded-3xl border border-white/10 shadow-inner">
-              <div class="w-full h-[240px]"><canvas id="consultantChart"></canvas></div>
+           <!-- GRÁFICAS DE CONTROL EMPRESARIAL -->
+           <div class="space-y-4">
+              <!-- Gráfica 1: Balance de Carga y Capacidad (Stacked Bar) -->
+              <div class="bg-black/30 p-5 rounded-3xl border border-white/10 shadow-inner space-y-3">
+                 <div class="flex items-center justify-between">
+                    <div>
+                       <h4 class="text-xs font-bold text-white tracking-wide">Carga de Trabajo y Recursos</h4>
+                       <p class="text-[9px] text-gray-400 mt-0.5">Completados, En tiempo y En riesgo por consultor</p>
+                    </div>
+                    <span class="text-[8px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">Capacidad</span>
+                 </div>
+                 <div class="w-full h-[220px]">
+                    <canvas id="consultantChart"></canvas>
+                 </div>
+              </div>
+
+              <!-- Gráfica 2: Rendimiento por Módulo de Negocio -->
+              <div class="bg-black/30 p-5 rounded-3xl border border-white/10 shadow-inner space-y-3">
+                 <div class="flex items-center justify-between">
+                    <div>
+                       <h4 class="text-xs font-bold text-white tracking-wide">Avance por Módulo de Negocio</h4>
+                       <p class="text-[9px] text-gray-400 mt-0.5">% de progreso promedio por módulo</p>
+                    </div>
+                    <span class="text-[8px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">Módulos</span>
+                 </div>
+                 <div class="w-full h-[200px]">
+                    <canvas id="moduleChart"></canvas>
+                 </div>
+              </div>
+
+              <!-- Gráfica 3: Estado General del Portafolio -->
+              <div class="bg-black/30 p-5 rounded-3xl border border-white/10 shadow-inner space-y-3">
+                 <div class="flex items-center justify-between">
+                    <div>
+                       <h4 class="text-xs font-bold text-white tracking-wide">Estado del Portafolio</h4>
+                       <p class="text-[9px] text-gray-400 mt-0.5">Distribución general de iniciativas</p>
+                    </div>
+                    <span class="text-[8px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono">Estatus</span>
+                 </div>
+                 <div class="w-full h-[220px] flex justify-center">
+                    <canvas id="statusChart"></canvas>
+                 </div>
+              </div>
            </div>
         </div>
 
@@ -667,7 +811,7 @@
           <div class="space-y-3">
             <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Elemento a Editar</label>
             <select id="globalEditSelector" onchange="handleGlobalEditSelectionChange()" class="w-full liquid-input rounded-2xl p-4 text-sm appearance-none font-medium text-white">
-              <option value="" class="bg-black text-gray-400">-- Selecciona en el mapa --</option>
+              <option value="" class="bg-black text-gray-400">-- Selecciona un elemento --</option>
             </select>
           </div>
           
@@ -685,6 +829,12 @@
             </div>
             
             <div id="editProjectFields" class="space-y-6 hidden">
+              <!-- Selector de Módulo / Reubicación de Proyecto -->
+              <div class="space-y-2">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Módulo / Ubicación</label>
+                <select id="editProjectLocation" class="w-full liquid-input rounded-2xl p-4 text-sm appearance-none font-medium text-white"></select>
+              </div>
+
               <div class="space-y-2 sm:col-span-2">
                   <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Carpeta Drive (URL)</label>
                   <div class="flex gap-2">
@@ -766,6 +916,7 @@
                   <input type="text" id="editModuleColorHex" class="flex-1 liquid-input rounded-2xl p-4 text-sm font-mono uppercase" readonly>
                 </div>
               </div>
+              <div id="editModuleSummary" class="bg-black/30 border border-white/10 p-4 rounded-2xl text-[11px] text-gray-300 font-mono space-y-1"></div>
             </div>
             
             <button onclick="saveEditChanges()" class="pill-btn w-full py-4 bg-brand-accent hover:bg-[#005bb5] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(0,113,227,0.3)] flex justify-center items-center gap-2">Guardar Cambios Completos</button>
@@ -773,7 +924,7 @@
           
           <div id="editEmptyState" class="text-center py-20 opacity-50">
              <svg class="w-16 h-16 text-gray-400 mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-             <p class="text-sm text-gray-300 font-medium tracking-wide">Selecciona un elemento en el mapa</p>
+             <p class="text-sm text-gray-300 font-medium tracking-wide">Selecciona un elemento arriba o en el mapa interactivo</p>
           </div>
         </div>
 
@@ -784,46 +935,67 @@
             <button onclick="setCreateType('module')" id="btnCreateTypeModule" class="flex-1 py-3 text-xs font-semibold rounded-xl text-gray-400 hover:text-white transition border border-transparent supremo-only hidden">Módulos</button>
           </div>
           
-          <div id="createProjectForm" class="space-y-5">
+          <div id="createProjectForm" class="space-y-4">
             <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Ubicación</label>
-                <select id="newProjLocation" class="w-full liquid-input rounded-2xl p-4 text-sm appearance-none font-medium text-white"></select>
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Módulo / Ubicación</label>
+                <select id="newProjLocation" class="w-full liquid-input rounded-2xl p-3.5 text-sm appearance-none font-medium text-white"></select>
             </div>
             <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre</label>
-                <input type="text" id="newProjName" class="w-full liquid-input rounded-2xl p-4 text-sm">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre del Proyecto</label>
+                <input type="text" id="newProjName" placeholder="Ej. Implementación Módulo Contable" class="w-full liquid-input rounded-2xl p-3.5 text-sm">
             </div>
-            <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Carpeta Drive (Opcional)</label>
-                <input type="url" id="newProjDrive" class="w-full liquid-input rounded-2xl p-4 text-sm text-[#0071e3]" placeholder="https://drive.google.com/...">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-2">
+                    <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Fecha Límite</label>
+                    <input type="date" id="newProjDeadline" max="2099-12-31" class="w-full liquid-input rounded-xl p-3 text-sm [color-scheme:dark]">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Estado Inicial</label>
+                    <select id="newProjStatus" class="w-full liquid-input rounded-xl p-3 text-sm appearance-none font-medium text-white">
+                        <option value="No Iniciado">⏸️ No Iniciado</option>
+                        <option value="Pendiente">⏳ Pendiente</option>
+                        <option value="En Progreso">🚀 En Progreso</option>
+                    </select>
+                </div>
             </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-2">
+                    <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Prioridad (Numérica)</label>
+                    <input type="number" id="newProjPriority" value="1" min="1" max="99" class="w-full liquid-input rounded-xl p-3 text-sm" placeholder="1 = Urgente">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Carpeta Drive (Opcional)</label>
+                    <input type="url" id="newProjDrive" class="w-full liquid-input rounded-xl p-3 text-sm text-[#0071e3]" placeholder="https://drive.google.com/...">
+                </div>
+            </div>
+
             <div class="space-y-2">
                 <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Ticket Invgate (Opcional)</label>
-                <input type="url" id="newProjInvgate" class="w-full liquid-input rounded-2xl p-4 text-sm text-[#30d158]" placeholder="https://stgt.invgate.com/...">
+                <input type="url" id="newProjInvgate" class="w-full liquid-input rounded-xl p-3 text-sm text-[#30d158]" placeholder="https://stgt.invgate.com/...">
             </div>
+
             <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Prioridad (Numérica)</label>
-                <input type="number" id="newProjPriority" value="1" class="w-full liquid-input rounded-2xl p-4 text-sm">
+                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1 block mb-1">Consultor(es) Asignado(s)</label>
+                <div id="newProjConsultantsChecks" class="bg-black/30 border border-white/5 border-t-white/10 p-3 rounded-2xl grid grid-cols-1 gap-2 max-h-40 overflow-y-auto scrollbar-thin shadow-inner"></div>
             </div>
-            <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1 block mb-1">Consultor(es)</label>
-                <div id="newProjConsultantsChecks" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl grid grid-cols-1 gap-2 max-h-48 overflow-y-auto scrollbar-thin shadow-inner"></div>
-            </div>
-            <button onclick="createNewProject()" class="pill-btn w-full py-4 bg-[#ff9f0a] hover:bg-[#ffb340] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(255,159,10,0.3)] flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Añadir Proyecto
+
+            <button onclick="createNewProject()" class="pill-btn w-full py-3.5 bg-brand-accent hover:bg-[#005bb5] text-white font-bold text-sm mt-4 shadow-[0_0_20px_rgba(0,113,227,0.3)] flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Crear Proyecto
             </button>
           </div>
           
           <div id="createModuleForm" class="space-y-5 hidden">
             <div class="space-y-2">
                 <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Nombre del Módulo</label>
-                <input type="text" id="newModName" class="w-full liquid-input rounded-2xl p-4 text-sm">
+                <input type="text" id="newModName" placeholder="Ej. Recursos Humanos" class="w-full liquid-input rounded-2xl p-4 text-sm">
             </div>
             <div class="space-y-2">
                 <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest ml-1">Color Distintivo</label>
                 <div class="flex gap-3">
                   <div class="w-14 h-14 rounded-2xl overflow-hidden border border-white/20 relative shrink-0">
-                      <input type="color" id="newModColor" value="#8b5cf6" class="absolute -top-2 -left-2 w-20 h-20 cursor-pointer border-0 p-0">
+                      <input type="color" id="newModColor" value="#8b5cf6" oninput="document.getElementById('newModColorHex').value = this.value" class="absolute -top-2 -left-2 w-20 h-20 cursor-pointer border-0 p-0">
                   </div>
                   <input type="text" id="newModColorHex" value="#8b5cf6" class="flex-1 liquid-input rounded-2xl p-4 text-sm font-mono uppercase" readonly>
                 </div>
@@ -835,18 +1007,46 @@
         </div>
 
         <!-- HISTORIAL -->
-        <div id="tab-history" class="tab-content hidden space-y-5">
-            <div class="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-inner">
+        <div id="tab-history" class="tab-content hidden space-y-4">
+            <div class="bg-black/30 border border-white/10 rounded-2xl p-4 space-y-3 shadow-inner">
+                <!-- Buscador de texto en vivo -->
                 <div>
-                    <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest mb-1">Filtrar por Fecha</label>
-                    <input type="date" id="historyDateFilter" onchange="renderHistory()" class="liquid-input rounded-xl p-2.5 text-xs text-white [color-scheme:dark]">
+                    <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest mb-1.5">Búsqueda Rápida</label>
+                    <div class="relative">
+                        <input type="text" id="historySearchInput" oninput="renderHistory()" placeholder="🔍 Buscar por proyecto, autor o palabra clave..." class="liquid-input w-full rounded-xl p-2.5 pl-3 pr-8 text-xs text-white">
+                        <button onclick="document.getElementById('historySearchInput').value = ''; renderHistory();" class="absolute right-2.5 top-2.5 text-gray-400 hover:text-white text-xs font-mono" title="Limpiar búsqueda">✕</button>
+                    </div>
                 </div>
-                <button onclick="document.getElementById('historyDateFilter').value = ''; renderHistory();" class="pill-btn px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/5 mt-4">Ver Todos</button>
+
+                <!-- Filtro por Fecha y Botones -->
+                <div class="flex flex-wrap items-end justify-between gap-3 pt-1">
+                    <div class="flex-1 min-w-[150px]">
+                        <label class="block text-[9px] text-gray-400 font-semibold uppercase tracking-widest mb-1.5">Filtrar por Fecha</label>
+                        <input type="date" id="historyDateFilter" onchange="renderHistory()" class="liquid-input w-full rounded-xl p-2.5 text-xs text-white [color-scheme:dark]">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="setHistoryFilterToday()" class="pill-btn px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/5" title="Mostrar registros de hoy">Hoy</button>
+                        <button onclick="clearHistoryFilter()" class="pill-btn px-3 py-2 bg-brand-accent/20 hover:bg-brand-accent/30 text-brand-accent text-xs font-semibold transition border border-brand-accent/30" title="Mostrar historial completo">Ver Todos</button>
+                    </div>
+                </div>
+
+                <!-- Filtro por Categoría -->
+                <div class="flex gap-1.5 overflow-x-auto scrollbar-thin pt-2 border-t border-white/5">
+                    <button onclick="setHistoryCategoryFilter('all')" id="histCatBtn-all" class="hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white border border-white/20">Todos</button>
+                    <button onclick="setHistoryCategoryFilter('validaciones')" id="histCatBtn-validaciones" class="hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent">Validaciones ✅</button>
+                    <button onclick="setHistoryCategoryFilter('tareas')" id="histCatBtn-tareas" class="hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent">Tareas 📋</button>
+                    <button onclick="setHistoryCategoryFilter('proyectos')" id="histCatBtn-proyectos" class="hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent">Proyectos 📁</button>
+                </div>
+
+                <div class="flex items-center justify-between text-[10px] text-gray-400 pt-2 border-t border-white/5 font-mono">
+                    <span id="historyFilterLabel">Mostrando todos los registros</span>
+                    <span id="historyCountBadge" class="bg-white/10 px-2 py-0.5 rounded-full text-white font-semibold">0 registros</span>
+                </div>
             </div>
             <div id="historyListContainer" class="space-y-3"></div>
             <div id="historyEmptyState" class="text-center py-20 opacity-50 hidden">
                 <svg class="w-14 h-14 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-sm text-gray-300 font-medium tracking-wide">No hay registros para la fecha seleccionada.</p>
+                <p id="historyEmptyMsg" class="text-sm text-gray-300 font-medium tracking-wide">No hay registros que coincidan con la búsqueda.</p>
             </div>
         </div>
 
@@ -908,16 +1108,45 @@
         </div>
       </div>
 
-      <div class="mt-8 border-t border-white/10 pt-6 space-y-4 shrink-0">
-        <div id="backupControls" class="supremo-only hidden">
-            <h4 class="text-[9px] font-semibold text-gray-500 uppercase tracking-widest mb-3 ml-1">Respaldo de Datos</h4>
-            <div class="flex gap-3 flex-wrap">
-              <button onclick="exportData()" class="pill-btn flex-1 min-w-[100px] py-2.5 bg-black/40 border border-white/10 text-gray-300 text-xs font-medium hover:bg-white/10 transition hover:text-white shadow-inner">JSON</button>
-              <button onclick="exportCSV()" class="pill-btn flex-1 min-w-[100px] py-2.5 bg-[#30d158]/10 border border-[#30d158]/30 text-[#30d158] font-semibold text-xs hover:bg-[#30d158]/20 transition shadow-inner">Excel</button>
-              <button onclick="document.getElementById('importFile').click()" class="pill-btn w-full py-2.5 bg-black/40 border border-white/10 text-gray-300 text-xs font-medium hover:bg-white/10 transition mt-1 hover:text-white shadow-inner">Importar JSON</button>
-              <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-              <button onclick="forceCloudSync()" class="pill-btn w-full py-3 bg-brand-accent text-white font-bold mt-2 shadow-[0_0_15px_rgba(0,113,227,0.4)]">⬆️ Forzar Restauración a la Nube</button>
+      <div class="mt-8 border-t border-white/10 pt-5 space-y-4 shrink-0">
+        <div id="backupControls" class="supremo-only hidden space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-[9px] font-semibold text-gray-400 uppercase tracking-widest ml-1">Exportación y Respaldo</h4>
+              <span class="text-[8px] bg-[#30d158]/20 text-[#30d158] px-2 py-0.5 rounded-full border border-[#30d158]/30 font-mono font-bold">Nube Activa ●</span>
             </div>
+            
+            <div class="grid grid-cols-2 gap-2.5">
+              <button onclick="exportCSV()" class="pill-btn py-2.5 px-3 bg-[#30d158]/15 border border-[#30d158]/30 text-[#30d158] font-bold text-xs hover:bg-[#30d158]/25 transition shadow-inner flex items-center justify-center gap-1.5" title="Descargar informe completo en formato Excel / CSV">
+                📊 Reporte Excel
+              </button>
+              <button onclick="exportData()" class="pill-btn py-2.5 px-3 bg-black/40 border border-white/10 text-gray-200 text-xs font-semibold hover:bg-white/10 transition shadow-inner flex items-center justify-center gap-1.5" title="Descargar copia de seguridad en formato JSON">
+                💾 Backup JSON
+              </button>
+            </div>
+
+            <!-- ZONA DE RECUPERACIÓN TÉCNICA (Protegida contra sobreescritura accidental) -->
+            <details class="group bg-red-950/20 border border-red-500/20 rounded-2xl overflow-hidden transition mt-3">
+              <summary class="cursor-pointer p-3 text-[10px] font-semibold text-gray-400 hover:text-red-300 flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden">
+                <span class="flex items-center gap-1.5">
+                  <span class="text-xs">⚠️</span> Recuperación Técnica (Peligro)
+                </span>
+                <svg class="w-3.5 h-3.5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div class="p-3 border-t border-red-500/20 bg-black/40 space-y-2 text-[10px] text-gray-400">
+                <p class="leading-relaxed text-gray-300">
+                  <b class="text-[#ff453a]">Advertencia:</b> SICOM sincroniza en tiempo real. Usar estas opciones únicamente para rescate mayor ante contingencias con doble confirmación.
+                </p>
+                <div class="pt-1 space-y-2">
+                  <button onclick="safeImportJSON()" class="pill-btn w-full py-2 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 text-[11px] font-medium transition flex items-center justify-center gap-1.5">
+                    📥 Restaurar desde archivo JSON local...
+                  </button>
+                  <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+                  <button onclick="safeForceCloudSync()" class="pill-btn w-full py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold text-[11px] transition flex items-center justify-center gap-1.5">
+                    ⬆️ Sobreescribir Nube con Estado Local
+                  </button>
+                </div>
+              </div>
+            </details>
         </div>
       </div>
     </div>
