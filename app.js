@@ -1203,42 +1203,100 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     let animationFrameId = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchPanOriginX = 0;
+    let touchPanOriginY = 0;
+    let touchTotalDistance = 0;
+    let suppressClickUntil = 0;
+    let isTouchActive = false;
+
+    // Supresor global de clics fantasmas tras arrastrar el mapa en móvil
+    window.addEventListener('click', (e) => {
+        if (Date.now() < suppressClickUntil) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    function isAnyDrawerActive() {
+        return isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || 
+               (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) || 
+               (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen);
+    }
+
     const ws = document.getElementById('workspace');
     if(ws) {
         ws.addEventListener('touchstart', (e) => {
-            if(e.target.closest('.interactive-node') || isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || e.target.closest('#infoCard')) return;
-            if(e.touches.length === 1) { 
-                isPanning = true; 
-                startX = e.touches[0].clientX - translateX; 
-                startY = e.touches[0].clientY - translateY; 
-                ws.classList.add('is-panning');
-            } else if (e.touches.length===2) { 
+            if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
+            if (e.touches.length === 1) { 
+                isTouchActive = true; 
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchPanOriginX = e.touches[0].clientX - translateX; 
+                touchPanOriginY = e.touches[0].clientY - translateY; 
+                touchTotalDistance = 0;
+                isPanning = false;
+            } else if (e.touches.length === 2) { 
+                isTouchActive = true;
                 isPanning = false; 
+                touchTotalDistance = 50; 
                 initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); 
             }
         }, {passive: true});
+
         ws.addEventListener('touchmove', (e) => {
-            if(e.target.closest('#infoCard') || isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen) return;
-            if (e.touches.length === 1 && isPanning) { 
-                translateX = e.touches[0].clientX - startX; 
-                translateY = e.touches[0].clientY - startY; 
-                if(!animationFrameId) { animationFrameId = requestAnimationFrame(() => { window.updateCanvasTransform(); animationFrameId = null; }); }
-            } else if (e.touches.length===2) { 
+            if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
+            if (e.touches.length === 1 && isTouchActive) { 
+                const dx = e.touches[0].clientX - touchStartX;
+                const dy = e.touches[0].clientY - touchStartY;
+                const dist = Math.hypot(dx, dy);
+                touchTotalDistance = Math.max(touchTotalDistance, dist);
+
+                if (touchTotalDistance > 6) {
+                    if (!isPanning) {
+                        isPanning = true;
+                        ws.classList.add('is-panning');
+                    }
+                    if (e.cancelable) e.preventDefault();
+                    translateX = e.touches[0].clientX - touchPanOriginX; 
+                    translateY = e.touches[0].clientY - touchPanOriginY; 
+                    if(!animationFrameId) { 
+                        animationFrameId = requestAnimationFrame(() => { 
+                            window.updateCanvasTransform(); 
+                            animationFrameId = null; 
+                        }); 
+                    }
+                }
+            } else if (e.touches.length === 2) { 
+                if (e.cancelable) e.preventDefault();
+                touchTotalDistance = 50;
                 const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); 
-                if(initialPinchDistance) { 
-                    const delta = (currentDist - initialPinchDistance)*0.005; 
-                    window.zoomCanvas(delta, (e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2); 
+                if(initialPinchDistance && initialPinchDistance > 10) { 
+                    const delta = (currentDist - initialPinchDistance) * 0.004; 
+                    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    window.zoomCanvas(delta, midX, midY); 
                     initialPinchDistance = currentDist; 
                 } 
             }
-        }, {passive: true});
-        ws.addEventListener('touchend', () => { 
+        }, {passive: false});
+
+        const handleTouchEnd = () => { 
+            if (touchTotalDistance > 6) {
+                suppressClickUntil = Date.now() + 350;
+            }
+            isTouchActive = false;
             isPanning = false; 
             initialPinchDistance = null; 
             ws.classList.remove('is-panning');
-        });
+        };
+
+        ws.addEventListener('touchend', handleTouchEnd);
+        ws.addEventListener('touchcancel', handleTouchEnd);
+
         ws.addEventListener('mousedown', (e) => { 
-            if(e.target.closest('.interactive-node') || e.target.closest('#infoCard') || isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen) return; 
+            if(e.target.closest('.interactive-node') || e.target.closest('#infoCard') || isAnyDrawerActive()) return; 
             isPanning = true; 
             startX = e.clientX - translateX; 
             startY = e.clientY - translateY; 
@@ -1262,7 +1320,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.remove('is-panning');
         }); 
         ws.addEventListener('wheel', (e) => { 
-            if(isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
+            if(isAnyDrawerActive() || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
             e.preventDefault(); 
             window.zoomCanvas(-e.deltaY * 0.001, e.clientX, e.clientY); 
         }, {passive: false});
@@ -1271,20 +1329,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // CANDADO DE ZOOM: Calcula dinámicamente el límite mínimo de zoom
     // para que el mapa NUNCA se aleje más allá de los extremos donde terminan los proyectos.
     window.getMinZoomLimit = function() {
-        if (!svgElem || !canvasGroup) return 0.55;
+        if (!svgElem || !canvasGroup) return window.innerWidth < 640 ? 0.15 : 0.40;
         try {
             const bbox = canvasGroup.getBBox();
             if (bbox.width > 0 && bbox.height > 0) {
                 const rect = svgElem.getBoundingClientRect();
-                const padding = window.innerWidth < 640 ? 30 : 75;
+                const padding = window.innerWidth < 640 ? 15 : 70;
                 const fitX = (rect.width - padding * 2) / bbox.width;
                 const fitY = (rect.height - padding * 2) / bbox.height;
                 const fitScale = Math.min(fitX, fitY);
-                // Bloquea el zoom out en el encuadre óptimo de proyectos (piso 0.50, nunca negativo ni diminuto)
-                return Math.max(0.50, Math.min(0.85, fitScale * 0.94));
+                // Piso flexible en móvil para que quepa todo el mapa en pantallas estrechas
+                const minFloor = window.innerWidth < 640 ? 0.12 : 0.35;
+                return Math.max(minFloor, Math.min(0.85, fitScale * 0.95));
             }
         } catch(e) {}
-        return 0.55;
+        return window.innerWidth < 640 ? 0.15 : 0.40;
     };
 
     window.zoomCanvas = function(delta, mx = window.innerWidth/2, my = window.innerHeight/2) {
@@ -1306,7 +1365,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       window.updateCanvasTransform();
     }
     
-    
     window.focusNode = function(nodeX, nodeY) {
         if(!svgElem) return;
         const rect = svgElem.getBoundingClientRect();
@@ -1319,10 +1377,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (isDrawerOpen) availableWidth -= 480;
             else if (!document.getElementById('infoCard').classList.contains('hidden')) availableWidth -= 400;
         } else {
-            if (!document.getElementById('infoCard').classList.contains('hidden')) availableHeight -= 350;
+            if (!document.getElementById('infoCard').classList.contains('hidden')) availableHeight -= (rect.height * 0.42);
         }
         
-        const targetScale = 1.05; // Acercamiento óptimo
+        const targetScale = window.innerWidth < 640 ? 0.80 : 1.05; // Acercamiento óptimo responsive
         let targetTx = (availableWidth / 2) - (nodeX * targetScale);
         let targetTy = (availableHeight / 2) - (nodeY * targetScale);
         
@@ -1337,26 +1395,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const rect = svgElem.getBoundingClientRect();
         try {
             const bbox = canvasGroup.getBBox(); if (bbox.width === 0) throw new Error();
-            const padding = window.innerWidth < 640 ? 25 : 70;
+            const isMobile = window.innerWidth < 640;
+            const padding = isMobile ? 16 : 70;
             
             const sX = (rect.width - padding*2) / bbox.width;
             const sY = (rect.height - padding*2) / bbox.height;
             
             const minAllowed = window.getMinZoomLimit();
-            scale = Math.max(minAllowed, Math.min(1.20, Math.min(sX, sY)));
+            scale = Math.max(minAllowed, Math.min(1.10, Math.min(sX, sY)));
             
             translateX = (rect.width / 2) - ((bbox.x + bbox.width / 2) * scale); 
             translateY = (rect.height / 2) - ((bbox.y + bbox.height / 2) * scale);
         } catch(e) { 
             translateX = rect.width / 2; 
             translateY = rect.height / 2; 
-            scale = window.innerWidth < 640 ? 0.75 : 1.0; 
+            scale = window.innerWidth < 640 ? 0.28 : 0.85; 
         }
         window.updateCanvasTransform();
     }
 
     window.toggleConfigDrawer = function() { isDrawerOpen ? window.closeConfigDrawer() : window.openConfigDrawer(); }
     window.openConfigDrawer = function() { 
+        if (window.innerWidth < 768) window.closeInfoCardSafe();
         if (isPriorityDrawerOpen) window.closePriorityDrawer(); 
         if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
@@ -1367,7 +1427,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
     window.closeConfigDrawer = function() { document.getElementById('configDrawer').classList.add('translate-x-full'); isDrawerOpen = false; }
     window.togglePriorityDrawer = function() { isPriorityDrawerOpen ? window.closePriorityDrawer() : window.openPriorityDrawer(); }
-    window.openPriorityDrawer = function() { if(isDrawerOpen) window.closeConfigDrawer(); if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); document.getElementById('priorityDrawer').classList.remove('translate-x-full'); isPriorityDrawerOpen = true; window.renderPriorityDrawer(); }
+    window.openPriorityDrawer = function() { 
+        if (window.innerWidth < 768) window.closeInfoCardSafe();
+        if(isDrawerOpen) window.closeConfigDrawer(); 
+        if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
+        document.getElementById('priorityDrawer').classList.remove('translate-x-full'); 
+        isPriorityDrawerOpen = true; 
+        window.renderPriorityDrawer(); 
+    }
     window.closePriorityDrawer = function() { document.getElementById('priorityDrawer').classList.add('translate-x-full'); isPriorityDrawerOpen = false; }
     window.openFastCreateProject = function() { window.openConfigDrawer(); window.switchTab('new'); window.setCreateType('project'); setTimeout(() => document.getElementById('newProjName').focus(), 300); }
     
@@ -1439,7 +1506,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.handleFilterChange = function() { const fc = document.getElementById('consultantFilter'), fs = document.getElementById('statusFilter'); if (fc) activeFilterConsultant = fc.value; if (fs) activeFilterStatus = fs.value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
-    window.closeInfoCardSafe = function() { if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return; } document.getElementById('infoCard').classList.add('opacity-0'); setTimeout(() => document.getElementById('infoCard').classList.add('hidden'), 400); }
+    window.closeInfoCardSafe = function() { 
+        if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return; } 
+        document.body.classList.remove('info-card-open');
+        document.getElementById('infoCard').classList.add('opacity-0'); 
+        setTimeout(() => {
+            document.getElementById('infoCard').classList.add('hidden');
+            document.body.classList.remove('info-card-open');
+        }, 400); 
+    }
 
     
     // === LÓGICA DE TAREA POR PROYECTO Y TAREA GLOBAL ===
@@ -2200,7 +2275,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const noteInput = document.getElementById('infoNoteInput');
         if (noteInput && noteInput.dataset.pid !== String(id)) { noteInput.value = ''; noteInput.dataset.pid = String(id); }
       }
-      document.getElementById('infoTitle').textContent = item.name; card.classList.remove('hidden'); setTimeout(() => card.classList.remove('opacity-0'), 10);
+      document.getElementById('infoTitle').textContent = item.name; 
+      document.body.classList.add('info-card-open');
+      card.classList.remove('hidden'); 
+      setTimeout(() => card.classList.remove('opacity-0'), 10);
     }
     window.editFromInfoCard = function() { window.closeInfoCardSafe(); if(currentSelection.id) window.selectNodeAndOpenConfig(currentSelection.type, currentSelection.id); }
 
@@ -3650,6 +3728,7 @@ window.toggleDailyDrawer = function() {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
             if(isAlertsDrawerOpen) { document.getElementById('alertsDrawer').classList.add('translate-x-full'); isAlertsDrawerOpen = false; }
+            if (window.innerWidth < 768) window.closeInfoCardSafe();
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
             
@@ -4260,3 +4339,13 @@ window.renderAlerts = function() {
 
     // Fondo cósmico de la Nebulosa de Orión renderizado de forma ultraligera y nítida en el DOM
     initData();
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (!isPanning && !isTouchActive) {
+                window.updateCanvasTransform();
+            }
+        }, 150);
+    });

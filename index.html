@@ -39,7 +39,7 @@
   <!-- LOGIN LIQUID GLASS -->
   <div id="loginOverlay" class="fixed inset-0 z-[99999] bg-black hidden transition-opacity duration-700 flex items-center justify-center">
       <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
-      <div class="liquid-glass rounded-[2rem] p-10 max-w-sm w-full mx-4 flex flex-col items-center transform transition-all duration-700 scale-95 opacity-0 relative z-10" id="loginCard">
+      <div class="liquid-glass rounded-[2rem] p-6 sm:p-10 max-w-sm w-full mx-4 flex flex-col items-center transform transition-all duration-700 scale-95 opacity-0 relative z-10" id="loginCard">
           <div class="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-brand-accent to-[#004080] flex items-center justify-center shadow-[0_10px_30px_rgba(0,113,227,0.4)] mb-6 border border-white/20 overflow-hidden">
               <img id="loginLogo" src="https://placehold.co/150x150/0071e3/ffffff?text=STGT" alt="STGT" class="w-full h-full object-cover" />
           </div>
@@ -282,12 +282,12 @@
                   <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Descripción de la Tarea <span class="text-brand-accent">*</span></label>
                   <input type="text" id="gtDescription" placeholder="Ej. Actualizar formato de propuesta..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none text-white">
               </div>
-              <div class="flex gap-3">
-                  <div class="flex-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
                       <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Asignar a</label>
                       <select id="gtAssignee" class="w-full liquid-input rounded-xl p-3 text-xs appearance-none focus:outline-none text-white cursor-pointer"></select>
                   </div>
-                  <div class="flex-1">
+                  <div>
                       <label class="block text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-widest">Límite</label>
                       <input type="date" id="gtDate" class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none [color-scheme:dark]">
                   </div>
@@ -330,13 +330,13 @@
             SICOM
             <span id="connectionStatusDot" class="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_#30d158] animate-pulse transition-all duration-300" title="En Línea"></span>
         </h1>
-        <p id="topBarWelcome" class="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide"></p>
+        <p id="topBarWelcome" class="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide truncate max-w-[100px] xs:max-w-[130px] sm:max-w-[200px] md:max-w-none"></p>
       </div>
     </div>
     
-    <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end flex-1 pl-4">
-      <div class="relative flex items-center group">
-          <button id="searchBtnIcon" onclick="toggleSearch()" class="p-2 text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 border border-white/10 rounded-full z-10 relative">
+    <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end flex-1 pl-2 sm:pl-4 overflow-hidden">
+      <div class="relative flex items-center group shrink-0">
+          <button id="searchBtnIcon" onclick="toggleSearch()" class="shrink-0 p-2 text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 border border-white/10 rounded-full z-10 relative">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </button>
           <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="Buscar proyecto..." class="absolute right-0 opacity-0 w-0 pointer-events-none bg-black/60 border border-white/20 rounded-full py-1.5 px-4 text-sm text-white focus:outline-none transition-all duration-300 ease-in-out backdrop-blur-md">
@@ -344,13 +344,13 @@
       </div>
 
     <!-- MODO ENFOQUE -->
-      <button id="btnFocusMode" onclick="toggleFocusMode()" class="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-[#bf5af2]/20 hover:border-[#bf5af2]/50 text-gray-400 hover:text-[#bf5af2] transition-all rounded-full px-3 sm:px-4 py-1.5 font-medium text-[11px] sm:text-xs">
+      <button id="btnFocusMode" onclick="toggleFocusMode()" class="shrink-0 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-[#bf5af2]/20 hover:border-[#bf5af2]/50 text-gray-400 hover:text-[#bf5af2] transition-all rounded-full px-3 sm:px-4 py-1.5 font-medium text-[11px] sm:text-xs">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           <span class="hidden sm:inline">Modo Enfoque</span>
       </button>
       
       <!-- BOTÓN FILTROS AVANZADOS -->
-      <button onclick="toggleFilterDrawer()" class="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-full px-3 sm:px-4 py-1.5 text-white font-medium text-[11px] sm:text-xs">
+      <button onclick="toggleFilterDrawer()" class="shrink-0 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-full px-3 sm:px-4 py-1.5 text-white font-medium text-[11px] sm:text-xs">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
           <span class="hidden sm:inline">Filtros</span>
           <span id="activeFiltersBadge" class="hidden bg-brand-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1">1</span>
@@ -380,24 +380,28 @@
 
       <div class="h-5 w-px bg-white/20 mx-1 hidden sm:block"></div>
 
-      <button onclick="logout()" class="pill-btn p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-[#ff453a]/20 hover:text-[#ff453a] font-medium flex items-center gap-1.5 transition ml-1" title="Cerrar Sesión">
+      <button onclick="logout()" class="pill-btn shrink-0 p-1.5 sm:px-2 sm:py-1.5 bg-transparent text-gray-400 hover:bg-[#ff453a]/20 hover:text-[#ff453a] font-medium flex items-center gap-1.5 transition ml-1" title="Cerrar Sesión">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
       </button>
 </div>
 
       <!-- BOTÓN 3 PUNTOS MÓVIL -->
-      <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="pill-btn p-2 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white transition md:hidden flex items-center justify-center ml-1 border border-white/10 rounded-xl" title="Menú">
+      <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="shrink-0 pill-btn p-2 bg-transparent text-gray-400 hover:bg-white/10 hover:text-white transition md:hidden flex items-center justify-center ml-1 border border-white/10 rounded-xl" title="Menú">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
       </button>
 
       <!-- MENÚ DESPLEGABLE MÓVIL -->
       <div id="mobileMenuDropdown" class="absolute top-[60px] right-0 w-56 liquid-glass rounded-2xl p-2 z-[100] transform scale-95 opacity-0 pointer-events-none transition-all duration-300 origin-top-right flex flex-col gap-1 md:hidden shadow-2xl border border-white/20">
+          <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+              Centrar Mapa
+          </button>
+          <div class="h-px w-full bg-white/10 my-1"></div>
           <button id="mobileThemeToggleBtn" onclick="toggleTheme(); toggleMobileMenu()" class="supremo-only hidden w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
               <svg class="w-4 h-4 text-[#ff9f0a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
               <span id="mobileThemeText">Cambiar Tema</span>
               <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">Supremo</span>
           </button>
-          <div class="h-px w-full bg-white/10 my-1"></div>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
@@ -434,7 +438,7 @@
       <g id="canvasGroup" class="pointer-events-auto transition-transform duration-100 ease-out"></g>
     </svg>
 
-    <div id="infoCard" class="absolute bottom-4 left-4 right-4 md:left-auto md:bottom-8 md:right-8 md:w-[400px] liquid-glass rounded-[2rem] p-6 hidden opacity-0 transition-opacity duration-400 z-10 max-h-[85vh] overflow-y-auto scrollbar-thin">
+    <div id="infoCard" class="absolute bottom-4 left-4 right-4 md:left-auto md:bottom-8 md:right-8 md:w-[400px] liquid-glass rounded-[2rem] p-4 sm:p-6 hidden opacity-0 transition-opacity duration-400 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
       <div class="flex justify-between items-start mb-4">
         <span id="infoType" class="text-[9px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-white/10 text-gray-300 border border-white/5">TIPO</span>
         <button onclick="closeInfoCardSafe()" class="text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-white/10 transition bg-black/20"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
@@ -477,9 +481,9 @@
                       <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Estado</label><select id="quickEditStatus" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none appearance-none font-medium"><option value="No Iniciado">⏸️ No Iniciado</option><option value="Pendiente">⏳ Pendiente</option><option value="En Progreso">🚀 En Progreso</option><option value="Completado">✅ Completado</option></select></div>
                       <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Límite</label><input type="date" id="quickEditDeadline" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]"></div>
                   </div>
-                  <div class="flex items-end gap-4 min-h-[60px]">
-                      <div class="flex-1"><label class="block text-[8px] text-[#35aee8] font-bold mb-2 uppercase tracking-widest leading-tight">Envío Propuesta</label><input type="date" id="quickEditDeliveryDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]"></div>
-                      <div class="flex-1"><label class="block text-[8px] text-[#30d158] font-bold mb-2 uppercase tracking-widest leading-tight">Autorización</label><input type="date" id="quickEditReturnDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#30d158]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]"></div>
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 min-h-[60px]">
+                      <div class="flex-1"><label class="block text-[8px] text-[#35aee8] font-bold mb-1 uppercase tracking-widest leading-tight">Envío Propuesta</label><input type="date" id="quickEditDeliveryDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]"></div>
+                      <div class="flex-1"><label class="block text-[8px] text-[#30d158] font-bold mb-1 uppercase tracking-widest leading-tight">Autorización</label><input type="date" id="quickEditReturnDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input border-[#30d158]/30 rounded-xl p-2.5 text-xs focus:outline-none [color-scheme:dark]"></div>
                   </div>
               </div>
           </details>
@@ -497,10 +501,12 @@
                   <div id="quickTasksList" class="space-y-2 max-h-40 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
                   <div class="flex flex-col gap-2" id="quickTaskInputBlock">
                       <input type="text" id="newQuickTaskInput" placeholder="Descripción de la tarea..." class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none">
-                      <div class="flex gap-2">
-                          <select id="newQuickTaskAssignee" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none appearance-none cursor-pointer"><option value="">👤 Asignar a...</option></select>
-                          <input type="date" id="newQuickTaskDate" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none [color-scheme:dark]">
-                          <button onclick="addQuickTask()" class="pill-btn px-3 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0">Añadir</button>
+                      <div class="flex flex-col sm:flex-row gap-2">
+                          <select id="newQuickTaskAssignee" class="w-full sm:flex-1 liquid-input rounded-xl p-2 text-xs focus:outline-none appearance-none cursor-pointer"><option value="">👤 Asignar a...</option></select>
+                          <div class="flex gap-2 flex-1">
+                              <input type="date" id="newQuickTaskDate" class="flex-1 liquid-input rounded-xl p-2 text-xs focus:outline-none [color-scheme:dark]">
+                              <button onclick="addQuickTask()" class="pill-btn px-4 bg-brand-accent hover:bg-blue-600 text-white font-bold text-xs transition shrink-0">Añadir</button>
+                          </div>
                       </div>
                   </div>
               </div>
@@ -862,13 +868,13 @@
                       <input type="date" id="editDeadline" max="2099-12-31" class="w-full liquid-input rounded-xl p-3 text-sm [color-scheme:dark]">
                   </div>
                   
-                  <div class="flex items-end gap-4 mt-2 border-t border-white/10 pt-4 sm:col-span-2 min-h-[60px]">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mt-2 border-t border-white/10 pt-4 sm:col-span-2 min-h-[60px]">
                       <div class="flex-1">
-                          <label class="block text-[8px] text-[#35aee8] font-bold mb-2 uppercase tracking-widest leading-tight">Envío Propuesta<br>(Indicador)</label>
+                          <label class="block text-[8px] text-[#35aee8] font-bold mb-1 uppercase tracking-widest leading-tight">Envío Propuesta (Indicador)</label>
                           <input type="date" id="editDeliveryDate" max="2099-12-31" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-3 text-sm [color-scheme:dark]">
                       </div>
                       <div class="flex-1">
-                          <label class="block text-[8px] text-[#30d158] font-bold mb-2 uppercase tracking-widest leading-tight">Autorización<br>(Indicador)</label>
+                          <label class="block text-[8px] text-[#30d158] font-bold mb-1 uppercase tracking-widest leading-tight">Autorización (Indicador)</label>
                           <input type="date" id="editReturnDate" max="2099-12-31" class="w-full liquid-input border-[#30d158]/30 rounded-xl p-3 text-sm [color-scheme:dark]">
                       </div>
                   </div>
