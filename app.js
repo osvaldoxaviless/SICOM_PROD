@@ -2512,6 +2512,46 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }, 100);
     }
 
+    window.registerConsultant = function() { 
+        if (currentUserRole === 'Lector') return; 
+        const n = document.getElementById('newConsultantName').value.trim();
+        const c = document.getElementById('newConsultantColor').value; 
+        const r = document.getElementById('newConsultantRole').value; 
+        if (!n || consultants[n]) return; 
+        consultants[n] = { color: c, role: r }; 
+        document.getElementById('newConsultantName').value = ''; 
+        window.saveData(false); 
+        window.populateConsultantSelects(); 
+        window.renderRegisteredConsultantsList(); 
+        window.renderMindMap(); 
+        window.showToast(`Consultor "${n}" registrado con éxito`, false);
+    };
+
+    window.handleUpdateExistingConsultantColor = function(name, newColor) { 
+        if(consultants[name]) { 
+            consultants[name].color = newColor; 
+            window.saveData(false); 
+            window.renderRegisteredConsultantsList(); 
+            window.renderMindMap(); 
+            if(currentSelection && currentSelection.id) window.showInfoCard(currentSelection.type, currentSelection.id); 
+        } 
+    };
+
+    window.updateConsultantRole = function(name, newRole) { 
+        if(consultants[name]) { 
+            consultants[name].role = newRole; 
+            window.saveData(false); 
+            window.showToast(`Rol de ${name} actualizado a ${newRole}`, false);
+        } 
+    };
+
+    window.requestDeleteConsultant = function(name) { 
+        itemToDelete = { category: 'consultant', id: name }; 
+        document.getElementById('deleteModalTitle').textContent = `¿Eliminar a ${name}?`; 
+        document.getElementById('deleteConfirmModal').classList.remove('hidden'); 
+        setTimeout(() => document.getElementById('deleteConfirmModal').classList.remove('opacity-0'), 10); 
+    };
+
     window.populateGlobalEditSelector = function() {
       const s = document.getElementById('globalEditSelector'); 
       if (!s) return;
