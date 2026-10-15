@@ -733,5 +733,22 @@ body.theme-light #loginOverlay .orb {
     animation: unreadBlockerPulse 1.3s infinite ease-in-out;
 }
 
+@keyframes unreadMentionPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 6px rgba(0, 113, 227, 0.85));
+    }
+    50% {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 14px rgba(0, 113, 227, 1));
+    }
+}
+.unread-mention-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: unreadMentionPulse 1.8s infinite ease-in-out;
+}
+
+
 
 

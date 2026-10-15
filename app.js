@@ -854,6 +854,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             }
             
+            // Menciones directas con @ en el Foro del Proyecto (alerta prioritaria e inmediata)
+            if (p.notes && Array.isArray(p.notes) && localAuthor) {
+                p.notes.forEach(n => {
+                    if (!n) return;
+                    const isReadByMe = Array.isArray(n.readBy) && n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+                    if (!isReadByMe && window.isUserMentionedInText && window.isUserMentionedInText(n.text, localAuthor)) {
+                        myAlerts.push({
+                            id: p.id,
+                            name: p.name || 'Sin nombre',
+                            pType,
+                            parentName: pParent,
+                            alertType: 'mention',
+                            icon: '🔔',
+                            reason: `@${localAuthor}: ${n.by || 'Un consultor'} te mencionó en el foro: "${(n.text || '').length > 55 ? (n.text || '').substring(0, 52) + '...' : (n.text || '')}"`,
+                            users: [n.by || 'Consultor'],
+                            noteInfo: n
+                        });
+                    }
+                });
+            }
+
             if(p.tasks && Array.isArray(p.tasks)) {
                 for(let t of p.tasks) {
                     if(t.done === true) continue;
@@ -957,10 +978,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 container.innerHTML = myAlerts.map(a => {
                     const isDanger = a.alertType === 'danger';
                     const isWarning = a.alertType === 'warning';
-                    const colorClassText = isDanger ? 'text-[#ff453a]' : (isWarning ? 'text-[#ff9f0a]' : 'text-brand-accent');
-                    const colorClassBg = isDanger ? 'bg-[#ff453a]/10' : (isWarning ? 'bg-[#ff9f0a]/10' : 'bg-brand-accent/10');
-                    const colorClassBorder = isDanger ? 'border-[#ff453a]/30' : (isWarning ? 'border-[#ff9f0a]/30' : 'border-brand-accent/30');
-                    const colorClassBadgeBg = isDanger ? 'bg-[#ff453a]/20' : (isWarning ? 'bg-[#ff9f0a]/20' : 'bg-brand-accent/20');
+                    const isMention = a.alertType === 'mention';
+                    const colorClassText = isDanger ? 'text-[#ff453a]' : (isWarning ? 'text-[#ff9f0a]' : (isMention ? 'text-[#64d2ff]' : 'text-brand-accent'));
+                    const colorClassBg = isDanger ? 'bg-[#ff453a]/10' : (isWarning ? 'bg-[#ff9f0a]/10' : (isMention ? 'bg-[#0071e3]/15' : 'bg-brand-accent/10'));
+                    const colorClassBorder = isDanger ? 'border-[#ff453a]/30' : (isWarning ? 'border-[#ff9f0a]/30' : (isMention ? 'border-[#0071e3]/40' : 'border-brand-accent/30'));
+                    const colorClassBadgeBg = isDanger ? 'bg-[#ff453a]/20' : (isWarning ? 'bg-[#ff9f0a]/20' : (isMention ? 'bg-[#0071e3]/25' : 'bg-brand-accent/20'));
                     
                     // BLINDAJE DE SEGURIDAD
                     const userText = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
@@ -1147,6 +1169,120 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.currentNoteTagInfo = 'comentario';
     window.currentNoteTagEdit = 'comentario';
 
+    // Helpers de Menciones con @ y Reglas de Involucramiento (Señal vs Ruido)
+    window.extractMentionsFromText = function(text) {
+        if (!text) return [];
+        const allCons = Object.keys(consultants || {});
+        const found = [];
+        allCons.forEach(c => {
+            const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`@${escaped}\\b`, 'i');
+            if (regex.test(text)) found.push(c);
+        });
+        return found;
+    };
+
+    window.isUserMentionedInText = function(text, userName) {
+        if (!text || !userName) return false;
+        const escaped = userName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`@${escaped}\\b`, 'i');
+        return regex.test(text);
+    };
+
+    window.isUserInvolvedInProject = function(proj, userName) {
+        if (!proj || !userName) return false;
+        const u = userName.trim().toLowerCase();
+        
+        // 1. Asignado formalmente en la lista de consultores del proyecto
+        const cons = typeof getProjectConsultants === 'function' ? getProjectConsultants(proj) : (Array.isArray(proj.consultants) ? proj.consultants : []);
+        if (cons.some(c => c && c.trim().toLowerCase() === u)) return true;
+        
+        // 2. Tiene alguna tarea asignada en el proyecto
+        if (Array.isArray(proj.tasks) && proj.tasks.some(t => t.assignee && t.assignee.trim().toLowerCase() === u)) {
+            return true;
+        }
+        
+        return false;
+    };
+
+    window.shouldShowProjectForumBadge = function(proj, userName, userRole) {
+        if (!proj || !userName) return false;
+        if (!Array.isArray(proj.notes) || proj.notes.length === 0) return false;
+
+        // Calcular notas no leídas por este usuario
+        const unreadNotes = proj.notes.filter(n => {
+            if (!n) return false;
+            if (!Array.isArray(n.readBy)) return n.by !== userName;
+            return !n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === userName);
+        });
+
+        if (unreadNotes.length === 0) return false;
+
+        // 1. ¿Fue mencionado explícitamente en alguna nota no leída? (Prioridad absoluta para cualquier rol)
+        const hasUnreadMention = unreadNotes.some(n => window.isUserMentionedInText(n.text, userName));
+        if (hasUnreadMention) return true;
+
+        // 2. ¿Está involucrado directamente en el proyecto (consultor o tareas)?
+        const isInvolved = window.isUserInvolvedInProject(proj, userName);
+        if (isInvolved) return true;
+
+        // 3. Regla para Supremo (Dirección General): Si no está asignado, solo ve si hay Bloqueos Críticos (⚠️ Bloqueo)
+        if (userRole === 'Supremo') {
+            return unreadNotes.some(n => n.tag === 'bloqueo');
+        }
+
+        // Para Supervisores y Consultores no involucrados: CERO RUIDO
+        return false;
+    };
+
+    window.toggleMentionDropdown = function(context) {
+        const isInfo = context === 'info';
+        const menu = document.getElementById(isInfo ? 'mentionMenu_info' : 'mentionMenu_edit');
+        if (!menu) return;
+        
+        if (!menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            return;
+        }
+        
+        const allCons = Object.keys(consultants || {}).filter(k => consultants[k].role !== 'Lector');
+        menu.innerHTML = allCons.map(cName => {
+            const col = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#64d2ff';
+            const initial = cName.charAt(0).toUpperCase();
+            return `
+                <button type="button" onclick="insertMention('${escapeHtml(cName)}', '${context}')" class="w-full text-left p-2 rounded-xl hover:bg-white/10 transition flex items-center gap-2 text-xs text-white">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm shrink-0" style="background-color: ${col};">
+                        ${initial}
+                    </div>
+                    <span class="truncate font-medium flex-1">${escapeHtml(cName)}</span>
+                    <span class="text-[9px] text-[#64d2ff] font-mono">@${escapeHtml(cName.split(' ')[0])}</span>
+                </button>
+            `;
+        }).join('');
+        
+        menu.classList.remove('hidden');
+    };
+
+    window.insertMention = function(userName, context) {
+        const isInfo = context === 'info';
+        const input = document.getElementById(isInfo ? 'infoNoteInput' : 'editNotes');
+        const menu = document.getElementById(isInfo ? 'mentionMenu_info' : 'mentionMenu_edit');
+        if (menu) menu.classList.add('hidden');
+        if (!input) return;
+
+        const val = input.value;
+        const cursorPos = input.selectionStart || val.length;
+        const textBefore = val.slice(0, cursorPos);
+        const textAfter = val.slice(cursorPos);
+
+        if (textBefore.endsWith('@')) {
+            input.value = textBefore.slice(0, -1) + `@${userName} ` + textAfter;
+        } else {
+            input.value = textBefore + (textBefore.length && !textBefore.endsWith(' ') ? ' ' : '') + `@${userName} ` + textAfter;
+        }
+        input.focus();
+    };
+
     window.setNoteTag = function(tag, context) {
         const isInfo = context === 'info';
         if (isInfo) window.currentNoteTagInfo = tag;
@@ -1250,12 +1386,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const newNoteId = 'n_' + Date.now();
             const tag = (isInfo ? window.currentNoteTagInfo : window.currentNoteTagEdit) || 'comentario';
             const nowTimestamp = new Date().toLocaleString('es-MX', {hour12:false});
+            const mentions = window.extractMentionsFromText(noteText);
 
             item.notes.push({ 
                 id: newNoteId, 
                 text: noteText, 
                 by: localAuthor, 
                 tag: tag,
+                mentions: mentions,
                 date: nowTimestamp,
                 readBy: [
                     { user: localAuthor, at: nowTimestamp }
@@ -1270,11 +1408,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
             
             const tagLabel = tag === 'acuerdo' ? 'Acuerdo' : (tag === 'bloqueo' ? 'Bloqueo' : (tag === 'entregable' ? 'Entregable' : 'Comentario'));
-            logActivity(item.id, item.name, `Añadió nota al foro [${tagLabel}]: "${noteText.length > 40 ? noteText.slice(0, 37) + '...' : noteText}"`, localAuthor);
+            const mentionLog = mentions.length ? ` (Mencionó a: ${mentions.join(', ')})` : '';
+            logActivity(item.id, item.name, `Añadió nota al foro [${tagLabel}]: "${noteText.length > 40 ? noteText.slice(0, 37) + '...' : noteText}"${mentionLog}`, localAuthor);
             window.saveData(false);
             window.renderNotesHistory(item.notes, 'editNotesHistory');
             window.renderNotesHistory(item.notes, 'infoNotes');
             window.renderMindMap(); // Refresca los badges de notificación del mapa mental
+            if (typeof window.renderAlerts === 'function') window.renderAlerts();
+            if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
         }
     };
 
@@ -1296,6 +1437,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     window.renderNotesHistory(item.notes, 'infoNotes');
                     window.renderNotesHistory(item.notes, 'editNotesHistory');
                     window.renderMindMap();
+                    if (typeof window.renderAlerts === 'function') window.renderAlerts();
+                    if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
                     window.showToast("✓ Acuse de lectura confirmado", false);
                 }
             }
@@ -1324,6 +1467,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 window.renderNotesHistory(item.notes, 'infoNotes');
                 window.renderNotesHistory(item.notes, 'editNotesHistory');
                 window.renderMindMap();
+                if (typeof window.renderAlerts === 'function') window.renderAlerts();
+                if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
                 window.showToast("✓ Todas las notas marcadas como enterado", false);
             }
         }
@@ -1350,7 +1495,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (badge) {
             if (unreadForMeCount > 0) {
                 const hasBlocker = unreadForMeList.some(n => n.tag === 'bloqueo');
-                badge.innerHTML = `${arr.length} <span class="w-1.5 h-1.5 rounded-full ${hasBlocker ? 'bg-[#ff453a]' : 'bg-white'} inline-block animate-ping ml-0.5"></span>`;
+                const hasMention = unreadForMeList.some(n => window.isUserMentionedInText(n.text, localAuthor));
+                const badgeDotColor = hasBlocker ? 'bg-[#ff453a]' : (hasMention ? 'bg-[#64d2ff]' : 'bg-white');
+                badge.innerHTML = `${arr.length} <span class="w-1.5 h-1.5 rounded-full ${badgeDotColor} inline-block animate-ping ml-0.5"></span>`;
                 badge.classList.remove('hidden');
             } else {
                 badge.textContent = arr.length;
@@ -1424,9 +1571,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-medium bg-white/5 text-gray-400 border border-white/10 flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
             }
 
-            // Auto-enlazar URLs en el texto
+            // Detección de si el usuario activo fue mencionado con @
+            const isMentioned = localAuthor && window.isUserMentionedInText(n.text, localAuthor);
+            let mentionTag = '';
+            if (isMentioned) {
+                mentionTag = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/20 text-[#64d2ff] border border-blue-500/35 flex items-center gap-1 shrink-0 shadow-sm animate-pulse"><span>🔔</span><span>Te mencionaron</span></span>`;
+            }
+
+            // Formatear menciones con @Nombre dentro del texto
             const safeText = escapeHtml(n.text || '');
-            const linkedText = safeText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline break-all inline-flex items-center gap-0.5">$1 <svg class="w-3 h-3 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>');
+            let formattedText = safeText;
+            const allCons = Object.keys(consultants || {});
+            allCons.forEach(cName => {
+                const escaped = escapeHtml(cName);
+                const col = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#64d2ff';
+                const regex = new RegExp(`@${escaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                formattedText = formattedText.replace(regex, `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#0071e3]/20 text-[#64d2ff] border border-[#0071e3]/30 font-semibold text-[10px] shadow-sm"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>@${escaped}</span>`);
+            });
+
+            // Auto-enlazar URLs en el texto
+            const linkedText = formattedText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline break-all inline-flex items-center gap-0.5">$1 <svg class="w-3 h-3 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>');
 
             const friendlyDate = window.formatFriendlyNoteDate(n.date);
 
@@ -1440,13 +1604,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             // Sección de acuse y auditoría
             let receiptSection = '';
             if (!isReadByMe) {
+                const noticeText = isMentioned ? '🔔 Te mencionaron en esta nota' : (tag === 'bloqueo' ? '⚠️ Bloqueo pendiente de tu acuse' : '📌 Pendiente de tu lectura');
+                const noticeColor = isMentioned ? 'text-[#64d2ff]' : (tag === 'bloqueo' ? 'text-[#ff453a]' : 'text-purple-300');
+                const pingColor = isMentioned ? 'bg-[#64d2ff]' : (tag === 'bloqueo' ? 'bg-[#ff453a]' : 'bg-[#bf5af2]');
+                const btnColor = isMentioned ? 'bg-[#0071e3] hover:bg-[#005bb5] shadow-[0_0_10px_rgba(0,113,227,0.4)]' : (tag === 'bloqueo' ? 'bg-[#ff453a] hover:bg-[#e0382e] shadow-[0_0_10px_rgba(255,69,58,0.4)]' : 'bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 shadow-[0_0_10px_rgba(191,90,242,0.4)]');
+
                 receiptSection = `
                     <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 text-[10px] ${tag === 'bloqueo' ? 'text-[#ff453a]' : 'text-purple-300'} font-semibold">
-                            <span class="w-2 h-2 rounded-full ${tag === 'bloqueo' ? 'bg-[#ff453a]' : 'bg-[#bf5af2]'} animate-ping shrink-0"></span>
-                            <span>${tag === 'bloqueo' ? '⚠️ Bloqueo pendiente de tu acuse' : '📌 Pendiente de tu lectura'}</span>
+                        <div class="flex items-center gap-1.5 text-[10px] ${noticeColor} font-semibold">
+                            <span class="w-2 h-2 rounded-full ${pingColor} animate-ping shrink-0"></span>
+                            <span>${noticeText}</span>
                         </div>
-                        <button type="button" onclick="confirmNoteRead('${n.id}')" class="px-3 py-1.5 ${tag === 'bloqueo' ? 'bg-[#ff453a] hover:bg-[#e0382e] shadow-[0_0_10px_rgba(255,69,58,0.4)]' : 'bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 shadow-[0_0_10px_rgba(191,90,242,0.4)]'} active:scale-95 text-white font-bold text-[10px] rounded-xl transition flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="confirmNoteRead('${n.id}')" class="px-3 py-1.5 ${btnColor} active:scale-95 text-white font-bold text-[10px] rounded-xl transition flex items-center gap-1.5 shrink-0">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>Enterado / Confirmar lectura</span>
                         </button>
@@ -1474,7 +1643,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 `;
             }
 
-            const unreadCardClasses = !isReadByMe ? (tag === 'bloqueo' ? 'border-[#ff453a]/60 bg-[#ff453a]/10 shadow-[0_0_15px_rgba(255,69,58,0.2)]' : 'border-[#bf5af2]/60 bg-[#bf5af2]/10 shadow-[0_0_15px_rgba(191,90,242,0.15)]') : 'border-white/5 hover:border-white/10 bg-black/40 hover:bg-black/50';
+            const unreadCardClasses = !isReadByMe ? (isMentioned ? 'border-[#0071e3]/60 bg-[#0071e3]/10 shadow-[0_0_15px_rgba(0,113,227,0.2)]' : (tag === 'bloqueo' ? 'border-[#ff453a]/60 bg-[#ff453a]/10 shadow-[0_0_15px_rgba(255,69,58,0.2)]' : 'border-[#bf5af2]/60 bg-[#bf5af2]/10 shadow-[0_0_15px_rgba(191,90,242,0.15)]')) : 'border-white/5 hover:border-white/10 bg-black/40 hover:bg-black/50';
 
             return `
                 <div class="flex flex-col gap-2 p-3 rounded-xl border ${unreadCardClasses} shadow-sm transition-all group">
@@ -1485,6 +1654,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
                             <span class="text-[11px] font-bold text-white tracking-wide truncate max-w-[120px]">${escapeHtml(n.by || 'Consultor')}</span>
                             ${tagBadge}
+                            ${mentionTag}
                         </div>
                         <span class="text-[9px] text-gray-500 ml-auto shrink-0" title="${escapeHtml(n.date || '')}">${friendlyDate}</span>
                         ${delBtn}
@@ -1535,6 +1705,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             window.addProjectNote(id === 'infoNoteInput' ? 'info' : 'edit');
                         }
                     });
+                    el.addEventListener('input', function(e) {
+                        const context = id === 'infoNoteInput' ? 'info' : 'edit';
+                        const val = this.value;
+                        const cursorPos = this.selectionStart;
+                        const lastChar = val.slice(cursorPos - 1, cursorPos);
+                        if (lastChar === '@') {
+                            window.toggleMentionDropdown(context);
+                        }
+                    });
+                }
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#btnMention_info') && !e.target.closest('#mentionMenu_info')) {
+                    const m = document.getElementById('mentionMenu_info');
+                    if (m) m.classList.add('hidden');
+                }
+                if (!e.target.closest('#btnMention_edit') && !e.target.closest('#mentionMenu_edit')) {
+                    const m = document.getElementById('mentionMenu_edit');
+                    if (m) m.classList.add('hidden');
                 }
             });
         }
@@ -1871,7 +2060,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.setCreateType = function(type) {
        currentCreateType = type; const btnP = document.getElementById('btnCreateTypeProject'), btnM = document.getElementById('btnCreateTypeModule'), formP = document.getElementById('createProjectForm'), formM = document.getElementById('createModuleForm');
-       if(type === 'project') { btnP.classList.add('bg-white/10','text-white'); btnP.classList.remove('text-gray-400','border-transparent'); btnM.classList.remove('bg-white/10','text-white'); btnM.classList.add('text-gray-400','border-transparent'); formP.classList.remove('hidden'); formM.classList.add('hidden'); } 
+       if(type === 'project') { 
+           btnP.classList.add('bg-white/10','text-white'); btnP.classList.remove('text-gray-400','border-transparent'); 
+           btnM.classList.remove('bg-white/10','text-white'); btnM.classList.add('text-gray-400','border-transparent'); 
+           formP.classList.remove('hidden'); formM.classList.add('hidden'); 
+           if (typeof window.populateNewProjectLocationSelect === 'function') {
+               const locSel = document.getElementById('newProjLocation');
+               window.populateNewProjectLocationSelect(locSel ? locSel.value : null);
+           }
+       } 
        else { btnM.classList.add('bg-white/10','text-white'); btnM.classList.remove('text-gray-400','border-transparent'); btnP.classList.remove('bg-white/10','text-white'); btnP.classList.add('text-gray-400','border-transparent'); formM.classList.remove('hidden'); formP.classList.add('hidden'); }
     }
     
@@ -2767,6 +2964,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const card = document.getElementById('infoCard'); let item = null;
       document.getElementById('infoQuickEditContainer').classList.add('hidden'); document.getElementById('btnFullEditInfoCard').classList.add('hidden');
       document.getElementById('infoNotesContainer').classList.add('hidden');
+      const modActions = document.getElementById('moduleActionsInfoCard');
+      if (modActions) modActions.classList.add('hidden');
       card.dataset.notesSig = '';
       document.getElementById('infoRelativeTime').classList.add('hidden');
       document.getElementById('infoDriveBtn').classList.add('hidden');
@@ -2791,6 +2990,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${avgProg}%</span>`;
         if (type === 'module' && (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor')) {
           document.getElementById('btnFullEditInfoCard').classList.remove('hidden');
+        }
+        if (modActions && currentUserRole !== 'Lector') {
+          modActions.classList.remove('hidden');
+          const btnAdd = document.getElementById('btnAddProjectToModule');
+          if (btnAdd) {
+            const targetLocId = (type === 'module' && item) ? item.id : 'DIRECT';
+            btnAdd.onclick = () => window.openCreateProjectForModule(targetLocId);
+          }
         }
       } else {
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
@@ -3173,7 +3380,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (mod) { 
           if (!mod.projects) mod.projects = []; 
           mod.projects.push(np); 
-        } 
+        } else {
+          console.error("Módulo destino no encontrado:", loc);
+          window.showToast("⚠️ Error: No se encontró el módulo seleccionado", true);
+          return;
+        }
       }
 
       document.getElementById('newProjName').value = ''; 
@@ -3186,15 +3397,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]`, localAuthor); 
 
-      // Alerta a Google Chat de nuevo proyecto
-      const modName = loc === 'DIRECT' ? 'Proyectos Directos' : ((appData.modules.find(m => m.id === loc) || {}).name || 'Módulo');
-      window.sendExternalAlert('PROJECT_CREATED', {
-        project: np.name,
-        module: modName,
-        consultants: selectedCons.join(', ') || 'Sin asignar',
-        deadline: deadline || 'Sin fecha',
-        author: localAuthor
-      });
+      // Alerta a Google Chat de nuevo proyecto (con blindaje contra fallos)
+      try {
+        const modName = loc === 'DIRECT' ? 'Proyectos Directos' : ((appData.modules.find(m => m.id === loc) || {}).name || 'Módulo');
+        window.sendExternalAlert('PROJECT_CREATED', {
+          project: np.name,
+          module: modName,
+          consultants: (Array.isArray(cons) ? cons.join(', ') : '') || 'Sin asignar',
+          deadline: deadline || 'Sin fecha',
+          author: localAuthor
+        });
+      } catch (errAlert) {
+        console.warn("No se pudo enviar alerta de nuevo proyecto:", errAlert);
+      }
 
       window.saveData(true); 
       window.populateGlobalEditSelector(); 
@@ -3225,7 +3440,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       logActivity(newId, name, 'Creó el módulo', localAuthor); 
       window.saveData(true); 
       window.populateGlobalEditSelector(); 
-      window.populateNewProjectLocationSelect(); 
+      window.populateNewProjectLocationSelect(newId); 
       if (typeof window.populateEditProjectLocationSelect === 'function') {
         window.populateEditProjectLocationSelect();
       }
@@ -3305,10 +3520,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (currentLoc) s.value = currentLoc;
     };
     
-    window.populateNewProjectLocationSelect = function() { 
+    window.populateNewProjectLocationSelect = function(preselectedId) { 
       const s = document.getElementById('newProjLocation'); 
       if (!s) return; 
+      const prevVal = preselectedId || s.value;
       s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
+      if (prevVal && Array.from(s.options).some(o => o.value === prevVal)) {
+        s.value = prevVal;
+      }
+    };
+
+    window.openCreateProjectForModule = function(moduleId) {
+      if (currentUserRole === 'Lector') return;
+      window.closeInfoCardSafe();
+      window.openConfigDrawer();
+      window.switchTab('new');
+      window.setCreateType('project');
+      window.populateNewProjectLocationSelect(moduleId);
+      setTimeout(() => {
+        const inp = document.getElementById('newProjName');
+        if (inp) inp.focus();
+      }, 350);
     };
     window.populateConsultantSelects = function() {
       const f = document.getElementById('consultantFilter'), all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
@@ -3693,8 +3925,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           pPerc.textContent = `${prog}%`;
           g.appendChild(pPerc);
 
-          // 3.5 BADGE DE NOTIFICACIÓN DE FORO (NO LEÍDOS POR EL USUARIO ACTIVO)
-          if (localAuthor && Array.isArray(p.notes) && p.notes.length > 0) {
+          // 3.5 BADGE DE NOTIFICACIÓN DE FORO (FILTRO DE INVOLUCRAMIENTO Y MENCIONES)
+          if (localAuthor && Array.isArray(p.notes) && p.notes.length > 0 && (typeof window.shouldShowProjectForumBadge !== 'function' || window.shouldShowProjectForumBadge(p, localAuthor, currentUserRole))) {
               const unreadNotes = p.notes.filter(n => {
                   if (!n) return false;
                   if (!Array.isArray(n.readBy)) {
@@ -3705,13 +3937,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
               const unreadCount = unreadNotes.length;
               if (unreadCount > 0) {
+                  const hasMention = unreadNotes.some(n => window.isUserMentionedInText && window.isUserMentionedInText(n.text, localAuthor));
                   const hasBlocker = unreadNotes.some(n => n.tag === 'bloqueo');
-                  const badgeColor = hasBlocker ? '#ff453a' : '#bf5af2';
+
+                  // Prioridad visual: 1. Mención (@ Azul Eléctrico) > 2. Bloqueo (⚠️ Rojo) > 3. Normal (💬 Morado)
+                  const badgeColor = hasMention ? '#0071e3' : (hasBlocker ? '#ff453a' : '#bf5af2');
+                  const animClass = hasMention ? 'unread-mention-pulse' : (hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
+                  const badgeText = hasMention ? '@' : (unreadCount > 9 ? '9+' : String(unreadCount));
+
                   const badgeG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                   badgeG.setAttribute('class', 'project-unread-badge');
                   badgeG.style.pointerEvents = 'none';
 
-                  if (unreadCount < 10) {
+                  if (hasMention || unreadCount < 10) {
                       const bCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                       bCircle.setAttribute('cx', '310');
                       bCircle.setAttribute('cy', '4');
@@ -3719,17 +3957,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       bCircle.setAttribute('fill', badgeColor);
                       bCircle.setAttribute('stroke', '#0d0d12');
                       bCircle.setAttribute('stroke-width', '1.5');
-                      bCircle.setAttribute('class', hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
+                      bCircle.setAttribute('class', animClass);
                       bCircle.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
                       badgeG.appendChild(bCircle);
 
                       const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                       bTxt.setAttribute('x', '310');
-                      bTxt.setAttribute('y', '7');
+                      bTxt.setAttribute('y', hasMention ? '7.5' : '7');
                       bTxt.setAttribute('text-anchor', 'middle');
                       bTxt.setAttribute('fill', '#ffffff');
-                      bTxt.setAttribute('style', 'font-size: 9px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
-                      bTxt.textContent = String(unreadCount);
+                      bTxt.setAttribute('style', `font-size: ${hasMention ? '10px' : '9px'}; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;`);
+                      bTxt.textContent = badgeText;
                       badgeG.appendChild(bTxt);
                   } else {
                       const bPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -3741,7 +3979,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       bPill.setAttribute('fill', badgeColor);
                       bPill.setAttribute('stroke', '#0d0d12');
                       bPill.setAttribute('stroke-width', '1.5');
-                      bPill.setAttribute('class', hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
+                      bPill.setAttribute('class', animClass);
                       bPill.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
                       badgeG.appendChild(bPill);
 
@@ -4747,7 +4985,8 @@ window.renderDailyTasks = function() {
         const style = { 
             danger: ['text-[#ff453a]', 'bg-[#ff453a]/10', 'border-[#ff453a]/30'], 
             warning: ['text-[#ff9f0a]', 'bg-[#ff9f0a]/10', 'border-[#ff9f0a]/30'], 
-            info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'] 
+            info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'],
+            mention: ['text-[#64d2ff]', 'bg-[#0071e3]/15', 'border-[#0071e3]/40']
         };
 
         container.innerHTML = `

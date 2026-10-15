@@ -26,7 +26,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261015_15">
+  <link rel="stylesheet" href="styles.css?v=20261015_17">
 </head>
 <body class="flex flex-col h-screen w-screen bg-black text-gray-200">
 
@@ -596,21 +596,30 @@
                   
                   <!-- Formulario de Redacción -->
                   <div class="lector-hide pt-2.5 border-t border-white/5 space-y-2.5">
-                      <!-- Selector de tipo de nota -->
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                          <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
-                          <button type="button" onclick="setNoteTag('comentario', 'info')" id="tagBtn_info_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
-                              <span>💬</span> Comentario
-                          </button>
-                          <button type="button" onclick="setNoteTag('acuerdo', 'info')" id="tagBtn_info_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
-                              <span>📌</span> Acuerdo
-                          </button>
-                          <button type="button" onclick="setNoteTag('bloqueo', 'info')" id="tagBtn_info_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
-                              <span>⚠️</span> Bloqueo
-                          </button>
-                          <button type="button" onclick="setNoteTag('entregable', 'info')" id="tagBtn_info_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
-                              <span>🔗</span> Entregable
-                          </button>
+                      <!-- Selector de tipo de nota y mención -->
+                      <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                              <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
+                              <button type="button" onclick="setNoteTag('comentario', 'info')" id="tagBtn_info_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
+                                  <span>💬</span> Comentario
+                              </button>
+                              <button type="button" onclick="setNoteTag('acuerdo', 'info')" id="tagBtn_info_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
+                                  <span>📌</span> Acuerdo
+                              </button>
+                              <button type="button" onclick="setNoteTag('bloqueo', 'info')" id="tagBtn_info_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
+                                  <span>⚠️</span> Bloqueo
+                              </button>
+                              <button type="button" onclick="setNoteTag('entregable', 'info')" id="tagBtn_info_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
+                                  <span>🔗</span> Entregable
+                              </button>
+                          </div>
+                          <!-- Botón Mencionar -->
+                          <div class="relative">
+                              <button type="button" onclick="toggleMentionDropdown('info')" id="btnMention_info" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-blue-500/15 hover:bg-blue-500/25 text-[#64d2ff] border border-blue-500/30 shadow-sm active:scale-95" title="Mencionar a un consultor con @">
+                                  <span>@</span> Mencionar
+                              </button>
+                              <div id="mentionMenu_info" class="hidden absolute right-0 bottom-full mb-2 w-56 bg-[#16161e]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin space-y-1"></div>
+                          </div>
                       </div>
 
                       <!-- Textarea ancho completo -->
@@ -633,6 +642,12 @@
           </details>
       </div>  
 
+      <div id="moduleActionsInfoCard" class="hidden flex flex-col gap-2 pt-2 mb-2">
+        <button type="button" id="btnAddProjectToModule" class="w-full py-3.5 bg-brand-accent hover:bg-[#005bb5] text-white text-xs font-bold rounded-2xl transition flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(0,113,227,0.3)] active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <span>➕ Añadir Proyecto a este Módulo</span>
+        </button>
+      </div>
       
       <button onclick="editFromInfoCard()" id="btnFullEditInfoCard" class="w-full py-3.5 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-semibold rounded-2xl transition flex justify-center items-center gap-2 backdrop-blur-md shadow-sm supervisor-up hidden">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edición Completa en Panel
@@ -998,20 +1013,28 @@
                 </div>
                 <div id="editNotesHistory" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl flex flex-col gap-2.5 max-h-56 overflow-y-auto scrollbar-thin shadow-inner mb-2 hidden"></div>
                 <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
-                        <button type="button" onclick="setNoteTag('comentario', 'edit')" id="tagBtn_edit_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
-                            <span>💬</span> Comentario
-                        </button>
-                        <button type="button" onclick="setNoteTag('acuerdo', 'edit')" id="tagBtn_edit_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
-                            <span>📌</span> Acuerdo
-                        </button>
-                        <button type="button" onclick="setNoteTag('bloqueo', 'edit')" id="tagBtn_edit_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
-                            <span>⚠️</span> Bloqueo
-                        </button>
-                        <button type="button" onclick="setNoteTag('entregable', 'edit')" id="tagBtn_edit_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
-                            <span>🔗</span> Entregable
-                        </button>
+                    <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
+                            <button type="button" onclick="setNoteTag('comentario', 'edit')" id="tagBtn_edit_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
+                                <span>💬</span> Comentario
+                            </button>
+                            <button type="button" onclick="setNoteTag('acuerdo', 'edit')" id="tagBtn_edit_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
+                                <span>📌</span> Acuerdo
+                            </button>
+                            <button type="button" onclick="setNoteTag('bloqueo', 'edit')" id="tagBtn_edit_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
+                                <span>⚠️</span> Bloqueo
+                            </button>
+                            <button type="button" onclick="setNoteTag('entregable', 'edit')" id="tagBtn_edit_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
+                                <span>🔗</span> Entregable
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button type="button" onclick="toggleMentionDropdown('edit')" id="btnMention_edit" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-blue-500/15 hover:bg-blue-500/25 text-[#64d2ff] border border-blue-500/30 shadow-sm active:scale-95" title="Mencionar a un consultor con @">
+                                <span>@</span> Mencionar
+                            </button>
+                            <div id="mentionMenu_edit" class="hidden absolute right-0 bottom-full mb-2 w-56 bg-[#16161e]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin space-y-1"></div>
+                        </div>
                     </div>
                     <div class="relative">
                         <textarea id="editNotes" rows="2" maxlength="1500" class="w-full liquid-input rounded-2xl p-3 text-xs resize-none border border-white/10 focus:border-[#bf5af2]/60 focus:outline-none transition leading-relaxed text-gray-200 placeholder-gray-500" placeholder="Escribe una nota, acuerdo o bloqueo técnico..."></textarea>
@@ -1040,6 +1063,10 @@
                 </div>
               </div>
               <div id="editModuleSummary" class="bg-black/30 border border-white/10 p-4 rounded-2xl text-[11px] text-gray-300 font-mono space-y-1"></div>
+              <button type="button" id="btnEditModuleAddProject" onclick="if(currentSelection && currentSelection.id) window.openCreateProjectForModule(currentSelection.id)" class="pill-btn w-full py-3.5 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent/40 text-brand-accent font-bold text-xs flex justify-center items-center gap-2 transition shadow-inner">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                  <span>➕ Añadir Proyecto a este Módulo</span>
+              </button>
             </div>
             
             <button onclick="saveEditChanges()" class="pill-btn w-full py-4 bg-brand-accent hover:bg-[#005bb5] text-white font-semibold mt-8 shadow-[0_0_20px_rgba(0,113,227,0.3)] flex justify-center items-center gap-2">Guardar Cambios Completos</button>
@@ -1278,7 +1305,7 @@
     </div>
   </div>
 
-    <script type="module" src="app.js?v=20261015_15"></script>
+    <script type="module" src="app.js?v=20261015_17"></script>
 
 </body>
 </html>
