@@ -26,7 +26,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261015_20">
+  <link rel="stylesheet" href="styles.css?v=20261015_21">
 </head>
 <body class="flex flex-col h-screen w-screen bg-black text-gray-200">
 
@@ -354,6 +354,12 @@
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
           <span class="hidden sm:inline">Vínculos</span>
       </button>
+
+      <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS -->
+      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="shrink-0 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-400 hover:text-white transition-all rounded-full px-3 sm:px-4 py-1.5 font-medium text-[11px] sm:text-xs" title="Alternar entre vista compacta y vista completa">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+          <span id="textCollapseAll" class="hidden sm:inline">Colapsar</span>
+      </button>
       
       <!-- BOTÓN FILTROS AVANZADOS -->
       <button onclick="toggleFilterDrawer()" class="shrink-0 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-full px-3 sm:px-4 py-1.5 text-white font-medium text-[11px] sm:text-xs">
@@ -405,6 +411,10 @@
           <button id="btnMobileToggleLinks" onclick="toggleSecondaryLinks(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
               <svg class="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
               <span id="mobileToggleLinksText">Vínculos Multimódulo: Off</span>
+          </button>
+          <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#bf5af2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+              <span id="mobileToggleCollapseText">Colapsar Módulos</span>
           </button>
           <div class="h-px w-full bg-white/10 my-1"></div>
           <button id="mobileThemeToggleBtn" onclick="toggleTheme(); toggleMobileMenu()" class="supremo-only hidden w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 text-white text-xs font-medium flex items-center gap-3">
@@ -772,9 +782,27 @@
     </div>
     <div class="flex-1 overflow-y-auto p-6 scrollbar-thin space-y-5">
         <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Módulo / Agrupador</label><select id="advFilterModule" onchange="handleAdvFilter()" class="w-full liquid-input rounded-xl p-3 text-sm appearance-none font-medium text-white"></select></div>
-        <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Consultor Asignado</label><select id="advFilterConsultant" onchange="handleAdvFilter()" class="w-full liquid-input rounded-xl p-3 text-sm appearance-none font-medium text-white"></select></div>
-        <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Estatus Actual</label><select id="advFilterStatus" onchange="handleAdvFilter()" class="w-full liquid-input rounded-xl p-3 text-sm appearance-none font-medium text-white"><option value="ALL">Todos los estados</option><option value="No Iniciado">⏸️ No Iniciado</option><option value="Pendiente">⏳ Pendiente</option><option value="En Progreso">🚀 En Progreso</option><option value="Completado">✅ Completado</option></select></div>
-        <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest text-[#ff9f0a]">Empresa Destino</label><select id="advFilterCompany" onchange="handleAdvFilter()" class="w-full liquid-input border-[#ff9f0a]/30 rounded-xl p-3 text-sm appearance-none font-medium text-white"></select></div>
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-[9px] text-gray-400 font-semibold uppercase tracking-widest">Consultor(es) Asignado(s)</label>
+                <span class="text-[9px] text-blue-400 font-semibold">Multiselección</span>
+            </div>
+            <div id="advFilterConsultantChips" class="flex flex-wrap gap-1.5 pt-0.5"></div>
+        </div>
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-[9px] text-gray-400 font-semibold uppercase tracking-widest text-[#ff9f0a]">Empresa(s) Destino</label>
+                <span class="text-[9px] text-orange-400 font-semibold">Multiselección</span>
+            </div>
+            <div id="advFilterCompanyChips" class="flex flex-wrap gap-1.5 pt-0.5"></div>
+        </div>
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-[9px] text-gray-400 font-semibold uppercase tracking-widest text-[#30d158]">Estatus de Proyecto</label>
+                <span class="text-[9px] text-green-400 font-semibold">Multiselección</span>
+            </div>
+            <div id="advFilterStatusChips" class="flex flex-wrap gap-1.5 pt-0.5"></div>
+        </div>
         <div class="h-px w-full bg-white/10 my-2"></div>
         <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest text-[#ff453a]">Temporalidad y Riesgo</label><select id="advFilterUrgency" onchange="handleAdvFilter()" class="w-full liquid-input border-[#ff453a]/30 rounded-xl p-3 text-sm appearance-none font-medium text-white"><option value="ALL">Cualquier fecha</option><option value="OVERDUE">🚨 Vencidos</option><option value="WEEK">⚠️ Vencen esta semana (7 días)</option><option value="MONTH">📅 Próximos 30 días</option><option value="NONE">Indefinidos (Sin fecha)</option></select></div>
         <div><label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest text-[#35aee8]">Nivel de Prioridad</label><select id="advFilterPriority" onchange="handleAdvFilter()" class="w-full liquid-input border-[#35aee8]/30 rounded-xl p-3 text-sm appearance-none font-medium text-white"><option value="ALL">Cualquier prioridad</option><option value="HIGH">🔥 Alta (1 - 3)</option><option value="MED">⚡ Media (4 - 6)</option><option value="LOW">🧊 Baja (7+)</option></select></div>
@@ -1369,7 +1397,7 @@
     </div>
   </div>
 
-    <script type="module" src="app.js?v=20261015_20"></script>
+    <script type="module" src="app.js?v=20261015_21"></script>
 
 </body>
 </html>

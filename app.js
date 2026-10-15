@@ -13,7 +13,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
     let activeSearchQuery = '';
     let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeFilterCompany = 'ALL';
+    let activeFilterConsultants = ['ALL'], activeFilterStatuses = ['ALL'], activeFilterCompanies = ['ALL'];
     let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false, showAllSecondaryLinks = false;
+    let collapsedModules = new Set();
     let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
@@ -3517,7 +3519,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
            if (pName) logActivity(id, pName, 'Eliminó el elemento permanentemente', localAuthor);
            currentSelection = { type: null, id: null }; document.getElementById('globalEditSelector').value = ""; window.saveData(true); window.handleGlobalEditSelectionChange(); window.populateGlobalEditSelector(); window.closeInfoCardSafe(); window.renderMindMap(); 
        } 
-       else if(itemToDelete.category === 'consultant') { const name = itemToDelete.id; appData.directProjects.forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); appData.modules.forEach(m => { (m.projects || []).forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); }); delete consultants[name]; if (activeFilterConsultant === name) activeFilterConsultant = 'ALL'; if (localAuthor === name) { localAuthor = ''; localStorage.removeItem('sicom_author'); location.reload(); } window.saveData(true); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); if(isDrawerOpen && currentSelection.id) window.handleGlobalEditSelectionChange(); window.renderMindMap(); }
+       else if(itemToDelete.category === 'consultant') { const name = itemToDelete.id; appData.directProjects.forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); appData.modules.forEach(m => { (m.projects || []).forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); }); delete consultants[name]; if (activeFilterConsultant === name) activeFilterConsultant = 'ALL'; activeFilterConsultants = activeFilterConsultants.filter(c => c !== name); if (activeFilterConsultants.length === 0) activeFilterConsultants = ['ALL']; if (localAuthor === name) { localAuthor = ''; localStorage.removeItem('sicom_author'); location.reload(); } window.saveData(true); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); if(isDrawerOpen && currentSelection.id) window.handleGlobalEditSelectionChange(); window.renderMindMap(); }
        window.closeDeleteModal(); window.updateDatalist();
     }
 
@@ -3528,7 +3530,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!newName || newName === oldName || consultants[newName]) { window.closeRenameModal(); return; }
         consultants[newName] = consultants[oldName]; delete consultants[oldName];
         appData.directProjects.forEach(p => { let idx = p.consultants.indexOf(oldName); if (idx !== -1) p.consultants[idx] = newName; }); appData.modules.forEach(m => { (m.projects || []).forEach(p => { let idx = p.consultants.indexOf(oldName); if (idx !== -1) p.consultants[idx] = newName; }); });
-        if (activeFilterConsultant === oldName) activeFilterConsultant = newName; if (localAuthor === oldName) { localAuthor = newName; localStorage.setItem('sicom_author', newName); }
+        if (activeFilterConsultant === oldName) activeFilterConsultant = newName; activeFilterConsultants = activeFilterConsultants.map(c => c === oldName ? newName : c); if (localAuthor === oldName) { localAuthor = newName; localStorage.setItem('sicom_author', newName); }
         window.saveData(false); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); if(isDrawerOpen && currentSelection.id) window.handleGlobalEditSelectionChange(); window.renderMindMap(); window.closeRenameModal();
     }
 
@@ -3926,12 +3928,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.renderPriorityDrawer = function() {
         const c = document.getElementById('priorityListContainer'); if(!c) return;
-        const all = activeFilterConsultant === 'ALL' ? Object.keys(consultants) : [activeFilterConsultant];
+        const all = (!activeFilterConsultants.includes('ALL') && activeFilterConsultants.length > 0) ? activeFilterConsultants : Object.keys(consultants);
         let has = false; let h = '';
+        const statusMatches = (p) => (activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0 || activeFilterStatuses.includes(p.status));
+        const companyMatches = (p) => (activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0 || window.getProjectCompanies(p).some(comp => activeFilterCompanies.includes(comp)));
         all.forEach(cons => {
-            const cData = consultants[cons]; let projs = [];
-            appData.directProjects.forEach(p => { if(getProjectConsultants(p).includes(cons) && (activeFilterStatus==='ALL' || p.status===activeFilterStatus)) projs.push({...p, parentName: appData.directHub.name, pType: 'direct-project'}); });
-            appData.modules.forEach(m => { (m.projects||[]).forEach(p => { if(getProjectConsultants(p).includes(cons) && (activeFilterStatus==='ALL' || p.status===activeFilterStatus)) projs.push({...p, parentName: m.name, pType: 'project'}); }); });
+            const cData = consultants[cons]; if (!cData) return; let projs = [];
+            appData.directProjects.forEach(p => { if(getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({...p, parentName: appData.directHub.name, pType: 'direct-project'}); });
+            appData.modules.forEach(m => { (m.projects||[]).forEach(p => { if(getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({...p, parentName: m.name, pType: 'project'}); }); });
             if(projs.length === 0) return; has = true; projs.sort((a,b) => parseFloat(a.priority||0) - parseFloat(b.priority||0));
             h += `<div class="mb-8"><h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" style="color: ${cData.color}"><span class="w-3.5 h-3.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}<span class="bg-white/10 text-white px-2.5 py-0.5 rounded-full text-[9px] ml-auto border border-white/5 shadow-inner">${projs.length} proy.</span></h3><div class="space-y-4">`;
             projs.forEach(p => {
@@ -3977,11 +3981,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               );
               if (!isPrim && !isSec) return false;
           }
-          if (activeFilterStatus !== 'ALL' && p.status !== activeFilterStatus) return false;
-          if (activeFilterConsultant !== 'ALL' && !getProjectConsultants(p).includes(activeFilterConsultant)) return false;
-          if (activeFilterCompany !== 'ALL') {
+          if (activeFilterStatuses.length > 0 && !activeFilterStatuses.includes('ALL')) {
+              if (!activeFilterStatuses.includes(p.status)) return false;
+          }
+          if (activeFilterConsultants.length > 0 && !activeFilterConsultants.includes('ALL')) {
+              const pCons = getProjectConsultants(p);
+              if (!pCons.some(c => activeFilterConsultants.includes(c))) return false;
+          }
+          if (activeFilterCompanies.length > 0 && !activeFilterCompanies.includes('ALL')) {
               const pComps = window.getProjectCompanies(p);
-              if (!pComps.includes(activeFilterCompany)) return false;
+              if (!pComps.some(c => activeFilterCompanies.includes(c))) return false;
           }
           
           if (activeFilterUrgency !== 'ALL') {
@@ -4018,7 +4027,37 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           return true;
       };
 
-      const isDefaultState = !isFocusMode && activeFilterModule === 'ALL' && activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && activeFilterCompany === 'ALL' && activeFilterUrgency === 'ALL' && activeFilterPriority === 'ALL' && activeFilterBottleneck === 'ALL' && !q;
+      const isConsAll = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+      const isStatusAll = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+      const isCompAll = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+
+      const isDefaultState = !isFocusMode &&
+          activeFilterModule === 'ALL' &&
+          isStatusAll &&
+          isConsAll &&
+          isCompAll &&
+          activeFilterUrgency === 'ALL' &&
+          activeFilterPriority === 'ALL' &&
+          activeFilterBottleneck === 'ALL' &&
+          !q;
+
+      function isModuleCollapsed(modId, n) {
+          if (!collapsedModules.has(modId)) return false;
+          // Si hay una búsqueda o filtro activo, auto-expandir si el módulo contiene proyectos coincidentes
+          if (!isDefaultState) {
+              const hasMatchingProj = (n.projects || []).some(p => isFiltered(p));
+              if (hasMatchingProj) return false;
+          }
+          return true;
+      }
+
+      function getModuleSlotWeight(n) {
+          const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+          if (isModuleCollapsed(modId, n)) return 1;
+          const pCount = (n.projects || []).length;
+          if (pCount <= 6) return Math.max(1, pCount);
+          return Math.max(1, Math.ceil(pCount / 2));
+      }
       
       ensureDataStructure();
       const directHubItem = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
@@ -4027,41 +4066,64 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       
       let lNodes = [], rNodes = [], lSlots = 0, rSlots = 0;
       
-      // PARCHE: Contabilizamos el peso real del Agrupador Directo para balancear el mapa
-      const directLen = Math.max(1, visDir.length);
-      lNodes.push({ type: 'direct-hub', item: directHubItem, projects: visDir });
-      lSlots += directLen; 
+      const directData = { type: 'direct-hub', item: directHubItem, projects: visDir };
+      lNodes.push(directData);
+      lSlots += getModuleSlotWeight(directData); 
       
       activeMods.forEach(m => {
           if (!m.id) m.id = 'm_' + Math.random().toString(36).slice(2, 9);
           if (!m.name) m.name = 'Módulo';
           if (!m.color) m.color = '#0071e3';
           const modData = { type: 'module', item: m, projects: m.projects || [] };
-          const pLength = Math.max(1, modData.projects.length);
+          const pLength = getModuleSlotWeight(modData);
           if (lSlots <= rSlots) { lNodes.push(modData); lSlots += pLength; } 
           else { rNodes.push(modData); rSlots += pLength; }
       });
 
-      const slotH = 75, mOffX = 400, pOffX = 900; 
+      const slotH = 75, mOffX = 400; 
       function procSide(nodes, totalSlots, isLeft) {
-          const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
+          const mx = isLeft ? -mOffX : mOffX;
           let cy = -(totalSlots * slotH / 2) + (slotH / 2);
           nodes.forEach(n => {
-              const pCount = (n.projects || []).length; let sy = cy, ey = cy;
+              const pCount = (n.projects || []).length;
               const nItemId = String(n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod')).replace(/[^a-zA-Z0-9_-]/g, '');
               const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
               const nItemName = n.item ? (n.item.name || '') : '';
-
-              if (pCount > 0) {
-                  n.projects.forEach(p => { 
-                      const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
-                      const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
-                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
-                      p._renderData = { x: px, y: cy, color: col, type: strictType, realId: p.id }; 
-                      ey = cy; cy += slotH;
-                  });
-              } else { ey = cy; cy += slotH; }
+              const isCollapsed = isModuleCollapsed(nItemId, n);
+              const weight = isCollapsed ? 1 : (pCount > 6 ? Math.max(1, Math.ceil(pCount / 2)) : Math.max(1, pCount));
+              
+              const sy = cy;
+              const ey = cy + (weight - 1) * slotH;
               const my = (sy + ey) / 2;
+              cy += weight * slotH;
+
+              if (!isCollapsed && pCount > 0) {
+                  if (pCount <= 6) {
+                      n.projects.forEach((p, idx) => { 
+                          const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
+                          const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
+                          p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
+                          const px = isLeft ? -820 : 820;
+                          const py = sy + idx * slotH;
+                          p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
+                      });
+                  } else {
+                      // Multi-columna (2 columnas) para módulos densos (> 6 proyectos)
+                      n.projects.forEach((p, idx) => { 
+                          const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
+                          const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
+                          p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
+                          const colIdx = idx % 2;
+                          const rowIdx = Math.floor(idx / 2);
+                          const px = colIdx === 0 ? (isLeft ? -770 : 770) : (isLeft ? -1120 : 1120);
+                          const py = sy + rowIdx * slotH;
+                          p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
+                      });
+                  }
+              } else {
+                  (n.projects || []).forEach(p => { p._renderData = null; });
+              }
+
               n._renderData = { x: mx, y: my, isLeft };
               if (n.item) n.item._renderData = n._renderData;
 
@@ -4117,7 +4179,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               pC.setAttribute('opacity', lineOpacity);
               canvasGroup.appendChild(pC);
 
-              if (pCount > 0) (n.projects || []).forEach(p => {
+              if (!isCollapsed && pCount > 0) (n.projects || []).forEach(p => {
+                  if (!p._renderData) return;
                   const pMatches = isDefaultState || isFiltered(p);
                   let isOver = false;
                   if(p.deadline && p.status !== 'Completado') {
@@ -4132,8 +4195,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
                   const startX = isLeft ? mx - 165 : mx + 165;
                   const endX = isLeft ? p._renderData.x + 160 : p._renderData.x - 160;
-                  const cp1X = isLeft ? startX - 65 : startX + 65;
-                  const cp2X = isLeft ? endX + 65 : endX - 65;
+                  const dx = Math.abs(endX - startX);
+                  const cpDist = Math.max(30, Math.min(85, dx * 0.45));
+                  const cp1X = isLeft ? startX - cpDist : startX + cpDist;
+                  const cp2X = isLeft ? endX + cpDist : endX - cpDist;
                   
                   pP.setAttribute('d', `M ${startX} ${my} C ${cp1X} ${my}, ${cp2X} ${p._renderData.y}, ${endX} ${p._renderData.y}`);
                   pP.setAttribute('fill', 'none'); 
@@ -4283,9 +4348,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       });
 
       [...lNodes, ...rNodes].forEach(n => {
-        n.projects.forEach(p => {
-          // EL FIX CONTINÚA AQUÍ: Extraemos strictType y realId
-          const { x, y, color, type: strictType, realId } = p._renderData; 
+        const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
+        const isCollapsed = isModuleCollapsed(modId, n);
+        if (!isCollapsed) {
+          (n.projects || []).forEach(p => {
+            if (!p._renderData) return;
+            const { x, y, color, type: strictType, realId } = p._renderData; 
           const isSel = currentSelection.id === realId;
           const pMatches = isDefaultState || isFiltered(p);
           
@@ -4585,10 +4653,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           g.appendChild(hitBox);
           
           canvasGroup.appendChild(g);
-        });
+          });
+        }
 
         // PARCHE: Evaluación estricta de módulos y ghosting de bloques
-        const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
         const modName = n.item ? (n.item.name || '') : '';
         const modCol = (n.item && n.item.color) ? n.item.color : '#0071e3';
         const hasSecMatchesMod = (appData.directProjects || []).concat(
@@ -4720,6 +4788,55 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         hitBox.setAttribute('fill', 'transparent');
         hitBox.style.cursor = 'pointer';
         g.appendChild(hitBox);
+
+        // Botón interactivo de colapso/expansión (+/-) del módulo
+        if (pCount > 0) {
+            const isCollapsed = isModuleCollapsed(modId, n);
+            const isLeft = (n._renderData && n._renderData.isLeft);
+            const toggleBtnG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            toggleBtnG.classList.add('mod-toggle-btn');
+            const btnX = isLeft ? -10 : 340;
+            const btnY = 25;
+            toggleBtnG.setAttribute('transform', `translate(${btnX}, ${btnY})`);
+            
+            const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            btnCircle.setAttribute('r', '11');
+            btnCircle.setAttribute('fill', isLight ? '#ffffff' : '#14141a');
+            btnCircle.setAttribute('stroke', modCol);
+            btnCircle.setAttribute('stroke-width', '1.5');
+            btnCircle.setAttribute('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))');
+            toggleBtnG.appendChild(btnCircle);
+            
+            const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            hLine.setAttribute('x1', '-5'); hLine.setAttribute('y1', '0');
+            hLine.setAttribute('x2', '5'); hLine.setAttribute('y2', '0');
+            hLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
+            hLine.setAttribute('stroke-width', '2');
+            hLine.setAttribute('stroke-linecap', 'round');
+            toggleBtnG.appendChild(hLine);
+            
+            if (isCollapsed) {
+                const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-5');
+                vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '5');
+                vLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
+                vLine.setAttribute('stroke-width', '2');
+                vLine.setAttribute('stroke-linecap', 'round');
+                toggleBtnG.appendChild(vLine);
+            }
+            
+            const btnTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            btnTitle.textContent = isCollapsed ? `Expandir ${rawName} (${pCount} proyectos)` : `Colapsar ${rawName}`;
+            toggleBtnG.appendChild(btnTitle);
+            
+            toggleBtnG.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.toggleModuleCollapse(modId);
+            });
+            
+            g.appendChild(toggleBtnG);
+        }
 
         canvasGroup.appendChild(g);
       });
@@ -5861,55 +5978,174 @@ window.renderAlerts = function() {
         }
     };
 
+    // === CHIPS DE MULTISELECCIÓN EN FILTROS AVANZADOS ===
+    window.renderFilterChips = function() {
+        // 1. Consultores
+        const consContainer = document.getElementById('advFilterConsultantChips');
+        if (consContainer) {
+            const allC = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
+            const isAllSelected = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+            
+            let html = `<button type="button" onclick="toggleFilterChip('consultant', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">👥 Todos</button>`;
+            
+            allC.forEach(name => {
+                const isAct = !isAllSelected && activeFilterConsultants.includes(name);
+                const cColor = consultants[name]?.color || '#0071e3';
+                html += `<button type="button" onclick="toggleFilterChip('consultant', '${escapeHtml(name)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                    <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${cColor}; box-shadow: 0 0 5px ${cColor};"></span>
+                    <span>${escapeHtml(name)}</span>
+                </button>`;
+            });
+            consContainer.innerHTML = html;
+        }
+
+        // 2. Empresas Destino
+        const compContainer = document.getElementById('advFilterCompanyChips');
+        if (compContainer) {
+            const allComps = window.getAllKnownCompanies ? window.getAllKnownCompanies() : ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
+            const isAllSelected = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+
+            let html = `<button type="button" onclick="toggleFilterChip('company', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">🏢 Todas</button>`;
+
+            allComps.forEach(comp => {
+                const isAct = !isAllSelected && activeFilterCompanies.includes(comp);
+                html += `<button type="button" onclick="toggleFilterChip('company', '${escapeHtml(comp)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                    <span>${escapeHtml(comp)}</span>
+                </button>`;
+            });
+            compContainer.innerHTML = html;
+        }
+
+        // 3. Estatus
+        const statusContainer = document.getElementById('advFilterStatusChips');
+        if (statusContainer) {
+            const statuses = [
+                { id: 'ALL', label: '🌐 Todos' },
+                { id: 'No Iniciado', label: '⏸️ No Iniciado' },
+                { id: 'Pendiente', label: '⏳ Pendiente' },
+                { id: 'En Progreso', label: '🚀 En Progreso' },
+                { id: 'Completado', label: '✅ Completado' }
+            ];
+            const isAllSelected = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+
+            let html = '';
+            statuses.forEach(st => {
+                const isAct = (st.id === 'ALL' && isAllSelected) || (!isAllSelected && activeFilterStatuses.includes(st.id));
+                html += `<button type="button" onclick="toggleFilterChip('status', '${escapeHtml(st.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                    <span>${escapeHtml(st.label)}</span>
+                </button>`;
+            });
+            statusContainer.innerHTML = html;
+        }
+    };
+
+    window.toggleFilterChip = function(type, val) {
+        if (type === 'consultant') {
+            if (val === 'ALL') {
+                activeFilterConsultants = ['ALL'];
+            } else {
+                activeFilterConsultants = activeFilterConsultants.filter(x => x !== 'ALL');
+                if (activeFilterConsultants.includes(val)) {
+                    activeFilterConsultants = activeFilterConsultants.filter(x => x !== val);
+                    if (activeFilterConsultants.length === 0) activeFilterConsultants = ['ALL'];
+                } else {
+                    activeFilterConsultants.push(val);
+                }
+            }
+            activeFilterConsultant = activeFilterConsultants[0] || 'ALL';
+        } else if (type === 'company') {
+            if (val === 'ALL') {
+                activeFilterCompanies = ['ALL'];
+            } else {
+                activeFilterCompanies = activeFilterCompanies.filter(x => x !== 'ALL');
+                if (activeFilterCompanies.includes(val)) {
+                    activeFilterCompanies = activeFilterCompanies.filter(x => x !== val);
+                    if (activeFilterCompanies.length === 0) activeFilterCompanies = ['ALL'];
+                } else {
+                    activeFilterCompanies.push(val);
+                }
+            }
+            activeFilterCompany = activeFilterCompanies[0] || 'ALL';
+        } else if (type === 'status') {
+            if (val === 'ALL') {
+                activeFilterStatuses = ['ALL'];
+            } else {
+                activeFilterStatuses = activeFilterStatuses.filter(x => x !== 'ALL');
+                if (activeFilterStatuses.includes(val)) {
+                    activeFilterStatuses = activeFilterStatuses.filter(x => x !== val);
+                    if (activeFilterStatuses.length === 0) activeFilterStatuses = ['ALL'];
+                } else {
+                    activeFilterStatuses.push(val);
+                }
+            }
+            activeFilterStatus = activeFilterStatuses[0] || 'ALL';
+        }
+        
+        window.renderFilterChips();
+        window.handleAdvFilter();
+    };
+
     window.populateAdvFilters = function() {
         const modSel = document.getElementById('advFilterModule');
-        const consSel = document.getElementById('advFilterConsultant');
-        if(!modSel || !consSel) return;
-        
-        modSel.innerHTML = `<option value="ALL">Todos los módulos</option><option value="direct-hub">⚡ ${escapeHtml(appData.directHub.name)}</option>` + appData.modules.map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join('');
-        modSel.value = activeFilterModule;
-        
-        const allC = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
-        consSel.innerHTML = `<option value="ALL">Todos los consultores</option>` + allC.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-        consSel.value = activeFilterConsultant;
-        
-        document.getElementById('advFilterStatus').value = activeFilterStatus;
-        const compSel = document.getElementById('advFilterCompany');
-        if (compSel) {
-            const allComps = window.getAllKnownCompanies ? window.getAllKnownCompanies() : ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
-            compSel.innerHTML = `<option value="ALL">Todas las empresas</option>` + allComps.map(c => `<option value="${escapeHtml(c)}">🏢 ${escapeHtml(c)}</option>`).join('');
-            compSel.value = activeFilterCompany;
+        if (modSel) {
+            modSel.innerHTML = `<option value="ALL">Todos los módulos</option><option value="direct-hub">⚡ ${escapeHtml(appData.directHub.name)}</option>` + (appData.modules || []).map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join('');
+            modSel.value = activeFilterModule;
         }
-        document.getElementById('advFilterUrgency').value = activeFilterUrgency;
-        document.getElementById('advFilterPriority').value = activeFilterPriority;
-        document.getElementById('advFilterBottleneck').value = activeFilterBottleneck;
+        
+        const urgSel = document.getElementById('advFilterUrgency');
+        if (urgSel) urgSel.value = activeFilterUrgency;
+        const prioSel = document.getElementById('advFilterPriority');
+        if (prioSel) prioSel.value = activeFilterPriority;
+        const botSel = document.getElementById('advFilterBottleneck');
+        if (botSel) botSel.value = activeFilterBottleneck;
+
+        window.renderFilterChips();
     };
 
     window.handleAdvFilter = function() {
-        activeFilterModule = document.getElementById('advFilterModule').value;
-        activeFilterConsultant = document.getElementById('advFilterConsultant').value;
-        activeFilterStatus = document.getElementById('advFilterStatus').value;
-        if (document.getElementById('advFilterCompany')) activeFilterCompany = document.getElementById('advFilterCompany').value;
-        activeFilterUrgency = document.getElementById('advFilterUrgency').value;
-        activeFilterPriority = document.getElementById('advFilterPriority').value;
-        activeFilterBottleneck = document.getElementById('advFilterBottleneck').value;
+        const modSel = document.getElementById('advFilterModule');
+        if (modSel) activeFilterModule = modSel.value;
+        const urgSel = document.getElementById('advFilterUrgency');
+        if (urgSel) activeFilterUrgency = urgSel.value;
+        const prioSel = document.getElementById('advFilterPriority');
+        if (prioSel) activeFilterPriority = prioSel.value;
+        const botSel = document.getElementById('advFilterBottleneck');
+        if (botSel) activeFilterBottleneck = botSel.value;
         
         let c = 0;
-        if(activeFilterModule !== 'ALL') c++; if(activeFilterConsultant !== 'ALL') c++; if(activeFilterStatus !== 'ALL') c++;
-        if(activeFilterCompany !== 'ALL') c++;
-        if(activeFilterUrgency !== 'ALL') c++; if(activeFilterPriority !== 'ALL') c++; if(activeFilterBottleneck !== 'ALL') c++;
-        const badge = document.getElementById('activeFiltersBadge');
-        if(c > 0) { badge.textContent = c; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+        if (activeFilterModule !== 'ALL') c++;
+        if (!activeFilterConsultants.includes('ALL') && activeFilterConsultants.length > 0) c += activeFilterConsultants.length;
+        if (!activeFilterStatuses.includes('ALL') && activeFilterStatuses.length > 0) c += activeFilterStatuses.length;
+        if (!activeFilterCompanies.includes('ALL') && activeFilterCompanies.length > 0) c += activeFilterCompanies.length;
+        if (activeFilterUrgency !== 'ALL') c++;
+        if (activeFilterPriority !== 'ALL') c++;
+        if (activeFilterBottleneck !== 'ALL') c++;
         
-        if(isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
+        const badge = document.getElementById('activeFiltersBadge');
+        if (badge) {
+            if (c > 0) { badge.textContent = c; badge.classList.remove('hidden'); }
+            else { badge.classList.add('hidden'); }
+        }
+        
+        if (isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
         else window.renderMindMap();
+        if (isPriorityDrawerOpen) window.renderPriorityDrawer();
     };
 
     window.resetAdvFilters = function() {
-        activeFilterModule = 'ALL'; activeFilterConsultant = 'ALL'; activeFilterStatus = 'ALL'; activeFilterCompany = 'ALL';
-        activeFilterUrgency = 'ALL'; activeFilterPriority = 'ALL'; activeFilterBottleneck = 'ALL';
-        if (document.getElementById('advFilterCompany')) document.getElementById('advFilterCompany').value = 'ALL';
-        document.getElementById('activeFiltersBadge').classList.add('hidden');
+        activeFilterModule = 'ALL';
+        activeFilterConsultants = ['ALL'];
+        activeFilterStatuses = ['ALL'];
+        activeFilterCompanies = ['ALL'];
+        activeFilterConsultant = 'ALL';
+        activeFilterStatus = 'ALL';
+        activeFilterCompany = 'ALL';
+        activeFilterUrgency = 'ALL';
+        activeFilterPriority = 'ALL';
+        activeFilterBottleneck = 'ALL';
+        
+        const badge = document.getElementById('activeFiltersBadge');
+        if (badge) badge.classList.add('hidden');
         
         // Apaga el Modo Enfoque si estaba encendido al limpiar filtros
         if (isFocusMode) {
@@ -5923,6 +6159,52 @@ window.renderAlerts = function() {
         
         window.populateAdvFilters(); 
         window.renderMindMap();
+        if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+    };
+
+    // === GESTIÓN DE COLAPSO Y EXPANSIÓN INTELIGENTE DE MÓDULOS ===
+    window.toggleModuleCollapse = function(modId) {
+        if (collapsedModules.has(modId)) {
+            collapsedModules.delete(modId);
+        } else {
+            collapsedModules.add(modId);
+        }
+        window.updateCollapseAllButtonState();
+        window.renderMindMap();
+    };
+
+    window.collapseAllModules = function() {
+        const allModIds = ['hub-direct', ...(appData.modules || []).map(m => m.id)];
+        allModIds.forEach(id => collapsedModules.add(id));
+        window.updateCollapseAllButtonState();
+        window.renderMindMap();
+        window.showToast('Módulos colapsados para vista panorámica');
+    };
+
+    window.expandAllModules = function() {
+        collapsedModules.clear();
+        window.updateCollapseAllButtonState();
+        window.renderMindMap();
+        window.showToast('Todos los módulos expandidos');
+    };
+
+    window.toggleAllModulesCollapse = function() {
+        const totalModules = 1 + (appData.modules || []).length;
+        if (collapsedModules.size >= Math.ceil(totalModules / 2)) {
+            window.expandAllModules();
+        } else {
+            window.collapseAllModules();
+        }
+    };
+
+    window.updateCollapseAllButtonState = function() {
+        const totalModules = 1 + (appData.modules || []).length;
+        const isMostlyCollapsed = collapsedModules.size >= Math.ceil(totalModules / 2);
+        const txt = document.getElementById('btnToggleCollapseAllText');
+        const mTxt = document.getElementById('mobileToggleCollapseText');
+        const label = isMostlyCollapsed ? 'Expandir Todo' : 'Colapsar Todo';
+        if (txt) txt.textContent = label;
+        if (mTxt) mTxt.textContent = label;
     };
 
     window.toggleFocusMode = function() {
