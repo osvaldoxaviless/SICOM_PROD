@@ -670,5 +670,14 @@ body.theme-light #loginOverlay .orb {
     #dailyDrawer {
         width: min(390px, 75vw) !important;
     }
+
+    #dailyDrawer > div:first-child {
+        padding: 0.6rem 1rem !important;
+    }
+
+    #dailyDrawer .p-3\.5,
+    #dailyDrawer .p-3 {
+        padding: 0.5rem 0.75rem !important;
+    }
 }
 

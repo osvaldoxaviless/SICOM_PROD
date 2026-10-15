@@ -600,35 +600,63 @@
       <button onclick="toggleDailyDrawer()" class="text-gray-400 hover:text-white transition bg-black/40 hover:bg-black/60 p-2 rounded-full border border-white/5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
     
-    <div class="p-4 border-b border-white/10 bg-black/40 lector-hide shrink-0">
-      <label class="block text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-widest">Anotar Tarea Rápida Personal</label>
-      <div class="flex flex-col gap-2">
-          <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-xl p-2.5 text-xs focus:outline-none text-white">
-          <div class="flex gap-2">
-              <select id="newDailyTaskAssignee" class="flex-1 liquid-input rounded-xl p-2 text-[10px] focus:outline-none appearance-none cursor-pointer text-white"></select>
-              <button onclick="addDailyTask()" class="pill-btn px-4 bg-brand-accent hover:bg-blue-600 text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(0,113,227,0.3)]">Añadir</button>
-          </div>
+    <div class="p-3.5 border-b border-white/10 bg-black/40 lector-hide shrink-0">
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-3 shadow-inner">
+        <label class="block text-[10px] text-gray-400 font-semibold mb-2 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-accent"></span>
+          Anotar Tarea Rápida Personal
+        </label>
+        <div class="flex flex-col gap-2">
+            <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-xl px-3 py-2 text-xs focus:outline-none text-white placeholder-gray-500 border border-white/10 focus:border-brand-accent/60 transition">
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <select id="newDailyTaskAssignee" class="w-full liquid-input rounded-xl px-3 py-2 pr-8 text-[11px] focus:outline-none appearance-none cursor-pointer text-white bg-black/40 border border-white/10 focus:border-brand-accent/60 transition"></select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+                <button onclick="addDailyTask()" class="px-4 py-2 bg-brand-accent hover:bg-blue-600 active:scale-95 text-white font-semibold text-xs rounded-xl transition-all duration-200 shrink-0 shadow-[0_0_15px_rgba(0,113,227,0.3)] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Añadir</span>
+                </button>
+            </div>
+        </div>
       </div>
     </div>
 
-    <!-- PESTAÑAS DE CONTROL (SEGMENTED CONTROL ELEGANTE) -->
+    <!-- PESTAÑAS DE CONTROL (MATRIZ 2x2 APPLE GLASS) -->
     <div class="p-3 border-b border-white/10 bg-black/30 shrink-0">
-      <div class="flex p-1 bg-black/60 rounded-2xl border border-white/10 gap-1 overflow-x-auto scrollbar-none">
-        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
-          <span>⚠️ Alertas</span>
-          <span id="notifTabCount-alerts" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30">0</span>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border bg-white/5 border-white/10 hover:bg-white/10 text-gray-300">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm shrink-0">⚠️</span>
+            <span class="text-xs font-semibold truncate">Alertas</span>
+          </div>
+          <span id="notifTabCount-alerts" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 shrink-0 ml-1">0</span>
         </button>
-        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="flex-1 min-w-[92px] py-1.5 px-2 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 bg-white/15 text-white shadow-sm border border-white/20 whitespace-nowrap">
-          <span>📌 Pendientes</span>
-          <span id="notifTabCount-pending" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-brand-accent text-white">0</span>
+
+        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border bg-brand-accent/20 border-brand-accent text-white shadow-[0_0_15px_rgba(0,113,227,0.3)] ring-1 ring-brand-accent/50">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm shrink-0">📌</span>
+            <span class="text-xs font-semibold truncate">Pendientes</span>
+          </div>
+          <span id="notifTabCount-pending" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-brand-accent text-white shrink-0 ml-1">0</span>
         </button>
-        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="flex-1 min-w-[88px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
-          <span>⏳ Validación</span>
-          <span id="notifTabCount-validation" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30">0</span>
+
+        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border bg-white/5 border-white/10 hover:bg-white/10 text-gray-300">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm shrink-0">⏳</span>
+            <span class="text-xs font-semibold truncate">Validación</span>
+          </div>
+          <span id="notifTabCount-validation" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 shrink-0 ml-1">0</span>
         </button>
-        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap">
-          <span>✅ Hechas</span>
-          <span id="notifTabCount-completed" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold font-mono bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30">0</span>
+
+        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border bg-white/5 border-white/10 hover:bg-white/10 text-gray-300">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm shrink-0">✅</span>
+            <span class="text-xs font-semibold truncate">Hechas</span>
+          </div>
+          <span id="notifTabCount-completed" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 shrink-0 ml-1">0</span>
         </button>
       </div>
     </div>
@@ -1161,7 +1189,7 @@
     </div>
   </div>
 
-    <script type="module" src="app.js?v=20261015_11"></script>
+    <script type="module" src="app.js?v=20261015_12"></script>
 
 </body>
 </html>

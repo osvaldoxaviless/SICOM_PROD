@@ -4203,14 +4203,20 @@ window.setNotifTab = function(tabName) {
 };
 
 window.updateNotifTabsUI = function() {
+    const activeThemes = {
+        alerts: 'bg-[#ff453a]/15 border-[#ff453a]/60 text-white shadow-[0_0_15px_rgba(255,69,58,0.25)] ring-1 ring-[#ff453a]/50',
+        pending: 'bg-brand-accent/20 border-brand-accent text-white shadow-[0_0_15px_rgba(0,113,227,0.3)] ring-1 ring-brand-accent/50',
+        validation: 'bg-[#ff9f0a]/15 border-[#ff9f0a]/60 text-white shadow-[0_0_15px_rgba(255,159,10,0.25)] ring-1 ring-[#ff9f0a]/50',
+        completed: 'bg-[#30d158]/15 border-[#30d158]/60 text-white shadow-[0_0_15px_rgba(48,209,88,0.25)] ring-1 ring-[#30d158]/50'
+    };
+    const inactiveTheme = 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white shadow-sm';
+    const baseClasses = 'p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border cursor-pointer';
+
     ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
         const btn = document.getElementById(`notifTabBtn-${t}`);
         if (!btn) return;
-        if (t === currentNotifTab) {
-            btn.className = 'notif-tab-btn flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 bg-white/15 text-white shadow-sm border border-white/20 whitespace-nowrap';
-        } else {
-            btn.className = 'notif-tab-btn flex-1 min-w-[76px] py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent whitespace-nowrap';
-        }
+        const theme = (t === currentNotifTab) ? activeThemes[t] : inactiveTheme;
+        btn.className = `${baseClasses} ${theme}`;
     });
 };
 
@@ -4324,7 +4330,12 @@ window.renderDailyTasks = function() {
     // --- PESTAÑA A: ALERTAS IMPORTANTES ---
     if (currentNotifTab === 'alerts') {
         if (alertsList.length === 0) {
-            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">🎉</span><p class="text-xs text-gray-300">¡Al día! No hay proyectos vencidos ni alertas importantes.</p></div>`;
+            container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">🎉</div>
+                <h3 class="text-sm font-semibold text-white tracking-tight">¡Todo al día!</h3>
+                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No hay proyectos vencidos ni alertas importantes pendientes de atención.</p>
+            </div>`;
             return;
         }
 
@@ -4367,7 +4378,13 @@ window.renderDailyTasks = function() {
     // --- PESTAÑA B: PENDIENTES (DESPLEGABLES POR CONSULTOR) ---
     if (currentNotifTab === 'pending') {
         if (pendingTasks.length === 0) {
-            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">📋</span><p class="text-xs text-gray-300">¡Al día! No tienes tareas pendientes por realizar.</p></div>`;
+            container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">📋</div>
+                <h3 class="text-sm font-semibold text-white tracking-tight">Bandeja despejada</h3>
+                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No tienes tareas pendientes asignadas en este momento.</p>
+                <div class="mt-4 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] text-gray-400">💡 Usa el formulario superior para anotar tareas rápidas</div>
+            </div>`;
             return;
         }
 
@@ -4442,7 +4459,12 @@ window.renderDailyTasks = function() {
     // --- PESTAÑA C: EN VALIDACIÓN ---
     if (currentNotifTab === 'validation') {
         if (validationTasks.length === 0) {
-            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">⏳</span><p class="text-xs text-gray-300">No hay tareas pendientes de validación.</p></div>`;
+            container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">⏳</div>
+                <h3 class="text-sm font-semibold text-white tracking-tight">Sin entregas pendientes</h3>
+                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No hay tareas esperando revisión o visto bueno de jefatura.</p>
+            </div>`;
             return;
         }
 
@@ -4499,7 +4521,12 @@ window.renderDailyTasks = function() {
     // --- PESTAÑA D: COMPLETADAS / HECHAS ---
     if (currentNotifTab === 'completed') {
         if (completedTasks.length === 0) {
-            container.innerHTML = `<div class="text-center py-20 opacity-50"><span class="text-4xl block mb-4">✅</span><p class="text-xs text-gray-300">Aún no hay tareas marcadas como completadas.</p></div>`;
+            container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">✅</div>
+                <h3 class="text-sm font-semibold text-white tracking-tight">Sin historial reciente</h3>
+                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">Las tareas que completes y valides aparecerán organizadas aquí.</p>
+            </div>`;
             return;
         }
 
