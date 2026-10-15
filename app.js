@@ -1633,7 +1633,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     // --- MÓDULO DE ALERTAS EXTERNAS (PROXY GOOGLE APPS SCRIPT) ---
-    const URL_APPS_SCRIPT_WEBAPP = 'https://script.google.com/macros/s/AKfycb.../exec'; // Pegar URL de tu Web App desplegada
+    const URL_APPS_SCRIPT_WEBAPP = 'https://script.google.com/macros/s/AKfycbyrEdRic_xTLQTGtdxlgiX_EFLXBWlk3UrDj-57ie0d_IVUuM8ZIitBT2qoz3wmagLS/exec';
 
     window.sendExternalAlert = async function(type, message, assignedUser) {
         if (!URL_APPS_SCRIPT_WEBAPP || URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) return;

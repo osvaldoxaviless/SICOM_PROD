@@ -18,7 +18,7 @@ function doPost(e) {
     var assignedUser = payload.assignedUser || 'Sin asignar';
 
     // Endpoints seguros (Mocks configurables con Webhooks reales)
-    var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=YYYYY&token=ZZZZZ'; 
+    var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNIOcRc/messages?key=AIzaSyDdIOhCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c'; 
     var MAKE_WHATSAPP_WEBHOOK_URL = 'https://hook.us1.make.com/tu_webhook_aqui';
 
     switch (type) {
