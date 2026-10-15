@@ -185,7 +185,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.data();
-                        appData = data.appData || {};
+                        
+                        // Protección: verificar que data.appData contenga módulos reales
+                        if (data.appData && Array.isArray(data.appData.modules) && data.appData.modules.length > 0) {
+                            appData = data.appData;
+                        } else if (!appData || !Array.isArray(appData.modules) || appData.modules.length === 0) {
+                            console.warn("⚠️ [SICOM Cloud] Nube vacía o corrupta. Cargando respaldo local...");
+                            loadLocalFallback();
+                        }
                         
                         if(data.consultants && Object.keys(data.consultants).length > 2) {
                             consultants = data.consultants;
@@ -1038,6 +1045,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.addEventListener('offline', () => window.setConnectionStatus('offline'));
 
     window.saveData = function(showToastUI = true) {
+        // Blindaje contra borrado accidental de la nube
+        if (!appData || !Array.isArray(appData.modules) || (appData.modules.length === 0 && (!appData.directProjects || appData.directProjects.length === 0))) {
+            console.warn("🛡️ [SICOM Guard] saveData bloqueado: intento de sobreescritura con appData vacío.");
+            return;
+        }
         window.setConnectionStatus('syncing');
         if (isFirebaseReady && db && appId && globalDoc && globalSetDoc) {
             const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
