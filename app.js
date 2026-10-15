@@ -1704,7 +1704,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             // Inyección de alerta externa hacia Google Workspace / WhatsApp
             if (currentUserRole !== 'Lector') {
-                window.sendExternalAlert('CHAT', `Nueva tarea en [${item.name}]: "${text}" (Vence: ${deadline || 'Sin fecha'})`, assignee);
+                window.sendExternalAlert('ALL', `Nueva tarea en [${item.name}]: "${text}" (Vence: ${deadline || 'Sin fecha'})`, assignee);
             }
 
             window.saveData(true);
@@ -1825,7 +1825,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             // Inyección de alerta externa hacia Google Workspace / WhatsApp
             if (currentUserRole !== 'Lector') {
-                window.sendExternalAlert('CHAT', `Nueva tarea rápida en [${item.name}]: "${text}"`, assignee || 'Sin asignar');
+                window.sendExternalAlert('ALL', `Nueva tarea rápida en [${item.name}]: "${text}"`, assignee || 'Sin asignar');
             }
 
             window.saveData(false); 
