@@ -1698,7 +1698,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                            `👥 *Equipo Asignado:* ${payload.consultants || 'Por definir'}\n` +
                            `📅 *Fecha Límite:* ${payload.deadline || 'Sin fecha'}\n` +
                            `✍️ *Registrado por:* ${payload.author || localAuthor || 'Sistema'}\n` +
-                           `🔗 https://panel-control-sicom.netlify.app/`;
+                           `🔗 ${(typeof window !== 'undefined' && window.location) ? (window.location.origin + window.location.pathname) : 'https://panel-control-sicom.netlify.app/'}`;
             } else if (type === 'MORNING_DIGEST') {
                 chatText = payload.message || (typeof window.generateMorningDigestText === 'function' ? window.generateMorningDigestText() : '');
             } else {
@@ -1817,7 +1817,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             msg += `\n`;
         }
         
-        msg += `🔗 *Acceso al Panel:* https://panel-control-sicom.netlify.app/`;
+        const appUrl = (typeof window !== 'undefined' && window.location) ? (window.location.origin + window.location.pathname) : 'https://panel-control-sicom.netlify.app/';
+        msg += `🔗 *Acceso al Panel:* ${appUrl}`;
         return msg;
     };
 
