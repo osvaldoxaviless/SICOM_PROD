@@ -142,7 +142,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
 
     async function initData() {
-        window.populateLoginDropdown(); 
+        window.populateLoginDropdown();
+
+        // Arranque instantáneo de interfaz (Cero tiempo de espera)
+        if (localAuthor) { 
+            finishInit(); 
+        } else { 
+            showLoginScreen(); 
+        } 
 
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js");
