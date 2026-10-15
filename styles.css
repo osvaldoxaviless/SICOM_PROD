@@ -58,7 +58,6 @@ select.bg-transparent.appearance-none {
     padding-right: 1.3rem !important;
 }
 body { background-color: #000000; color: #f5f5f7; overflow: hidden; margin: 0; padding: 0; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
-select, option, optgroup { background-color: #000000 !important; color: #ffffff !important; }
 .bg-grid { background-size: 50px 50px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px); background-color: #000000 !important; }
 .liquid-glass { background: rgba(18, 18, 24, 0.62); backdrop-filter: blur(35px) saturate(180%); -webkit-backdrop-filter: blur(35px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.12); border-top-color: rgba(255, 255, 255, 0.35); box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0,0,0,0.3) inset; }
 .liquid-glass-panel { background: rgba(14, 14, 18, 0.65); backdrop-filter: blur(35px) saturate(160%); -webkit-backdrop-filter: blur(35px) saturate(160%); border-left: 1px solid rgba(255, 255, 255, 0.12); border-top: 1px solid rgba(255, 255, 255, 0.25); }
@@ -256,14 +255,15 @@ body.theme-light .hover\:bg-white\/20:hover {
 
 /* Speed Dial en modo claro */
 body.theme-light #speedDial .sd-item {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    color: #1d1d1f !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.60) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 30px rgba(0, 40, 90, 0.12) !important;
 }
 
 body.theme-light #speedDial .sd-item:hover {
-    background-color: #f2f2f7 !important;
+    background-color: rgba(255, 255, 255, 0.80) !important;
 }
 
 body.theme-light #speedDial .sd-item span {
@@ -883,6 +883,33 @@ body.theme-light #loginOverlay .orb {
     animation: unreadMentionPulse 1.8s infinite ease-in-out;
 }
 
+/* ==========================================================================
+   SPEED DIAL: NÚCLEO DE CREACIÓN
+   ========================================================================== */
+/* El contenedor secundario inicia invisible y desplazado */
+#speedDial .sd-items { opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden; transition: opacity .2s ease-out, transform .2s ease-out, visibility 0s linear .2s; }
+/* Solo se hace visible cuando el contenedor principal tiene la clase 'sd-open' */
+#speedDial.sd-open .sd-items { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
 
+#speedDial .sd-item { 
+    background-color: rgba(20, 20, 26, 0.65); 
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: background-color .15s ease-out, transform .15s ease-out, border-color .15s ease-out; 
+}
+#speedDial .sd-item:hover { background-color: rgba(40, 40, 50, 0.75); border-color: rgba(255, 255, 255, 0.3); }
+#speedDial .sd-item:active { transform: scale(.98); }
 
+/* Animación del botón principal */
+#speedDial .sd-plus { transition: transform .2s ease-out; }
+#speedDial.sd-open .sd-plus { transform: rotate(45deg); }
 
+#speedDial { transition: right .3s ease-out, opacity .2s ease-out; }
+/* Lógica para apartarse si abres paneles (Drawers) */
+body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-full), #priorityDrawer:not(.translate-x-full)) #speedDial { opacity: 0; pointer-events: none; }
+@media (min-width: 768px) { body:has(#infoCard:not(.hidden)) #speedDial { right: 440px; } }
+@media (max-width: 767px) { body:has(#infoCard:not(.hidden), #dailyDrawer:not(.-translate-x-full)) #speedDial { opacity: 0; pointer-events: none; } }
+@media (prefers-reduced-motion: reduce) { #speedDial, #speedDial * { transition: none !important; } }

@@ -466,7 +466,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     window.sendExternalAlert('VALIDATION_SUBMITTED', { project: 'General', task: t.text, feedback: feedback, consultant: localAuthor });
                 }
                 window.saveData(false);
-                window.renderAlerts();
             }
         } else if (taskType === 'daily') {
             const t = appData.dailyTasks.find(x => x.id === taskId);
@@ -482,7 +481,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     logActivity('daily', 'Actividades Diarias', `Envió tarea diaria a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
                 }
                 window.saveData(false);
-                window.renderAlerts();
             }
         } else {
             let item = null;
@@ -525,12 +523,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     }
                     window.saveData(false); 
                     window.renderTasksQuick(item); 
-                    window.renderAlerts();
                 }
             }
         }
         
-        window.renderDailyTasks();
         window.showToast("Enviado correctamente");
         window.triggerCelebration();
         window.closeTaskFeedbackModal();
@@ -777,8 +773,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     function refreshUI() {
-        window.ensureDomReferences(); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); window.renderRegisteredDocsList();
-        window.populateGlobalEditSelector(); window.updateDatalist(); window.renderMindMap(); window.renderHistory(); window.renderDashboard(); 
+        window.ensureDomReferences(); window.populateConsultantSelects();
+        if (isDrawerOpen) {
+            window.renderRegisteredConsultantsList(); window.renderRegisteredDocsList(); window.populateGlobalEditSelector();
+        }
+        window.updateDatalist(); window.renderMindMap(); window.renderHistory(); window.renderDashboard(); 
         if(isPriorityDrawerOpen) window.renderPriorityDrawer();
         window.renderAlerts(); // SENSOR DE ALERTAS
         refreshOpenInfoNotes();
@@ -823,6 +822,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if(badge) badge.classList.add('hidden');
             const badgeMobile = document.getElementById('alertsBadgeMobile'); if(badgeMobile) badgeMobile.classList.add('hidden');
             if(container) container.innerHTML = `<div class="text-center py-10 opacity-50"><p class="text-sm text-gray-300">Modo Lector Activo. Las alertas son exclusivas para el equipo operativo.</p></div>`;
+            window.renderDailyTasks();
             return;
         }
         
@@ -1174,18 +1174,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       return Array.from(set);
     };
     
-    function hexToRgb(hex) {
-      if (!hex || typeof hex !== 'string') return [142, 142, 147];
-      let clean = hex.replace('#', '').trim();
-      if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
-      if (clean.length !== 6) return [142, 142, 147];
-      return [
-        parseInt(clean.substring(0, 2), 16),
-        parseInt(clean.substring(2, 4), 16),
-        parseInt(clean.substring(4, 6), 16)
-      ];
-    }
-
     function generateJointGradient(consultantNames) {
       if (!consultantNames || consultantNames.length === 0) return '#48484a';
       if (consultantNames.length === 1) return consultants[consultantNames[0]] ? consultants[consultantNames[0]].color : '#48484a';
@@ -1194,23 +1182,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (validColors.length === 1) return validColors[0];
       const gradKey = validColors.map(c => c.replace('#','')).join('-');
       const gradId = `grad-${gradKey}`;
-      const glassGradId = `grad-glass-${gradKey}`;
-      const darkGlassGradId = `grad-darkglass-${gradKey}`;
       if (!document.getElementById(gradId) && svgDefs) {
         const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
         linearGradient.setAttribute('id', gradId); linearGradient.setAttribute('x1', '0%'); linearGradient.setAttribute('y1', '0%'); linearGradient.setAttribute('x2', '100%'); linearGradient.setAttribute('y2', '100%');
         validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); linearGradient.appendChild(stop); });
         svgDefs.appendChild(linearGradient);
-
-        const glassGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        glassGradient.setAttribute('id', glassGradId); glassGradient.setAttribute('x1', '0%'); glassGradient.setAttribute('y1', '0%'); glassGradient.setAttribute('x2', '100%'); glassGradient.setAttribute('y2', '100%');
-        validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); stop.setAttribute('stop-opacity', '0.12'); glassGradient.appendChild(stop); });
-        svgDefs.appendChild(glassGradient);
-
-        const darkGlassGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        darkGlassGradient.setAttribute('id', darkGlassGradId); darkGlassGradient.setAttribute('x1', '0%'); darkGlassGradient.setAttribute('y1', '0%'); darkGlassGradient.setAttribute('x2', '100%'); darkGlassGradient.setAttribute('y2', '100%');
-        validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); stop.setAttribute('stop-opacity', '0.16'); darkGlassGradient.appendChild(stop); });
-        svgDefs.appendChild(darkGlassGradient);
       }
       return `url(#${gradId})`;
     }
@@ -1464,8 +1440,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             window.renderNotesHistory(item.notes, 'editNotesHistory');
             window.renderNotesHistory(item.notes, 'infoNotes');
             window.renderMindMap(); // Refresca los badges de notificación del mapa mental
-            if (typeof window.renderAlerts === 'function') window.renderAlerts();
-            if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
         }
     };
 
@@ -1487,8 +1461,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     window.renderNotesHistory(item.notes, 'infoNotes');
                     window.renderNotesHistory(item.notes, 'editNotesHistory');
                     window.renderMindMap();
-                    if (typeof window.renderAlerts === 'function') window.renderAlerts();
-                    if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
                     window.showToast("✓ Acuse de lectura confirmado", false);
                 }
             }
@@ -1517,8 +1489,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 window.renderNotesHistory(item.notes, 'infoNotes');
                 window.renderNotesHistory(item.notes, 'editNotesHistory');
                 window.renderMindMap();
-                if (typeof window.renderAlerts === 'function') window.renderAlerts();
-                if (typeof window.renderDailyDrawer === 'function') window.renderDailyDrawer();
                 window.showToast("✓ Todas las notas marcadas como enterado", false);
             }
         }
@@ -2474,8 +2444,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             window.saveData(true);
             window.closeGlobalTaskModal();
-            window.renderAlerts(); 
-            window.renderDailyTasks();
             if (currentSelection && currentSelection.id === item.id) {
                 window.renderTasksQuick(item);
             }
@@ -2505,8 +2473,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
             logActivity('global', 'General', approve ? `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea general: "${t.text}"`, localAuthor);
             window.saveData(false);
-            window.renderAlerts();
-            window.renderDailyTasks();
             if (approve) window.triggerCelebration();
         }
     };
@@ -2534,9 +2500,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
                 logActivity(item.id, item.name, approve ? `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea: "${t.text}"`, localAuthor);
                 window.saveData(false);
-                window.renderAlerts();
                 if(currentSelection && currentSelection.id === item.id) window.renderTasksQuick(item);
-                window.renderDailyTasks();
                 if (approve) window.triggerCelebration();
             }
         }
@@ -2558,8 +2522,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         appData.globalTasks = appData.globalTasks.filter(x => x.id !== taskId);
         logActivity('global', 'General', `Eliminó la tarea general: ${t.text}`, localAuthor);
         window.saveData(false);
-        window.renderAlerts();
-        window.renderDailyTasks();
     };
 
     // === LÓGICA DE TAREAS ===
@@ -2601,7 +2563,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             window.saveData(false); 
             window.renderTasksQuick(item);
-            window.renderDailyTasks();
         }
     };
 
@@ -2633,8 +2594,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         logActivity(item.id, item.name, `Reabrió tarea de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
-                        window.renderAlerts(); 
-                        window.renderDailyTasks();
                     }
                 } else if (t.done === 'pending') {
                     // Supervisor aprueba o Consultor cancela envío
@@ -2651,8 +2610,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         });
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
-                        window.renderAlerts(); 
-                        window.renderDailyTasks();
                         window.triggerCelebration();
                     } else {
                         t.done = false;
@@ -2660,8 +2617,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         logActivity(item.id, item.name, `Canceló envío a validación: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
-                        window.renderAlerts(); 
-                        window.renderDailyTasks();
                     }
                 } else {
                     // Completar / Enviar a validar (abre modal)
@@ -5457,7 +5412,6 @@ window.toggleDailyDrawer = function() {
         input.value = ''; 
         logActivity('daily', 'Actividades Diarias', `Asignó tarea diaria a ${assignee}: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(false);
-        window.renderDailyTasks();
     };
 
 // NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD DIARIA
@@ -5500,7 +5454,6 @@ window.toggleDailyDrawer = function() {
         logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea diaria: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(true);
         window.closeFastDailyTaskModal();
-        if (isDailyDrawerOpen) window.renderDailyTasks();
     }
 
 window.toggleDailyTask = function(taskId) {
@@ -5519,7 +5472,6 @@ window.toggleDailyTask = function(taskId) {
                     delete t.feedback; delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                     logActivity('daily', 'Actividades Diarias', `Reabrió tarea diaria de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor);
                     window.saveData(false);
-                    window.renderDailyTasks();
                 }
             } else if (t.done === 'pending') {
                 if (isSuper || isAssigner) {
@@ -5528,13 +5480,11 @@ window.toggleDailyTask = function(taskId) {
                     const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
                     logActivity('daily', 'Actividades Diarias', `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
                     window.saveData(false);
-                    window.renderDailyTasks();
                     window.triggerCelebration();
                 } else if (t.assignee === localAuthor) {
                     t.done = false; delete t.feedback;
                     logActivity('daily', 'Actividades Diarias', `Canceló envío a validación: "${t.text}"`, localAuthor);
                     window.saveData(false);
-                    window.renderDailyTasks();
                 }
             } else {
                 window.openTaskFeedbackModal(taskId, 'daily');
@@ -5607,8 +5557,6 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
             logActivity('daily', 'Actividades Diarias', approve ? `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó o reabrió tarea diaria: "${t.text}"`, localAuthor);
             window.saveData(false);
-            window.renderAlerts();
-            window.renderDailyTasks();
             if (approve) window.triggerCelebration();
         }
     }
@@ -5972,7 +5920,7 @@ window.renderDailyTasks = function() {
             allC.forEach(name => {
                 const isAct = !isAllSelected && activeFilterConsultants.includes(name);
                 const cColor = consultants[name]?.color || '#0071e3';
-                html += `<button type="button" onclick="toggleFilterChip('consultant', '${escapeHtml(name)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                html += `<button type="button" onclick="toggleFilterChip('consultant', '${jsArg(name)}')" class="filter-chip ${isAct ? 'active' : ''}">
                     <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${cColor}; box-shadow: 0 0 5px ${cColor};"></span>
                     <span>${escapeHtml(name)}</span>
                 </button>`;
@@ -5990,7 +5938,7 @@ window.renderDailyTasks = function() {
 
             allComps.forEach(comp => {
                 const isAct = !isAllSelected && activeFilterCompanies.includes(comp);
-                html += `<button type="button" onclick="toggleFilterChip('company', '${escapeHtml(comp)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                html += `<button type="button" onclick="toggleFilterChip('company', '${jsArg(comp)}')" class="filter-chip ${isAct ? 'active' : ''}">
                     <span>${escapeHtml(comp)}</span>
                 </button>`;
             });
@@ -6012,7 +5960,7 @@ window.renderDailyTasks = function() {
             let html = '';
             statuses.forEach(st => {
                 const isAct = (st.id === 'ALL' && isAllSelected) || (!isAllSelected && activeFilterStatuses.includes(st.id));
-                html += `<button type="button" onclick="toggleFilterChip('status', '${escapeHtml(st.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                html += `<button type="button" onclick="toggleFilterChip('status', '${jsArg(st.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
                     <span>${escapeHtml(st.label)}</span>
                 </button>`;
             });
