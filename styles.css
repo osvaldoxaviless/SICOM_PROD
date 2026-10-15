@@ -428,11 +428,22 @@ body.theme-light .filter-chip.active {
 /* Botón colapso/expansión interactivo en el nodo del módulo */
 .mod-toggle-btn {
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+    user-select: none;
 }
-.mod-toggle-btn:hover {
-    filter: brightness(1.35) drop-shadow(0 0 8px rgba(0, 113, 227, 0.8));
-    transform: scale(1.12);
+.mod-toggle-btn .btn-circle-bg {
+    transition: r 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.2s ease, filter 0.2s ease, stroke 0.2s ease;
+}
+.mod-toggle-btn:hover .btn-circle-bg {
+    r: 13.5;
+    stroke-width: 2.2;
+    filter: drop-shadow(0 0 8px rgba(0, 113, 227, 0.75));
+}
+.mod-toggle-btn line {
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.mod-toggle-btn:hover line {
+    stroke: #0071e3 !important;
+    stroke-width: 2.2;
 }
 
 body.theme-light #dailyTasksContainer details[open] {

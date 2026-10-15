@@ -4051,46 +4051,53 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           return true;
       }
 
-      function getModuleSlotWeight(n) {
-          const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
-          if (isModuleCollapsed(modId, n)) return 1;
-          const pCount = (n.projects || []).length;
-          if (pCount <= 6) return Math.max(1, pCount);
-          return Math.max(1, Math.ceil(pCount / 2));
-      }
-      
       ensureDataStructure();
       const directHubItem = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
       const visDir = appData.directProjects || [];
       const activeMods = (appData.modules || []).filter(m => m && typeof m === 'object');
       
-      let lNodes = [], rNodes = [], lSlots = 0, rSlots = 0;
-      
+      // Balanceo estático y estable de lados para evitar que los módulos brinquen de izquierda a derecha al colapsar
+      let lNodes = [], rNodes = [], lStaticWeight = 0, rStaticWeight = 0;
       const directData = { type: 'direct-hub', item: directHubItem, projects: visDir };
       lNodes.push(directData);
-      lSlots += getModuleSlotWeight(directData); 
+      lStaticWeight += Math.max(1, visDir.length);
       
       activeMods.forEach(m => {
           if (!m.id) m.id = 'm_' + Math.random().toString(36).slice(2, 9);
           if (!m.name) m.name = 'Módulo';
           if (!m.color) m.color = '#0071e3';
           const modData = { type: 'module', item: m, projects: m.projects || [] };
-          const pLength = getModuleSlotWeight(modData);
-          if (lSlots <= rSlots) { lNodes.push(modData); lSlots += pLength; } 
-          else { rNodes.push(modData); rSlots += pLength; }
+          const pStaticLen = Math.max(1, modData.projects.length);
+          if (lStaticWeight <= rStaticWeight) {
+              lNodes.push(modData);
+              lStaticWeight += pStaticLen;
+          } else {
+              rNodes.push(modData);
+              rStaticWeight += pStaticLen;
+          }
       });
 
-      const slotH = 75, mOffX = 400; 
-      function procSide(nodes, totalSlots, isLeft) {
-          const mx = isLeft ? -mOffX : mOffX;
+      const slotH = 75, mOffX = 400, pOffX = 900; 
+      function procSide(nodes, isLeft) {
+          const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
+          
+          // Total de slots reales en este lado según su estado actual (colapsado o expandido)
+          const totalSlots = nodes.reduce((sum, n) => {
+              const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+              const isCollapsed = isModuleCollapsed(modId, n);
+              const pCount = (n.projects || []).length;
+              return sum + (isCollapsed ? 1 : Math.max(1, pCount));
+          }, 0);
+
           let cy = -(totalSlots * slotH / 2) + (slotH / 2);
           nodes.forEach(n => {
               const pCount = (n.projects || []).length;
-              const nItemId = String(n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod')).replace(/[^a-zA-Z0-9_-]/g, '');
+              const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+              const nItemId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
               const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
               const nItemName = n.item ? (n.item.name || '') : '';
-              const isCollapsed = isModuleCollapsed(nItemId, n);
-              const weight = isCollapsed ? 1 : (pCount > 6 ? Math.max(1, Math.ceil(pCount / 2)) : Math.max(1, pCount));
+              const isCollapsed = isModuleCollapsed(modId, n);
+              const weight = isCollapsed ? 1 : Math.max(1, pCount);
               
               const sy = cy;
               const ey = cy + (weight - 1) * slotH;
@@ -4098,28 +4105,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               cy += weight * slotH;
 
               if (!isCollapsed && pCount > 0) {
-                  if (pCount <= 6) {
-                      n.projects.forEach((p, idx) => { 
-                          const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
-                          const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
-                          p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
-                          const px = isLeft ? -820 : 820;
-                          const py = sy + idx * slotH;
-                          p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
-                      });
-                  } else {
-                      // Multi-columna (2 columnas) para módulos densos (> 6 proyectos)
-                      n.projects.forEach((p, idx) => { 
-                          const cN = getProjectConsultants(p); const col = generateJointGradient(cN);
-                          const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
-                          p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
-                          const colIdx = idx % 2;
-                          const rowIdx = Math.floor(idx / 2);
-                          const px = colIdx === 0 ? (isLeft ? -770 : 770) : (isLeft ? -1120 : 1120);
-                          const py = sy + rowIdx * slotH;
-                          p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
-                      });
-                  }
+                  n.projects.forEach((p, idx) => { 
+                      const cN = getProjectConsultants(p);
+                      const col = generateJointGradient(cN);
+                      const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
+                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
+                      const py = sy + idx * slotH;
+                      p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
+                  });
               } else {
                   (n.projects || []).forEach(p => { p._renderData = null; });
               }
@@ -4193,10 +4186,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
                   const endCol = isOver ? '#ff453a' : solidColor;
 
-                  const startX = isLeft ? mx - 165 : mx + 165;
+                  // Conexión limpia y fluida que nace exactamente en el botón de colapso
+                  const startX = isLeft ? (mx - 165 - 11) : (mx + 165 + 11);
                   const endX = isLeft ? p._renderData.x + 160 : p._renderData.x - 160;
                   const dx = Math.abs(endX - startX);
-                  const cpDist = Math.max(30, Math.min(85, dx * 0.45));
+                  const cpDist = Math.max(40, Math.min(95, dx * 0.45));
                   const cp1X = isLeft ? startX - cpDist : startX + cpDist;
                   const cp2X = isLeft ? endX + cpDist : endX - cpDist;
                   
@@ -4235,7 +4229,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               });
           });
       }
-      procSide(lNodes, lSlots, true); procSide(rNodes, rSlots, false);
+      procSide(lNodes, true); procSide(rNodes, false);
 
       // Mapa de nodos de módulo para resolución rápida de conectores secundarios
       const moduleNodeMap = new Map();
@@ -4795,21 +4789,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const isLeft = (n._renderData && n._renderData.isLeft);
             const toggleBtnG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             toggleBtnG.classList.add('mod-toggle-btn');
-            const btnX = isLeft ? -10 : 340;
+            const btnX = isLeft ? -11 : 341;
             const btnY = 25;
             toggleBtnG.setAttribute('transform', `translate(${btnX}, ${btnY})`);
             
             const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            btnCircle.classList.add('btn-circle-bg');
+            btnCircle.setAttribute('cx', '0');
+            btnCircle.setAttribute('cy', '0');
             btnCircle.setAttribute('r', '11');
             btnCircle.setAttribute('fill', isLight ? '#ffffff' : '#14141a');
             btnCircle.setAttribute('stroke', modCol);
-            btnCircle.setAttribute('stroke-width', '1.5');
-            btnCircle.setAttribute('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))');
+            btnCircle.setAttribute('stroke-width', '1.6');
+            btnCircle.setAttribute('filter', 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))');
             toggleBtnG.appendChild(btnCircle);
             
             const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            hLine.setAttribute('x1', '-5'); hLine.setAttribute('y1', '0');
-            hLine.setAttribute('x2', '5'); hLine.setAttribute('y2', '0');
+            hLine.setAttribute('x1', '-4.5'); hLine.setAttribute('y1', '0');
+            hLine.setAttribute('x2', '4.5'); hLine.setAttribute('y2', '0');
             hLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
             hLine.setAttribute('stroke-width', '2');
             hLine.setAttribute('stroke-linecap', 'round');
@@ -4817,13 +4814,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             
             if (isCollapsed) {
                 const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-5');
-                vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '5');
+                vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-4.5');
+                vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '4.5');
                 vLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
                 vLine.setAttribute('stroke-width', '2');
                 vLine.setAttribute('stroke-linecap', 'round');
                 toggleBtnG.appendChild(vLine);
             }
+
+            // Área invisible de clic amplia para interacción inmediata
+            const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            hitArea.setAttribute('cx', '0'); hitArea.setAttribute('cy', '0');
+            hitArea.setAttribute('r', '18');
+            hitArea.setAttribute('fill', 'transparent');
+            hitArea.style.cursor = 'pointer';
+            toggleBtnG.appendChild(hitArea);
             
             const btnTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             btnTitle.textContent = isCollapsed ? `Expandir ${rawName} (${pCount} proyectos)` : `Colapsar ${rawName}`;
@@ -6200,7 +6205,7 @@ window.renderAlerts = function() {
     window.updateCollapseAllButtonState = function() {
         const totalModules = 1 + (appData.modules || []).length;
         const isMostlyCollapsed = collapsedModules.size >= Math.ceil(totalModules / 2);
-        const txt = document.getElementById('btnToggleCollapseAllText');
+        const txt = document.getElementById('textCollapseAll') || document.getElementById('btnToggleCollapseAllText');
         const mTxt = document.getElementById('mobileToggleCollapseText');
         const label = isMostlyCollapsed ? 'Expandir Todo' : 'Colapsar Todo';
         if (txt) txt.textContent = label;
