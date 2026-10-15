@@ -13,7 +13,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
     let activeSearchQuery = '';
     let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeFilterCompany = 'ALL';
-    let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false;    let currentSelection = { type: null, id: null };
+    let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false, showAllSecondaryLinks = false;
+    let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
     
@@ -2171,6 +2172,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             document.getElementById('infoCard').classList.add('hidden');
             document.body.classList.remove('info-card-open');
         }, 400); 
+        if (currentSelection && currentSelection.id) {
+            currentSelection = { type: null, id: null };
+            window.renderMindMap();
+        }
     }
 
     
@@ -4230,6 +4235,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   pSec.classList.add('mindmap-connector', 'secondary-module-connector');
                   pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`);
                   pSec.setAttribute('fill', 'none');
+                  pSec.setAttribute('data-source-proj', String(p.id));
+                  pSec.setAttribute('data-target-mod', String(secId));
 
                   const pIdClean = String(p.id).replace(/[^a-zA-Z0-9_-]/g, '');
                   const secIdClean = String(secId).replace(/[^a-zA-Z0-9_-]/g, '');
@@ -4246,33 +4253,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop1.setAttribute('offset', '0%');
                   stop1.setAttribute('stop-color', secColor);
-                  stop1.setAttribute('stop-opacity', isLight ? '0.50' : '0.65');
+                  stop1.setAttribute('stop-opacity', isLight ? '0.60' : '0.75');
                   sGrad.appendChild(stop1);
 
                   const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop2.setAttribute('offset', '100%');
                   stop2.setAttribute('stop-color', isLight ? '#0071e3' : '#60a5fa');
-                  stop2.setAttribute('stop-opacity', isLight ? '0.70' : '0.85');
+                  stop2.setAttribute('stop-opacity', isLight ? '0.75' : '0.90');
                   sGrad.appendChild(stop2);
 
                   dynamicDefs.appendChild(sGrad);
 
                   pSec.setAttribute('stroke', `url(#${secGradId})`);
+                  pSec.setAttribute('stroke-width', '1.6');
 
-                  let secOpacity = '0.50';
-                  let secStrokeWidth = '1.6';
                   if (!pMatches) {
-                      secOpacity = '0.06';
+                      pSec.classList.add('sec-connector-dimmed');
                   } else if (isProjectSel || isSecModSel) {
-                      secOpacity = '0.95';
-                      secStrokeWidth = '2.4';
+                      pSec.classList.add('sec-connector-selected');
+                      pSec.setAttribute('stroke-width', '2.5');
                       pSec.setAttribute('filter', 'url(#glow)');
                   } else if (activeFilterModule === secId || (secId === 'DIRECT' && activeFilterModule === 'direct-hub')) {
-                      secOpacity = '0.85';
-                      secStrokeWidth = '2.0';
+                      pSec.classList.add('sec-connector-selected');
+                      pSec.setAttribute('stroke-width', '2.2');
                   }
-                  pSec.setAttribute('stroke-width', secStrokeWidth);
-                  pSec.setAttribute('opacity', secOpacity);
                   canvasGroup.appendChild(pSec);
               });
           });
@@ -4291,6 +4295,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           // 1. CREACIÓN DEL CONTENEDOR PRINCIPAL
           const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           g.setAttribute('transform', `translate(${x - 160}, ${y - 28})`);
+          const pCleanId = String(realId).replace(/[^a-zA-Z0-9_-]/g, '');
+          g.setAttribute('data-project-id', String(realId));
+          g.classList.add('mindmap-project-node', `proj-node-${pCleanId}`);
           
           // ESTADO DE VISIBILIDAD Y BLOQUEO DURO
           const forceInteractive = isDefaultState;
@@ -4314,7 +4321,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               try { window.selectNode(currentNodeType, currentNodeId); } catch (err) { console.error('No se pudo abrir el proyecto:', p, err); window.showToast('⚠️ No se pudo abrir "' + p.name + '": ' + err.message, true); }
           }, false);
 
-           // El false es vital para evitar el bubbling inverso
+          // ILUMINACIÓN INTERACTIVA ON-DEMAND PARA PROYECTOS MULTIMÓDULO
+          if (Array.isArray(p.secondaryModules) && p.secondaryModules.length > 0) {
+              g.addEventListener('mouseenter', function() {
+                  const conns = canvasGroup.querySelectorAll(`.secondary-module-connector[data-source-proj="${currentNodeId}"]`);
+                  conns.forEach(c => c.classList.add('sec-connector-highlight'));
+                  
+                  p.secondaryModules.forEach(sModId => {
+                      const cleanId = String(sModId === 'DIRECT' ? 'hub-direct' : sModId).replace(/[^a-zA-Z0-9_-]/g, '');
+                      const targetModG = canvasGroup.querySelector(`.mod-node-${cleanId}`);
+                      if (targetModG) targetModG.classList.add('target-module-highlight');
+                  });
+              });
+              g.addEventListener('mouseleave', function() {
+                  const conns = canvasGroup.querySelectorAll(`.secondary-module-connector[data-source-proj="${currentNodeId}"]`);
+                  conns.forEach(c => c.classList.remove('sec-connector-highlight'));
+                  
+                  p.secondaryModules.forEach(sModId => {
+                      const cleanId = String(sModId === 'DIRECT' ? 'hub-direct' : sModId).replace(/[^a-zA-Z0-9_-]/g, '');
+                      const targetModG = canvasGroup.querySelector(`.mod-node-${cleanId}`);
+                      if (targetModG) targetModG.classList.remove('target-module-highlight');
+                  });
+              });
+          }
 
           // 3. CAPA VISUAL (Píldoras estilo original con liquid glass)
           // AURA PARPADEANTE / FARO VISUAL PARA PROYECTOS VENCIDOS
@@ -4411,7 +4440,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           if (hasSecBadge) {
               const multiG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
               multiG.setAttribute('transform', 'translate(252, 9)');
-              multiG.style.pointerEvents = 'none';
+              multiG.style.pointerEvents = 'auto';
+              multiG.style.cursor = 'pointer';
+
+              const secModNames = p.secondaryModules.map(smId => {
+                  if (smId === 'DIRECT' || smId === 'hub-direct') return 'Proyectos Directos';
+                  const m = (appData.modules || []).find(x => x.id === smId);
+                  return m ? m.name : smId;
+              }).join(', ');
+
+              const mTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+              mTitle.textContent = `🔗 Vinculado a: ${secModNames} (Posa el cursor para iluminar conexiones)`;
+              multiG.appendChild(mTitle);
 
               const mPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               mPill.setAttribute('width', '38');
@@ -4566,6 +4606,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const isSel = currentSelection.id === modId;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         g.setAttribute('transform', `translate(${x - 165}, ${y - 25})`);
+        const cleanModId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
+        g.setAttribute('data-module-id', String(modId));
+        g.classList.add('mindmap-module-node', `mod-node-${cleanModId}`);
         
         if (!modMatches) {
              g.setAttribute('opacity', '0.15');
@@ -4585,6 +4628,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             e.stopPropagation();
             window.selectNode(currentModType, currentModId);
         }, false);
+
+        // INTERACCIÓN HOVER EN MÓDULO PARA ILUMINAR VÍNCULOS ENTRANTES
+        g.addEventListener('mouseenter', function() {
+            const inConns = canvasGroup.querySelectorAll(`.secondary-module-connector[data-target-mod="${modId}"]${modId === 'hub-direct' ? ', .secondary-module-connector[data-target-mod="DIRECT"]' : ''}`);
+            inConns.forEach(c => c.classList.add('sec-connector-highlight'));
+        });
+        g.addEventListener('mouseleave', function() {
+            const inConns = canvasGroup.querySelectorAll(`.secondary-module-connector[data-target-mod="${modId}"]${modId === 'hub-direct' ? ', .secondary-module-connector[data-target-mod="DIRECT"]' : ''}`);
+            inConns.forEach(c => c.classList.remove('sec-connector-highlight'));
+        });
 
         const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         r.setAttribute('width', '330'); r.setAttribute('height', '50'); r.setAttribute('rx', '25'); 
@@ -5882,6 +5935,27 @@ window.renderAlerts = function() {
         } else {
             btn.classList.remove('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
             btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+        }
+        window.renderMindMap();
+    };
+
+    window.toggleSecondaryLinks = function() {
+        showAllSecondaryLinks = !showAllSecondaryLinks;
+        document.body.classList.toggle('show-all-sec-links', showAllSecondaryLinks);
+        const btn = document.getElementById('btnToggleLinks');
+        const mText = document.getElementById('mobileToggleLinksText');
+        if (btn) {
+            if (showAllSecondaryLinks) {
+                btn.classList.add('bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
+                btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-400');
+                if (mText) mText.textContent = "Vínculos Multimódulo: On";
+                window.showToast("🔗 Mostrando todos los vínculos multimódulo", false);
+            } else {
+                btn.classList.remove('bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
+                btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+                if (mText) mText.textContent = "Vínculos Multimódulo: Off";
+                window.showToast("🔗 Vínculos en modo inteligente (hover/selección)", false);
+            }
         }
         window.renderMindMap();
     };

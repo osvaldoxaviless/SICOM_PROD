@@ -299,11 +299,13 @@ body.theme-light .mindmap-connector {
     stroke: rgba(0, 0, 0, 0.22) !important;
 }
 
-/* Conectores Secundarios Multimódulo (Dependencias Cruzadas) */
+/* Conectores Secundarios Multimódulo (Dependencias Cruzadas On-Demand) */
 .secondary-module-connector {
     stroke-dasharray: 6, 4;
-    transition: opacity 0.3s ease, stroke-width 0.3s ease;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.25s ease, filter 0.25s ease;
     animation: dash-flow 35s linear infinite;
+    opacity: 0;
+    pointer-events: none;
 }
 
 @keyframes dash-flow {
@@ -315,9 +317,44 @@ body.theme-light .mindmap-connector {
     }
 }
 
-.secondary-module-connector:hover {
-    stroke-width: 2.6px !important;
+/* Modo Global: activado cuando se enciende el botón "Vínculos" en la barra superior */
+body.show-all-sec-links .secondary-module-connector {
+    opacity: 0.40;
+    pointer-events: stroke;
+}
+
+body.show-all-sec-links.theme-light .secondary-module-connector {
+    opacity: 0.45;
+    stroke: rgba(0, 113, 227, 0.5) !important;
+}
+
+/* Estado Activo / Hover / Seleccionado: Iluminación Neón / Fibra Óptica */
+.secondary-module-connector.sec-connector-highlight,
+.secondary-module-connector.sec-connector-selected {
     opacity: 0.95 !important;
+    stroke-width: 2.6px !important;
+    filter: drop-shadow(0 0 8px rgba(0, 113, 227, 0.85)) !important;
+    pointer-events: stroke !important;
+}
+
+.secondary-module-connector:hover {
+    stroke-width: 3.2px !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 12px rgba(53, 174, 232, 0.95)) !important;
+    cursor: pointer;
+}
+
+.secondary-module-connector.sec-connector-dimmed {
+    opacity: 0.04 !important;
+    pointer-events: none !important;
+}
+
+/* Resaltado del nodo de módulo destino cuando se posa el cursor en un proyecto multimódulo */
+.target-module-highlight rect:first-child {
+    filter: drop-shadow(0 0 14px rgba(0, 113, 227, 0.85)) brightness(1.25) !important;
+    stroke: #38bdf8 !important;
+    stroke-width: 2.5px !important;
+    transition: all 0.25s ease;
 }
 
 body.theme-light .secondary-module-connector {
