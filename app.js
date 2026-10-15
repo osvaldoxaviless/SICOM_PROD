@@ -1632,6 +1632,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         setTimeout(() => modal.classList.add('hidden'), 400);
     };
 
+    // --- MÓDULO DE ALERTAS EXTERNAS (PROXY GOOGLE APPS SCRIPT) ---
+    const URL_APPS_SCRIPT_WEBAPP = 'https://script.google.com/macros/s/AKfycb.../exec'; // Pegar URL de tu Web App desplegada
+
+    window.sendExternalAlert = async function(type, message, assignedUser) {
+        if (!URL_APPS_SCRIPT_WEBAPP || URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) return;
+        try {
+            fetch(URL_APPS_SCRIPT_WEBAPP, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    type: type,
+                    message: message,
+                    assignedUser: assignedUser || 'General'
+                })
+            }).catch(() => {
+                // Silencioso por diseño
+            });
+        } catch (e) {
+            // Silencioso
+        }
+    };
+
     window.saveGlobalTask = function() { 
         if (currentUserRole === 'Lector') return;
         const projVal = document.getElementById('gtProject').value;
@@ -1678,6 +1701,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 done: false 
             });
             logActivity(item.id, item.name, `Asignó tarea de proyecto a ${assignee}`, localAuthor);
+
+            // Inyección de alerta externa hacia Google Workspace / WhatsApp
+            if (currentUserRole !== 'Lector') {
+                window.sendExternalAlert('CHAT', `Nueva tarea en [${item.name}]: "${text}" (Vence: ${deadline || 'Sin fecha'})`, assignee);
+            }
+
             window.saveData(true);
             window.closeGlobalTaskModal();
             window.renderAlerts(); 
@@ -1793,6 +1822,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             item.tasks.push({ id: 't_'+Date.now(), text, deadline, assignee, assignedBy: localAuthor, assignDate, assignTime, done: false });
             input.value = ''; dateInput.value = ''; if(assigneeInput && !assigneeInput.disabled) assigneeInput.value = '';
             logActivity(item.id, item.name, 'Agregó nueva tarea', localAuthor); 
+
+            // Inyección de alerta externa hacia Google Workspace / WhatsApp
+            if (currentUserRole !== 'Lector') {
+                window.sendExternalAlert('CHAT', `Nueva tarea rápida en [${item.name}]: "${text}"`, assignee || 'Sin asignar');
+            }
+
             window.saveData(false); 
             window.renderTasksQuick(item);
             window.renderDailyTasks();
