@@ -493,8 +493,8 @@ body.theme-light #loginOverlay .orb {
 }
 
 
-/* Ocultación de botones flotantes cuando infoCard o drawers están abiertos en móvil */
-@media (max-width: 767px) {
+/* Ocultación de botones flotantes cuando infoCard o drawers están abiertos en móvil (vertical y horizontal) */
+@media (max-width: 767px), (orientation: landscape) and (max-height: 520px) {
     body.info-card-open #speedDial,
     body.info-card-open #btnDailyTasks,
     body.info-card-open #btnManual,
@@ -518,7 +518,9 @@ body.theme-light #loginOverlay .orb {
         transform: translateY(12px) scale(0.95);
         transition: opacity 0.2s ease, transform 0.2s ease;
     }
+}
 
+@media (max-width: 767px) and (orientation: portrait) {
     #infoCard {
         max-height: 82vh !important;
         bottom: 12px !important;
@@ -526,6 +528,147 @@ body.theme-light #loginOverlay .orb {
         right: 10px !important;
         padding: 1rem !important;
         border-radius: 1.5rem !important;
+    }
+}
+
+/* ==========================================================================
+   ADAPTACIÓN TOTAL MÓVIL HORIZONTAL (LANDSCAPE — altura <= 520px)
+   ========================================================================== */
+@media (orientation: landscape) and (max-height: 520px) {
+    /* 1. Header ultra-compacto (44px) */
+    header {
+        height: 2.75rem !important; /* 44px */
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    #headerLogo {
+        width: 1.75rem !important;
+        height: 1.75rem !important;
+    }
+
+    /* 2. Login Overlay con scroll y escala perfecta */
+    #loginOverlay {
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+        padding: 1rem 0.5rem !important;
+    }
+
+    #loginCard {
+        margin: auto !important;
+        padding: 1.25rem 1.5rem !important;
+        max-width: 22rem !important;
+    }
+
+    #loginCard .w-20.h-20 {
+        width: 3.25rem !important;
+        height: 3.25rem !important;
+        border-radius: 1rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    #loginCard h2 {
+        font-size: 1.25rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+
+    #loginCard p.mb-10 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    #loginCard .space-y-5 {
+        margin-top: 0.5rem !important;
+    }
+
+    #loginCard .space-y-5 > * + * {
+        margin-top: 0.6rem !important;
+    }
+
+    #loginCard button.pill-btn {
+        padding-top: 0.65rem !important;
+        padding-bottom: 0.65rem !important;
+        margin-top: 0.75rem !important;
+    }
+
+    /* 3. Todos los modales centrados con scroll seguro */
+    #manualModal,
+    #taskFeedbackModal,
+    #deleteConfirmModal,
+    #passwordModal,
+    #renameModal,
+    #globalTaskModal,
+    #fastDailyTaskModal {
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+        padding: 1rem 0.5rem !important;
+    }
+
+    #manualModal > div,
+    #taskFeedbackModal > div,
+    #deleteConfirmModal > div,
+    #passwordModal > div,
+    #renameModal > div,
+    #globalTaskModal > div,
+    #fastDailyTaskModal > div {
+        margin: auto !important;
+        max-height: 92vh !important;
+        overflow-y: auto !important;
+        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+    }
+
+    /* 4. InfoCard acoplado lateralmente a la derecha en formato panel */
+    #infoCard {
+        top: 3.25rem !important;
+        bottom: 0.5rem !important;
+        right: 0.5rem !important;
+        left: auto !important;
+        width: min(390px, 46vw) !important;
+        max-height: calc(100vh - 3.75rem) !important;
+        border-radius: 1.25rem !important;
+        padding: 0.85rem !important;
+    }
+
+    /* 5. SpeedDial y botones flotantes reducidos y no invasivos */
+    #speedDial {
+        bottom: 0.65rem !important;
+        right: 0.65rem !important;
+    }
+
+    #speedDialTrigger {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+    }
+
+    #speedDial .sd-item {
+        padding: 0.35rem 0.65rem !important;
+        font-size: 0.75rem !important;
+        border-radius: 0.75rem !important;
+    }
+
+    #btnDailyTasks {
+        bottom: 3.75rem !important;
+        left: 0.65rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+    }
+
+    #btnManual {
+        bottom: 0.65rem !important;
+        left: 0.65rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+    }
+
+    /* 6. Drawers laterales ocupan el ancho adecuado en horizontal */
+    #configDrawer,
+    #priorityDrawer,
+    #filterDrawer {
+        width: min(420px, 75vw) !important;
+    }
+
+    #dailyDrawer {
+        width: min(390px, 75vw) !important;
     }
 }
 

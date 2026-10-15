@@ -1409,21 +1409,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // CANDADO DE ZOOM: Calcula dinámicamente el límite mínimo de zoom
     // para que el mapa NUNCA se aleje más allá de los extremos donde terminan los proyectos.
     window.getMinZoomLimit = function() {
-        if (!svgElem || !canvasGroup) return window.innerWidth < 640 ? 0.15 : 0.40;
+        const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
+        if (!svgElem || !canvasGroup) return isSmallScreen ? 0.15 : 0.40;
         try {
             const bbox = canvasGroup.getBBox();
             if (bbox.width > 0 && bbox.height > 0) {
                 const rect = svgElem.getBoundingClientRect();
-                const padding = window.innerWidth < 640 ? 15 : 70;
+                const padding = isSmallScreen ? 15 : 70;
                 const fitX = (rect.width - padding * 2) / bbox.width;
                 const fitY = (rect.height - padding * 2) / bbox.height;
                 const fitScale = Math.min(fitX, fitY);
-                // Piso flexible en móvil para que quepa todo el mapa en pantallas estrechas
-                const minFloor = window.innerWidth < 640 ? 0.12 : 0.35;
+                // Piso flexible en móvil para que quepa todo el mapa en pantallas estrechas u horizontales
+                const minFloor = isSmallScreen ? 0.10 : 0.35;
                 return Math.max(minFloor, Math.min(0.85, fitScale * 0.95));
             }
         } catch(e) {}
-        return window.innerWidth < 640 ? 0.15 : 0.40;
+        return isSmallScreen ? 0.15 : 0.40;
     };
 
     window.zoomCanvas = function(delta, mx = window.innerWidth/2, my = window.innerHeight/2) {
@@ -1475,8 +1476,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const rect = svgElem.getBoundingClientRect();
         try {
             const bbox = canvasGroup.getBBox(); if (bbox.width === 0) throw new Error();
-            const isMobile = window.innerWidth < 640;
-            const padding = isMobile ? 16 : 70;
+            const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
+            const padding = isSmallScreen ? 16 : 70;
             
             const sX = (rect.width - padding*2) / bbox.width;
             const sY = (rect.height - padding*2) / bbox.height;
@@ -1489,7 +1490,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } catch(e) { 
             translateX = rect.width / 2; 
             translateY = rect.height / 2; 
-            scale = window.innerWidth < 640 ? 0.28 : 0.85; 
+            const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
+            scale = isSmallScreen ? 0.28 : 0.85; 
         }
         window.updateCanvasTransform();
     }
@@ -4665,4 +4667,12 @@ window.renderAlerts = function() {
                 window.updateCanvasTransform();
             }
         }, 150);
+    });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (!isPanning && !isTouchActive) {
+                window.recenterCanvas();
+            }
+        }, 250);
     });
