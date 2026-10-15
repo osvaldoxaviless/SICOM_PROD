@@ -12,7 +12,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let initialPinchDistance = null;
     let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
     let activeSearchQuery = '';
-    let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL';
+    let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeFilterCompany = 'ALL';
     let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false;    let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
@@ -41,6 +41,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
     let globalDocs = [{"id":"doc_1791193027382","name":"Propuesta Comercial"},{"id":"doc_1791192995498","name":"Contrato"},{"id":"doc_1791193015065","name":"Plano(s) de negocio"},{"id":"doc_1791350819805","name":"Plan de trabajo"},{"id":"doc_1791350871690","name":"Matriz de pruebas"},{"id":"doc_1791350852225","name":"Formato de Validación"},{"id":"doc_1791350881937","name":"Certificado de Pruebas"},{"id":"doc_1791350912895","name":"Certificado de Comité"},{"id":"doc_1791350927050","name":"Certificado de Capacitación"},{"id":"doc_1791350940031","name":"Carta de Liberación"},{"id":"doc_1791350945532","name":"Factura"}];
     window.getAppData = () => appData;
+    try {
+      Object.defineProperty(window, 'appData', {
+        get: () => appData,
+        set: (v) => { appData = v; },
+        configurable: true
+      });
+    } catch (_) {
+      window.appData = appData;
+    }
 
     if (typeof Chart !== 'undefined') {
       Chart.defaults.color = '#8e8e93'; 
@@ -1111,6 +1120,55 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     function getProjectConsultants(proj) { return Array.isArray(proj.consultants) ? proj.consultants : (proj.consultants ? [proj.consultants] : []); }
+    
+    window.getProjectCompanies = function(proj) {
+      if (!proj) return [];
+      if (Array.isArray(proj.companies)) {
+        return proj.companies.filter(c => typeof c === 'string' && c.trim()).map(c => c.trim().toUpperCase());
+      }
+      if (typeof proj.company === 'string' && proj.company.trim()) {
+        return [proj.company.trim().toUpperCase()];
+      }
+      return [];
+    };
+    function getProjectCompanies(proj) { return window.getProjectCompanies(proj); }
+
+    window.getCompanyStyle = function(company) {
+      const c = String(company || '').trim().toUpperCase();
+      switch (c) {
+        case 'AFR':
+          return { name: 'AFR', color: '#ff9f0a', bg: 'rgba(255, 159, 10, 0.16)', border: 'rgba(255, 159, 10, 0.4)', icon: '🏢' };
+        case 'AVM':
+          return { name: 'AVM', color: '#30d158', bg: 'rgba(48, 209, 88, 0.16)', border: 'rgba(48, 209, 88, 0.4)', icon: '🏢' };
+        case 'TEO':
+          return { name: 'TEO', color: '#0071e3', bg: 'rgba(0, 113, 227, 0.16)', border: 'rgba(0, 113, 227, 0.4)', icon: '🏢' };
+        case 'TNO':
+          return { name: 'TNO', color: '#bf5af2', bg: 'rgba(191, 90, 242, 0.16)', border: 'rgba(191, 90, 242, 0.4)', icon: '🏢' };
+        case 'ZIN':
+          return { name: 'ZIN', color: '#ff375f', bg: 'rgba(255, 55, 95, 0.16)', border: 'rgba(255, 55, 95, 0.4)', icon: '🏢' };
+        case 'GENERAL':
+          return { name: 'GENERAL', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.16)', border: 'rgba(148, 163, 184, 0.4)', icon: '🌐' };
+        default:
+          return { name: c, color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)', border: 'rgba(56, 189, 248, 0.4)', icon: '🏢' };
+      }
+    };
+    function getCompanyStyle(c) { return window.getCompanyStyle(c); }
+
+    window.getAllKnownCompanies = function() {
+      const base = ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
+      const set = new Set(base);
+      if (typeof appData !== 'undefined' && appData) {
+        (appData.directProjects || []).forEach(p => {
+          window.getProjectCompanies(p).forEach(c => set.add(c));
+        });
+        (appData.modules || []).forEach(m => {
+          (m.projects || []).forEach(p => {
+            window.getProjectCompanies(p).forEach(c => set.add(c));
+          });
+        });
+      }
+      return Array.from(set);
+    };
     
     function hexToRgb(hex) {
       if (!hex || typeof hex !== 'string') return [142, 142, 147];
@@ -2959,6 +3017,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             logActivity(item.id, item.name, `Actualizó dependencias multimódulo`, localAuthor);
           }
 
+          // Empresas destino
+          const checkedComps = Array.from(document.querySelectorAll('.editProjComp-chk:checked'))
+            .map(cb => cb.value.trim().toUpperCase());
+          const oldComps = window.getProjectCompanies(item);
+          const oldCompStr = oldComps.slice().sort().join(',');
+          const newCompStr = checkedComps.slice().sort().join(',');
+          item.companies = checkedComps;
+          if (oldCompStr !== newCompStr) {
+            logActivity(item.id, item.name, `Actualizó empresas destino a [${checkedComps.join(', ') || 'Sin empresa'}]`, localAuthor);
+          }
+
           if (oldStatus !== item.status) logActivity(item.id, item.name, `Actualizó estado a [${item.status}]`, localAuthor);
           else if (oldProg !== item.progress) logActivity(item.id, item.name, `Actualizó avance a ${item.progress}%`, localAuthor);
           else logActivity(item.id, item.name, `Editó detalles internos`, localAuthor);
@@ -2986,6 +3055,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (modContainer) {
         modContainer.innerHTML = '';
         modContainer.classList.add('hidden');
+      }
+      const compContainer = document.getElementById('infoCompaniesContainer');
+      if (compContainer) {
+        compContainer.innerHTML = '';
+        compContainer.classList.add('hidden');
       }
       
       if (type === 'core') {
@@ -3045,6 +3119,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       } else {
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
         document.getElementById('infoType').textContent = 'PROYECTO';
+
+        // Renderizado de Empresa(s) Destino (AFR, AVM, TEO, TNO, ZIN, GENERAL...)
+        if (compContainer) {
+          const comps = window.getProjectCompanies(item);
+          if (comps.length > 0) {
+            compContainer.innerHTML = '';
+            compContainer.classList.remove('hidden');
+            comps.forEach(c => {
+              const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)', border: 'rgba(255,159,10,0.3)', icon: '🏢' };
+              const pill = document.createElement('span');
+              pill.className = "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl shadow-sm border";
+              pill.style.backgroundColor = st.bg;
+              pill.style.borderColor = st.border;
+              pill.style.color = st.color;
+              pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full shadow-[0_0_4px_currentColor]" style="background-color: ${st.color}"></span>${st.icon} ${escapeHtml(c)}`;
+              compContainer.appendChild(pill);
+            });
+          }
+        }
 
         // Renderizado de Módulos (Base y Secundarios)
         if (modContainer) {
@@ -3279,6 +3372,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.populateSecondaryModulesChecklist === 'function') {
           window.populateSecondaryModulesChecklist('editProj', currentLoc, item.secondaryModules || []);
         }
+        if (typeof window.populateCompanyChecklist === 'function') {
+          window.populateCompanyChecklist('editProj', window.getProjectCompanies(item));
+        }
 
         // Botones Abrir Drive e Invgate en vivo
         const updateEditLinkButtons = () => {
@@ -3466,6 +3562,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       const loc = document.getElementById('newProjLocation').value;
       const secMods = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value).filter(v => v !== loc);
+      const comps = Array.from(document.querySelectorAll('.newProjComp-chk:checked')).map(cb => cb.value.trim().toUpperCase());
       const prio = parseFloat(document.getElementById('newProjPriority').value || 1);
       const cons = Array.from(document.querySelectorAll('.newProjCons-chk:checked')).map(cb => cb.value);
       const driveLink = document.getElementById('newProjDrive').value.trim();
@@ -3489,7 +3586,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         docs: {}, 
         clientDeliveryDate: "", 
         clientReturnDate: "",
-        secondaryModules: secMods
+        secondaryModules: secMods,
+        companies: comps
       };
 
       if (loc === 'DIRECT') {
@@ -3515,9 +3613,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
       document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); 
       document.querySelectorAll('.newProjSecMod-chk').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.newProjComp-chk').forEach(cb => cb.checked = false);
+      if (typeof window.populateCompanyChecklist === 'function') window.populateCompanyChecklist('newProj', []);
 
       const secCountMsg = secMods.length > 0 ? ` (+ ${secMods.length} dependencias multimódulo)` : '';
-      logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]${secCountMsg}`, localAuthor); 
+      const compMsg = comps.length > 0 ? ` [Empresas: ${comps.join(', ')}]` : '';
+      logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]${compMsg}${secCountMsg}`, localAuthor); 
 
       // Alerta a Google Chat de nuevo proyecto (con blindaje contra fallos)
       try {
@@ -3685,6 +3786,52 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }).join('');
     };
 
+    window.populateCompanyChecklist = function(prefix, selectedCompanies = []) {
+      const container = document.getElementById(`${prefix}CompaniesList`);
+      if (!container) return;
+      const selSet = new Set((Array.isArray(selectedCompanies) ? selectedCompanies : []).map(c => String(c).trim().toUpperCase()));
+      
+      const allComps = window.getAllKnownCompanies ? window.getAllKnownCompanies() : ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
+      selSet.forEach(c => {
+        if (c && !allComps.includes(c)) allComps.push(c);
+      });
+
+      container.innerHTML = allComps.map(comp => {
+        const isChecked = selSet.has(comp);
+        const style = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#0071e3', bg: 'rgba(0,113,227,0.15)' };
+        return `
+          <label class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer transition select-none border shadow-sm ${isChecked ? 'ring-1 ring-white/20' : 'opacity-70 hover:opacity-100'}"
+                 style="background-color: ${isChecked ? style.bg : 'rgba(255,255,255,0.04)'};
+                        border-color: ${isChecked ? style.color : 'rgba(255,255,255,0.1)'};
+                        color: ${isChecked ? '#ffffff' : '#94a3b8'};">
+            <input type="checkbox" value="${escapeHtml(comp)}" class="${prefix}Comp-chk sr-only" ${isChecked ? 'checked' : ''} onchange="window.handleCompanyCheckboxChange('${prefix}')">
+            <span class="w-2 h-2 rounded-full shrink-0 shadow-[0_0_5px_rgba(255,255,255,0.3)]" style="background-color: ${style.color}"></span>
+            <span>${escapeHtml(comp)}</span>
+            ${isChecked ? `<svg class="w-3.5 h-3.5 text-white ml-0.5" fill="none" stroke="${style.color}" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` : ''}
+          </label>
+        `;
+      }).join('');
+    };
+
+    window.handleCompanyCheckboxChange = function(prefix) {
+      const checked = Array.from(document.querySelectorAll(`.${prefix}Comp-chk:checked`)).map(cb => cb.value.trim().toUpperCase());
+      window.populateCompanyChecklist(prefix, checked);
+    };
+
+    window.addCustomCompany = function(prefix) {
+      const input = document.getElementById(`${prefix}CustomComp`);
+      if (!input) return;
+      const val = input.value.trim().toUpperCase();
+      if (!val) {
+        window.showToast("⚠️ Ingresa el nombre de la empresa", true);
+        return;
+      }
+      input.value = '';
+      const currentChecked = Array.from(document.querySelectorAll(`.${prefix}Comp-chk:checked`)).map(cb => cb.value.trim().toUpperCase());
+      if (!currentChecked.includes(val)) currentChecked.push(val);
+      window.populateCompanyChecklist(prefix, currentChecked);
+    };
+
     window.populateEditProjectLocationSelect = function(currentLoc) { 
       const s = document.getElementById('editProjectLocation'); 
       if (!s) return; 
@@ -3716,6 +3863,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       const checked = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value);
       window.populateSecondaryModulesChecklist('newProj', s.value, checked);
+      const checkedComps = Array.from(document.querySelectorAll('.newProjComp-chk:checked')).map(cb => cb.value);
+      window.populateCompanyChecklist('newProj', checkedComps);
     };
 
     window.openCreateProjectForModule = function(moduleId) {
@@ -3783,7 +3932,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             projs.forEach(p => {
                 let sIco = p.status==='En Progreso'?'🚀':(p.status==='Completado'?'✅':(p.status==='No Iniciado'?'⏸️':'⏳'));
                 let over = false; if(p.deadline && p.status !== 'Completado') { const [y,m,d] = p.deadline.split('-'); if(new Date(y,m-1,d) < new Date(new Date().setHours(0,0,0,0))) over=true; }
-                h += `<div class="bg-black/40 border border-white/10 rounded-[1.5rem] p-5 flex gap-4 hover:bg-white/10 transition-all cursor-pointer group shadow-inner ${over?'border-[#ff453a]/50 bg-[#ff453a]/5':''}" onclick="window.selectNodeAndOpenConfig('${p.pType}', '${p.id}')"><div class="text-xl font-bold mt-1.5 shrink-0 w-8 text-center drop-shadow-md" style="color: ${cData.color}">*${p.priority}</div><div class="flex-1 min-w-0"><h4 class="text-sm font-semibold text-white leading-tight group-hover:text-brand-accent transition truncate">${over?'⚠️ ':''}${escapeHtml(p.name)}</h4><p class="text-[9px] text-gray-500 mt-1.5 uppercase tracking-widest truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-2 mt-3"><span class="text-[9px] font-bold px-2.5 py-1 rounded-md bg-black/40 border border-white/5 text-gray-300 shadow-inner">${sIco} ${p.status||'Pendiente'} (${p.progress||0}%)</span>${p.deadline ? `<span class="text-[9px] font-mono font-bold text-[#ff453a] bg-[#ff453a]/10 border border-[#ff453a]/20 px-2.5 py-1 rounded-md">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
+                const pComps = window.getProjectCompanies(p);
+                const compBadges = pComps.map(c => {
+                    const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)', border: 'rgba(255,159,10,0.3)', icon: '🏢' };
+                    return `<span class="text-[9px] font-bold px-2 py-0.5 rounded-md shadow-sm border" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};">${st.icon} ${escapeHtml(c)}</span>`;
+                }).join('');
+                h += `<div class="bg-black/40 border border-white/10 rounded-[1.5rem] p-5 flex gap-4 hover:bg-white/10 transition-all cursor-pointer group shadow-inner ${over?'border-[#ff453a]/50 bg-[#ff453a]/5':''}" onclick="window.selectNodeAndOpenConfig('${p.pType}', '${p.id}')"><div class="text-xl font-bold mt-1.5 shrink-0 w-8 text-center drop-shadow-md" style="color: ${cData.color}">*${p.priority}</div><div class="flex-1 min-w-0"><h4 class="text-sm font-semibold text-white leading-tight group-hover:text-brand-accent transition truncate">${over?'⚠️ ':''}${escapeHtml(p.name)}</h4><p class="text-[9px] text-gray-500 mt-1.5 uppercase tracking-widest truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-2 mt-3">${compBadges}<span class="text-[9px] font-bold px-2.5 py-1 rounded-md bg-black/40 border border-white/5 text-gray-300 shadow-inner">${sIco} ${p.status||'Pendiente'} (${p.progress||0}%)</span>${p.deadline ? `<span class="text-[9px] font-mono font-bold text-[#ff453a] bg-[#ff453a]/10 border border-[#ff453a]/20 px-2.5 py-1 rounded-md">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
             }); h += `</div></div>`;
         });
         c.innerHTML = has ? h : `<div class="flex flex-col items-center justify-center py-20 text-center opacity-50"><svg class="w-16 h-16 text-gray-500 mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><p class="text-gray-300 text-sm font-medium tracking-wide">No hay coincidencias.</p></div>`;
@@ -3820,6 +3974,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           if (activeFilterStatus !== 'ALL' && p.status !== activeFilterStatus) return false;
           if (activeFilterConsultant !== 'ALL' && !getProjectConsultants(p).includes(activeFilterConsultant)) return false;
+          if (activeFilterCompany !== 'ALL') {
+              const pComps = window.getProjectCompanies(p);
+              if (!pComps.includes(activeFilterCompany)) return false;
+          }
           
           if (activeFilterUrgency !== 'ALL') {
               if (p.status === 'Completado') return false;
@@ -3851,11 +4009,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               }
           }
 
-          if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q))) return false;
+          if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q)) && !window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q))) return false;
           return true;
       };
 
-      const isDefaultState = !isFocusMode && activeFilterModule === 'ALL' && activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && activeFilterUrgency === 'ALL' && activeFilterPriority === 'ALL' && activeFilterBottleneck === 'ALL' && !q;
+      const isDefaultState = !isFocusMode && activeFilterModule === 'ALL' && activeFilterStatus === 'ALL' && activeFilterConsultant === 'ALL' && activeFilterCompany === 'ALL' && activeFilterUrgency === 'ALL' && activeFilterPriority === 'ALL' && activeFilterBottleneck === 'ALL' && !q;
       
       ensureDataStructure();
       const directHubItem = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
@@ -4202,14 +4360,50 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           g.appendChild(sC);
 
+          const pComps = window.getProjectCompanies(p);
+          let compBadgeOffset = 0;
+          if (pComps.length > 0) {
+              const mainC = pComps[0];
+              const cStyle = window.getCompanyStyle ? window.getCompanyStyle(mainC) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)' };
+              const bText = pComps.length > 1 ? `${mainC} +${pComps.length - 1}` : mainC;
+              const bWidth = pComps.length > 1 ? 46 : 34;
+
+              const cG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              cG.setAttribute('transform', 'translate(34, 10)');
+              cG.style.pointerEvents = 'none';
+
+              const cP = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              cP.setAttribute('width', String(bWidth));
+              cP.setAttribute('height', '14');
+              cP.setAttribute('rx', '4');
+              cP.setAttribute('fill', cStyle.bg);
+              cP.setAttribute('stroke', cStyle.color);
+              cP.setAttribute('stroke-width', '1');
+              cG.appendChild(cP);
+
+              const cT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              cT.setAttribute('x', String(bWidth / 2));
+              cT.setAttribute('y', '10.5');
+              cT.setAttribute('text-anchor', 'middle');
+              cT.setAttribute('fill', cStyle.color);
+              cT.setAttribute('style', 'font-size: 8px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; letter-spacing: 0.3px;');
+              cT.textContent = bText;
+              cG.appendChild(cT);
+
+              g.appendChild(cG);
+              compBadgeOffset = bWidth + 5;
+          }
+
           const hasSecBadge = Array.isArray(p.secondaryModules) && p.secondaryModules.length > 0;
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          nT.setAttribute('x', '34'); nT.setAttribute('y', '22'); nT.setAttribute('fill', '#ffffff'); 
+          nT.setAttribute('x', String(34 + compBadgeOffset));
+          nT.setAttribute('y', '22');
+          nT.setAttribute('fill', '#ffffff'); 
           nT.classList.add('svg-text', 'svg-text-bold');
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
           nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
-          const maxNameLen = hasSecBadge ? 34 : 55;
+          const maxNameLen = hasSecBadge ? (compBadgeOffset ? 26 : 34) : (compBadgeOffset ? 35 : 55);
           nT.textContent = fullText.length > maxNameLen ? fullText.substring(0, maxNameLen - 3)+'...' : fullText;
           g.appendChild(nT);
 
@@ -4983,8 +5177,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.exportCSV = function() {
-        let csv = "Tipo,Módulo,Proyecto,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
-        const addRow = (t, m, p) => { csv += `"${t}","${m}","${p.name}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; };
+        let csv = "Tipo,Módulo,Empresas,Proyecto,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
+        const addRow = (t, m, p) => { 
+            const comps = (window.getProjectCompanies(p) || []).join('; ');
+            csv += `"${t}","${m}","${comps}","${p.name}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; 
+        };
         appData.directProjects.forEach(p => addRow('Directo', appData.directHub.name, p)); appData.modules.forEach(m => (m.projects||[]).forEach(p => addRow('Módulo', m.name, p)));
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`; link.click();
     };
@@ -5624,6 +5821,12 @@ window.renderAlerts = function() {
         consSel.value = activeFilterConsultant;
         
         document.getElementById('advFilterStatus').value = activeFilterStatus;
+        const compSel = document.getElementById('advFilterCompany');
+        if (compSel) {
+            const allComps = window.getAllKnownCompanies ? window.getAllKnownCompanies() : ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
+            compSel.innerHTML = `<option value="ALL">Todas las empresas</option>` + allComps.map(c => `<option value="${escapeHtml(c)}">🏢 ${escapeHtml(c)}</option>`).join('');
+            compSel.value = activeFilterCompany;
+        }
         document.getElementById('advFilterUrgency').value = activeFilterUrgency;
         document.getElementById('advFilterPriority').value = activeFilterPriority;
         document.getElementById('advFilterBottleneck').value = activeFilterBottleneck;
@@ -5633,12 +5836,14 @@ window.renderAlerts = function() {
         activeFilterModule = document.getElementById('advFilterModule').value;
         activeFilterConsultant = document.getElementById('advFilterConsultant').value;
         activeFilterStatus = document.getElementById('advFilterStatus').value;
+        if (document.getElementById('advFilterCompany')) activeFilterCompany = document.getElementById('advFilterCompany').value;
         activeFilterUrgency = document.getElementById('advFilterUrgency').value;
         activeFilterPriority = document.getElementById('advFilterPriority').value;
         activeFilterBottleneck = document.getElementById('advFilterBottleneck').value;
         
         let c = 0;
         if(activeFilterModule !== 'ALL') c++; if(activeFilterConsultant !== 'ALL') c++; if(activeFilterStatus !== 'ALL') c++;
+        if(activeFilterCompany !== 'ALL') c++;
         if(activeFilterUrgency !== 'ALL') c++; if(activeFilterPriority !== 'ALL') c++; if(activeFilterBottleneck !== 'ALL') c++;
         const badge = document.getElementById('activeFiltersBadge');
         if(c > 0) { badge.textContent = c; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
@@ -5648,8 +5853,9 @@ window.renderAlerts = function() {
     };
 
     window.resetAdvFilters = function() {
-        activeFilterModule = 'ALL'; activeFilterConsultant = 'ALL'; activeFilterStatus = 'ALL';
+        activeFilterModule = 'ALL'; activeFilterConsultant = 'ALL'; activeFilterStatus = 'ALL'; activeFilterCompany = 'ALL';
         activeFilterUrgency = 'ALL'; activeFilterPriority = 'ALL'; activeFilterBottleneck = 'ALL';
+        if (document.getElementById('advFilterCompany')) document.getElementById('advFilterCompany').value = 'ALL';
         document.getElementById('activeFiltersBadge').classList.add('hidden');
         
         // Apaga el Modo Enfoque si estaba encendido al limpiar filtros
