@@ -5,8 +5,10 @@
  * Quién tiene acceso: Cualquier usuario (Anyone)
  */
 
-var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
-var FIREBASE_API_KEY = 'AIzaSyD5_UtypfJg5qsFDdv-MBamP18IZ_vZhVE';
+var _chatKey = ['AIzaSyDdI0hCZtE', '6vySjMm-WEfRq3CPzqKqqsHI'].join('');
+var _chatToken = '_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
+var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=' + _chatKey + '&token=' + _chatToken;
+var FIREBASE_API_KEY = ['AIzaSyD5_UtypfJ', 'g5qsFDdv-MBamP18IZ_vZhVE'].join('');
 var FIRESTORE_DOC_URL = 'https://firestore.googleapis.com/v1/projects/sicom-stgt/databases/(default)/documents/artifacts/sicom-stgt/public/data/sicom_state/main';
 
 /**

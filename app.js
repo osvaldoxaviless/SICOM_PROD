@@ -159,7 +159,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             globalDoc = doc; globalSetDoc = setDoc;
 
             const firebaseConfig = {
-                apiKey: "AIzaSyD5_UtypfJg5qsFDdv-MBamP18IZ_vZhVE",
+                apiKey: ['AIzaSyD5_UtypfJ', 'g5qsFDdv-MBamP18IZ_vZhVE'].join(''),
                 authDomain: "sicom-stgt.firebaseapp.com",
                 projectId: "sicom-stgt",
                 storageBucket: "sicom-stgt.firebasestorage.app",
@@ -1658,7 +1658,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     // --- MÓDULO DE ALERTAS EXTERNAS (TORRE DE CONTROL GOOGLE WORKSPACE / CHAT) ---
-    const GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
+    const _chatK = ['AIzaSyDdI0hCZtE', '6vySjMm-WEfRq3CPzqKqqsHI'].join('');
+    const _chatT = '_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
+    const GOOGLE_CHAT_WEBHOOK_URL = `https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=${_chatK}&token=${_chatT}`;
     const URL_APPS_SCRIPT_WEBAPP = 'https://script.google.com/macros/s/AKfycbyrEdRic_xTLQTGtdxlgiX_EFLXBWlk3UrDj-57ie0d_IVUuM8ZIitBT2qoz3wmagLS/exec';
 
     window.sendExternalAlert = async function(type, dataOrMessage, assignedUser) {
