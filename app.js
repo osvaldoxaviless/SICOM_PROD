@@ -1638,20 +1638,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.sendExternalAlert = async function(type, message, assignedUser) {
         if (!URL_APPS_SCRIPT_WEBAPP || URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) return;
         try {
+            console.log('🔔 [SICOM External Alert] Disparando notificación:', { type, message, assignedUser });
             fetch(URL_APPS_SCRIPT_WEBAPP, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({
                     type: type,
                     message: message,
                     assignedUser: assignedUser || 'General'
                 })
-            }).catch(() => {
-                // Silencioso por diseño
+            }).then(() => {
+                console.log('✅ [SICOM External Alert] Notificación despachada con éxito');
+            }).catch((err) => {
+                console.warn('⚠️ [SICOM External Alert] Aviso en envío:', err);
             });
         } catch (e) {
-            // Silencioso
+            console.warn('⚠️ [SICOM External Alert] Excepción silenciosa:', e);
         }
     };
 
