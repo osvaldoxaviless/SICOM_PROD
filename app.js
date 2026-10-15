@@ -1143,13 +1143,99 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       return `url(#${gradId})`;
     }
 
+    // === GESTIÓN DE FORO Y BITÁCORA TÉCNICA DEL PROYECTO ===
+    window.currentNoteTagInfo = 'comentario';
+    window.currentNoteTagEdit = 'comentario';
+
+    window.setNoteTag = function(tag, context) {
+        const isInfo = context === 'info';
+        if (isInfo) window.currentNoteTagInfo = tag;
+        else window.currentNoteTagEdit = tag;
+
+        const prefix = isInfo ? 'tagBtn_info_' : 'tagBtn_edit_';
+        const tags = ['comentario', 'acuerdo', 'bloqueo', 'entregable'];
+        
+        tags.forEach(t => {
+            const btn = document.getElementById(prefix + t);
+            if (!btn) return;
+            if (t === tag) {
+                btn.className = 'note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 shadow-sm';
+                if (t === 'comentario') {
+                    btn.className += ' bg-white/20 text-white border border-white/30';
+                } else if (t === 'acuerdo') {
+                    btn.className += ' bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
+                } else if (t === 'bloqueo') {
+                    btn.className += ' bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/40 shadow-[0_0_10px_rgba(255,69,58,0.25)]';
+                } else if (t === 'entregable') {
+                    btn.className += ' bg-[#64d2ff]/20 text-[#64d2ff] border border-[#64d2ff]/40 shadow-[0_0_10px_rgba(100,210,255,0.2)]';
+                }
+            } else {
+                btn.className = 'note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent';
+            }
+        });
+    };
+
+    window.formatFriendlyNoteDate = function(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const raw = String(dateStr).trim();
+            let datePart = '', timePart = '';
+            if (raw.includes(',')) {
+                const p = raw.split(',');
+                datePart = p[0].trim();
+                timePart = (p[1] || '').trim().slice(0, 5);
+            } else if (raw.includes(' ')) {
+                const p = raw.split(' ');
+                datePart = p[0].trim();
+                timePart = (p[1] || '').trim().slice(0, 5);
+            } else {
+                return raw;
+            }
+
+            const now = new Date();
+            const dNow = now.getDate();
+            const mNow = now.getMonth() + 1;
+            const yNow = now.getFullYear();
+
+            const todayStr = `${String(dNow).padStart(2, '0')}/${String(mNow).padStart(2, '0')}/${yNow}`;
+            
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yestStr = `${String(yesterday.getDate()).padStart(2, '0')}/${String(yesterday.getMonth() + 1).padStart(2, '0')}/${yesterday.getFullYear()}`;
+
+            if (datePart === todayStr) {
+                return `Hoy ${timePart}`;
+            }
+            if (datePart === yestStr) {
+                return `Ayer ${timePart}`;
+            }
+
+            const parts = datePart.split('/');
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10);
+                const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                const mName = months[m - 1] || parts[1];
+                return `${d} ${mName}${timePart ? ', ' + timePart : ''}`;
+            }
+
+            return raw.length > 20 ? raw.slice(0, 16) : raw;
+        } catch (e) {
+            return String(dateStr);
+        }
+    };
+
     window.addProjectNote = function(source) {
         if (currentUserRole === 'Lector') return;
         if (!currentSelection.id) return;
-        const input = document.getElementById(source === 'info' ? 'infoNoteInput' : 'editNotes');
+        const isInfo = source === 'info';
+        const input = document.getElementById(isInfo ? 'infoNoteInput' : 'editNotes');
         if (!input) return;
         const noteText = input.value.trim();
-        if (!noteText) return;
+        if (!noteText) {
+            input.focus();
+            return;
+        }
 
         let item = getSelectedItem();
         if (item) {
@@ -1157,15 +1243,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof item.notes === 'string') {
                 const oldNote = item.notes.trim();
                 item.notes = [];
-                if (oldNote) item.notes.push({ id: 'n_legacy', text: oldNote, by: 'Sistema/Anterior', date: new Date().toLocaleString('es-MX', {hour12:false}) });
+                if (oldNote) item.notes.push({ id: 'n_legacy', text: oldNote, by: 'Sistema/Anterior', tag: 'comentario', date: new Date().toLocaleString('es-MX', {hour12:false}) });
             }
             if (!Array.isArray(item.notes)) item.notes = [];
             
             const newNoteId = 'n_' + Date.now();
-            item.notes.push({ id: newNoteId, text: noteText, by: localAuthor, date: new Date().toLocaleString('es-MX', {hour12:false}) });
+            const tag = (isInfo ? window.currentNoteTagInfo : window.currentNoteTagEdit) || 'comentario';
+
+            item.notes.push({ 
+                id: newNoteId, 
+                text: noteText, 
+                by: localAuthor, 
+                tag: tag,
+                date: new Date().toLocaleString('es-MX', {hour12:false}) 
+            });
             input.value = '';
+
+            // Asegurar que el acordeón esté expandido para ver la nota recién publicada
+            if (isInfo) {
+                const acc = document.getElementById('acc-notes-details');
+                if (acc) acc.open = true;
+            }
             
-            logActivity(item.id, item.name, 'Añadió un comentario al foro', localAuthor);
+            const tagLabel = tag === 'acuerdo' ? 'Acuerdo' : (tag === 'bloqueo' ? 'Bloqueo' : (tag === 'entregable' ? 'Entregable' : 'Comentario'));
+            logActivity(item.id, item.name, `Añadió nota al foro [${tagLabel}]: "${noteText.length > 40 ? noteText.slice(0, 37) + '...' : noteText}"`, localAuthor);
             window.saveData(false);
             window.renderNotesHistory(item.notes, 'editNotesHistory');
             window.renderNotesHistory(item.notes, 'infoNotes');
@@ -1177,49 +1278,130 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!container) return;
         
         let arr = [];
-        if (typeof notesData === 'string') { if (notesData.trim()) arr = [{ id: 'legacy', text: notesData, by: 'Sistema', date: '' }]; } 
+        if (typeof notesData === 'string') { if (notesData.trim()) arr = [{ id: 'legacy', text: notesData, by: 'Sistema', tag: 'comentario', date: '' }]; } 
         else if (Array.isArray(notesData)) { arr = notesData; }
 
-        if (arr.length === 0) { container.classList.add('hidden'); return; }
+        const isInfo = containerId === 'infoNotes';
+        const badge = document.getElementById(isInfo ? 'infoNotesBadge' : 'editNotesBadge');
+        if (badge) {
+            badge.textContent = arr.length;
+            if (arr.length > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+
+        if (arr.length === 0) {
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="text-center py-6 px-4 bg-white/[0.02] border border-dashed border-white/10 rounded-2xl">
+                    <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-[#bf5af2]/10 border border-[#bf5af2]/20 flex items-center justify-center text-[#bf5af2]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-200">Aún no hay notas en este proyecto</p>
+                    <p class="text-[10px] text-gray-500 mt-1 max-w-[260px] mx-auto">Sé el primero en registrar acuerdos con cliente, bloqueos técnicos o comentarios.</p>
+                </div>
+            `;
+            return;
+        }
         
         const isSupremo = currentUserRole === 'Supremo';
+        const isSupervisor = currentUserRole === 'Supervisor';
+        const isLector = currentUserRole === 'Lector';
         
         container.classList.remove('hidden');
         container.innerHTML = arr.map(n => {
-            const col = consultants[n.by] ? consultants[n.by].color : '#8e8e93';
-            // Renderiza botón de basura SOLO para Supremo y SOLO en el panel de edición
-            const delBtn = (isSupremo && containerId === 'editNotesHistory') ? `<button type="button" onclick="deleteProjectNote('${n.id}')" class="text-gray-500 hover:text-[#ff453a] transition p-1 ml-auto" title="Forzar borrado (Supremo)"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : `<span class="text-[8px] text-gray-500 ml-auto">${escapeHtml(n.date || '')}</span>`;
-            const dateDisplay = (isSupremo && containerId === 'editNotesHistory') ? `<span class="text-[8px] text-gray-500 mr-2">${escapeHtml(n.date || '')}</span>` : '';
+            const col = (consultants[n.by] && consultants[n.by].color) ? consultants[n.by].color : '#bf5af2';
+            const initial = (n.by || '?').charAt(0).toUpperCase();
+            
+            // Permiso de borrado: Supremo, Supervisor o el propio autor
+            const isAuthor = Boolean(n.by && localAuthor && n.by.trim().toLowerCase() === localAuthor.trim().toLowerCase());
+            const canDelete = !isLector && (isSupremo || isSupervisor || isAuthor);
 
-            return `<div class="flex flex-col gap-1 bg-black/40 p-3 rounded-xl border border-white/5 shadow-inner group">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_5px_${col}]" style="background-color: ${col}"></span>
-                    <span class="text-[10px] font-bold text-white tracking-wide">${escapeHtml(n.by)}</span>
-                    ${dateDisplay}
-                    ${delBtn}
+            const delBtn = canDelete ? `
+                <button type="button" onclick="deleteProjectNote('${n.id}')" class="text-gray-500 hover:text-[#ff453a] transition p-1 ml-auto opacity-70 hover:opacity-100 shrink-0" title="${(isSupremo || isSupervisor) && !isAuthor ? 'Moderar/Borrar comentario' : 'Eliminar mi comentario'}">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            ` : '';
+
+            // Tag badge
+            const tag = n.tag || 'comentario';
+            let tagBadge = '';
+            if (tag === 'acuerdo') {
+                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0"><span>📌</span><span>Acuerdo</span></span>`;
+            } else if (tag === 'bloqueo') {
+                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#ff453a]/15 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1 shrink-0 shadow-[0_0_10px_rgba(255,69,58,0.2)]"><span>⚠️</span><span>Bloqueo</span></span>`;
+            } else if (tag === 'entregable') {
+                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#64d2ff]/15 text-[#64d2ff] border border-[#64d2ff]/30 flex items-center gap-1 shrink-0"><span>🔗</span><span>Entregable</span></span>`;
+            } else {
+                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-medium bg-white/5 text-gray-400 border border-white/10 flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
+            }
+
+            // Auto-enlazar URLs en el texto
+            const safeText = escapeHtml(n.text || '');
+            const linkedText = safeText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline break-all inline-flex items-center gap-0.5">$1 <svg class="w-3 h-3 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>');
+
+            const friendlyDate = window.formatFriendlyNoteDate(n.date);
+
+            return `
+                <div class="flex flex-col gap-2 bg-black/40 hover:bg-black/50 p-3 rounded-xl border border-white/5 hover:border-white/10 shadow-sm transition-all group">
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm shrink-0" style="background-color: ${col};">
+                            ${initial}
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                            <span class="text-[11px] font-bold text-white tracking-wide truncate max-w-[120px]">${escapeHtml(n.by || 'Consultor')}</span>
+                            ${tagBadge}
+                        </div>
+                        <span class="text-[9px] text-gray-500 ml-auto shrink-0" title="${escapeHtml(n.date || '')}">${friendlyDate}</span>
+                        ${delBtn}
+                    </div>
+                    <div class="text-xs text-gray-200 pl-7 leading-relaxed whitespace-pre-wrap break-words">${linkedText}</div>
                 </div>
-                <p class="text-xs text-gray-300 pl-4 whitespace-pre-wrap">${escapeHtml(n.text)}</p>
-            </div>`;
+            `;
         }).join('');
         setTimeout(() => container.scrollTop = container.scrollHeight, 50);
     };
 
     window.deleteProjectNote = function(noteId) {
-        if (currentUserRole !== 'Supremo') return; // Seguridad estricta
+        if (currentUserRole === 'Lector') return;
         let item = getSelectedItem();
         if (item && Array.isArray(item.notes)) {
             const noteToDelete = item.notes.find(n => n.id === noteId);
             if (noteToDelete) {
+                const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+                const isAuthor = Boolean(noteToDelete.by && localAuthor && noteToDelete.by.trim().toLowerCase() === localAuthor.trim().toLowerCase());
+                if (!isSuper && !isAuthor) {
+                    alert('Solo el autor de la nota o un supervisor pueden eliminarla.');
+                    return;
+                }
+                if (!confirm('¿Deseas eliminar este comentario del foro?')) return;
                 item.notes = item.notes.filter(n => n.id !== noteId);
-                // Auditoría: Registra que un Supremo intervino y de quién era el mensaje
-                logActivity(item.id, item.name, `Forzó borrado de comentario de ${noteToDelete.by}`, localAuthor);
+                logActivity(item.id, item.name, `Eliminó nota del foro de ${noteToDelete.by}`, localAuthor);
                 window.saveData(false);
                 window.renderNotesHistory(item.notes, 'editNotesHistory');
+                window.renderNotesHistory(item.notes, 'infoNotes');
             }
         }
     };
 
-    window.ensureDomReferences = function() { svgElem = document.getElementById('mindmapCanvas'); canvasGroup = document.getElementById('canvasGroup'); svgDefs = document.getElementById('svgDefs'); }
+    window.ensureDomReferences = function() { 
+        svgElem = document.getElementById('mindmapCanvas'); 
+        canvasGroup = document.getElementById('canvasGroup'); 
+        svgDefs = document.getElementById('svgDefs'); 
+        if (!window._forumKeybindingsInitialized) {
+            window._forumKeybindingsInitialized = true;
+            ['infoNoteInput', 'editNotes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('keydown', function(e) {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                            e.preventDefault();
+                            window.addProjectNote(id === 'infoNoteInput' ? 'info' : 'edit');
+                        }
+                    });
+                }
+            });
+        }
+    };
     
     window.updateCanvasTransform = function() {
         if(!canvasGroup) return; 
@@ -2575,7 +2757,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         // Un borrador escrito en un proyecto nunca debe aparecer en otro
         const noteInput = document.getElementById('infoNoteInput');
-        if (noteInput && noteInput.dataset.pid !== String(id)) { noteInput.value = ''; noteInput.dataset.pid = String(id); }
+        if (noteInput && noteInput.dataset.pid !== String(id)) { 
+            noteInput.value = ''; 
+            noteInput.dataset.pid = String(id); 
+            if (typeof window.setNoteTag === 'function') window.setNoteTag('comentario', 'info');
+        }
       }
       document.getElementById('infoTitle').textContent = item.name; 
       document.body.classList.add('info-card-open');
@@ -2631,6 +2817,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('editNotes').value = ''; 
         document.getElementById('editStatus').value = item.status || 'Pendiente';
         window.renderNotesHistory(item.notes, 'editNotesHistory'); 
+        if (typeof window.setNoteTag === 'function') window.setNoteTag('comentario', 'edit');
         document.getElementById('editDeadline').value = item.deadline || '';
         document.getElementById('editDriveLink').value = item.driveLink || '';
         document.getElementById('editInvgateLink').value = item.invgateLink || '';

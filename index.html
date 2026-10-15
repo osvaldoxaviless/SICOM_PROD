@@ -26,7 +26,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261015_09">
+  <link rel="stylesheet" href="styles.css?v=20261015_14">
 </head>
 <body class="flex flex-col h-screen w-screen bg-black text-gray-200">
 
@@ -577,22 +577,56 @@
           </details>
       </div>
 
-      <!-- 5. FORO / NOTAS TÉCNICAS -->
+      <!-- 5. FORO / BITÁCORA TÉCNICA -->
       <div id="infoNotesContainer" class="hidden relative w-full mb-6">
-          <details class="group bg-black/40 border border-white/10 rounded-2xl shadow-inner overflow-hidden">
+          <details id="acc-notes-details" class="group bg-black/40 border border-white/10 rounded-2xl shadow-inner overflow-hidden">
               <summary class="flex justify-between items-center cursor-pointer p-4 select-none list-none [&::-webkit-details-marker]:hidden hover:bg-white/5 transition">
                   <div class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-[#bf5af2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                      <span class="text-[10px] font-bold text-[#bf5af2] uppercase tracking-widest">Foro y Notas Técnicas</span>
+                      <div class="w-6 h-6 rounded-lg bg-[#bf5af2]/15 border border-[#bf5af2]/30 flex items-center justify-center text-[#bf5af2] shadow-sm">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                      </div>
+                      <span class="text-[10px] font-bold text-[#bf5af2] uppercase tracking-widest">Foro y Bitácora Técnica</span>
+                      <span id="infoNotesBadge" class="hidden ml-1 px-2 py-0.5 text-[9px] font-bold rounded-full bg-[#bf5af2]/20 text-[#bf5af2] border border-[#bf5af2]/30 shadow-sm">0</span>
                   </div>
                   <svg class="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
               </summary>
-              <div class="p-4 pt-0 border-t border-white/5 mt-2">
-                  <div id="infoNotes" class="flex flex-col gap-2 max-h-48 overflow-y-auto scrollbar-thin pr-1"></div>
-                  <div class="lector-hide mt-3">
-                      <div class="flex gap-2">
-                          <textarea id="infoNoteInput" rows="2" maxlength="1000" class="flex-1 liquid-input rounded-2xl p-3 text-xs resize-none" placeholder="Escribe un comentario o responde..."></textarea>
-                          <button type="button" onclick="addProjectNote('info')" class="pill-btn px-4 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(191,90,242,0.3)]">Publicar</button>
+              <div class="p-4 pt-0 border-t border-white/5 mt-2 space-y-3">
+                  <!-- Historial de Notas -->
+                  <div id="infoNotes" class="flex flex-col gap-2.5 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
+                  
+                  <!-- Formulario de Redacción -->
+                  <div class="lector-hide pt-2.5 border-t border-white/5 space-y-2.5">
+                      <!-- Selector de tipo de nota -->
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                          <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
+                          <button type="button" onclick="setNoteTag('comentario', 'info')" id="tagBtn_info_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
+                              <span>💬</span> Comentario
+                          </button>
+                          <button type="button" onclick="setNoteTag('acuerdo', 'info')" id="tagBtn_info_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
+                              <span>📌</span> Acuerdo
+                          </button>
+                          <button type="button" onclick="setNoteTag('bloqueo', 'info')" id="tagBtn_info_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
+                              <span>⚠️</span> Bloqueo
+                          </button>
+                          <button type="button" onclick="setNoteTag('entregable', 'info')" id="tagBtn_info_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
+                              <span>🔗</span> Entregable
+                          </button>
+                      </div>
+
+                      <!-- Textarea ancho completo -->
+                      <div class="relative">
+                          <textarea id="infoNoteInput" rows="2" maxlength="1500" class="w-full liquid-input rounded-xl p-3 text-xs resize-none border border-white/10 focus:border-[#bf5af2]/60 focus:outline-none transition leading-relaxed text-gray-200 placeholder-gray-500" placeholder="Escribe una nota, acuerdo o bloqueo técnico..."></textarea>
+                      </div>
+
+                      <!-- Barra inferior de acciones -->
+                      <div class="flex items-center justify-between pt-0.5">
+                          <span class="text-[9px] text-gray-500 hidden sm:inline-flex items-center gap-1">
+                              <kbd class="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-[9px] font-mono">Enter</kbd> para enviar
+                          </span>
+                          <button type="button" onclick="addProjectNote('info')" class="ml-auto px-4 py-2 bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 active:scale-95 text-white font-semibold text-xs rounded-xl transition-all duration-200 shadow-[0_0_15px_rgba(191,90,242,0.35)] flex items-center gap-1.5 shrink-0">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                              <span>Publicar</span>
+                          </button>
                       </div>
                   </div>
               </div>
@@ -958,11 +992,39 @@
               </div>
               
               <div class="space-y-2">
-                <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block mb-1 ml-1">Foro / Notas Técnicas</label>
-                <div id="editNotesHistory" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl flex flex-col gap-3 max-h-48 overflow-y-auto scrollbar-thin shadow-inner mb-2 hidden"></div>
-                <div class="flex gap-2">
-                    <textarea id="editNotes" rows="2" class="flex-1 liquid-input rounded-2xl p-3 text-sm resize-none" placeholder="Añadir un nuevo comentario..."></textarea>
-                    <button type="button" onclick="addProjectNote()" class="pill-btn px-4 bg-[#bf5af2] hover:bg-[#a855f7] text-white font-bold text-[10px] transition shrink-0 shadow-[0_0_15px_rgba(191,90,242,0.3)]">Publicar</button>
+                <div class="flex items-center justify-between mb-1 ml-1">
+                    <label class="text-[10px] text-gray-400 font-semibold uppercase tracking-widest block">Foro y Bitácora Técnica</label>
+                    <span id="editNotesBadge" class="hidden px-2 py-0.5 text-[9px] font-bold rounded-full bg-[#bf5af2]/20 text-[#bf5af2] border border-[#bf5af2]/30 shadow-sm">0</span>
+                </div>
+                <div id="editNotesHistory" class="bg-black/30 border border-white/5 border-t-white/10 p-4 rounded-3xl flex flex-col gap-2.5 max-h-56 overflow-y-auto scrollbar-thin shadow-inner mb-2 hidden"></div>
+                <div class="space-y-2.5 pt-1">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider mr-1">Tipo:</span>
+                        <button type="button" onclick="setNoteTag('comentario', 'edit')" id="tagBtn_edit_comentario" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 bg-white/20 text-white border border-white/30 shadow-sm">
+                            <span>💬</span> Comentario
+                        </button>
+                        <button type="button" onclick="setNoteTag('acuerdo', 'edit')" id="tagBtn_edit_acuerdo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent">
+                            <span>📌</span> Acuerdo
+                        </button>
+                        <button type="button" onclick="setNoteTag('bloqueo', 'edit')" id="tagBtn_edit_bloqueo" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#ff453a] hover:bg-[#ff453a]/10 border border-transparent">
+                            <span>⚠️</span> Bloqueo
+                        </button>
+                        <button type="button" onclick="setNoteTag('entregable', 'edit')" id="tagBtn_edit_entregable" class="note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-[#64d2ff] hover:bg-[#64d2ff]/10 border border-transparent">
+                            <span>🔗</span> Entregable
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <textarea id="editNotes" rows="2" maxlength="1500" class="w-full liquid-input rounded-2xl p-3 text-xs resize-none border border-white/10 focus:border-[#bf5af2]/60 focus:outline-none transition leading-relaxed text-gray-200 placeholder-gray-500" placeholder="Escribe una nota, acuerdo o bloqueo técnico..."></textarea>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] text-gray-500 hidden sm:inline-flex items-center gap-1">
+                            <kbd class="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-[9px] font-mono">Enter</kbd> para enviar
+                        </span>
+                        <button type="button" onclick="addProjectNote('edit')" class="ml-auto px-4 py-2 bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 active:scale-95 text-white font-semibold text-xs rounded-xl transition-all duration-200 shadow-[0_0_15px_rgba(191,90,242,0.35)] flex items-center gap-1.5 shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>Publicar</span>
+                        </button>
+                    </div>
                 </div>
               </div>
             </div>
@@ -1216,7 +1278,7 @@
     </div>
   </div>
 
-    <script type="module" src="app.js?v=20261015_13"></script>
+    <script type="module" src="app.js?v=20261015_14"></script>
 
 </body>
 </html>
