@@ -1709,7 +1709,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             console.log('🔔 [SICOM External Alert] Despachando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
 
-            // 1. Envío DIRECTO e INMEDIATO al Webhook de Google Chat (instantáneo, sin intermediarios)
+            // Envío DIRECTO e INMEDIATO al Webhook de Google Chat (instantáneo, limpio y sin duplicados)
             if (GOOGLE_CHAT_WEBHOOK_URL) {
                 fetch(GOOGLE_CHAT_WEBHOOK_URL, {
                     method: 'POST',
@@ -1720,18 +1720,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     console.log('✅ [SICOM Google Chat] Mensaje entregado directamente al Webhook de Google Chat');
                 }).catch(err => {
                     console.warn('⚠️ [SICOM Google Chat] Error en Webhook directo:', err);
-                });
-            }
-
-            // 2. Envío secundario a Google Apps Script (con type='CHAT' para 100% compatibilidad)
-            if (URL_APPS_SCRIPT_WEBAPP && !URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) {
-                const proxyPayload = Object.assign({}, payload, { type: 'CHAT', message: chatText });
-                fetch(URL_APPS_SCRIPT_WEBAPP, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(proxyPayload)
-                }).catch(err => {
-                    console.warn('⚠️ [SICOM Apps Script] Aviso en proxy secundario:', err);
                 });
             }
         } catch (e) {
