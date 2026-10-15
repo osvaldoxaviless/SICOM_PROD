@@ -1938,21 +1938,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // para que el mapa NUNCA se aleje más allá de los extremos donde terminan los proyectos.
     window.getMinZoomLimit = function() {
         const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-        if (!svgElem || !canvasGroup) return isSmallScreen ? 0.15 : 0.40;
+        if (!svgElem || !canvasGroup) return isSmallScreen ? 0.12 : 0.25;
         try {
             const bbox = canvasGroup.getBBox();
             if (bbox.width > 0 && bbox.height > 0) {
                 const rect = svgElem.getBoundingClientRect();
-                const padding = isSmallScreen ? 15 : 70;
-                const fitX = (rect.width - padding * 2) / bbox.width;
-                const fitY = (rect.height - padding * 2) / bbox.height;
+                const padX = isSmallScreen ? 16 : 60;
+                const padY = isSmallScreen ? 24 : 55;
+                const fitX = (rect.width - padX * 2) / bbox.width;
+                const fitY = (rect.height - padY * 2) / bbox.height;
                 const fitScale = Math.min(fitX, fitY);
-                // Piso flexible en móvil para que quepa todo el mapa en pantallas estrechas u horizontales
-                const minFloor = isSmallScreen ? 0.10 : 0.35;
+                // Piso flexible adaptable a la altura vertical y amplitud de columnas
+                const minFloor = isSmallScreen ? 0.08 : 0.18;
                 return Math.max(minFloor, Math.min(0.85, fitScale * 0.95));
             }
         } catch(e) {}
-        return isSmallScreen ? 0.15 : 0.40;
+        return isSmallScreen ? 0.12 : 0.25;
     };
 
     window.zoomCanvas = function(delta, mx = window.innerWidth/2, my = window.innerHeight/2) {
@@ -2003,12 +2004,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!svgElem || !canvasGroup) return; 
         const rect = svgElem.getBoundingClientRect();
         try {
-            const bbox = canvasGroup.getBBox(); if (bbox.width === 0) throw new Error();
+            const bbox = canvasGroup.getBBox(); if (bbox.width === 0 || bbox.height === 0) throw new Error();
             const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-            const padding = isSmallScreen ? 16 : 70;
+            const padX = isSmallScreen ? 16 : 60;
+            const padY = isSmallScreen ? 24 : 55;
             
-            const sX = (rect.width - padding*2) / bbox.width;
-            const sY = (rect.height - padding*2) / bbox.height;
+            const sX = (rect.width - padX * 2) / bbox.width;
+            const sY = (rect.height - padY * 2) / bbox.height;
             
             const minAllowed = window.getMinZoomLimit();
             scale = Math.max(minAllowed, Math.min(1.10, Math.min(sX, sY)));
@@ -2017,7 +2019,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             translateY = (rect.height / 2) - ((bbox.y + bbox.height / 2) * scale);
         } catch(e) { 
             translateX = rect.width / 2; 
-            translateY = rect.height / 2; 
+            translateY = rect.height * 0.35; 
             const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
             scale = isSmallScreen ? 0.28 : 0.85; 
         }
@@ -3420,7 +3422,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           if (item && item._renderData) {
               window.focusNode(item._renderData.x, item._renderData.y);
           } else if (type === 'core') {
-              window.focusNode(0, 0);
+              window.focusNode(0, -250);
           } else if (type === 'direct-hub' && appData.directHub && appData.directHub._renderData) {
               window.focusNode(appData.directHub._renderData.x, appData.directHub._renderData.y);
           }
@@ -4000,40 +4002,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const visDir = appData.directProjects || [];
       const activeMods = (appData.modules || []).filter(m => m && typeof m === 'object');
       
-      // Balanceo estático y estable de lados para evitar que los módulos brinquen de izquierda a derecha al colapsar
-      let lNodes = [], rNodes = [], lStaticWeight = 0, rStaticWeight = 0;
+      // Distribución en flujo vertical en cascada (Top-to-Bottom)
+      const allNodes = [];
       const directData = { type: 'direct-hub', item: directHubItem, projects: visDir };
-      lNodes.push(directData);
-      lStaticWeight += Math.max(1, visDir.length);
+      allNodes.push(directData);
       
       activeMods.forEach(m => {
           if (!m.id) m.id = 'm_' + Math.random().toString(36).slice(2, 9);
           if (!m.name) m.name = 'Módulo';
           if (!m.color) m.color = '#0071e3';
           const modData = { type: 'module', item: m, projects: m.projects || [] };
-          const pStaticLen = Math.max(1, modData.projects.length);
-          if (lStaticWeight <= rStaticWeight) {
-              lNodes.push(modData);
-              lStaticWeight += pStaticLen;
-          } else {
-              rNodes.push(modData);
-              rStaticWeight += pStaticLen;
-          }
+          allNodes.push(modData);
       });
 
-      const slotH = 75, mOffX = 400, pOffX = 900; 
-      function procSide(nodes, isLeft) {
-          const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
-          
-          // Total de slots reales en este lado según su estado actual (colapsado o expandido)
-          const totalSlots = nodes.reduce((sum, n) => {
-              const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
-              const isCollapsed = isModuleCollapsed(modId, n);
-              const pCount = (n.projects || []).length;
-              return sum + (isCollapsed ? 1 : Math.max(1, pCount));
-          }, 0);
+      const slotH = 70, colStepX = 370, coreX = 0, coreY = -250, modBaseY = 0;
+      const totalMods = allNodes.length;
+      let lNodes = [], rNodes = [];
+      allNodes.forEach((n, idx) => {
+          n._colX = (idx - (totalMods - 1) / 2) * colStepX;
+          n._colY = modBaseY;
+          if (n._colX <= 0) lNodes.push(n);
+          else rNodes.push(n);
+      });
 
-          let cy = -(totalSlots * slotH / 2) + (slotH / 2);
+      function procSide(nodes, isLeft) {
           nodes.forEach(n => {
               const pCount = (n.projects || []).length;
               const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
@@ -4041,12 +4033,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
               const nItemName = n.item ? (n.item.name || '') : '';
               const isCollapsed = isModuleCollapsed(modId, n);
-              const weight = isCollapsed ? 1 : Math.max(1, pCount);
               
-              const sy = cy;
-              const ey = cy + (weight - 1) * slotH;
-              const my = (sy + ey) / 2;
-              cy += weight * slotH;
+              const mx = n._colX;
+              const my = n._colY;
+              const px = mx;
+              const sy = my + 105;
 
               if (!isCollapsed && pCount > 0) {
                   n.projects.forEach((p, idx) => { 
@@ -4080,11 +4071,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
               pC.classList.add('mindmap-connector');
-              const coreStartX = isLeft ? -60 : 60;
-              const modEndX = isLeft ? mx + 165 : mx - 165;
-              const cp1CoreX = isLeft ? -125 : 125;
-              const cp2CoreX = isLeft ? modEndX + 65 : modEndX - 65;
-              pC.setAttribute('d', `M ${coreStartX} 0 C ${cp1CoreX} 0, ${cp2CoreX} ${my}, ${modEndX} ${my}`);
+              const coreStartX = coreX;
+              const coreStartY = coreY + 60;
+              const modEndX = mx;
+              const modEndY = my - 25;
+              const cp1CoreY = coreStartY + 80;
+              const cp2CoreY = modEndY - 80;
+              pC.setAttribute('d', `M ${coreStartX} ${coreStartY} C ${coreStartX} ${cp1CoreY}, ${modEndX} ${cp2CoreY}, ${modEndX} ${modEndY}`);
               pC.setAttribute('fill', 'none'); 
 
               // Conector de fibra óptica: Gradiente direccional de Núcleo a Módulo
@@ -4093,9 +4086,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               cGrad.setAttribute('id', coreGradId);
               cGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
               cGrad.setAttribute('x1', `${coreStartX}`);
-              cGrad.setAttribute('y1', '0');
+              cGrad.setAttribute('y1', `${coreStartY}`);
               cGrad.setAttribute('x2', `${modEndX}`);
-              cGrad.setAttribute('y2', `${my}`);
+              cGrad.setAttribute('y2', `${modEndY}`);
 
               const cs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
               cs1.setAttribute('offset', '0%');
@@ -4130,15 +4123,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
                   const endCol = isOver ? '#ff453a' : solidColor;
 
-                  // Conexión limpia y fluida que nace exactamente en el botón de colapso
-                  const startX = isLeft ? (mx - 165 - 11) : (mx + 165 + 11);
-                  const endX = isLeft ? p._renderData.x + 160 : p._renderData.x - 160;
-                  const dx = Math.abs(endX - startX);
-                  const cpDist = Math.max(40, Math.min(95, dx * 0.45));
-                  const cp1X = isLeft ? startX - cpDist : startX + cpDist;
-                  const cp2X = isLeft ? endX + cpDist : endX - cpDist;
+                  // Conexión vertical que nace exactamente en el botón de colapso inferior del módulo y baja hacia cada proyecto hijo
+                  const startX = mx;
+                  const startY = my + 25 + 11;
+                  const endX = p._renderData.x;
+                  const endY = p._renderData.y - 28;
+                  const dy = Math.abs(endY - startY);
+                  const cpDist = Math.max(20, Math.min(80, dy * 0.45));
+                  const cp1Y = startY + cpDist;
+                  const cp2Y = endY - cpDist;
                   
-                  pP.setAttribute('d', `M ${startX} ${my} C ${cp1X} ${my}, ${cp2X} ${p._renderData.y}, ${endX} ${p._renderData.y}`);
+                  pP.setAttribute('d', `M ${startX} ${startY} C ${startX} ${cp1Y}, ${endX} ${cp2Y}, ${endX} ${endY}`);
                   pP.setAttribute('fill', 'none'); 
 
                   // Conector de fibra óptica: Gradiente direccional de Módulo a Proyecto
@@ -4148,9 +4143,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   pGrad.setAttribute('id', pGradId);
                   pGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
                   pGrad.setAttribute('x1', `${startX}`);
-                  pGrad.setAttribute('y1', `${my}`);
+                  pGrad.setAttribute('y1', `${startY}`);
                   pGrad.setAttribute('x2', `${endX}`);
-                  pGrad.setAttribute('y2', `${p._renderData.y}`);
+                  pGrad.setAttribute('y2', `${endY}`);
 
                   const ps1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   ps1.setAttribute('offset', '0%');
@@ -4183,7 +4178,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           if (n.type === 'direct-hub') moduleNodeMap.set('hub-direct', n);
       });
 
-      // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas)
+      // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas en flujo vertical)
       [...lNodes, ...rNodes].forEach(n => {
           (n.projects || []).forEach(p => {
               if (!Array.isArray(p.secondaryModules) || p.secondaryModules.length === 0) return;
@@ -4200,43 +4195,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const secData = secNode._renderData;
                   const secMx = secData.x;
                   const secMy = secData.y;
-                  const secIsLeft = secData.isLeft;
                   const secColor = (secNode.item && secNode.item.color) ? secNode.item.color : '#0071e3';
                   const secNodeId = secNode.item ? secNode.item.id : (secNode.type === 'direct-hub' ? 'hub-direct' : '');
                   const isSecModSel = currentSelection.id === secNodeId;
 
                   const pX = pData.x;
                   const pY = pData.y;
-                  const pIsLeft = pX < 0;
 
-                  let startX, startY = secMy, endX, endY = pY;
-                  let cp1X, cp2X;
-
-                  if (secIsLeft && pIsLeft) {
-                      startX = secMx - 165;
-                      endX = pX + 160;
-                      cp1X = startX - 70;
-                      cp2X = endX + 70;
-                  } else if (!secIsLeft && !pIsLeft) {
-                      startX = secMx + 165;
-                      endX = pX - 160;
-                      cp1X = startX + 70;
-                      cp2X = endX - 70;
-                  } else if (secIsLeft && !pIsLeft) {
-                      startX = secMx + 165;
-                      endX = pX - 160;
-                      cp1X = startX + 220;
-                      cp2X = endX - 220;
-                  } else {
-                      startX = secMx - 165;
-                      endX = pX + 160;
-                      cp1X = startX - 220;
-                      cp2X = endX + 220;
-                  }
+                  const startX = secMx;
+                  const startY = secMy + 25;
+                  const endX = secMx <= pX ? (pX - 160) : (pX + 160);
+                  const endY = pY;
+                  const cp1X = startX;
+                  const cp1Y = startY + Math.max(60, (endY - startY) * 0.5);
+                  const cp2X = secMx <= pX ? (endX - 70) : (endX + 70);
+                  const cp2Y = endY;
 
                   const pSec = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                   pSec.classList.add('mindmap-connector', 'secondary-module-connector');
-                  pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`);
+                  pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`);
                   pSec.setAttribute('fill', 'none');
                   pSec.setAttribute('data-source-proj', String(p.id));
                   pSec.setAttribute('data-target-mod', String(secId));
@@ -4370,7 +4347,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '16'); 
-          r.setAttribute('fill', 'rgba(18, 18, 24, 0.65)'); 
+          r.setAttribute('fill', isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 18, 24, 0.88)'); 
           r.setAttribute('stroke', isOver ? '#ff453a' : color); 
           r.setAttribute('stroke-width', isOver ? '2' : (isSel ? '2' : '1')); 
           r.style.pointerEvents = 'none';
@@ -4727,14 +4704,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         hitBox.style.cursor = 'pointer';
         g.appendChild(hitBox);
 
-        // Botón interactivo de colapso/expansión (+/-) del módulo
+        // Botón interactivo de colapso/expansión (+/-) en el borde inferior central del módulo
         if (pCount > 0) {
             const isCollapsed = isModuleCollapsed(modId, n);
-            const isLeft = (n._renderData && n._renderData.isLeft);
             const toggleBtnG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             toggleBtnG.classList.add('mod-toggle-btn');
-            const btnX = isLeft ? -11 : 341;
-            const btnY = 25;
+            const btnX = 165;
+            const btnY = 61;
             toggleBtnG.setAttribute('transform', `translate(${btnX}, ${btnY})`);
             
             const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -4790,8 +4766,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         canvasGroup.appendChild(g);
       });
 
+      if (appData.core) appData.core._renderData = { x: coreX, y: coreY };
       const coreG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      coreG.setAttribute('transform', `translate(-60, -60)`);
+      coreG.setAttribute('transform', `translate(${coreX - 60}, ${coreY - 60})`);
       coreG.classList.add('interactive-node');
       coreG.onclick = (e) => { e.stopPropagation(); window.selectNode('core', 'sicom'); };
       
@@ -4862,7 +4839,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       canvasGroup.appendChild(coreG);
       
       if(appData.secondaryCore && appData.secondaryCore.active) {
-          const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(-60, 100)`); sucomG.classList.add('interactive-node');
+          const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(${coreX + 110}, ${coreY - 60})`); sucomG.classList.add('interactive-node');
           
           const sccBase = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           sccBase.setAttribute('cx', '60'); sccBase.setAttribute('cy', '60'); sccBase.setAttribute('r', '60');
