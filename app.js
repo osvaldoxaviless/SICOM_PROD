@@ -1702,9 +1702,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             });
             logActivity(item.id, item.name, `Asignó tarea de proyecto a ${assignee}`, localAuthor);
 
-            // Inyección de alerta externa hacia Google Workspace / WhatsApp
+            // Inyección de alerta externa hacia Google Workspace (Google Chat)
             if (currentUserRole !== 'Lector') {
-                window.sendExternalAlert('ALL', `Nueva tarea en [${item.name}]: "${text}" (Vence: ${deadline || 'Sin fecha'})`, assignee);
+                window.sendExternalAlert('CHAT', `Nueva tarea en [${item.name}]: "${text}" (Vence: ${deadline || 'Sin fecha'})`, assignee);
             }
 
             window.saveData(true);
@@ -1823,9 +1823,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             input.value = ''; dateInput.value = ''; if(assigneeInput && !assigneeInput.disabled) assigneeInput.value = '';
             logActivity(item.id, item.name, 'Agregó nueva tarea', localAuthor); 
 
-            // Inyección de alerta externa hacia Google Workspace / WhatsApp
+            // Inyección de alerta externa hacia Google Workspace (Google Chat)
             if (currentUserRole !== 'Lector') {
-                window.sendExternalAlert('ALL', `Nueva tarea rápida en [${item.name}]: "${text}"`, assignee || 'Sin asignar');
+                window.sendExternalAlert('CHAT', `Nueva tarea rápida en [${item.name}]: "${text}"`, assignee || 'Sin asignar');
             }
 
             window.saveData(false); 
