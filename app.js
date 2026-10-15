@@ -1656,35 +1656,82 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     // --- MÓDULO DE ALERTAS EXTERNAS (TORRE DE CONTROL GOOGLE WORKSPACE / CHAT) ---
+    const GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
     const URL_APPS_SCRIPT_WEBAPP = 'https://script.google.com/macros/s/AKfycbyrEdRic_xTLQTGtdxlgiX_EFLXBWlk3UrDj-57ie0d_IVUuM8ZIitBT2qoz3wmagLS/exec';
 
     window.sendExternalAlert = async function(type, dataOrMessage, assignedUser) {
-        if (!URL_APPS_SCRIPT_WEBAPP || URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) return;
         try {
             let payload = { type: type || 'CHAT' };
             if (typeof dataOrMessage === 'object' && dataOrMessage !== null) {
                 payload = Object.assign(payload, dataOrMessage);
-                if (!payload.message) {
-                    if (type === 'ASSIGNMENT') payload.message = `Nueva tarea en [${payload.project || 'General'}]: "${payload.task || ''}" (Vence: ${payload.deadline || 'Sin fecha'})`;
-                    else if (type === 'VALIDATION_SUBMITTED') payload.message = `Tarea enviada a validación en [${payload.project || 'General'}]: "${payload.task || ''}" (Evidencia: "${payload.feedback || ''}")`;
-                    else if (type === 'TASK_VALIDATED') payload.message = `Tarea validada y aprobada en [${payload.project || 'General'}]: "${payload.task || ''}"`;
-                    else if (type === 'PROJECT_CREATED') payload.message = `Nuevo proyecto registrado: [${payload.project || ''}] (${payload.module || ''})`;
-                }
                 if (!payload.assignedUser && payload.assignee) payload.assignedUser = payload.assignee;
             } else {
                 payload.message = dataOrMessage || '';
                 payload.assignedUser = assignedUser || 'General';
             }
-            console.log('🔔 [SICOM External Alert] Disparando notificación:', payload);
-            fetch(URL_APPS_SCRIPT_WEBAPP, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            }).then(() => {
-                console.log('✅ [SICOM External Alert] Notificación despachada con éxito');
-            }).catch((err) => {
-                console.warn('⚠️ [SICOM External Alert] Aviso en envío:', err);
-            });
+
+            // Construir texto formateado Markdown para Google Chat
+            let chatText = '';
+            if (type === 'ASSIGNMENT') {
+                chatText = `📌 *NUEVA ASIGNACIÓN DE TRABAJO*\n` +
+                           `👤 *Consultor:* ${payload.assignee || payload.assignedUser || 'Consultor'}\n` +
+                           `📦 *Proyecto:* ${payload.project || 'General'}\n` +
+                           `📝 *Tarea:* "${payload.task || ''}"\n` +
+                           `📅 *Fecha Límite:* ${payload.deadline || 'Sin fecha'}\n` +
+                           `✍️ *Asignado por:* ${payload.author || localAuthor || 'Sistema'}`;
+            } else if (type === 'VALIDATION_SUBMITTED') {
+                chatText = `⏳ *TAREA ENVIADA A VALIDACIÓN*\n` +
+                           `👤 *Consultor:* ${payload.consultant || payload.assignedUser || localAuthor || 'Consultor'}\n` +
+                           `📦 *Proyecto:* ${payload.project || 'General'}\n` +
+                           `📝 *Tarea:* "${payload.task || ''}"\n` +
+                           `📎 *Evidencia:* "${payload.feedback || 'Sin comentarios'}"`;
+            } else if (type === 'TASK_VALIDATED') {
+                chatText = `✅ *TAREA VALIDADA Y APROBADA*\n` +
+                           `👤 *Consultor:* ${payload.consultant || 'Consultor'}\n` +
+                           `📦 *Proyecto:* ${payload.project || 'General'}\n` +
+                           `📝 *Tarea:* "${payload.task || ''}"\n` +
+                           `🎖️ *Validado por:* ${payload.validatedBy || localAuthor || 'Supervisor'}`;
+            } else if (type === 'PROJECT_CREATED') {
+                chatText = `🚀 *NUEVO PROYECTO REGISTRADO*\n` +
+                           `📦 *Proyecto:* ${payload.project || ''}\n` +
+                           `📂 *Módulo:* ${payload.module || 'Directo'}\n` +
+                           `👥 *Equipo Asignado:* ${payload.consultants || 'Por definir'}\n` +
+                           `📅 *Fecha Límite:* ${payload.deadline || 'Sin fecha'}\n` +
+                           `✍️ *Registrado por:* ${payload.author || localAuthor || 'Sistema'}\n` +
+                           `🔗 https://panel-control-sicom.netlify.app/`;
+            } else if (type === 'MORNING_DIGEST') {
+                chatText = payload.message || (typeof window.generateMorningDigestText === 'function' ? window.generateMorningDigestText() : '');
+            } else {
+                chatText = payload.message || `🔔 *ALERTA SICOM*\n👤 *Para:* ${payload.assignedUser || 'General'}\n📋 *Detalle:* ${payload.message || ''}`;
+            }
+
+            console.log('🔔 [SICOM External Alert] Despachando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
+
+            // 1. Envío DIRECTO e INMEDIATO al Webhook de Google Chat (instantáneo, sin intermediarios)
+            if (GOOGLE_CHAT_WEBHOOK_URL) {
+                fetch(GOOGLE_CHAT_WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ text: chatText })
+                }).then(() => {
+                    console.log('✅ [SICOM Google Chat] Mensaje entregado directamente al Webhook de Google Chat');
+                }).catch(err => {
+                    console.warn('⚠️ [SICOM Google Chat] Error en Webhook directo:', err);
+                });
+            }
+
+            // 2. Envío secundario a Google Apps Script (con type='CHAT' para 100% compatibilidad)
+            if (URL_APPS_SCRIPT_WEBAPP && !URL_APPS_SCRIPT_WEBAPP.includes('AKfycb...')) {
+                const proxyPayload = Object.assign({}, payload, { type: 'CHAT', message: chatText });
+                fetch(URL_APPS_SCRIPT_WEBAPP, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(proxyPayload)
+                }).catch(err => {
+                    console.warn('⚠️ [SICOM Apps Script] Aviso en proxy secundario:', err);
+                });
+            }
         } catch (e) {
             console.warn('⚠️ [SICOM External Alert] Excepción silenciosa:', e);
         }
@@ -1774,14 +1821,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         return msg;
     };
 
-    window.triggerChatMorningDigest = function() {
-        if (currentUserRole === 'Lector') return;
+    window.triggerChatMorningDigest = async function(btnEl) {
+        if (currentUserRole === 'Lector') {
+            window.showToast("⚠️ Los lectores no tienen permisos para publicar alertas.", true);
+            return;
+        }
+        let originalText = '';
+        if (btnEl && btnEl.innerHTML) {
+            originalText = btnEl.innerHTML;
+            btnEl.innerHTML = `⏳ Publicando en Chat...`;
+            btnEl.disabled = true;
+        }
         window.showToast("📡 Despachando Resumen a Google Chat...", false);
-        const digestText = window.generateMorningDigestText();
-        window.sendExternalAlert('MORNING_DIGEST', { message: digestText, assignedUser: 'General' });
-        setTimeout(() => {
+        try {
+            const digestText = window.generateMorningDigestText();
+            await window.sendExternalAlert('MORNING_DIGEST', { message: digestText, assignedUser: 'General' });
             window.showToast("✅ Resumen de Riesgos publicado en Google Chat", false);
-        }, 1000);
+        } catch (err) {
+            console.error('Error al generar o enviar resumen:', err);
+            window.showToast("⚠️ Ocurrió un error al despachar el resumen.", true);
+        } finally {
+            if (btnEl && originalText) {
+                setTimeout(() => {
+                    btnEl.innerHTML = originalText;
+                    btnEl.disabled = false;
+                }, 1500);
+            }
+        }
     };
 
     window.saveGlobalTask = function() { 
