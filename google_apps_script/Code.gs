@@ -17,7 +17,7 @@ function doPost(e) {
     var assignedUser = payload.assignedUser || 'Sin asignar';
 
     // Endpoint seguro del Webhook de Google Chat
-    var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNIOcRc/messages?key=AIzaSyDdIOhCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c'; 
+    var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c'; 
 
     var chatPayload = {
       text: "🔔 *NUEVA ALERTA SICOM*\n" +
