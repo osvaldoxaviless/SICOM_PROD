@@ -40,6 +40,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let appData = JSON.parse(JSON.stringify(defaultTestingData));
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
     let globalDocs = [{"id":"doc_1791193027382","name":"Propuesta Comercial"},{"id":"doc_1791192995498","name":"Contrato"},{"id":"doc_1791193015065","name":"Plano(s) de negocio"},{"id":"doc_1791350819805","name":"Plan de trabajo"},{"id":"doc_1791350871690","name":"Matriz de pruebas"},{"id":"doc_1791350852225","name":"Formato de Validación"},{"id":"doc_1791350881937","name":"Certificado de Pruebas"},{"id":"doc_1791350912895","name":"Certificado de Comité"},{"id":"doc_1791350927050","name":"Certificado de Capacitación"},{"id":"doc_1791350940031","name":"Carta de Liberación"},{"id":"doc_1791350945532","name":"Factura"}];
+    window.getAppData = () => appData;
 
     if (typeof Chart !== 'undefined') {
       Chart.defaults.color = '#8e8e93'; 
@@ -2947,6 +2948,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
           }
 
+          // Módulos secundarios / dependencias multimódulo
+          const checkedSec = Array.from(document.querySelectorAll('.editProjSecMod-chk:checked'))
+            .map(cb => cb.value)
+            .filter(v => v !== targetLoc);
+          const oldSecStr = (item.secondaryModules || []).slice().sort().join(',');
+          const newSecStr = checkedSec.slice().sort().join(',');
+          item.secondaryModules = checkedSec;
+          if (oldSecStr !== newSecStr) {
+            logActivity(item.id, item.name, `Actualizó dependencias multimódulo`, localAuthor);
+          }
+
           if (oldStatus !== item.status) logActivity(item.id, item.name, `Actualizó estado a [${item.status}]`, localAuthor);
           else if (oldProg !== item.progress) logActivity(item.id, item.name, `Actualizó avance a ${item.progress}%`, localAuthor);
           else logActivity(item.id, item.name, `Editó detalles internos`, localAuthor);
@@ -2970,6 +2982,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('infoRelativeTime').classList.add('hidden');
       document.getElementById('infoDriveBtn').classList.add('hidden');
       document.getElementById('infoInvgateBtn').classList.add('hidden');
+      const modContainer = document.getElementById('infoModulesContainer');
+      if (modContainer) {
+        modContainer.innerHTML = '';
+        modContainer.classList.add('hidden');
+      }
       
       if (type === 'core') {
         item = appData.core;
@@ -2988,6 +3005,32 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('infoConsultant').innerHTML = `<span class="text-white font-bold text-lg">${projs.length}</span>`;
         document.getElementById('infoMetricLabel').textContent = 'AVANCE PROMEDIO';
         document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${avgProg}%</span>`;
+        
+        // Detección de proyectos dependientes / vinculados de otros módulos
+        const modIdCheck = type === 'module' ? id : 'DIRECT';
+        const sharedProjs = [];
+        (appData.directProjects || []).forEach(p => {
+          if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(modIdCheck) || (modIdCheck === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
+            sharedProjs.push(p);
+          }
+        });
+        (appData.modules || []).forEach(m => {
+          (m.projects || []).forEach(p => {
+            if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(modIdCheck) || (modIdCheck === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
+              sharedProjs.push(p);
+            }
+          });
+        });
+        if (modContainer && sharedProjs.length > 0) {
+          modContainer.innerHTML = `
+            <div class="w-full text-[10px] text-blue-300 bg-[#0071e3]/10 border border-[#0071e3]/25 px-3 py-2 rounded-xl flex items-center justify-between shadow-inner">
+              <span class="flex items-center gap-1.5 font-medium"><span>🔗</span> <b>${sharedProjs.length}</b> proyecto(s) vinculados como dependencia</span>
+              <span class="text-[9px] text-[#0071e3] font-bold bg-[#0071e3]/20 px-2 py-0.5 rounded-full border border-[#0071e3]/30">Multimódulo</span>
+            </div>
+          `;
+          modContainer.classList.remove('hidden');
+        }
+
         if (type === 'module' && (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor')) {
           document.getElementById('btnFullEditInfoCard').classList.remove('hidden');
         }
@@ -3002,6 +3045,53 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       } else {
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
         document.getElementById('infoType').textContent = 'PROYECTO';
+
+        // Renderizado de Módulos (Base y Secundarios)
+        if (modContainer) {
+          modContainer.innerHTML = '';
+          modContainer.classList.remove('hidden');
+          
+          let primMod = null;
+          let primType = 'module';
+          if (type === 'direct-project') {
+            primMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+            primType = 'direct-hub';
+          } else {
+            primMod = appData.modules.find(m => (m.projects || []).some(p => p.id === id));
+            if (!primMod) {
+              primMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+              primType = 'direct-hub';
+            }
+          }
+          
+          const pPill = document.createElement('button');
+          pPill.type = 'button';
+          pPill.className = "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl text-white bg-white/10 hover:bg-white/20 border border-white/15 transition shadow-sm";
+          pPill.innerHTML = `<span class="w-2 h-2 rounded-full shadow-[0_0_4px_rgba(255,255,255,0.4)]" style="background-color: ${primMod.color || '#0071e3'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[8px] text-gray-400 font-normal uppercase tracking-wider">(Base)</span>`;
+          pPill.onclick = () => window.selectNode(primType, primMod.id);
+          modContainer.appendChild(pPill);
+
+          const secList = Array.isArray(item.secondaryModules) ? item.secondaryModules : [];
+          secList.forEach(sId => {
+            let sMod = null, sType = 'module';
+            if (sId === 'DIRECT' || sId === 'hub-direct') {
+              sMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+              sType = 'direct-hub';
+            } else {
+              sMod = (appData.modules || []).find(m => m.id === sId);
+            }
+            if (sMod) {
+              const sPill = document.createElement('button');
+              sPill.type = 'button';
+              sPill.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-xl text-blue-200 bg-[#0071e3]/15 hover:bg-[#0071e3]/25 border border-[#0071e3]/30 transition shadow-sm";
+              sPill.title = "Módulo dependiente / vinculación cruzada";
+              sPill.innerHTML = `<span class="w-2 h-2 rounded-full shadow-[0_0_4px_rgba(0,113,227,0.4)]" style="background-color: ${sMod.color || '#0071e3'}"></span>🔗 ${escapeHtml(sMod.name)}`;
+              sPill.onclick = () => window.selectNode(sType, sMod.id);
+              modContainer.appendChild(sPill);
+            }
+          });
+        }
+
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'CONSULTOR(ES)';
         document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<div class="text-xs flex items-center gap-2"><span class="w-3 h-3 rounded-full border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.3)]" style="background-color: ${consultants[n]?consultants[n].color:'#8e8e93'}"></span> ${escapeHtml(n)}</div>`).join('') || 'Sin asignar';
         document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD'; document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold bg-white/10 px-2.5 py-1 rounded-full border border-white/5">*${item.priority}</span>`;
@@ -3186,6 +3276,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.populateEditProjectLocationSelect === 'function') {
           window.populateEditProjectLocationSelect(currentLoc);
         }
+        if (typeof window.populateSecondaryModulesChecklist === 'function') {
+          window.populateSecondaryModulesChecklist('editProj', currentLoc, item.secondaryModules || []);
+        }
 
         // Botones Abrir Drive e Invgate en vivo
         const updateEditLinkButtons = () => {
@@ -3240,16 +3333,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const pend = projs.filter(p => p.status === 'Pendiente' || p.status === 'No Iniciado').length;
           const avgProg = total > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / total) : 0;
           const assignedCons = Array.from(new Set(projs.flatMap(p => getProjectConsultants(p))));
+
+          // Conteo de proyectos vinculados de otros módulos
+          const mCheckId = type === 'module' ? item.id : 'DIRECT';
+          let sharedCount = 0;
+          (appData.directProjects || []).forEach(p => {
+            if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(mCheckId) || (mCheckId === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
+              sharedCount++;
+            }
+          });
+          (appData.modules || []).forEach(m => {
+            (m.projects || []).forEach(p => {
+              if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(mCheckId) || (mCheckId === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
+                sharedCount++;
+              }
+            });
+          });
+
           sumCont.innerHTML = `
             <div class="flex items-center justify-between pb-2 border-b border-white/10 font-bold">
               <span class="text-white text-xs">${type === 'module' ? 'Módulo' : 'Agrupador'}: ${escapeHtml(item.name)}</span>
               <span class="text-brand-accent text-xs">${avgProg}% Avance</span>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-2 text-[10px]">
-              <div>📁 Proyectos: <b class="text-white">${total}</b></div>
+              <div>📁 Propios: <b class="text-white">${total}</b></div>
+              <div>🔗 Vinculados: <b class="text-[#0071e3]">${sharedCount}</b></div>
               <div>✅ Completados: <b class="text-[#30d158]">${comp}</b></div>
               <div>🚀 En Curso: <b class="text-[#0071e3]">${inProg}</b></div>
-              <div>⏳ Pendientes: <b class="text-[#ffd60a]">${pend}</b></div>
             </div>
             <div class="pt-2 text-[10px] text-gray-400 border-t border-white/5 truncate">
               👥 Consultores (${assignedCons.length}): <span class="text-gray-200">${escapeHtml(assignedCons.join(', ')) || 'Ninguno'}</span>
@@ -3281,7 +3391,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
            if (type === 'module') {
                const mod = appData.modules.find(m => m.id === id);
                if(mod) pName = mod.name;
-               appData.modules = appData.modules.filter(m => m.id !== id); 
+               appData.modules = appData.modules.filter(m => m.id !== id);
+               (appData.directProjects || []).forEach(p => {
+                   if (Array.isArray(p.secondaryModules)) p.secondaryModules = p.secondaryModules.filter(mId => mId !== id);
+               });
+               (appData.modules || []).forEach(m => {
+                   (m.projects || []).forEach(p => {
+                       if (Array.isArray(p.secondaryModules)) p.secondaryModules = p.secondaryModules.filter(mId => mId !== id);
+                   });
+               });
            }
            else if (type === 'direct-project') {
                const proj = appData.directProjects.find(p => p.id === id);
@@ -3347,6 +3465,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         return; 
       }
       const loc = document.getElementById('newProjLocation').value;
+      const secMods = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value).filter(v => v !== loc);
       const prio = parseFloat(document.getElementById('newProjPriority').value || 1);
       const cons = Array.from(document.querySelectorAll('.newProjCons-chk:checked')).map(cb => cb.value);
       const driveLink = document.getElementById('newProjDrive').value.trim();
@@ -3369,7 +3488,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         progress, 
         docs: {}, 
         clientDeliveryDate: "", 
-        clientReturnDate: "" 
+        clientReturnDate: "",
+        secondaryModules: secMods
       };
 
       if (loc === 'DIRECT') {
@@ -3394,15 +3514,23 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'No Iniciado';
       if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
       document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); 
+      document.querySelectorAll('.newProjSecMod-chk').forEach(cb => cb.checked = false);
 
-      logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]`, localAuthor); 
+      const secCountMsg = secMods.length > 0 ? ` (+ ${secMods.length} dependencias multimódulo)` : '';
+      logActivity(np.id, np.name, `Creó el proyecto [Estado: ${status}]${secCountMsg}`, localAuthor); 
 
       // Alerta a Google Chat de nuevo proyecto (con blindaje contra fallos)
       try {
-        const modName = loc === 'DIRECT' ? 'Proyectos Directos' : ((appData.modules.find(m => m.id === loc) || {}).name || 'Módulo');
+        const baseModName = loc === 'DIRECT' ? (appData.directHub?.name || 'Proyectos Directos') : ((appData.modules.find(m => m.id === loc) || {}).name || 'Módulo');
+        const secNames = secMods.map(smId => {
+          if (smId === 'DIRECT' || smId === 'hub-direct') return (appData.directHub?.name || 'Directos');
+          const sm = (appData.modules || []).find(m => m.id === smId);
+          return sm ? sm.name : smId;
+        });
+        const modDisplayName = secNames.length > 0 ? `${baseModName} (+ ${secNames.join(', ')})` : baseModName;
         window.sendExternalAlert('PROJECT_CREATED', {
           project: np.name,
-          module: modName,
+          module: modDisplayName,
           consultants: (Array.isArray(cons) ? cons.join(', ') : '') || 'Sin asignar',
           deadline: deadline || 'Sin fecha',
           author: localAuthor
@@ -3513,11 +3641,62 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
     };
 
+    window.populateSecondaryModulesChecklist = function(prefix, primaryModId, selectedIds = []) {
+      const container = document.getElementById(`${prefix}SecondaryModulesList`);
+      if (!container) return;
+      const selSet = new Set(Array.isArray(selectedIds) ? selectedIds : []);
+      
+      const options = [];
+      const directId = 'DIRECT';
+      if (primaryModId !== directId) {
+        options.push({
+          id: directId,
+          name: appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM',
+          color: (appData.directHub && appData.directHub.color) ? appData.directHub.color : '#f59e0b',
+          icon: '⚡'
+        });
+      }
+      
+      (appData.modules || []).forEach(m => {
+        if (m && m.id && m.id !== primaryModId) {
+          options.push({
+            id: m.id,
+            name: m.name || 'Módulo',
+            color: m.color || '#0071e3',
+            icon: '📦'
+          });
+        }
+      });
+
+      if (options.length === 0) {
+        container.innerHTML = '<div class="text-[11px] text-gray-500 italic py-2 px-1">No hay otros módulos disponibles para vincular.</div>';
+        return;
+      }
+
+      container.innerHTML = options.map(opt => {
+        const isChecked = selSet.has(opt.id) || (opt.id === 'DIRECT' && selSet.has('hub-direct'));
+        return `
+          <label class="flex items-center gap-2.5 text-xs font-medium text-gray-300 cursor-pointer p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition select-none">
+            <input type="checkbox" value="${escapeHtml(opt.id)}" class="${prefix}SecMod-chk rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4" ${isChecked ? 'checked' : ''}>
+            <span class="w-3 h-3 rounded-full shrink-0 border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.2)]" style="background-color: ${opt.color}"></span>
+            <span class="truncate text-white/90">${opt.icon} ${escapeHtml(opt.name)}</span>
+          </label>
+        `;
+      }).join('');
+    };
+
     window.populateEditProjectLocationSelect = function(currentLoc) { 
       const s = document.getElementById('editProjectLocation'); 
       if (!s) return; 
       s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
       if (currentLoc) s.value = currentLoc;
+      if (!s._hasSecModListener) {
+        s._hasSecModListener = true;
+        s.addEventListener('change', function() {
+          const checked = Array.from(document.querySelectorAll('.editProjSecMod-chk:checked')).map(cb => cb.value);
+          window.populateSecondaryModulesChecklist('editProj', this.value, checked);
+        });
+      }
     };
     
     window.populateNewProjectLocationSelect = function(preselectedId) { 
@@ -3528,6 +3707,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (prevVal && Array.from(s.options).some(o => o.value === prevVal)) {
         s.value = prevVal;
       }
+      if (!s._hasSecModListener) {
+        s._hasSecModListener = true;
+        s.addEventListener('change', function() {
+          const checked = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value);
+          window.populateSecondaryModulesChecklist('newProj', this.value, checked);
+        });
+      }
+      const checked = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value);
+      window.populateSecondaryModulesChecklist('newProj', s.value, checked);
     };
 
     window.openCreateProjectForModule = function(moduleId) {
@@ -3621,7 +3809,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               return isOverdue || isSoon || hasVal;
           }
 
-          if (activeFilterModule !== 'ALL' && p._modId !== activeFilterModule) return false;
+          if (activeFilterModule !== 'ALL') {
+              const isPrim = (p._modId === activeFilterModule) || (activeFilterModule === 'direct-hub' && p._modId === 'direct-hub');
+              const isSec = Array.isArray(p.secondaryModules) && (
+                  p.secondaryModules.includes(activeFilterModule) ||
+                  (activeFilterModule === 'direct-hub' && p.secondaryModules.includes('DIRECT')) ||
+                  (activeFilterModule === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
+              );
+              if (!isPrim && !isSec) return false;
+          }
           if (activeFilterStatus !== 'ALL' && p.status !== activeFilterStatus) return false;
           if (activeFilterConsultant !== 'ALL' && !getProjectConsultants(p).includes(activeFilterConsultant)) return false;
           
@@ -3707,7 +3903,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               if (n.item) n.item._renderData = n._renderData;
 
               // PARCHE: Evaluación estricta de módulos y ghosting de líneas
-              const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || (q !== '' && nItemName && nItemName.toLowerCase().includes(q));
+              const hasSecMatches = (appData.directProjects || []).concat(
+                  (appData.modules || []).flatMap(m => m.projects || [])
+              ).some(p => {
+                  const isSec = Array.isArray(p.secondaryModules) && (
+                      p.secondaryModules.includes(nItemId) ||
+                      (nItemId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
+                      (nItemId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
+                  );
+                  return isSec && isFiltered(p);
+              });
+              const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || hasSecMatches || (q !== '' && nItemName && nItemName.toLowerCase().includes(q));
               const lineOpacity = modMatches ? '1' : '0.15';
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -3803,6 +4009,117 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       procSide(lNodes, lSlots, true); procSide(rNodes, rSlots, false);
 
+      // Mapa de nodos de módulo para resolución rápida de conectores secundarios
+      const moduleNodeMap = new Map();
+      [...lNodes, ...rNodes].forEach(n => {
+          const mId = n.type === 'direct-hub' ? 'DIRECT' : (n.item ? n.item.id : '');
+          if (mId) moduleNodeMap.set(mId, n);
+          if (n.type === 'direct-hub') moduleNodeMap.set('hub-direct', n);
+      });
+
+      // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas)
+      [...lNodes, ...rNodes].forEach(n => {
+          (n.projects || []).forEach(p => {
+              if (!Array.isArray(p.secondaryModules) || p.secondaryModules.length === 0) return;
+              if (!p._renderData) return;
+
+              const pData = p._renderData;
+              const pMatches = isDefaultState || isFiltered(p);
+              const isProjectSel = currentSelection.id === p.id;
+
+              p.secondaryModules.forEach(secId => {
+                  const secNode = moduleNodeMap.get(secId) || (secId === 'DIRECT' ? moduleNodeMap.get('hub-direct') : null);
+                  if (!secNode || !secNode._renderData) return;
+
+                  const secData = secNode._renderData;
+                  const secMx = secData.x;
+                  const secMy = secData.y;
+                  const secIsLeft = secData.isLeft;
+                  const secColor = (secNode.item && secNode.item.color) ? secNode.item.color : '#0071e3';
+                  const secNodeId = secNode.item ? secNode.item.id : (secNode.type === 'direct-hub' ? 'hub-direct' : '');
+                  const isSecModSel = currentSelection.id === secNodeId;
+
+                  const pX = pData.x;
+                  const pY = pData.y;
+                  const pIsLeft = pX < 0;
+
+                  let startX, startY = secMy, endX, endY = pY;
+                  let cp1X, cp2X;
+
+                  if (secIsLeft && pIsLeft) {
+                      startX = secMx - 165;
+                      endX = pX + 160;
+                      cp1X = startX - 70;
+                      cp2X = endX + 70;
+                  } else if (!secIsLeft && !pIsLeft) {
+                      startX = secMx + 165;
+                      endX = pX - 160;
+                      cp1X = startX + 70;
+                      cp2X = endX - 70;
+                  } else if (secIsLeft && !pIsLeft) {
+                      startX = secMx + 165;
+                      endX = pX - 160;
+                      cp1X = startX + 220;
+                      cp2X = endX - 220;
+                  } else {
+                      startX = secMx - 165;
+                      endX = pX + 160;
+                      cp1X = startX - 220;
+                      cp2X = endX + 220;
+                  }
+
+                  const pSec = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                  pSec.classList.add('mindmap-connector', 'secondary-module-connector');
+                  pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`);
+                  pSec.setAttribute('fill', 'none');
+
+                  const pIdClean = String(p.id).replace(/[^a-zA-Z0-9_-]/g, '');
+                  const secIdClean = String(secId).replace(/[^a-zA-Z0-9_-]/g, '');
+                  const secGradId = `grad-sec-${pIdClean}-${secIdClean}`;
+
+                  const sGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                  sGrad.setAttribute('id', secGradId);
+                  sGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                  sGrad.setAttribute('x1', `${startX}`);
+                  sGrad.setAttribute('y1', `${startY}`);
+                  sGrad.setAttribute('x2', `${endX}`);
+                  sGrad.setAttribute('y2', `${endY}`);
+
+                  const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  stop1.setAttribute('offset', '0%');
+                  stop1.setAttribute('stop-color', secColor);
+                  stop1.setAttribute('stop-opacity', isLight ? '0.50' : '0.65');
+                  sGrad.appendChild(stop1);
+
+                  const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  stop2.setAttribute('offset', '100%');
+                  stop2.setAttribute('stop-color', isLight ? '#0071e3' : '#60a5fa');
+                  stop2.setAttribute('stop-opacity', isLight ? '0.70' : '0.85');
+                  sGrad.appendChild(stop2);
+
+                  dynamicDefs.appendChild(sGrad);
+
+                  pSec.setAttribute('stroke', `url(#${secGradId})`);
+
+                  let secOpacity = '0.50';
+                  let secStrokeWidth = '1.6';
+                  if (!pMatches) {
+                      secOpacity = '0.06';
+                  } else if (isProjectSel || isSecModSel) {
+                      secOpacity = '0.95';
+                      secStrokeWidth = '2.4';
+                      pSec.setAttribute('filter', 'url(#glow)');
+                  } else if (activeFilterModule === secId || (secId === 'DIRECT' && activeFilterModule === 'direct-hub')) {
+                      secOpacity = '0.85';
+                      secStrokeWidth = '2.0';
+                  }
+                  pSec.setAttribute('stroke-width', secStrokeWidth);
+                  pSec.setAttribute('opacity', secOpacity);
+                  canvasGroup.appendChild(pSec);
+              });
+          });
+      });
+
       [...lNodes, ...rNodes].forEach(n => {
         n.projects.forEach(p => {
           // EL FIX CONTINÚA AQUÍ: Extraemos strictType y realId
@@ -3885,14 +4202,43 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           g.appendChild(sC);
 
+          const hasSecBadge = Array.isArray(p.secondaryModules) && p.secondaryModules.length > 0;
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           nT.setAttribute('x', '34'); nT.setAttribute('y', '22'); nT.setAttribute('fill', '#ffffff'); 
           nT.classList.add('svg-text', 'svg-text-bold');
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
           nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
-          nT.textContent = fullText.length > 55 ? fullText.substring(0, 52)+'...' : fullText;
+          const maxNameLen = hasSecBadge ? 34 : 55;
+          nT.textContent = fullText.length > maxNameLen ? fullText.substring(0, maxNameLen - 3)+'...' : fullText;
           g.appendChild(nT);
+
+          // Micro-badge de multimódulo en la pastilla del proyecto
+          if (hasSecBadge) {
+              const multiG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              multiG.setAttribute('transform', 'translate(252, 9)');
+              multiG.style.pointerEvents = 'none';
+
+              const mPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              mPill.setAttribute('width', '38');
+              mPill.setAttribute('height', '14');
+              mPill.setAttribute('rx', '7');
+              mPill.setAttribute('fill', isLight ? 'rgba(0,113,227,0.12)' : 'rgba(0,113,227,0.25)');
+              mPill.setAttribute('stroke', '#0071e3');
+              mPill.setAttribute('stroke-width', '1');
+              multiG.appendChild(mPill);
+
+              const mTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              mTxt.setAttribute('x', '19');
+              mTxt.setAttribute('y', '10.5');
+              mTxt.setAttribute('text-anchor', 'middle');
+              mTxt.setAttribute('fill', isLight ? '#0071e3' : '#60a5fa');
+              mTxt.setAttribute('style', 'font-size: 8px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;');
+              mTxt.textContent = `🔗+${p.secondaryModules.length}`;
+              multiG.appendChild(mTxt);
+
+              g.appendChild(multiG);
+          }
           
           const prog = Math.round(p.progress || 0);
 
@@ -4011,7 +4357,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
         const modName = n.item ? (n.item.name || '') : '';
         const modCol = (n.item && n.item.color) ? n.item.color : '#0071e3';
-        const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || (q !== '' && modName && modName.toLowerCase().includes(q));
+        const hasSecMatchesMod = (appData.directProjects || []).concat(
+            (appData.modules || []).flatMap(m => m.projects || [])
+        ).some(p => {
+            const isSec = Array.isArray(p.secondaryModules) && (
+                p.secondaryModules.includes(modId) ||
+                (modId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
+                (modId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
+            );
+            return isSec && isFiltered(p);
+        });
+        const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || hasSecMatchesMod || (q !== '' && modName && modName.toLowerCase().includes(q));
         const { x, y } = n._renderData || { x: 0, y: 0 };
         const isSel = currentSelection.id === modId;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -4077,18 +4433,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         t.textContent = displayName; 
         g.appendChild(t);
 
-        const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        titleEl.textContent = rawName;
-        g.appendChild(titleEl);
-
         // Micro-badge pill de conteo de proyectos a la derecha
         const pCount = n.projects.length;
+        const allProjsList = (appData.directProjects || []).concat((appData.modules || []).flatMap(m => m.projects || []));
+        const secCount = allProjsList.filter(p => Array.isArray(p.secondaryModules) && (
+            p.secondaryModules.includes(modId) ||
+            (modId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
+            (modId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
+        )).length;
+
+        const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        titleEl.textContent = `${rawName} (${pCount} propios${secCount > 0 ? `, ${secCount} vinculados` : ''})`;
+        g.appendChild(titleEl);
+
         const countG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        countG.setAttribute('transform', 'translate(262, 16)');
+        countG.setAttribute('transform', secCount > 0 ? 'translate(254, 16)' : 'translate(262, 16)');
         countG.style.pointerEvents = 'none';
         
         const countBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        countBg.setAttribute('width', '52'); countBg.setAttribute('height', '18');
+        countBg.setAttribute('width', secCount > 0 ? '62' : '52'); countBg.setAttribute('height', '18');
         countBg.setAttribute('rx', '9');
         countBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)');
         countBg.setAttribute('stroke', isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.14)');
@@ -4096,11 +4459,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         countG.appendChild(countBg);
         
         const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        countText.setAttribute('x', '26'); countText.setAttribute('y', '12.5');
+        countText.setAttribute('x', secCount > 0 ? '31' : '26'); countText.setAttribute('y', '12.5');
         countText.setAttribute('text-anchor', 'middle');
         countText.setAttribute('fill', modCol);
         countText.setAttribute('style', 'font-size: 8.5px; font-weight: 700; font-family: "SF Mono", monospace; letter-spacing: 0.04em;');
-        countText.textContent = `${pCount} ${pCount === 1 ? 'PROY' : 'PROYS'}`;
+        countText.textContent = secCount > 0 ? `${pCount}+${secCount}P` : `${pCount} ${pCount === 1 ? 'PROY' : 'PROYS'}`;
         countG.appendChild(countText);
         g.appendChild(countG);
 

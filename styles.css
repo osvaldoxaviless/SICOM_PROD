@@ -299,6 +299,31 @@ body.theme-light .mindmap-connector {
     stroke: rgba(0, 0, 0, 0.22) !important;
 }
 
+/* Conectores Secundarios Multimódulo (Dependencias Cruzadas) */
+.secondary-module-connector {
+    stroke-dasharray: 6, 4;
+    transition: opacity 0.3s ease, stroke-width 0.3s ease;
+    animation: dash-flow 35s linear infinite;
+}
+
+@keyframes dash-flow {
+    from {
+        stroke-dashoffset: 200;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.secondary-module-connector:hover {
+    stroke-width: 2.6px !important;
+    opacity: 0.95 !important;
+}
+
+body.theme-light .secondary-module-connector {
+    stroke: rgba(0, 113, 227, 0.45) !important;
+}
+
 /* Scrollbars y Acordeones en modo claro */
 body.theme-light ::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.18);
