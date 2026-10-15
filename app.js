@@ -2127,7 +2127,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const badge = document.getElementById('badge-acc-tasks');
         
         if(!item.tasks || item.tasks.length === 0) { 
-            c.innerHTML = '<p class="text-[10px] text-gray-500 italic">No hay tareas específicas.</p>'; 
+            c.innerHTML = `
+            <div class="py-3 px-3 text-center rounded-xl bg-white/[0.03] border border-dashed border-white/10 mb-2">
+                <p class="text-xs text-gray-300 font-medium">Sin tareas registradas en este proyecto</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">Usa el formulario inferior para asignar una tarea con fecha límite.</p>
+            </div>`; 
             if(badge) badge.classList.add('hidden');
             return; 
         }
@@ -2193,7 +2197,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                         ${t.validatedDate ? `<span class="text-[9px] text-[#30d158] font-mono font-bold bg-[#30d158]/10 border border-[#30d158]/30 px-1.5 py-0.5 rounded">✅ Validada: ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
                         ${t.deadline ? `<span class="text-[9px] ${dateColor}">🎯 Límite: ${escapeHtml(t.deadline)}</span>` : ''}
-                        ${t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-300 border border-white/10 px-1.5 py-0.5 rounded shadow-inner truncate max-w-[120px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
+                        ${t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-300 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">👤 ${escapeHtml(t.assignee)}</span>` : ''}
                         ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/5 text-gray-400 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
                     ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/40 border border-white/10 p-2 rounded shadow-inner">💬 ${escapeHtml(t.feedback)}</div>` : ''}
