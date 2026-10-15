@@ -1249,13 +1249,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             
             const newNoteId = 'n_' + Date.now();
             const tag = (isInfo ? window.currentNoteTagInfo : window.currentNoteTagEdit) || 'comentario';
+            const nowTimestamp = new Date().toLocaleString('es-MX', {hour12:false});
 
             item.notes.push({ 
                 id: newNoteId, 
                 text: noteText, 
                 by: localAuthor, 
                 tag: tag,
-                date: new Date().toLocaleString('es-MX', {hour12:false}) 
+                date: nowTimestamp,
+                readBy: [
+                    { user: localAuthor, at: nowTimestamp }
+                ]
             });
             input.value = '';
 
@@ -1270,6 +1274,58 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             window.saveData(false);
             window.renderNotesHistory(item.notes, 'editNotesHistory');
             window.renderNotesHistory(item.notes, 'infoNotes');
+            window.renderMindMap(); // Refresca los badges de notificación del mapa mental
+        }
+    };
+
+    window.confirmNoteRead = function(noteId) {
+        if (!localAuthor) return;
+        let item = getSelectedItem();
+        if (item && Array.isArray(item.notes)) {
+            const note = item.notes.find(n => n.id === noteId);
+            if (note) {
+                if (!Array.isArray(note.readBy)) {
+                    note.readBy = note.by ? [{ user: note.by, at: note.date || '' }] : [];
+                }
+                const already = note.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+                if (!already) {
+                    const nowStr = new Date().toLocaleString('es-MX', {hour12:false});
+                    note.readBy.push({ user: localAuthor, at: nowStr });
+                    logActivity(item.id, item.name, `Confirmó lectura de nota de ${note.by}`, localAuthor);
+                    window.saveData(false);
+                    window.renderNotesHistory(item.notes, 'infoNotes');
+                    window.renderNotesHistory(item.notes, 'editNotesHistory');
+                    window.renderMindMap();
+                    window.showToast("✓ Acuse de lectura confirmado", false);
+                }
+            }
+        }
+    };
+
+    window.confirmAllNotesRead = function() {
+        if (!localAuthor) return;
+        let item = getSelectedItem();
+        if (item && Array.isArray(item.notes)) {
+            const nowStr = new Date().toLocaleString('es-MX', {hour12:false});
+            let markedAny = false;
+            item.notes.forEach(note => {
+                if (!Array.isArray(note.readBy)) {
+                    note.readBy = note.by ? [{ user: note.by, at: note.date || '' }] : [];
+                }
+                const already = note.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+                if (!already) {
+                    note.readBy.push({ user: localAuthor, at: nowStr });
+                    markedAny = true;
+                }
+            });
+            if (markedAny) {
+                logActivity(item.id, item.name, 'Confirmó lectura de todas las notas del proyecto', localAuthor);
+                window.saveData(false);
+                window.renderNotesHistory(item.notes, 'infoNotes');
+                window.renderNotesHistory(item.notes, 'editNotesHistory');
+                window.renderMindMap();
+                window.showToast("✓ Todas las notas marcadas como enterado", false);
+            }
         }
     };
 
@@ -1281,12 +1337,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof notesData === 'string') { if (notesData.trim()) arr = [{ id: 'legacy', text: notesData, by: 'Sistema', tag: 'comentario', date: '' }]; } 
         else if (Array.isArray(notesData)) { arr = notesData; }
 
+        // Calcular cuántas notas están pendientes de acuse para el usuario activo
+        const unreadForMeList = arr.filter(n => {
+            if (!localAuthor) return false;
+            if (!Array.isArray(n.readBy)) return n.by !== localAuthor;
+            return !n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+        });
+        const unreadForMeCount = unreadForMeList.length;
+
         const isInfo = containerId === 'infoNotes';
         const badge = document.getElementById(isInfo ? 'infoNotesBadge' : 'editNotesBadge');
         if (badge) {
-            badge.textContent = arr.length;
-            if (arr.length > 0) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            if (unreadForMeCount > 0) {
+                const hasBlocker = unreadForMeList.some(n => n.tag === 'bloqueo');
+                badge.innerHTML = `${arr.length} <span class="w-1.5 h-1.5 rounded-full ${hasBlocker ? 'bg-[#ff453a]' : 'bg-white'} inline-block animate-ping ml-0.5"></span>`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.textContent = arr.length;
+                if (arr.length > 0) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
         }
 
         if (arr.length === 0) {
@@ -1306,9 +1376,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const isSupremo = currentUserRole === 'Supremo';
         const isSupervisor = currentUserRole === 'Supervisor';
         const isLector = currentUserRole === 'Lector';
+        const item = getSelectedItem();
+        const projCons = (item && typeof getProjectConsultants === 'function') ? getProjectConsultants(item) : [];
+
+        // Banner superior si hay múltiples notas sin enterar
+        let headerBanner = '';
+        if (unreadForMeCount > 1) {
+            headerBanner = `
+                <div class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-between gap-2 shadow-sm mb-1">
+                    <div class="flex items-center gap-1.5 text-xs text-purple-200 font-medium">
+                        <span class="w-2 h-2 rounded-full bg-[#bf5af2] animate-ping shrink-0"></span>
+                        <span>Tienes <strong class="text-white font-bold">${unreadForMeCount} notas</strong> sin enterarte</span>
+                    </div>
+                    <button type="button" onclick="confirmAllNotesRead()" class="px-3 py-1 bg-[#bf5af2] hover:bg-[#a855f7] active:scale-95 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1 shrink-0">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Enterado de todas</span>
+                    </button>
+                </div>
+            `;
+        }
         
         container.classList.remove('hidden');
-        container.innerHTML = arr.map(n => {
+        container.innerHTML = headerBanner + arr.map(n => {
             const col = (consultants[n.by] && consultants[n.by].color) ? consultants[n.by].color : '#bf5af2';
             const initial = (n.by || '?').charAt(0).toUpperCase();
             
@@ -1341,8 +1430,54 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             const friendlyDate = window.formatFriendlyNoteDate(n.date);
 
+            // Estado de lectura individual
+            const isReadByMe = (() => {
+                if (!localAuthor) return true;
+                if (!Array.isArray(n.readBy)) return n.by === localAuthor;
+                return n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+            })();
+
+            // Sección de acuse y auditoría
+            let receiptSection = '';
+            if (!isReadByMe) {
+                receiptSection = `
+                    <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 text-[10px] ${tag === 'bloqueo' ? 'text-[#ff453a]' : 'text-purple-300'} font-semibold">
+                            <span class="w-2 h-2 rounded-full ${tag === 'bloqueo' ? 'bg-[#ff453a]' : 'bg-[#bf5af2]'} animate-ping shrink-0"></span>
+                            <span>${tag === 'bloqueo' ? '⚠️ Bloqueo pendiente de tu acuse' : '📌 Pendiente de tu lectura'}</span>
+                        </div>
+                        <button type="button" onclick="confirmNoteRead('${n.id}')" class="px-3 py-1.5 ${tag === 'bloqueo' ? 'bg-[#ff453a] hover:bg-[#e0382e] shadow-[0_0_10px_rgba(255,69,58,0.4)]' : 'bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 shadow-[0_0_10px_rgba(191,90,242,0.4)]'} active:scale-95 text-white font-bold text-[10px] rounded-xl transition flex items-center gap-1.5 shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Enterado / Confirmar lectura</span>
+                        </button>
+                    </div>
+                `;
+            } else {
+                const myReceipt = Array.isArray(n.readBy) ? n.readBy.find(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor) : null;
+                const myReceiptDate = (myReceipt && typeof myReceipt === 'object' && myReceipt.at) ? window.formatFriendlyNoteDate(myReceipt.at) : '';
+                
+                const readList = Array.isArray(n.readBy) ? n.readBy.map(r => (typeof r === 'string' ? r : (r && r.user))).filter(Boolean) : (n.by ? [n.by] : []);
+                const pendingCons = projCons.filter(c => !readList.includes(c));
+                const auditTitle = `Leído por: ${readList.join(', ') || 'Nadie'}${pendingCons.length ? '\nPendiente: ' + pendingCons.join(', ') : ''}`;
+
+                receiptSection = `
+                    <div class="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[9px] text-gray-400">
+                        <span class="flex items-center gap-1 text-[#30d158] font-medium">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            ${isAuthor ? 'Publicado por ti' : `Enterado (${myReceiptDate || 'Confirmado'})`}
+                        </span>
+                        <span class="text-[9px] text-gray-500 hover:text-gray-300 transition cursor-help flex items-center gap-1 ml-auto" title="${escapeHtml(auditTitle)}">
+                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>${readList.length}${projCons.length ? '/' + projCons.length : ''} enterados</span>
+                        </span>
+                    </div>
+                `;
+            }
+
+            const unreadCardClasses = !isReadByMe ? (tag === 'bloqueo' ? 'border-[#ff453a]/60 bg-[#ff453a]/10 shadow-[0_0_15px_rgba(255,69,58,0.2)]' : 'border-[#bf5af2]/60 bg-[#bf5af2]/10 shadow-[0_0_15px_rgba(191,90,242,0.15)]') : 'border-white/5 hover:border-white/10 bg-black/40 hover:bg-black/50';
+
             return `
-                <div class="flex flex-col gap-2 bg-black/40 hover:bg-black/50 p-3 rounded-xl border border-white/5 hover:border-white/10 shadow-sm transition-all group">
+                <div class="flex flex-col gap-2 p-3 rounded-xl border ${unreadCardClasses} shadow-sm transition-all group">
                     <div class="flex items-center gap-2">
                         <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm shrink-0" style="background-color: ${col};">
                             ${initial}
@@ -1355,6 +1490,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         ${delBtn}
                     </div>
                     <div class="text-xs text-gray-200 pl-7 leading-relaxed whitespace-pre-wrap break-words">${linkedText}</div>
+                    ${receiptSection}
                 </div>
             `;
         }).join('');
@@ -1379,6 +1515,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 window.saveData(false);
                 window.renderNotesHistory(item.notes, 'editNotesHistory');
                 window.renderNotesHistory(item.notes, 'infoNotes');
+                window.renderMindMap();
             }
         }
     };
@@ -2752,6 +2889,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (hasNotes || currentUserRole !== 'Lector') {
             notesCont.classList.remove('hidden');
             window.renderNotesHistory(item.notes, 'infoNotes');
+
+            // Si hay notas no leídas para el usuario activo, expandir automáticamente el foro
+            const hasUnreadForMe = Array.isArray(item.notes) && item.notes.some(n => {
+                if (!localAuthor) return false;
+                if (!Array.isArray(n.readBy)) return n.by !== localAuthor;
+                return !n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+            });
+            if (hasUnreadForMe) {
+                const acc = document.getElementById('acc-notes-details');
+                if (acc) acc.open = true;
+            }
         } else {
             notesCont.classList.add('hidden');
         }
@@ -3544,6 +3692,72 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           pPerc.setAttribute('style', 'font-size: 9.5px; font-weight: 600; font-family: "SF Mono", monospace; pointer-events: none;');
           pPerc.textContent = `${prog}%`;
           g.appendChild(pPerc);
+
+          // 3.5 BADGE DE NOTIFICACIÓN DE FORO (NO LEÍDOS POR EL USUARIO ACTIVO)
+          if (localAuthor && Array.isArray(p.notes) && p.notes.length > 0) {
+              const unreadNotes = p.notes.filter(n => {
+                  if (!n) return false;
+                  if (!Array.isArray(n.readBy)) {
+                      return n.by !== localAuthor;
+                  }
+                  return !n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+              });
+
+              const unreadCount = unreadNotes.length;
+              if (unreadCount > 0) {
+                  const hasBlocker = unreadNotes.some(n => n.tag === 'bloqueo');
+                  const badgeColor = hasBlocker ? '#ff453a' : '#bf5af2';
+                  const badgeG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                  badgeG.setAttribute('class', 'project-unread-badge');
+                  badgeG.style.pointerEvents = 'none';
+
+                  if (unreadCount < 10) {
+                      const bCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                      bCircle.setAttribute('cx', '310');
+                      bCircle.setAttribute('cy', '4');
+                      bCircle.setAttribute('r', '8.5');
+                      bCircle.setAttribute('fill', badgeColor);
+                      bCircle.setAttribute('stroke', '#0d0d12');
+                      bCircle.setAttribute('stroke-width', '1.5');
+                      bCircle.setAttribute('class', hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
+                      bCircle.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
+                      badgeG.appendChild(bCircle);
+
+                      const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                      bTxt.setAttribute('x', '310');
+                      bTxt.setAttribute('y', '7');
+                      bTxt.setAttribute('text-anchor', 'middle');
+                      bTxt.setAttribute('fill', '#ffffff');
+                      bTxt.setAttribute('style', 'font-size: 9px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
+                      bTxt.textContent = String(unreadCount);
+                      badgeG.appendChild(bTxt);
+                  } else {
+                      const bPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                      bPill.setAttribute('x', '298');
+                      bPill.setAttribute('y', '-5');
+                      bPill.setAttribute('width', '24');
+                      bPill.setAttribute('height', '18');
+                      bPill.setAttribute('rx', '9');
+                      bPill.setAttribute('fill', badgeColor);
+                      bPill.setAttribute('stroke', '#0d0d12');
+                      bPill.setAttribute('stroke-width', '1.5');
+                      bPill.setAttribute('class', hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
+                      bPill.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
+                      badgeG.appendChild(bPill);
+
+                      const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                      bTxt.setAttribute('x', '310');
+                      bTxt.setAttribute('y', '7.5');
+                      bTxt.setAttribute('text-anchor', 'middle');
+                      bTxt.setAttribute('fill', '#ffffff');
+                      bTxt.setAttribute('style', 'font-size: 8.5px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
+                      bTxt.textContent = '9+';
+                      badgeG.appendChild(bTxt);
+                  }
+
+                  g.appendChild(badgeG);
+              }
+          }
 
           // 4. CAPA DE INTERCEPCIÓN (Caja invisible final con silueta continua)
           const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');

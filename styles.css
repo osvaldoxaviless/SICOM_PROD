@@ -701,4 +701,37 @@ body.theme-light #loginOverlay .orb {
     transform: scale(0.95);
 }
 
+/* Animaciones para los badges de notas no leídas en el mapa mental */
+@keyframes unreadPurplePulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px rgba(191, 90, 242, 0.8));
+    }
+    50% {
+        transform: scale(1.18);
+        filter: drop-shadow(0 0 12px rgba(191, 90, 242, 1));
+    }
+}
+@keyframes unreadBlockerPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 6px rgba(255, 69, 58, 0.85));
+    }
+    50% {
+        transform: scale(1.22);
+        filter: drop-shadow(0 0 14px rgba(255, 69, 58, 1));
+    }
+}
+.unread-purple-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: unreadPurplePulse 2.2s infinite ease-in-out;
+}
+.unread-blocker-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: unreadBlockerPulse 1.3s infinite ease-in-out;
+}
+
+
 
