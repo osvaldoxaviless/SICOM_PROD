@@ -913,3 +913,125 @@ body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-fu
 @media (min-width: 768px) { body:has(#infoCard:not(.hidden)) #speedDial { right: 440px; } }
 @media (max-width: 767px) { body:has(#infoCard:not(.hidden), #dailyDrawer:not(.-translate-x-full)) #speedDial { opacity: 0; pointer-events: none; } }
 @media (prefers-reduced-motion: reduce) { #speedDial, #speedDial * { transition: none !important; } }
+
+/* ==========================================================================
+   TRANSICIONES FLUIDAS ENTRADA Y SALIDA (100% PATH LENGTH + REVERSE COLLAPSE)
+   ========================================================================== */
+@keyframes projectNodeBloomIn {
+    0% {
+        opacity: 0;
+        transform: var(--start-transform) scale(0.86);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: var(--end-transform) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes projectNodeBloomOut {
+    0% {
+        opacity: 1;
+        transform: var(--end-transform) scale(1);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: var(--start-transform) scale(0.86);
+        filter: blur(4px);
+    }
+}
+
+@keyframes connectorDrawIn {
+    0% {
+        opacity: 0;
+        stroke-dashoffset: 1;
+    }
+    30% {
+        opacity: var(--target-opacity, 1);
+    }
+    100% {
+        opacity: var(--target-opacity, 1);
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes connectorDrawOut {
+    0% {
+        opacity: var(--target-opacity, 1);
+        stroke-dashoffset: 0;
+    }
+    100% {
+        opacity: 0;
+        stroke-dashoffset: 1;
+    }
+}
+
+.proj-animate-in {
+    opacity: 0;
+    animation: projectNodeBloomIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity, filter;
+}
+
+.proj-animate-out {
+    pointer-events: none !important;
+    animation: projectNodeBloomOut 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    will-change: transform, opacity, filter;
+}
+
+.connector-animate-in {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: connectorDrawIn 0.40s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.connector-animate-out {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: connectorDrawOut 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+/* ==========================================================================
+   DESLIZAMIENTO FLIP DE MÓDULOS Y MODO SINERGIA (CO-ASIGNACIÓN)
+   ========================================================================== */
+@keyframes moduleSlideTransition {
+    0% {
+        transform: var(--mod-prev-transform);
+    }
+    100% {
+        transform: var(--mod-curr-transform);
+    }
+}
+
+.module-slide-anim {
+    animation: moduleSlideTransition 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform;
+}
+
+@keyframes synergyPulseGlow {
+    0%, 100% {
+        stroke-width: 2.2px;
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.55));
+    }
+    50% {
+        stroke-width: 3px;
+        filter: drop-shadow(0 0 16px rgba(191, 90, 242, 0.90)) drop-shadow(0 0 24px rgba(0, 113, 227, 0.70));
+    }
+}
+
+.synergy-capsule-glow {
+    animation: synergyPulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes synergyConnectorFlow {
+    from { stroke-dashoffset: 40; }
+    to { stroke-dashoffset: 0; }
+}
+
+.synergy-connector-line {
+    stroke-width: 2.8px !important;
+    stroke-dasharray: 8, 4 !important;
+    animation: synergyConnectorFlow 1.2s linear infinite !important;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
+}

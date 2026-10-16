@@ -16,6 +16,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let activeFilterConsultants = ['ALL'], activeFilterStatuses = ['ALL'], activeFilterCompanies = ['ALL'];
     let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false, showAllSecondaryLinks = false;
     let collapsedModules = new Set();
+    let initialCollapseApplied = false;
+    let cameraAnimId = null;
+    let lastExpandedModuleId = null;
+    let prevModulePositions = new Map();
+    let prevCorePaths = new Map();
+    let consultantFilterMode = 'ANY';
     let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
@@ -1759,6 +1765,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(svgElem) svgElem.style.overflow = 'visible';
     }
 
+    window.animateCameraTo = function(targetTx, targetTy, targetScale, duration = 480) {
+        if (cameraAnimId) {
+            cancelAnimationFrame(cameraAnimId);
+            cameraAnimId = null;
+        }
+        const startTx = translateX;
+        const startTy = translateY;
+        const startScale = scale;
+        const startTime = performance.now();
+
+        function step(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / Math.max(1, duration));
+            const ease = 1 - Math.pow(1 - progress, 4);
+            translateX = startTx + (targetTx - startTx) * ease;
+            translateY = startTy + (targetTy - startTy) * ease;
+            scale = startScale + (targetScale - startScale) * ease;
+            window.updateCanvasTransform();
+            if (progress < 1) {
+                cameraAnimId = requestAnimationFrame(step);
+            } else {
+                cameraAnimId = null;
+            }
+        }
+        cameraAnimId = requestAnimationFrame(step);
+    };
+
     let animationFrameId = null;
     let touchStartX = 0;
     let touchStartY = 0;
@@ -1788,6 +1821,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     if(ws) {
         ws.addEventListener('touchstart', (e) => {
             if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
+            if (cameraAnimId) {
+                cancelAnimationFrame(cameraAnimId);
+                cameraAnimId = null;
+            }
             if (e.touches.length === 1) { 
                 isTouchActive = true; 
                 touchStartX = e.touches[0].clientX;
@@ -1905,6 +1942,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         ws.addEventListener('mousedown', (e) => { 
             if(e.target.closest('.interactive-node') || e.target.closest('#infoCard') || isAnyDrawerActive()) return; 
+            if (cameraAnimId) {
+                cancelAnimationFrame(cameraAnimId);
+                cameraAnimId = null;
+            }
             isPanning = true; 
             startX = e.clientX - translateX; 
             startY = e.clientY - translateY; 
@@ -1930,6 +1971,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         ws.addEventListener('wheel', (e) => { 
             if(isAnyDrawerActive() || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
             e.preventDefault(); 
+            if (cameraAnimId) {
+                cancelAnimationFrame(cameraAnimId);
+                cameraAnimId = null;
+            }
             window.zoomCanvas(-e.deltaY * 0.001, e.clientX, e.clientY); 
         }, {passive: false});
     }
@@ -1994,15 +2039,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         let targetTx = (availableWidth / 2) - (nodeX * targetScale);
         let targetTy = (availableHeight / 2) - (nodeY * targetScale);
         
-        scale = targetScale;
-        translateX = targetTx;
-        translateY = targetTy;
-        window.updateCanvasTransform();
+        window.animateCameraTo(targetTx, targetTy, targetScale, 520);
     };
 
     window.recenterCanvas = function() {
         if(!svgElem || !canvasGroup) return; 
         const rect = svgElem.getBoundingClientRect();
+        let targetTx, targetTy, targetScale;
         try {
             const bbox = canvasGroup.getBBox(); if (bbox.width === 0 || bbox.height === 0) throw new Error();
             const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
@@ -2013,17 +2056,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const sY = (rect.height - padY * 2) / bbox.height;
             
             const minAllowed = window.getMinZoomLimit();
-            scale = Math.max(minAllowed, Math.min(1.10, Math.min(sX, sY)));
+            targetScale = Math.max(minAllowed, Math.min(1.10, Math.min(sX, sY)));
             
-            translateX = (rect.width / 2) - ((bbox.x + bbox.width / 2) * scale); 
-            translateY = (rect.height / 2) - ((bbox.y + bbox.height / 2) * scale);
+            targetTx = (rect.width / 2) - ((bbox.x + bbox.width / 2) * targetScale); 
+            targetTy = (rect.height / 2) - ((bbox.y + bbox.height / 2) * targetScale);
         } catch(e) { 
-            translateX = rect.width / 2; 
-            translateY = rect.height * 0.35; 
+            targetTx = rect.width / 2; 
+            targetTy = rect.height * 0.35; 
             const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-            scale = isSmallScreen ? 0.28 : 0.85; 
+            targetScale = isSmallScreen ? 0.28 : 0.85; 
         }
-        window.updateCanvasTransform();
+        window.animateCameraTo(targetTx, targetTy, targetScale, 520);
     }
 
     window.toggleConfigDrawer = function() { isDrawerOpen ? window.closeConfigDrawer() : window.openConfigDrawer(); }
@@ -3038,13 +3081,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const sharedProjs = [];
         (appData.directProjects || []).forEach(p => {
           if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(modIdCheck) || (modIdCheck === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
-            sharedProjs.push(p);
+            sharedProjs.push({ proj: p, projType: 'direct-project', parentColor: (appData.directHub && appData.directHub.color) || '#f59e0b' });
           }
         });
         (appData.modules || []).forEach(m => {
           (m.projects || []).forEach(p => {
             if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(modIdCheck) || (modIdCheck === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
-              sharedProjs.push(p);
+              sharedProjs.push({ proj: p, projType: 'project', parentColor: m.color || '#0071e3' });
             }
           });
         });
@@ -3055,6 +3098,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               <span class="text-[9px] text-[#0071e3] font-bold bg-[#0071e3]/20 px-2 py-0.5 rounded-full border border-[#0071e3]/30">Multimódulo</span>
             </div>
           `;
+          const chipsWrap = document.createElement('div');
+          chipsWrap.className = "w-full flex flex-wrap gap-1.5 mt-1";
+          sharedProjs.forEach(({ proj, projType, parentColor }) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-xl text-blue-100 bg-[#0071e3]/15 hover:bg-[#0071e3]/30 border border-[#0071e3]/35 transition shadow-sm";
+            chip.title = "Ir al proyecto vinculado";
+            chip.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0 shadow-[0_0_4px_rgba(0,113,227,0.5)]" style="background-color: ${parentColor}"></span><span>🔗 ${escapeHtml(proj.name)}</span><span class="text-[9px] text-blue-300/80 ml-0.5">↗</span>`;
+            chip.onclick = () => {
+              const modKey = type === 'module' ? id : 'hub-direct';
+              if (collapsedModules.has(modKey)) {
+                collapsedModules.delete(modKey);
+                lastExpandedModuleId = modKey;
+                window.updateCollapseAllButtonState();
+                window.renderMindMap();
+              }
+              window.selectNode(projType, proj.id);
+            };
+            chipsWrap.appendChild(chip);
+          });
+          modContainer.appendChild(chipsWrap);
           modContainer.classList.remove('hidden');
         }
 
@@ -3416,13 +3480,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           `;
         }
       }
+      if (isProject && !item._renderData) {
+          let parentModKey = (type === 'direct-project') ? 'hub-direct' : null;
+          if (!parentModKey) {
+              const pMod = (appData.modules || []).find(m => (m.projects || []).some(p => p.id === id));
+              if (pMod) parentModKey = pMod.id;
+          }
+          if (parentModKey && collapsedModules.has(parentModKey)) {
+              collapsedModules.delete(parentModKey);
+              lastExpandedModuleId = parentModKey;
+              window.updateCollapseAllButtonState();
+              window.renderMindMap();
+          }
+      }
       window.showInfoCard(type, id);
       
       setTimeout(() => {
           if (item && item._renderData) {
               window.focusNode(item._renderData.x, item._renderData.y);
           } else if (type === 'core') {
-              window.focusNode(0, -250);
+              window.focusNode(0, 0);
           } else if (type === 'direct-hub' && appData.directHub && appData.directHub._renderData) {
               window.focusNode(appData.directHub._renderData.x, appData.directHub._renderData.y);
           }
@@ -3932,7 +4009,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           if (activeFilterConsultants.length > 0 && !activeFilterConsultants.includes('ALL')) {
               const pCons = getProjectConsultants(p);
-              if (!pCons.some(c => activeFilterConsultants.includes(c))) return false;
+              if (consultantFilterMode === 'ALL_SELECTED' && activeFilterConsultants.length >= 2) {
+                  if (!activeFilterConsultants.every(c => pCons.includes(c))) return false;
+              } else {
+                  if (!pCons.some(c => activeFilterConsultants.includes(c))) return false;
+              }
           }
           if (activeFilterCompanies.length > 0 && !activeFilterCompanies.includes('ALL')) {
               const pComps = window.getProjectCompanies(p);
@@ -3998,34 +4079,116 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
 
       ensureDataStructure();
-      const directHubItem = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+      if (!initialCollapseApplied && collapsedModules.size === 0) {
+          collapsedModules.add('hub-direct');
+          (appData.modules || []).forEach(m => {
+              if (m && m.id) collapsedModules.add(m.id);
+          });
+          initialCollapseApplied = true;
+          window.updateCollapseAllButtonState();
+      }
+
+      const directHubItem = appData.directHub || (appData.directHub = { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' });
       const visDir = appData.directProjects || [];
       const activeMods = (appData.modules || []).filter(m => m && typeof m === 'object');
-      
-      // Distribución en flujo vertical en cascada (Top-to-Bottom)
-      const allNodes = [];
-      const directData = { type: 'direct-hub', item: directHubItem, projects: visDir };
-      allNodes.push(directData);
+
+      const getLinkedProjectsForModule = (modId) => {
+          const linked = [];
+          if (modId !== 'hub-direct' && modId !== 'DIRECT') {
+              visDir.forEach(p => {
+                  if (Array.isArray(p.secondaryModules) && p.secondaryModules.includes(modId)) {
+                      linked.push(Object.assign(Object.create(p), {
+                          _isLinkedCopy: true,
+                          _origProj: p,
+                          _strictType: 'direct-project',
+                          _renderData: null
+                      }));
+                  }
+              });
+          }
+          activeMods.forEach(m => {
+              if (!m || m.id === modId) return;
+              (m.projects || []).forEach(p => {
+                  const isSec = Array.isArray(p.secondaryModules) && (
+                      p.secondaryModules.includes(modId) ||
+                      (modId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
+                      (modId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
+                  );
+                  if (isSec) {
+                      linked.push(Object.assign(Object.create(p), {
+                          _isLinkedCopy: true,
+                          _origProj: p,
+                          _strictType: 'project',
+                          _renderData: null
+                      }));
+                  }
+              });
+          });
+          return linked;
+      };
+
+      const dirLinked = getLinkedProjectsForModule('hub-direct');
+      // Ordenamiento por Peso (Gravedad al Centro): mayor a menor según cantidad de proyectos
+      const allNodes = [
+          {
+              type: 'direct-hub',
+              item: directHubItem,
+              ownProjects: visDir,
+              linkedProjects: dirLinked,
+              projects: visDir.length > 0 ? visDir : dirLinked
+          }
+      ];
       
       activeMods.forEach(m => {
           if (!m.id) m.id = 'm_' + Math.random().toString(36).slice(2, 9);
           if (!m.name) m.name = 'Módulo';
           if (!m.color) m.color = '#0071e3';
-          const modData = { type: 'module', item: m, projects: m.projects || [] };
-          allNodes.push(modData);
+          const ownP = m.projects || [];
+          const linkedP = getLinkedProjectsForModule(m.id);
+          allNodes.push({
+              type: 'module',
+              item: m,
+              ownProjects: ownP,
+              linkedProjects: linkedP,
+              projects: ownP.length > 0 ? ownP : linkedP
+          });
       });
 
-      const slotH = 70, colStepX = 370, coreX = 0, coreY = -250, modBaseY = 0;
-      const totalMods = allNodes.length;
-      let lNodes = [], rNodes = [];
+      allNodes.sort((a, b) => (b.projects || []).length - (a.projects || []).length);
+
+      // Simetría izquierda (Oeste) y derecha (Este), con los más pesados al centro (y ≈ 0) y los ligeros hacia Norte y Sur
+      const leftRaw = [], rightRaw = [];
       allNodes.forEach((n, idx) => {
-          n._colX = (idx - (totalMods - 1) / 2) * colStepX;
-          n._colY = modBaseY;
-          if (n._colX <= 0) lNodes.push(n);
-          else rNodes.push(n);
+          if (idx % 2 === 0) leftRaw.push(n);
+          else rightRaw.push(n);
       });
 
+      function arrangeFromCenterOutward(rawList) {
+          const ordered = [];
+          rawList.forEach((n, idx) => {
+              if (idx === 0) ordered.push(n);
+              else if (idx % 2 === 1) ordered.unshift(n); // Hacia zona Norte (Arriba)
+              else ordered.push(n); // Hacia zona Sur (Abajo)
+          });
+          return ordered;
+      }
+
+      const lNodes = arrangeFromCenterOutward(leftRaw);
+      const rNodes = arrangeFromCenterOutward(rightRaw);
+
+      const slotH = 75, mOffX = 400, pOffX = 900;
       function procSide(nodes, isLeft) {
+          const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
+          
+          // Total de slots reales en este sector según su estado actual (colapsado o expandido)
+          const totalSlots = nodes.reduce((sum, n) => {
+              const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+              const isCollapsed = isModuleCollapsed(modId, n);
+              const pCount = (n.projects || []).length;
+              return sum + (isCollapsed ? 1 : Math.max(1, pCount));
+          }, 0);
+
+          let cy = -(totalSlots * slotH / 2) + (slotH / 2);
           nodes.forEach(n => {
               const pCount = (n.projects || []).length;
               const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
@@ -4033,20 +4196,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
               const nItemName = n.item ? (n.item.name || '') : '';
               const isCollapsed = isModuleCollapsed(modId, n);
+              const weight = isCollapsed ? 1 : Math.max(1, pCount);
               
-              const mx = n._colX;
-              const my = n._colY;
-              const px = mx;
-              const sy = my + 105;
+              const sy = cy;
+              const ey = cy + (weight - 1) * slotH;
+              const my = (sy + ey) / 2;
+              cy += weight * slotH;
 
               if (!isCollapsed && pCount > 0) {
                   n.projects.forEach((p, idx) => { 
                       const cN = getProjectConsultants(p);
                       const col = generateJointGradient(cN);
-                      const strictType = n.type === 'direct-hub' ? 'direct-project' : 'project';
+                      const strictType = p._strictType || (n.type === 'direct-hub' ? 'direct-project' : 'project');
                       p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
                       const py = sy + idx * slotH;
                       p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
+                      if (p._isLinkedCopy && p._origProj && !p._origProj._renderData) {
+                          p._origProj._renderData = p._renderData;
+                      }
                   });
               } else {
                   (n.projects || []).forEach(p => { p._renderData = null; });
@@ -4071,13 +4238,46 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
               pC.classList.add('mindmap-connector');
-              const coreStartX = coreX;
-              const coreStartY = coreY + 60;
-              const modEndX = mx;
-              const modEndY = my - 25;
-              const cp1CoreY = coreStartY + 80;
-              const cp2CoreY = modEndY - 80;
-              pC.setAttribute('d', `M ${coreStartX} ${coreStartY} C ${coreStartX} ${cp1CoreY}, ${modEndX} ${cp2CoreY}, ${modEndX} ${modEndY}`);
+              const modEndX = isLeft ? mx + 165 : mx - 165;
+              const modEndY = my;
+              let coreStartX, coreStartY, cp1CoreX, cp1CoreY, cp2CoreX, cp2CoreY;
+
+              if (my < -70) {
+                  // Zona Norte: nace en (0, -60) con control vertical
+                  coreStartX = 0;
+                  coreStartY = -60;
+                  cp1CoreX = 0;
+                  cp1CoreY = -60 - Math.max(55, Math.abs(modEndY + 60) * 0.55);
+                  cp2CoreX = isLeft ? modEndX + 75 : modEndX - 75;
+                  cp2CoreY = modEndY;
+              } else if (my > 70) {
+                  // Zona Sur: nace en (0, 60) con control vertical
+                  coreStartX = 0;
+                  coreStartY = 60;
+                  cp1CoreX = 0;
+                  cp1CoreY = 60 + Math.max(55, Math.abs(modEndY - 60) * 0.55);
+                  cp2CoreX = isLeft ? modEndX + 75 : modEndX - 75;
+                  cp2CoreY = modEndY;
+              } else if (isLeft) {
+                  // Zona Oeste (Izquierda): nace en (-60, 0) con control horizontal
+                  coreStartX = -60;
+                  coreStartY = 0;
+                  cp1CoreX = -125;
+                  cp1CoreY = 0;
+                  cp2CoreX = modEndX + 65;
+                  cp2CoreY = modEndY;
+              } else {
+                  // Zona Este (Derecha): nace en (60, 0) con control horizontal
+                  coreStartX = 60;
+                  coreStartY = 0;
+                  cp1CoreX = 125;
+                  cp1CoreY = 0;
+                  cp2CoreX = modEndX - 65;
+                  cp2CoreY = modEndY;
+              }
+
+              const newCorePathD = `M ${coreStartX} ${coreStartY} C ${cp1CoreX} ${cp1CoreY}, ${cp2CoreX} ${cp2CoreY}, ${modEndX} ${modEndY}`;
+              pC.setAttribute('d', newCorePathD);
               pC.setAttribute('fill', 'none'); 
 
               // Conector de fibra óptica: Gradiente direccional de Núcleo a Módulo
@@ -4109,9 +4309,35 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               pC.setAttribute('opacity', lineOpacity);
               canvasGroup.appendChild(pC);
 
-              if (!isCollapsed && pCount > 0) (n.projects || []).forEach(p => {
+              const prevModPos = prevModulePositions.get(modId);
+              const prevCorePathD = prevCorePaths.get(modId);
+              if (prevModPos && prevModPos.y !== my && prevCorePathD && prevCorePathD !== newCorePathD) {
+                  const prevNums = (prevCorePathD.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+                  const currNums = [coreStartX, coreStartY, cp1CoreX, cp1CoreY, cp2CoreX, cp2CoreY, modEndX, modEndY];
+                  if (prevNums.length === 8) {
+                      pC.setAttribute('d', prevCorePathD);
+                      const animStart = performance.now();
+                      const animDur = 380;
+                      const stepCorePath = (now) => {
+                          const t = Math.min(1, (now - animStart) / animDur);
+                          const ease = 1 - Math.pow(1 - t, 3);
+                          const v = prevNums.map((p0, i) => p0 + (currNums[i] - p0) * ease);
+                          pC.setAttribute('d', `M ${v[0]} ${v[1]} C ${v[2]} ${v[3]}, ${v[4]} ${v[5]}, ${v[6]} ${v[7]}`);
+                          cGrad.setAttribute('x1', `${v[0]}`);
+                          cGrad.setAttribute('y1', `${v[1]}`);
+                          cGrad.setAttribute('x2', `${v[6]}`);
+                          cGrad.setAttribute('y2', `${v[7]}`);
+                          if (t < 1 && pC.isConnected) requestAnimationFrame(stepCorePath);
+                      };
+                      requestAnimationFrame(stepCorePath);
+                  }
+              }
+              prevCorePaths.set(modId, newCorePathD);
+
+              if (!isCollapsed && pCount > 0) (n.projects || []).forEach((p, idx) => {
                   if (!p._renderData) return;
                   const pMatches = isDefaultState || isFiltered(p);
+                  const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
                   let isOver = false;
                   if(p.deadline && p.status !== 'Completado') {
                       const [dy, dm, dd] = p.deadline.split('-');
@@ -4120,32 +4346,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
                   const pP = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                   pP.classList.add('mindmap-connector');
+                  pP.setAttribute('pathLength', '1');
+                  pP.setAttribute('data-parent-mod', String(modId));
+                  pP.style.setProperty('--target-opacity', pMatches ? '1' : '0.12');
                   const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
                   const endCol = isOver ? '#ff453a' : solidColor;
 
-                  // Conexión vertical que nace exactamente en el botón de colapso inferior del módulo y baja hacia cada proyecto hijo
-                  const startX = mx;
-                  const startY = my + 25 + 11;
-                  const endX = p._renderData.x;
-                  const endY = p._renderData.y - 28;
-                  const dy = Math.abs(endY - startY);
-                  const cpDist = Math.max(20, Math.min(80, dy * 0.45));
-                  const cp1Y = startY + cpDist;
-                  const cp2Y = endY - cpDist;
+                  // Conexión limpia y fluida que nace exactamente en el botón de colapso
+                  const startX = isLeft ? (mx - 165 - 11) : (mx + 165 + 11);
+                  const endX = isLeft ? p._renderData.x + 160 : p._renderData.x - 160;
+                  const dx = Math.abs(endX - startX);
+                  const cpDist = Math.max(40, Math.min(95, dx * 0.45));
+                  const cp1X = isLeft ? startX - cpDist : startX + cpDist;
+                  const cp2X = isLeft ? endX + cpDist : endX - cpDist;
                   
-                  pP.setAttribute('d', `M ${startX} ${startY} C ${startX} ${cp1Y}, ${endX} ${cp2Y}, ${endX} ${endY}`);
+                  pP.setAttribute('d', `M ${startX} ${my} C ${cp1X} ${my}, ${cp2X} ${p._renderData.y}, ${endX} ${p._renderData.y}`);
                   pP.setAttribute('fill', 'none'); 
 
                   // Conector de fibra óptica: Gradiente direccional de Módulo a Proyecto
                   const pIdClean = String(p.id || Math.random().toString(36).slice(2, 7)).replace(/[^a-zA-Z0-9_-]/g, '');
-                  const pGradId = `grad-p-${pIdClean}`;
+                  const pGradId = `grad-p-${nItemId}-${pIdClean}`;
                   const pGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
                   pGrad.setAttribute('id', pGradId);
                   pGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
                   pGrad.setAttribute('x1', `${startX}`);
-                  pGrad.setAttribute('y1', `${startY}`);
+                  pGrad.setAttribute('y1', `${my}`);
                   pGrad.setAttribute('x2', `${endX}`);
-                  pGrad.setAttribute('y2', `${endY}`);
+                  pGrad.setAttribute('y2', `${p._renderData.y}`);
 
                   const ps1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   ps1.setAttribute('offset', '0%');
@@ -4161,9 +4388,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
                   dynamicDefs.appendChild(pGrad);
 
-                  pP.setAttribute('stroke', `url(#${pGradId})`); 
+                  if (isSynergyMatch) {
+                      pP.removeAttribute('pathLength');
+                      pP.classList.add('synergy-connector-line');
+                      pP.setAttribute('stroke', generateJointGradient(activeFilterConsultants));
+                  } else {
+                      pP.setAttribute('stroke', `url(#${pGradId})`);
+                  }
                   pP.setAttribute('stroke-width', isLight ? '2' : '1.5'); 
                   pP.setAttribute('opacity', pMatches ? '1' : '0.12'); 
+                  if (lastExpandedModuleId === modId && !isSynergyMatch) {
+                      pP.classList.add('connector-animate-in');
+                      pP.style.animationDelay = `${idx * 15}ms`;
+                  }
                   canvasGroup.appendChild(pP);
               });
           });
@@ -4178,9 +4415,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           if (n.type === 'direct-hub') moduleNodeMap.set('hub-direct', n);
       });
 
-      // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas en flujo vertical)
+      // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas)
       [...lNodes, ...rNodes].forEach(n => {
           (n.projects || []).forEach(p => {
+              if (p._isLinkedCopy) return;
               if (!Array.isArray(p.secondaryModules) || p.secondaryModules.length === 0) return;
               if (!p._renderData) return;
 
@@ -4195,25 +4433,43 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const secData = secNode._renderData;
                   const secMx = secData.x;
                   const secMy = secData.y;
+                  const secIsLeft = secData.isLeft;
                   const secColor = (secNode.item && secNode.item.color) ? secNode.item.color : '#0071e3';
                   const secNodeId = secNode.item ? secNode.item.id : (secNode.type === 'direct-hub' ? 'hub-direct' : '');
                   const isSecModSel = currentSelection.id === secNodeId;
 
                   const pX = pData.x;
                   const pY = pData.y;
+                  const pIsLeft = pX < 0;
 
-                  const startX = secMx;
-                  const startY = secMy + 25;
-                  const endX = secMx <= pX ? (pX - 160) : (pX + 160);
-                  const endY = pY;
-                  const cp1X = startX;
-                  const cp1Y = startY + Math.max(60, (endY - startY) * 0.5);
-                  const cp2X = secMx <= pX ? (endX - 70) : (endX + 70);
-                  const cp2Y = endY;
+                  let startX, startY = secMy, endX, endY = pY;
+                  let cp1X, cp2X;
+
+                  if (secIsLeft && pIsLeft) {
+                      startX = secMx - 165;
+                      endX = pX + 160;
+                      cp1X = startX - 70;
+                      cp2X = endX + 70;
+                  } else if (!secIsLeft && !pIsLeft) {
+                      startX = secMx + 165;
+                      endX = pX - 160;
+                      cp1X = startX + 70;
+                      cp2X = endX - 70;
+                  } else if (secIsLeft && !pIsLeft) {
+                      startX = secMx + 165;
+                      endX = pX - 160;
+                      cp1X = startX + 220;
+                      cp2X = endX - 220;
+                  } else {
+                      startX = secMx - 165;
+                      endX = pX + 160;
+                      cp1X = startX - 220;
+                      cp2X = endX + 220;
+                  }
 
                   const pSec = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                   pSec.classList.add('mindmap-connector', 'secondary-module-connector');
-                  pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`);
+                  pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`);
                   pSec.setAttribute('fill', 'none');
                   pSec.setAttribute('data-source-proj', String(p.id));
                   pSec.setAttribute('data-target-mod', String(secId));
@@ -4265,8 +4521,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       [...lNodes, ...rNodes].forEach(n => {
         const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
         const isCollapsed = isModuleCollapsed(modId, n);
+        const { x: mx, y: my } = n._renderData || { x: 0, y: 0 };
         if (!isCollapsed) {
-          (n.projects || []).forEach(p => {
+          (n.projects || []).forEach((p, idx) => {
             if (!p._renderData) return;
             const { x, y, color, type: strictType, realId } = p._renderData; 
           const isSel = currentSelection.id === realId;
@@ -4280,7 +4537,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           g.setAttribute('transform', `translate(${x - 160}, ${y - 28})`);
           const pCleanId = String(realId).replace(/[^a-zA-Z0-9_-]/g, '');
           g.setAttribute('data-project-id', String(realId));
+          g.setAttribute('data-parent-mod', String(modId));
           g.classList.add('mindmap-project-node', `proj-node-${pCleanId}`);
+          g.style.setProperty('--start-transform', `translate(${n._renderData.x - 160}px, ${n._renderData.y - 28}px)`);
+          g.style.setProperty('--end-transform', `translate(${x - 160}px, ${y - 28}px)`);
+          if (lastExpandedModuleId === modId) {
+              g.classList.add('proj-animate-in');
+              g.style.animationDelay = `${idx * 18}ms`;
+          }
           
           // ESTADO DE VISIBILIDAD Y BLOQUEO DURO
           const forceInteractive = isDefaultState;
@@ -4301,7 +4565,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           g.addEventListener('click', function(e) {
               e.preventDefault();
               e.stopPropagation();
-              try { window.selectNode(currentNodeType, currentNodeId); } catch (err) { console.error('No se pudo abrir el proyecto:', p, err); window.showToast('⚠️ No se pudo abrir "' + p.name + '": ' + err.message, true); }
+              try {
+                  if (p._origProj && p._renderData) p._origProj._renderData = p._renderData;
+                  window.selectNode(currentNodeType, currentNodeId);
+              } catch (err) { console.error('No se pudo abrir el proyecto:', p, err); window.showToast('⚠️ No se pudo abrir "' + p.name + '": ' + err.message, true); }
           }, false);
 
           // ILUMINACIÓN INTERACTIVA ON-DEMAND PARA PROYECTOS MULTIMÓDULO
@@ -4345,13 +4612,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               g.appendChild(aura);
           }
 
+          const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '16'); 
           r.setAttribute('fill', isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 18, 24, 0.88)'); 
-          r.setAttribute('stroke', isOver ? '#ff453a' : color); 
-          r.setAttribute('stroke-width', isOver ? '2' : (isSel ? '2' : '1')); 
+          r.setAttribute('stroke', isOver ? '#ff453a' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : color)); 
+          r.setAttribute('stroke-width', isOver ? '2' : (isSynergyMatch ? '2.5' : (isSel ? '2' : '1'))); 
           r.style.pointerEvents = 'none';
           if (isOver) r.classList.add('overdue-capsule');
+          if (isSynergyMatch) r.classList.add('synergy-capsule-glow');
           if(isSel || (!isDefaultState && pMatches)) r.setAttribute('filter', 'url(#glow)'); 
           g.appendChild(r);
 
@@ -4415,7 +4684,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
           nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
-          const maxNameLen = hasSecBadge ? (compBadgeOffset ? 26 : 34) : (compBadgeOffset ? 35 : 55);
+          const maxNameLen = (hasSecBadge || isSynergyMatch) ? (compBadgeOffset ? 22 : 28) : (compBadgeOffset ? 35 : 55);
           nT.textContent = fullText.length > maxNameLen ? fullText.substring(0, maxNameLen - 3)+'...' : fullText;
           g.appendChild(nT);
 
@@ -4456,13 +4725,82 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
               g.appendChild(multiG);
           }
+
+          // Micro-badge destacado de Sinergia (🤝 JUNTOS)
+          if (isSynergyMatch) {
+              const synG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              const synX = hasSecBadge ? 192 : 248;
+              synG.setAttribute('transform', `translate(${synX}, 9)`);
+              synG.style.pointerEvents = 'none';
+
+              const synBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              synBg.setAttribute('width', '54');
+              synBg.setAttribute('height', '14');
+              synBg.setAttribute('rx', '7');
+              synBg.setAttribute('fill', 'rgba(191, 90, 242, 0.25)');
+              synBg.setAttribute('stroke', '#bf5af2');
+              synBg.setAttribute('stroke-width', '1');
+              synG.appendChild(synBg);
+
+              const synTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              synTxt.setAttribute('x', '27');
+              synTxt.setAttribute('y', '10.5');
+              synTxt.setAttribute('text-anchor', 'middle');
+              synTxt.setAttribute('fill', '#ffffff');
+              synTxt.setAttribute('style', 'font-size: 7.5px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;');
+              synTxt.textContent = '🤝 JUNTOS';
+              synG.appendChild(synTxt);
+
+              g.appendChild(synG);
+          }
+
+          // Micro-Avatares de consultores asignados en la zona inferior izquierda (y = 40)
+          const pConsList = getProjectConsultants(p);
+          let avatarOffset = 0;
+          if (pConsList.length > 0) {
+              const avG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              avG.style.pointerEvents = 'auto';
+              
+              const avTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+              avTitle.textContent = `Asignado a: ${pConsList.join(', ')}`;
+              avG.appendChild(avTitle);
+
+              pConsList.forEach((cName, cIdx) => {
+                  const cx = 40 + cIdx * 12;
+                  const cData = consultants[cName];
+                  const cColor = cData?.color || '#0071e3';
+                  const initial = (cName || '?').trim().charAt(0).toUpperCase();
+
+                  const avCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                  avCircle.setAttribute('cx', String(cx));
+                  avCircle.setAttribute('cy', '40');
+                  avCircle.setAttribute('r', '6');
+                  avCircle.setAttribute('fill', cColor);
+                  avCircle.setAttribute('stroke', isLight ? '#ffffff' : '#121218');
+                  avCircle.setAttribute('stroke-width', '1.2');
+                  avG.appendChild(avCircle);
+
+                  const avTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                  avTxt.setAttribute('x', String(cx));
+                  avTxt.setAttribute('y', '42.5');
+                  avTxt.setAttribute('text-anchor', 'middle');
+                  avTxt.setAttribute('fill', '#ffffff');
+                  avTxt.setAttribute('style', 'font-size: 7px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
+                  avTxt.textContent = initial;
+                  avG.appendChild(avTxt);
+              });
+              g.appendChild(avG);
+              avatarOffset = pConsList.length * 12 + 6;
+          }
           
           const prog = Math.round(p.progress || 0);
+          const pbStartX = 34 + avatarOffset;
+          const pbMaxWidth = Math.max(30, 258 - pbStartX);
 
           // Pista base de la barra de progreso
           const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          pbBg.setAttribute('x', '34'); pbBg.setAttribute('y', '38');
-          pbBg.setAttribute('width', '224'); pbBg.setAttribute('height', '3.5');
+          pbBg.setAttribute('x', String(pbStartX)); pbBg.setAttribute('y', '38');
+          pbBg.setAttribute('width', String(pbMaxWidth)); pbBg.setAttribute('height', '3.5');
           pbBg.setAttribute('rx', '1.75');
           pbBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)');
           pbBg.style.pointerEvents = 'none';
@@ -4470,8 +4808,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           if (prog > 0) {
              const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-             pb.setAttribute('x', '34'); pb.setAttribute('y', '38');
-             pb.setAttribute('width', Math.max(4, 224 * (prog / 100)));
+             pb.setAttribute('x', String(pbStartX)); pb.setAttribute('y', '38');
+             pb.setAttribute('width', String(Math.max(4, pbMaxWidth * (prog / 100))));
              pb.setAttribute('height', '3.5'); pb.setAttribute('rx', '1.75');
              pb.setAttribute('fill', isOver ? '#ff453a' : sCol);
              pb.style.pointerEvents = 'none';
@@ -4592,6 +4930,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const cleanModId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
         g.setAttribute('data-module-id', String(modId));
         g.classList.add('mindmap-module-node', `mod-node-${cleanModId}`);
+
+        if (prevModulePositions.has(modId)) {
+            const prev = prevModulePositions.get(modId);
+            if (prev && (prev.x !== x || prev.y !== y)) {
+                g.style.setProperty('--mod-prev-transform', `translate(${prev.x - 165}px, ${prev.y - 25}px)`);
+                g.style.setProperty('--mod-curr-transform', `translate(${x - 165}px, ${y - 25}px)`);
+                g.classList.add('module-slide-anim');
+            }
+        }
+        prevModulePositions.set(modId, { x, y });
         
         if (!modMatches) {
              g.setAttribute('opacity', '0.15');
@@ -4664,7 +5012,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         g.appendChild(t);
 
         // Micro-badge pill de conteo de proyectos a la derecha
-        const pCount = n.projects.length;
+        const pCount = (n.ownProjects || []).length;
         const allProjsList = (appData.directProjects || []).concat((appData.modules || []).flatMap(m => m.projects || []));
         const secCount = allProjsList.filter(p => Array.isArray(p.secondaryModules) && (
             p.secondaryModules.includes(modId) ||
@@ -4704,13 +5052,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         hitBox.style.cursor = 'pointer';
         g.appendChild(hitBox);
 
-        // Botón interactivo de colapso/expansión (+/-) en el borde inferior central del módulo
-        if (pCount > 0) {
+        // Botón interactivo de colapso/expansión (+/-) del módulo
+        if (pCount > 0 || secCount > 0) {
             const isCollapsed = isModuleCollapsed(modId, n);
+            const isLeft = (n._renderData && n._renderData.isLeft);
             const toggleBtnG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             toggleBtnG.classList.add('mod-toggle-btn');
-            const btnX = 165;
-            const btnY = 61;
+            const btnX = isLeft ? -11 : 341;
+            const btnY = 25;
             toggleBtnG.setAttribute('transform', `translate(${btnX}, ${btnY})`);
             
             const btnCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -4751,7 +5100,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             toggleBtnG.appendChild(hitArea);
             
             const btnTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-            btnTitle.textContent = isCollapsed ? `Expandir ${rawName} (${pCount} proyectos)` : `Colapsar ${rawName}`;
+            const totalExpandable = pCount > 0 ? pCount : secCount;
+            btnTitle.textContent = isCollapsed ? `Expandir ${rawName} (${totalExpandable} proyectos)` : `Colapsar ${rawName}`;
             toggleBtnG.appendChild(btnTitle);
             
             toggleBtnG.addEventListener('click', function(e) {
@@ -4766,9 +5116,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         canvasGroup.appendChild(g);
       });
 
-      if (appData.core) appData.core._renderData = { x: coreX, y: coreY };
+      if (appData.core) appData.core._renderData = { x: 0, y: 0 };
       const coreG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      coreG.setAttribute('transform', `translate(${coreX - 60}, ${coreY - 60})`);
+      coreG.setAttribute('transform', `translate(-60, -60)`);
       coreG.classList.add('interactive-node');
       coreG.onclick = (e) => { e.stopPropagation(); window.selectNode('core', 'sicom'); };
       
@@ -4839,7 +5189,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       canvasGroup.appendChild(coreG);
       
       if(appData.secondaryCore && appData.secondaryCore.active) {
-          const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(${coreX + 110}, ${coreY - 60})`); sucomG.classList.add('interactive-node');
+          const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(-60, 100)`); sucomG.classList.add('interactive-node');
           
           const sccBase = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           sccBase.setAttribute('cx', '60'); sccBase.setAttribute('cy', '60'); sccBase.setAttribute('r', '60');
@@ -4881,6 +5231,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           canvasGroup.appendChild(sucomG);
       }
+
+      lastExpandedModuleId = null;
     };
 
     let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
@@ -5884,6 +6236,13 @@ window.renderDailyTasks = function() {
         }
     };
 
+    window.setConsultantFilterMode = function(mode) {
+        consultantFilterMode = mode;
+        window.renderFilterChips();
+        window.renderMindMap();
+        if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+    };
+
     // === CHIPS DE MULTISELECCIÓN EN FILTROS AVANZADOS ===
     window.renderFilterChips = function() {
         // 1. Consultores
@@ -5892,7 +6251,22 @@ window.renderDailyTasks = function() {
             const allC = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
             const isAllSelected = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
             
-            let html = `<button type="button" onclick="toggleFilterChip('consultant', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">👥 Todos</button>`;
+            let html = '';
+
+            // Selector de modo cuando hay 2 o más consultores seleccionados
+            if (!isAllSelected && activeFilterConsultants.length >= 2) {
+                html += `
+                <div class="w-full flex items-center gap-1.5 p-1 bg-black/40 border border-[#bf5af2]/30 rounded-xl mb-2">
+                    <button type="button" onclick="setConsultantFilterMode('ANY')" class="flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${consultantFilterMode === 'ANY' ? 'bg-[#0071e3] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">
+                        🔗 Ver individuales y juntos
+                    </button>
+                    <button type="button" onclick="setConsultantFilterMode('ALL_SELECTED')" class="flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${consultantFilterMode === 'ALL_SELECTED' ? 'bg-[#bf5af2] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">
+                        🤝 Solo donde colaboran juntos
+                    </button>
+                </div>`;
+            }
+
+            html += `<button type="button" onclick="toggleFilterChip('consultant', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">👥 Todos</button>`;
             
             allC.forEach(name => {
                 const isAct = !isAllSelected && activeFilterConsultants.includes(name);
@@ -6049,6 +6423,7 @@ window.renderDailyTasks = function() {
         activeFilterUrgency = 'ALL';
         activeFilterPriority = 'ALL';
         activeFilterBottleneck = 'ALL';
+        consultantFilterMode = 'ANY';
         
         const badge = document.getElementById('activeFiltersBadge');
         if (badge) badge.classList.add('hidden');
@@ -6069,14 +6444,37 @@ window.renderDailyTasks = function() {
     };
 
     // === GESTIÓN DE COLAPSO Y EXPANSIÓN INTELIGENTE DE MÓDULOS ===
+    let isCollapsingAnim = false;
+
     window.toggleModuleCollapse = function(modId) {
+        if (isCollapsingAnim) return;
+
         if (collapsedModules.has(modId)) {
             collapsedModules.delete(modId);
+            lastExpandedModuleId = modId;
+            window.updateCollapseAllButtonState();
+            window.renderMindMap();
         } else {
-            collapsedModules.add(modId);
+            const projs = canvasGroup.querySelectorAll('.mindmap-project-node[data-parent-mod="' + modId + '"]');
+            const conns = canvasGroup.querySelectorAll('.mindmap-connector[data-parent-mod="' + modId + '"]');
+            projs.forEach(el => {
+                el.classList.remove('proj-animate-in');
+                el.style.animationDelay = '0ms';
+                el.classList.add('proj-animate-out');
+            });
+            conns.forEach(el => {
+                el.classList.remove('connector-animate-in');
+                el.style.animationDelay = '0ms';
+                el.classList.add('connector-animate-out');
+            });
+            isCollapsingAnim = true;
+            setTimeout(() => {
+                collapsedModules.add(modId);
+                isCollapsingAnim = false;
+                window.updateCollapseAllButtonState();
+                window.renderMindMap();
+            }, 270);
         }
-        window.updateCollapseAllButtonState();
-        window.renderMindMap();
     };
 
     window.collapseAllModules = function() {
