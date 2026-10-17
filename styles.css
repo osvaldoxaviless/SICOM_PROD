@@ -148,6 +148,9 @@ label {
    CONTROLES DE FORMULARIO E INPUTS TÉCNICOS
    ========================================================================== */
 input[list]::-webkit-calendar-picker-indicator { display: none !important; }
+input[type="checkbox"] {
+    accent-color: var(--color-signal-orange);
+}
 input[type="date"]::-webkit-calendar-picker-indicator { 
     display: block !important; 
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b8b3b0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E") !important;

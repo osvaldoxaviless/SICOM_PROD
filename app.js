@@ -695,134 +695,126 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const content = document.getElementById('manualContent');
         if (currentUserRole === 'Supremo') {
             content.innerHTML = `
-            <div class="border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-lg font-bold text-[#ff453a] flex items-center gap-2">
-                    <span>👑</span> Supremo (Dirección General)
+            <div class="border-b border-[#3d3a39] pb-3 mb-4">
+                <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPREMO</span>
+                    <span>Dirección General</span>
                 </h3>
-                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Supremo, tienes el control absoluto de la arquitectura, configuración, usuarios y datos críticos del Mini-ERP SICOM.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura, configuración, usuarios y datos críticos del sistema STGT // SICOM.</p>
             </div>
-            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🔑 Gestión de Accesos y Equipo:</strong>
-                    En <strong>Panel > Equipo</strong>, puedes dar de alta nuevos consultores o modificar existentes. Haz clic en la llave para asignar o resetear la contraseña privada de cualquier usuario, o cambiar sus niveles de acceso al instante.
+            <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Gestión de Accesos y Equipo</strong>
+                    En <strong class="text-[#eeeeee]">Panel &gt; Equipo</strong>, puedes dar de alta nuevos consultores o modificar existentes. Haz clic en la llave para asignar o resetear la contraseña privada de cualquier usuario, o cambiar sus niveles de acceso al instante.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🏗️ Arquitectura y Estructura:</strong>
-                    Eres el único con la capacidad de crear nuevos <strong>Módulos</strong> (agrupadores departamentales). Además, al editar un proyecto o módulo, tienes la facultad exclusiva de eliminarlo permanentemente.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Arquitectura y Estructura</strong>
+                    Capacidad exclusiva para crear nuevos <strong class="text-[#eeeeee]">Módulos</strong> (agrupadores departamentales) y eliminar proyectos o módulos permanentemente desde el panel de edición.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📋 Panel Notificaciones y Trabajo (Izquierdo):</strong>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Centro de Trabajo (Panel Izquierdo)</strong>
                     Supervisa todo el ciclo operativo en sus 4 pestañas: 
-                    <span class="text-[#ff453a] font-semibold">⚠️ Alertas</span> (proyectos vencidos), 
-                    <span class="text-[#35aee8] font-semibold">📌 Pendientes</span> (agrupadas por consultor), 
-                    <span class="text-[#ff9f0a] font-semibold">⏳ Validación</span> (evidencias por auditar) y 
-                    <span class="text-[#30d158] font-semibold">✅ Hechas</span> (tareas validadas). 
-                    Puedes <strong>Aprobar</strong> o <strong>Rechazar</strong> entregas de cualquier miembro.
+                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Alertas</span> (vencidos), 
+                    <span class="text-[#eeeeee] font-mono text-[10px] uppercase">Pendientes</span> (por consultor), 
+                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Validación</span> (evidencias por auditar) y 
+                    <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Hechas</span> (tareas validadas).
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">➕ Acciones Rápidas (Speed Dial +):</strong>
-                    Desde el botón flotante inferior puedes crear proyectos, registrar tus tareas personales, asignar <strong>Tareas por proyecto</strong> o abrir un nuevo módulo directamente sin buscar en el mapa.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Acciones Rápidas (+)</strong>
+                    Desde el botón inferior derecho puedes crear proyectos, registrar tareas personales, asignar <strong class="text-[#eeeeee]">Tareas por proyecto</strong> o abrir un nuevo módulo directamente.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📊 Docs Base y Estandarización:</strong>
-                    En <strong>Panel > Docs Base</strong>, defines los documentos obligatorios de calidad. El avance porcentual (0 a 100%) de cada proyecto se calcula matemáticamente según los documentos validados.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Docs Base y Estandarización</strong>
+                    En <strong class="text-[#eeeeee]">Panel &gt; Docs Base</strong>, defines los documentos obligatorios de calidad. El avance porcentual (0 a 100%) de cada proyecto se calcula automáticamente según los documentos validados.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🔒 Auditoría Inmutable y Respaldos:</strong>
-                    En <strong>Panel > Historial</strong> puedes auditar quién hizo qué modificación y a qué hora. Al final del Panel dispones de herramientas para exportar a Excel (CSV), descargar respaldo JSON y forzar sincronización con Firebase.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Auditoría Inmutable y Respaldos</strong>
+                    En <strong class="text-[#eeeeee]">Panel &gt; Historial</strong> puedes auditar cada modificación. Al final del Panel dispones de exportación CSV, respaldo JSON y sincronización con la nube.
                 </li>
             </ul>`;
         } else if (currentUserRole === 'Supervisor') {
             content.innerHTML = `
-            <div class="border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-lg font-bold text-[#ff9f0a] flex items-center gap-2">
-                    <span>🛡️</span> Supervisor (Coordinador de Operaciones)
+            <div class="border-b border-[#3d3a39] pb-3 mb-4">
+                <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPERVISOR</span>
+                    <span>Coordinación de Operaciones</span>
                 </h3>
-                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Supervisor, eres responsable del flujo operativo, la auditoría de calidad de las entregas y el cumplimiento de tiempos del equipo.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregas y cumplimiento de tiempos del equipo.</p>
             </div>
-            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">⏳ Auditoría y Validación de Entregas:</strong>
-                    Abre el panel izquierdo <strong>Notificaciones y Trabajo</strong> en la pestaña <strong>Validación</strong>. Verás las tareas concluidas por los consultores junto con su evidencia registrada. Podrás <span class="text-[#30d158] font-bold">✅ Aprobar</span> (pasa a Hechas y registra la firma) o <span class="text-[#ff453a] font-bold">❌ Rechazar</span> (se devuelve a pendientes para corrección).
+            <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Auditoría y Validación de Entregas</strong>
+                    Abre el panel izquierdo en la pestaña <strong class="text-[#eeeeee]">Validación</strong> para revisar tareas concluidas con su evidencia y <span class="text-[#a0ca92] font-mono uppercase">Aprobar</span> o <span class="text-[#ee6018] font-mono uppercase">Rechazar</span>.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📌 Asignación de Tareas por Proyecto:</strong>
-                    Utiliza el botón <strong>"+" > Tarea por proyecto</strong> para delegar actividades vinculadas directamente a cualquier proyecto, definiendo el responsable y la fecha límite sin necesidad de buscar el proyecto en el mapa.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Asignación de Tareas por Proyecto</strong>
+                    Utiliza el botón <strong class="text-[#eeeeee]">"+" &gt; Tarea por proyecto</strong> para delegar actividades vinculadas a cualquier proyecto con responsable y fecha límite.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🛠️ Control Operativo de Proyectos:</strong>
-                    Selecciona cualquier proyecto para editar su estatus (No Iniciado, Pendiente, En Progreso, Completado), fechas compromiso (propuesta/autorización/límite), porcentaje de avance y enlaces oficiales de Drive e InvGate.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Control Operativo de Proyectos</strong>
+                    Selecciona cualquier proyecto para editar su estatus, fechas compromiso, porcentaje de avance y enlaces oficiales de Drive e InvGate.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📈 Tablero y Radiografía Operativa:</strong>
-                    Entra a <strong>Panel > Tablero</strong> para medir en tiempo real la carga de proyectos por consultor, su avance promedio y los proyectos con atrasos acumulados (<span class="text-[#ff453a]">🚨</span>).
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Tablero y Prioridades por Consultor</strong>
+                    Usa <strong class="text-[#eeeeee]">Prioridades</strong> (con pestañas por consultor) y <strong class="text-[#eeeeee]">Panel &gt; Tablero</strong> para medir carga operativa, avance promedio y atrasos.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">💬 Foro Técnico y Notas:</strong>
-                    Comunícate y registra acuerdos operativos en la sección de Foro y Notas Técnicas de cada proyecto.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Foro y Bitácora Técnica</strong>
+                    Registra acuerdos, bloqueos y menciones (<code class="font-mono text-[#ee6018]">@</code>) con acuse de lectura en cada proyecto.
                 </li>
             </ul>`;
         } else if (currentUserRole === 'Lector') {
             content.innerHTML = `
-            <div class="border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-lg font-bold text-gray-400 flex items-center gap-2">
-                    <span>👁️</span> Lector (Auditoría y Supervisión Ejecutiva)
+            <div class="border-b border-[#3d3a39] pb-3 mb-4">
+                <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">LECTOR</span>
+                    <span>Auditoría y Supervisión Ejecutiva</span>
                 </h3>
-                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Lector, tienes acceso de auditoría visual total a todo el sistema SICOM, con protección absoluta contra alteraciones involuntarias.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // SICOM, con protección contra modificaciones.</p>
             </div>
-            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🔍 Navegación y Búsqueda:</strong>
-                    Explora libremente el mapa mental arrastrando con el ratón o el dedo. Usa la Lupa superior para localizar proyectos al instante o aplica filtros por consultor y estatus para evaluar áreas específicas.
+            <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Navegación y Búsqueda</strong>
+                    Explora libremente el mapa mental arrastrando con el ratón. Usa la búsqueda superior o aplica filtros por consultor, empresa y estatus.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📋 Inspección Detallada de Proyectos:</strong>
-                    Haz clic en cualquier proyecto para ver su tarjeta informativa: estatus, fechas límite, tareas concluidas y el desglose de documentos base que acreditan matemáticamente su avance.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Inspección Detallada de Proyectos</strong>
+                    Haz clic en cualquier proyecto para consultar estatus, fechas límite, tareas concluidas, bitácora técnica y documentos base.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📁 Evidencias y Tickets Oficiales:</strong>
-                    Accede directamente a los botones de <strong class="text-[#0071e3]">Drive</strong> e <strong class="text-[#30d158]">InvGate</strong> si han sido enlazados al proyecto.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Evidencias y Tickets Oficiales</strong>
+                    Accede directamente a los botones de <strong class="text-[#eeeeee]">Drive</strong> e <strong class="text-[#a0ca92]">InvGate</strong> enlazados al proyecto.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📊 Métricas y Trazabilidad:</strong>
-                    En el menú <strong>Panel</strong>, consulta el <strong>Tablero</strong> para evaluar el rendimiento global del equipo y la pestaña <strong>Historial</strong> para auditar cada movimiento registrado por los operadores.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Métricas y Trazabilidad</strong>
+                    En el menú <strong class="text-[#eeeeee]">Panel</strong>, consulta el <strong class="text-[#eeeeee]">Tablero</strong> para evaluar el rendimiento global y la pestaña <strong class="text-[#eeeeee]">Historial</strong>.
                 </li>
             </ul>`;
         } else {
             content.innerHTML = `
-            <div class="border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-lg font-bold text-brand-accent flex items-center gap-2">
-                    <span>🚀</span> Consultor Operativo (Ejecutor)
+            <div class="border-b border-[#3d3a39] pb-3 mb-4">
+                <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40">CONSULTOR</span>
+                    <span>Operación y Ejecución</span>
                 </h3>
-                <p class="text-xs text-gray-300 mt-1 leading-relaxed">Como Consultor, tu objetivo es ejecutar las asignaciones con precisión, documentar tu avance con evidencias y mantenerte al día con tus entregas.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta avances con evidencias y mantén al día tus entregas.</p>
             </div>
-            <ul class="text-xs space-y-3.5 text-gray-300 list-none leading-relaxed">
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📌 Centro de Trabajo (Panel Izquierdo):</strong>
-                    Abre el panel <strong>Notificaciones y Trabajo</strong> en el extremo izquierdo. Encontrarás:
-                    <br>• <strong class="text-white">Pendientes:</strong> Tus tareas aparecen al inicio bajo <strong>(Mis Tareas)</strong>. Puedes desplegar o contraer otros compañeros.
-                    <br>• <strong class="text-[#ff453a]">Alertas:</strong> Avisos de proyectos próximos a vencer o con atrasos.
-                    <br>• <strong class="text-[#ff9f0a]">Validación:</strong> Estado de tus entregas enviadas a jefatura (puedes cancelar el envío si necesitas corregir).
-                    <br>• <strong class="text-[#30d158]">Hechas:</strong> Historial de tus tareas validadas y aprobadas.
+            <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Centro de Trabajo (Panel Izquierdo)</strong>
+                    Abre el panel izquierdo para gestionar tus <strong class="text-[#eeeeee]">Pendientes</strong>, revisar <strong class="text-[#ee6018]">Alertas</strong>, dar seguimiento a entregas en <strong class="text-[#ee6018]">Validación</strong> y consultar tus tareas <strong class="text-[#a0ca92]">Hechas</strong>.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">➕ Diferenciación de Tareas (Speed Dial +):</strong>
-                    En el botón flotante (+) en la esquina inferior derecha:
-                    <br>• <strong class="text-[#35aee8]">Nueva tarea diaria (Personal):</strong> Registra recordatorios o tareas de tu día a día personal.
-                    <br>• <strong class="text-[#bf5af2]">Tarea por proyecto:</strong> Vincula una tarea directamente a un proyecto del sistema (queda registrada en el proyecto y visible para tu supervisor).
-                    <br>• <strong class="text-[#ff9f0a]">Nuevo proyecto:</strong> Alta rápida de un proyecto en tu área.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Diferenciación de Tareas (+)</strong>
+                    En el botón flotante inferior derecho puedes registrar <strong class="text-[#eeeeee]">Tareas diarias personales</strong>, vincular una <strong class="text-[#eeeeee]">Tarea por proyecto</strong> o dar de alta un <strong class="text-[#eeeeee]">Nuevo proyecto</strong>.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📝 Reporte con Evidencia:</strong>
-                    Al marcar una tarea como completada, se abrirá la ventana de evidencia. Escribe tu enlace, observación o resumen del entregable y pulsa <strong>Enviar a Validación</strong>. Tu supervisor la revisará y validará.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Reporte con Evidencia</strong>
+                    Al marcar una tarea como completada, registra tu enlace u observación del entregable y pulsa <strong class="text-[#eeeeee]">Enviar a Validación</strong>.
                 </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">🎯 Modo Enfoque y Filtros:</strong>
-                    Pulsa el botón <strong>Modo Enfoque</strong> en la barra superior para atenuar todo el sistema y concentrarte únicamente en los proyectos donde estás asignado.
-                </li>
-                <li class="bg-black/40 p-3 rounded-xl border border-white/5">
-                    <strong class="text-white block mb-1">📁 Enlaces Rápidos y Foro Técnico:</strong>
-                    En la tarjeta de cada proyecto dispones de botones para abrir carpetas de <strong>Drive</strong> y tickets de <strong>InvGate</strong>, así como publicar notas o comentarios en el <strong>Foro Técnico</strong>.
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Modo Enfoque y Foro Técnico</strong>
+                    Usa <strong class="text-[#eeeeee]">Modo Enfoque</strong> en la barra superior para aislar tus proyectos asignados y utiliza el <strong class="text-[#eeeeee]">Foro y Bitácora Técnica</strong> para acuerdos, bloqueos y menciones con acuse de lectura.
                 </li>
             </ul>`;
         }
@@ -1100,28 +1092,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     const isDanger = a.alertType === 'danger';
                     const isWarning = a.alertType === 'warning';
                     const isMention = a.alertType === 'mention';
-                    const colorClassText = isDanger ? 'text-[#ff453a]' : (isWarning ? 'text-[#ff9f0a]' : (isMention ? 'text-[#64d2ff]' : 'text-brand-accent'));
-                    const colorClassBg = isDanger ? 'bg-[#ff453a]/10' : (isWarning ? 'bg-[#ff9f0a]/10' : (isMention ? 'bg-[#0071e3]/15' : 'bg-brand-accent/10'));
-                    const colorClassBorder = isDanger ? 'border-[#ff453a]/30' : (isWarning ? 'border-[#ff9f0a]/30' : (isMention ? 'border-[#0071e3]/40' : 'border-brand-accent/30'));
-                    const colorClassBadgeBg = isDanger ? 'bg-[#ff453a]/20' : (isWarning ? 'bg-[#ff9f0a]/20' : (isMention ? 'bg-[#0071e3]/25' : 'bg-brand-accent/20'));
+                    const colorClassText = (isDanger || isWarning) ? 'text-[#ee6018]' : (isMention ? 'text-[#eeeeee]' : 'text-[#a0ca92]');
+                    const colorClassBg = 'bg-[#101010]';
+                    const colorClassBorder = (isDanger || isWarning) ? 'border-[#ee6018]/60' : 'border-[#3d3a39]';
+                    const colorClassBadgeBg = (isDanger || isWarning) ? 'bg-[#ee6018]/15 border-[#ee6018]/40' : 'bg-[#1d1a18] border-[#3d3a39]';
                     
                     // BLINDAJE DE SEGURIDAD
                     const userText = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
                     
                     let clickAction = `window.selectNode('${a.pType}', '${a.id}'); window.toggleAlertsDrawer();`;
                     let extraGlobalHTML = '';
-                    let cursorStyle = 'cursor-pointer hover:opacity-80';
+                    let cursorStyle = 'cursor-pointer hover:border-[#eeeeee]';
                     let assignedByText = '';
                     
                     if (a.isPendingVal) {
                         clickAction = '';
                         cursorStyle = 'cursor-default';
-                        assignedByText = a.taskInfo ? (a.taskInfo.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner self-start truncate max-w-[280px]">De: ${escapeHtml(a.taskInfo.assignedBy)}</span>` : '') : (a.globalTaskInfo && a.globalTaskInfo.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner self-start truncate max-w-[280px]">De: ${escapeHtml(a.globalTaskInfo.assignedBy)}</span>` : '');
+                        assignedByText = a.taskInfo ? (a.taskInfo.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(a.taskInfo.assignedBy)}</span>` : '') : (a.globalTaskInfo && a.globalTaskInfo.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(a.globalTaskInfo.assignedBy)}</span>` : '');
                         
                         if (a.pType === 'global') {
-                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', true)" class="pill-btn py-1.5 px-3 bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 font-bold text-[9px] hover:bg-[#30d158]/30 transition shadow-inner">✅ Aprobar</button><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', false)" class="pill-btn py-1.5 px-3 bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 font-bold text-[9px] hover:bg-[#ff453a]/30 transition shadow-inner">❌ Rechazar</button></div>`;
+                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', true)" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 font-mono uppercase text-[9px] hover:bg-[#a0ca92] hover:text-[#101010] transition">✓ Aprobar</button><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', false)" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 font-mono uppercase text-[9px] hover:bg-[#ee6018] hover:text-[#fafafa] transition">✕ Rechazar</button></div>`;
                         } else {
-                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', true); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 font-bold text-[9px] hover:bg-[#30d158]/30 transition shadow-inner">✅ Aprobar</button><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', false); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 font-bold text-[9px] hover:bg-[#ff453a]/30 transition shadow-inner">❌ Rechazar</button></div>`;
+                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', true); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 font-mono uppercase text-[9px] hover:bg-[#a0ca92] hover:text-[#101010] transition">✓ Aprobar</button><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', false); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 font-mono uppercase text-[9px] hover:bg-[#ee6018] hover:text-[#fafafa] transition">✕ Rechazar</button></div>`;
                         }
                     } else if (a.pType === 'global') {
                         clickAction = ''; 
@@ -1133,33 +1125,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         const canComplete = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || isMyTask || !t.assignee;
                         const canDelete = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || isAssigner;
                         
-                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
+                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
                         
                         extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7">`;
-                        if(canComplete) extraGlobalHTML += `<button onclick="completeGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#30d158]/20 text-[#30d158] hover:bg-[#30d158]/30 border border-[#30d158]/30 font-bold text-[9px] shadow-inner transition">✅ Marcar Lista</button>`;
-                        if(canDelete) extraGlobalHTML += `<button onclick="deleteGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#ff453a]/20 text-[#ff453a] hover:bg-[#ff453a]/30 border border-[#ff453a]/30 font-bold text-[9px] shadow-inner transition">🗑️ Borrar</button>`;
+                        if(canComplete) extraGlobalHTML += `<button onclick="completeGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] hover:bg-[#a0ca92] hover:text-[#101010] border border-[#a0ca92]/40 font-mono uppercase text-[9px] transition">✓ Marcar Lista</button>`;
+                        if(canDelete) extraGlobalHTML += `<button onclick="deleteGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] hover:bg-[#ee6018] hover:text-[#fafafa] border border-[#ee6018]/40 font-mono uppercase text-[9px] transition">Borrar</button>`;
                         extraGlobalHTML += `</div>`;
                     } else if (a.taskInfo) {
                         const t = a.taskInfo;
-                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
+                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
                     }
                     
                     return `
-                    <div class="${colorClassBg} border ${colorClassBorder} rounded-2xl p-4 ${cursorStyle} transition shadow-inner" onclick="if('${a.pType}' !== 'global') { ${clickAction} }">
-                        <div class="flex items-start gap-2 mb-1">
-                            <span class="text-lg mt-0.5">${a.icon}</span>
+                    <div class="${colorClassBg} border ${colorClassBorder} rounded-[10px] p-3.5 ${cursorStyle} transition" onclick="if('${a.pType}' !== 'global') { ${clickAction} }">
+                        <div class="flex items-start gap-2.5 mb-1">
+                            <span class="text-base mt-0.5">${a.icon}</span>
                             <div class="flex-1 min-w-0">
-                                <h4 class="text-sm font-semibold ${colorClassText} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                <p class="text-[10px] text-gray-400 uppercase tracking-widest truncate">└ ${escapeHtml(a.parentName)}</p>
+                                <h4 class="text-xs font-normal ${colorClassText} leading-tight truncate">${escapeHtml(a.name)}</h4>
+                                <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName)}</p>
                             </div>
                         </div>
                         <div class="ml-7 mt-2 flex flex-col gap-2">
-                            <span class="text-[10px] ${colorClassText} font-medium ${colorClassBadgeBg} border ${colorClassBorder} px-2 py-1.5 rounded shadow-inner self-start leading-snug break-words max-w-[280px]">${escapeHtml(a.reason)}</span>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="text-[9px] text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner self-start truncate max-w-[200px]">👤 ${escapeHtml(userText)}</span>
+                            <span class="text-[10px] ${colorClassText} ${colorClassBadgeBg} border px-2 py-1 rounded-[3px] self-start leading-snug break-words max-w-[280px]">${escapeHtml(a.reason)}</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[200px]">👤 ${escapeHtml(userText)}</span>
                                 ${assignedByText}
-                                ${a.globalTaskInfo && a.globalTaskInfo.feedback ? `<span class="text-[9px] text-gray-300 font-medium bg-black/40 border border-white/10 px-2 py-1.5 rounded shadow-inner w-full mt-1 block">💬 <b>Nota:</b> ${escapeHtml(a.globalTaskInfo.feedback)}</span>` : ''}
-                                ${a.taskInfo && a.taskInfo.feedback ? `<span class="text-[9px] text-gray-300 font-medium bg-black/40 border border-white/10 px-2 py-1.5 rounded shadow-inner w-full mt-1 block">💬 <b>Nota:</b> ${escapeHtml(a.taskInfo.feedback)}</span>` : ''}
+                                ${a.globalTaskInfo && a.globalTaskInfo.feedback ? `<span class="text-[9px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-2 py-1.5 rounded-[3px] w-full mt-1 block">💬 <b>Evidencia:</b> ${escapeHtml(a.globalTaskInfo.feedback)}</span>` : ''}
+                                ${a.taskInfo && a.taskInfo.feedback ? `<span class="text-[9px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-2 py-1.5 rounded-[3px] w-full mt-1 block">💬 <b>Evidencia:</b> ${escapeHtml(a.taskInfo.feedback)}</span>` : ''}
                             </div>
                         </div>
                         ${extraGlobalHTML}
@@ -1169,7 +1161,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         } else {
             if (badge) badge.classList.add('hidden');
-            if (container) container.innerHTML = `<div class="text-center py-10 opacity-50"><span class="text-4xl block mb-2">🎉</span><p class="text-sm text-gray-300">¡Al día! No tienes tareas asignadas pendientes ni compromisos vencidos.</p></div>`;
+            if (container) container.innerHTML = `<div class="text-center py-10 px-4 bg-[#101010] border border-[#3d3a39] rounded-[10px]"><span class="font-mono text-xs text-[#a0ca92] uppercase block mb-1">✓ SISTEMA AL DÍA</span><p class="text-xs text-[#8a8380]">No tienes tareas asignadas pendientes ni compromisos vencidos.</p></div>`;
         }
         window.renderDailyTasks();
     };
@@ -1381,15 +1373,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const allCons = Object.keys(consultants || {}).filter(k => consultants[k].role !== 'Lector');
         menu.innerHTML = allCons.map(cName => {
-            const col = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#64d2ff';
+            const col = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#ee6018';
             const initial = cName.charAt(0).toUpperCase();
             return `
-                <button type="button" onclick="insertMention('${escapeHtml(cName)}', '${context}')" class="w-full text-left p-2 rounded-xl hover:bg-white/10 transition flex items-center gap-2 text-xs text-white">
-                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm shrink-0" style="background-color: ${col};">
+                <button type="button" onclick="insertMention('${escapeHtml(cName)}', '${context}')" class="w-full text-left px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#3d3a39]/40 border border-[#3d3a39] hover:border-[#eeeeee] transition flex items-center gap-2 text-xs text-[#eeeeee]">
+                    <div class="w-4 h-4 rounded-[2px] flex items-center justify-center font-mono text-[9px] text-[#fafafa] shrink-0" style="background-color: ${col};">
                         ${initial}
                     </div>
-                    <span class="truncate font-medium flex-1">${escapeHtml(cName)}</span>
-                    <span class="text-[9px] text-[#64d2ff] font-mono">@${escapeHtml(cName.split(' ')[0])}</span>
+                    <span class="truncate text-[11px] text-[#eeeeee] flex-1">${escapeHtml(cName)}</span>
+                    <span class="text-[9px] text-[#ee6018] font-mono shrink-0">@${escapeHtml(cName.split(' ')[0])}</span>
                 </button>
             `;
         }).join('');
@@ -1424,23 +1416,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const prefix = isInfo ? 'tagBtn_info_' : 'tagBtn_edit_';
         const tags = ['comentario', 'acuerdo', 'bloqueo', 'entregable'];
+        const inactiveBg = isInfo ? 'bg-[#101010]' : 'bg-[#1d1a18]';
         
         tags.forEach(t => {
             const btn = document.getElementById(prefix + t);
             if (!btn) return;
             if (t === tag) {
-                btn.className = 'note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 shadow-sm';
+                btn.className = 'note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1';
                 if (t === 'comentario') {
-                    btn.className += ' bg-white/20 text-white border border-white/30';
+                    btn.className += ' bg-[#eeeeee] text-[#101010] border border-[#eeeeee]';
                 } else if (t === 'acuerdo') {
-                    btn.className += ' bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
+                    btn.className += ' bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]';
                 } else if (t === 'bloqueo') {
-                    btn.className += ' bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/40 shadow-[0_0_10px_rgba(255,69,58,0.25)]';
+                    btn.className += ' bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]';
                 } else if (t === 'entregable') {
-                    btn.className += ' bg-[#64d2ff]/20 text-[#64d2ff] border border-[#64d2ff]/40 shadow-[0_0_10px_rgba(100,210,255,0.2)]';
+                    btn.className += ' bg-[#eeeeee] text-[#101010] border border-[#eeeeee]';
                 }
             } else {
-                btn.className = 'note-tag-btn px-2.5 py-1 rounded-lg text-[10px] font-medium transition flex items-center gap-1 text-gray-400 hover:text-white hover:bg-white/5 border border-transparent';
+                btn.className = `note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee] ${inactiveBg} border border-[#3d3a39]`;
             }
         });
     };
@@ -1624,7 +1617,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (unreadForMeCount > 0) {
                 const hasBlocker = unreadForMeList.some(n => n.tag === 'bloqueo');
                 const hasMention = unreadForMeList.some(n => window.isUserMentionedInText(n.text, localAuthor));
-                const badgeDotColor = hasBlocker ? 'bg-[#ff453a]' : (hasMention ? 'bg-[#64d2ff]' : 'bg-white');
+                const badgeDotColor = (hasBlocker || hasMention) ? 'bg-[#ee6018]' : 'bg-[#a0ca92]';
                 badge.innerHTML = `${arr.length} <span class="w-1.5 h-1.5 rounded-full ${badgeDotColor} inline-block animate-ping ml-0.5"></span>`;
                 badge.classList.remove('hidden');
             } else {
@@ -1637,12 +1630,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (arr.length === 0) {
             container.classList.remove('hidden');
             container.innerHTML = `
-                <div class="text-center py-6 px-4 bg-white/[0.02] border border-dashed border-white/10 rounded-2xl">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-[#bf5af2]/10 border border-[#bf5af2]/20 flex items-center justify-center text-[#bf5af2]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <div class="text-center py-5 px-4 bg-[#101010] border border-dashed border-[#3d3a39] rounded-[10px]">
+                    <div class="w-8 h-8 mx-auto mb-2 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center text-[#ee6018]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     </div>
-                    <p class="text-xs font-semibold text-gray-200">Aún no hay notas en este proyecto</p>
-                    <p class="text-[10px] text-gray-500 mt-1 max-w-[260px] mx-auto">Sé el primero en registrar acuerdos con cliente, bloqueos técnicos o comentarios.</p>
+                    <p class="font-mono text-[10px] uppercase text-[#eeeeee]">Bitácora sin registros</p>
+                    <p class="text-[11px] text-[#8a8380] mt-1 max-w-[260px] mx-auto">Registra acuerdos con cliente, bloqueos técnicos o notas operativas.</p>
                 </div>
             `;
             return;
@@ -1654,17 +1647,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const item = getSelectedItem();
         const projCons = (item && typeof getProjectConsultants === 'function') ? getProjectConsultants(item) : [];
 
-        // Banner superior si hay múltiples notas sin enterar
+        // Banner superior si hay múltiples notas sin enterar (Factory Design System)
         let headerBanner = '';
         if (unreadForMeCount > 1) {
             headerBanner = `
-                <div class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-between gap-2 shadow-sm mb-1">
-                    <div class="flex items-center gap-1.5 text-xs text-purple-200 font-medium">
-                        <span class="w-2 h-2 rounded-full bg-[#bf5af2] animate-ping shrink-0"></span>
-                        <span>Tienes <strong class="text-white font-bold">${unreadForMeCount} notas</strong> sin enterarte</span>
+                <div class="p-2.5 rounded-[10px] bg-[#101010] border border-[#ee6018]/60 flex items-center justify-between gap-2 mb-1">
+                    <div class="flex items-center gap-2 text-xs text-[#eeeeee]">
+                        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping shrink-0"></span>
+                        <span class="font-mono text-[10px] uppercase text-[#eeeeee]">Tienes <strong class="text-[#ee6018]">${unreadForMeCount} notas</strong> sin enterarte</span>
                     </div>
-                    <button type="button" onclick="confirmAllNotesRead()" class="px-3 py-1 bg-[#bf5af2] hover:bg-[#a855f7] active:scale-95 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1 shrink-0">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <button type="button" onclick="confirmAllNotesRead()" class="px-2.5 py-1 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] rounded-[3px] transition flex items-center gap-1 shrink-0">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Enterado de todas</span>
                     </button>
                 </div>
@@ -1673,7 +1666,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         container.classList.remove('hidden');
         container.innerHTML = headerBanner + arr.map(n => {
-            const col = (consultants[n.by] && consultants[n.by].color) ? consultants[n.by].color : '#bf5af2';
+            const col = (consultants[n.by] && consultants[n.by].color) ? consultants[n.by].color : '#ee6018';
             const initial = (n.by || '?').charAt(0).toUpperCase();
             
             // Permiso de borrado: Supremo, Supervisor o el propio autor
@@ -1681,29 +1674,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const canDelete = !isLector && (isSupremo || isSupervisor || isAuthor);
 
             const delBtn = canDelete ? `
-                <button type="button" onclick="deleteProjectNote('${n.id}')" class="text-gray-500 hover:text-[#ff453a] transition p-1 ml-auto opacity-70 hover:opacity-100 shrink-0" title="${(isSupremo || isSupervisor) && !isAuthor ? 'Moderar/Borrar comentario' : 'Eliminar mi comentario'}">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <button type="button" onclick="deleteProjectNote('${n.id}')" class="text-[#8a8380] hover:text-[#ee6018] transition p-1 ml-1 shrink-0" title="${(isSupremo || isSupervisor) && !isAuthor ? 'Moderar/Borrar comentario' : 'Eliminar mi comentario'}">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
             ` : '';
 
-            // Tag badge
+            // Tag badge (Factory Design System)
             const tag = n.tag || 'comentario';
             let tagBadge = '';
             if (tag === 'acuerdo') {
-                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0"><span>📌</span><span>Acuerdo</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 flex items-center gap-1 shrink-0"><span>📌</span><span>Acuerdo</span></span>`;
             } else if (tag === 'bloqueo') {
-                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#ff453a]/15 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1 shrink-0 shadow-[0_0_10px_rgba(255,69,58,0.2)]"><span>⚠️</span><span>Bloqueo</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>⚠️</span><span>Bloqueo</span></span>`;
             } else if (tag === 'entregable') {
-                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#64d2ff]/15 text-[#64d2ff] border border-[#64d2ff]/30 flex items-center gap-1 shrink-0"><span>🔗</span><span>Entregable</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>🔗</span><span>Entregable</span></span>`;
             } else {
-                tagBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-medium bg-white/5 text-gray-400 border border-white/10 flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
             }
 
             // Detección de si el usuario activo fue mencionado con @
             const isMentioned = localAuthor && window.isUserMentionedInText(n.text, localAuthor);
             let mentionTag = '';
             if (isMentioned) {
-                mentionTag = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/20 text-[#64d2ff] border border-blue-500/35 flex items-center gap-1 shrink-0 shadow-sm animate-pulse"><span>🔔</span><span>Te mencionaron</span></span>`;
+                mentionTag = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>@</span><span>Te mencionaron</span></span>`;
             }
 
             // Formatear menciones con @Nombre dentro del texto
@@ -1712,13 +1705,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const allCons = Object.keys(consultants || {});
             allCons.forEach(cName => {
                 const escaped = escapeHtml(cName);
-                const col = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#64d2ff';
+                const cCol = (consultants[cName] && consultants[cName].color) ? consultants[cName].color : '#ee6018';
                 const regex = new RegExp(`@${escaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-                formattedText = formattedText.replace(regex, `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#0071e3]/20 text-[#64d2ff] border border-[#0071e3]/30 font-semibold text-[10px] shadow-sm"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>@${escaped}</span>`);
+                formattedText = formattedText.replace(regex, `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] font-mono text-[10px]"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cCol}"></span>@${escaped}</span>`);
             });
 
             // Auto-enlazar URLs en el texto
-            const linkedText = formattedText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline break-all inline-flex items-center gap-0.5">$1 <svg class="w-3 h-3 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>');
+            const linkedText = formattedText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#ee6018] hover:underline break-all inline-flex items-center gap-0.5 font-mono text-[11px]">$1 <svg class="w-3 h-3 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>');
 
             const friendlyDate = window.formatFriendlyNoteDate(n.date);
 
@@ -1729,65 +1722,94 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 return n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
             })();
 
+            // Lista deduplicada de personas que ya leyeron la nota
+            const rawReadList = Array.isArray(n.readBy) ? n.readBy.map(r => (typeof r === 'string' ? r : (r && r.user))).filter(Boolean) : (n.by ? [n.by] : []);
+            const uniqueReaders = [...new Set(rawReadList)];
+            const pendingCons = projCons.filter(c => !uniqueReaders.includes(c));
+            const auditTitle = `Confirmaron lectura (${uniqueReaders.length}): ${uniqueReaders.join(', ') || 'Nadie'}${pendingCons.length ? '\nFalta por leer del proyecto: ' + pendingCons.join(', ') : ''}`;
+
+            const readerChipsHtml = uniqueReaders.map(rName => {
+                const rCol = (consultants[rName] && consultants[rName].color) ? consultants[rName].color : '#8a8380';
+                const shortName = rName.split(' ')[0];
+                return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[9px]" title="${escapeHtml(rName)}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${rCol}"></span>${escapeHtml(shortName)}</span>`;
+            }).join('');
+
+            const pendingBadgeHtml = pendingCons.length > 0
+                ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#ee6018]/10 border border-[#ee6018]/30 text-[#ee6018] font-mono text-[9px]" title="Asignados pendientes de leer: ${escapeHtml(pendingCons.join(', '))}">⏳ Falta: ${escapeHtml(pendingCons.map(c => c.split(' ')[0]).join(', '))}</span>`
+                : '';
+
             // Sección de acuse y auditoría
             let receiptSection = '';
             if (!isReadByMe) {
-                const noticeText = isMentioned ? '🔔 Te mencionaron en esta nota' : (tag === 'bloqueo' ? '⚠️ Bloqueo pendiente de tu acuse' : '📌 Pendiente de tu lectura');
-                const noticeColor = isMentioned ? 'text-[#64d2ff]' : (tag === 'bloqueo' ? 'text-[#ff453a]' : 'text-purple-300');
-                const pingColor = isMentioned ? 'bg-[#64d2ff]' : (tag === 'bloqueo' ? 'bg-[#ff453a]' : 'bg-[#bf5af2]');
-                const btnColor = isMentioned ? 'bg-[#0071e3] hover:bg-[#005bb5] shadow-[0_0_10px_rgba(0,113,227,0.4)]' : (tag === 'bloqueo' ? 'bg-[#ff453a] hover:bg-[#e0382e] shadow-[0_0_10px_rgba(255,69,58,0.4)]' : 'bg-gradient-to-r from-[#bf5af2] to-[#a855f7] hover:brightness-110 shadow-[0_0_10px_rgba(191,90,242,0.4)]');
+                const noticeText = isMentioned ? 'Te mencionaron en esta nota' : (tag === 'bloqueo' ? 'Bloqueo pendiente de acuse' : 'Pendiente de tu lectura');
+                const noticeColor = (isMentioned || tag === 'bloqueo') ? 'text-[#ee6018]' : 'text-[#eeeeee]';
+                const pingColor = (isMentioned || tag === 'bloqueo') ? 'bg-[#ee6018]' : 'bg-[#a0ca92]';
+                const btnColor = (isMentioned || tag === 'bloqueo')
+                    ? 'bg-[#ee6018] hover:bg-[#ff742e] text-[#fafafa]'
+                    : 'bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010]';
 
                 receiptSection = `
-                    <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 text-[10px] ${noticeColor} font-semibold">
-                            <span class="w-2 h-2 rounded-full ${pingColor} animate-ping shrink-0"></span>
-                            <span>${noticeText}</span>
+                    <div class="mt-2.5 pt-2 border-t border-[#3d3a39] flex flex-col gap-2">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5 font-mono text-[9px] uppercase ${noticeColor}">
+                                <span class="w-1.5 h-1.5 rounded-full ${pingColor} animate-ping shrink-0"></span>
+                                <span>${noticeText}</span>
+                            </div>
+                            <button type="button" onclick="confirmNoteRead('${n.id}')" class="px-2.5 py-1 ${btnColor} font-mono uppercase text-[10px] rounded-[3px] transition flex items-center gap-1.5 shrink-0">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Confirmar lectura</span>
+                            </button>
                         </div>
-                        <button type="button" onclick="confirmNoteRead('${n.id}')" class="px-3 py-1.5 ${btnColor} active:scale-95 text-white font-bold text-[10px] rounded-xl transition flex items-center gap-1.5 shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Enterado / Confirmar lectura</span>
-                        </button>
+                        ${uniqueReaders.length > 0 ? `
+                        <div class="flex items-center gap-1 flex-wrap pt-1" title="${escapeHtml(auditTitle)}">
+                            <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-0.5">👁 Visto (${uniqueReaders.length}):</span>
+                            ${readerChipsHtml}
+                            ${pendingBadgeHtml}
+                        </div>` : ''}
                     </div>
                 `;
             } else {
                 const myReceipt = Array.isArray(n.readBy) ? n.readBy.find(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor) : null;
                 const myReceiptDate = (myReceipt && typeof myReceipt === 'object' && myReceipt.at) ? window.formatFriendlyNoteDate(myReceipt.at) : '';
-                
-                const readList = Array.isArray(n.readBy) ? n.readBy.map(r => (typeof r === 'string' ? r : (r && r.user))).filter(Boolean) : (n.by ? [n.by] : []);
-                const pendingCons = projCons.filter(c => !readList.includes(c));
-                const auditTitle = `Leído por: ${readList.join(', ') || 'Nadie'}${pendingCons.length ? '\nPendiente: ' + pendingCons.join(', ') : ''}`;
 
                 receiptSection = `
-                    <div class="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[9px] text-gray-400">
-                        <span class="flex items-center gap-1 text-[#30d158] font-medium">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            ${isAuthor ? 'Publicado por ti' : `Enterado (${myReceiptDate || 'Confirmado'})`}
-                        </span>
-                        <span class="text-[9px] text-gray-500 hover:text-gray-300 transition cursor-help flex items-center gap-1 ml-auto" title="${escapeHtml(auditTitle)}">
-                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>${readList.length}${projCons.length ? '/' + projCons.length : ''} enterados</span>
-                        </span>
+                    <div class="mt-2 pt-2 border-t border-[#3d3a39]/70 flex flex-col gap-1.5" title="${escapeHtml(auditTitle)}">
+                        <div class="flex items-center justify-between gap-2 text-[9px]">
+                            <span class="flex items-center gap-1 text-[#a0ca92] font-mono uppercase">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                ${isAuthor ? 'Publicado por ti' : `Enterado (${myReceiptDate || 'Confirmado'})`}
+                            </span>
+                            <span class="font-mono text-[9px] text-[#8a8380] uppercase ml-auto">
+                                👁 ${uniqueReaders.length} ${uniqueReaders.length === 1 ? 'enterado' : 'enterados'}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1 flex-wrap">
+                            ${readerChipsHtml}
+                            ${pendingBadgeHtml}
+                        </div>
                     </div>
                 `;
             }
 
-            const unreadCardClasses = !isReadByMe ? (isMentioned ? 'border-[#0071e3]/60 bg-[#0071e3]/10 shadow-[0_0_15px_rgba(0,113,227,0.2)]' : (tag === 'bloqueo' ? 'border-[#ff453a]/60 bg-[#ff453a]/10 shadow-[0_0_15px_rgba(255,69,58,0.2)]' : 'border-[#bf5af2]/60 bg-[#bf5af2]/10 shadow-[0_0_15px_rgba(191,90,242,0.15)]')) : 'border-white/5 hover:border-white/10 bg-black/40 hover:bg-black/50';
+            const unreadCardClasses = !isReadByMe
+                ? ((isMentioned || tag === 'bloqueo') ? 'border-[#ee6018] bg-[#101010]' : 'border-[#eeeeee]/60 bg-[#101010]')
+                : 'border-[#3d3a39] hover:border-[#4d4947] bg-[#101010]';
 
             return `
-                <div class="flex flex-col gap-2 p-3 rounded-xl border ${unreadCardClasses} shadow-sm transition-all group">
+                <div class="flex flex-col gap-2 p-3 rounded-[10px] border ${unreadCardClasses} transition group">
                     <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm shrink-0" style="background-color: ${col};">
+                        <div class="w-5 h-5 rounded-[3px] flex items-center justify-center font-mono text-[10px] text-[#fafafa] shrink-0" style="background-color: ${col};">
                             ${initial}
                         </div>
                         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-                            <span class="text-[11px] font-bold text-white tracking-wide truncate max-w-[120px]">${escapeHtml(n.by || 'Consultor')}</span>
+                            <span class="text-xs font-normal text-[#eeeeee] truncate max-w-[130px]">${escapeHtml(n.by || 'Consultor')}</span>
                             ${tagBadge}
                             ${mentionTag}
                         </div>
-                        <span class="text-[9px] text-gray-500 ml-auto shrink-0" title="${escapeHtml(n.date || '')}">${friendlyDate}</span>
+                        <span class="font-mono text-[9px] text-[#8a8380] ml-auto shrink-0" title="${escapeHtml(n.date || '')}">${friendlyDate}</span>
                         ${delBtn}
                     </div>
-                    <div class="text-xs text-gray-200 pl-7 leading-relaxed whitespace-pre-wrap break-words">${linkedText}</div>
+                    <div class="text-xs text-[#eeeeee] pl-7 leading-relaxed whitespace-pre-wrap break-words">${linkedText}</div>
                     ${receiptSection}
                 </div>
             `;
@@ -2806,9 +2828,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         if(!item.tasks || item.tasks.length === 0) { 
             c.innerHTML = `
-            <div class="py-3 px-3 text-center rounded-xl bg-white/[0.03] border border-dashed border-white/10 mb-2">
-                <p class="text-xs text-gray-300 font-medium">Sin tareas registradas en este proyecto</p>
-                <p class="text-[10px] text-gray-500 mt-0.5">Usa el formulario inferior para asignar una tarea con fecha límite.</p>
+            <div class="py-3.5 px-3 text-center rounded-[10px] bg-[#101010] border border-dashed border-[#3d3a39] mb-2">
+                <p class="font-mono text-[10px] uppercase text-[#eeeeee]">Sin tareas registradas</p>
+                <p class="text-[11px] text-[#8a8380] mt-0.5">Usa el formulario inferior para asignar una actividad con fecha límite.</p>
             </div>`; 
             if(badge) badge.classList.add('hidden');
             return; 
@@ -2833,7 +2855,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const [y,m,d] = t.deadline.split('-');
                 if(new Date(y, m-1, d) < new Date(new Date().setHours(0,0,0,0))) isOverdue = true;
             }
-            const dateColor = isChecked ? 'text-gray-500' : (isOverdue ? 'text-[#ff453a] font-bold' : 'text-[#35aee8]');
+            const dateColor = isChecked ? 'text-[#8a8380]' : (isOverdue ? 'text-[#ee6018]' : 'text-[#b8b3b0]');
             
             const isMyTask = t.assignee === localAuthor;
             const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
@@ -2846,39 +2868,39 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             
             // canDelete es estricto: Solo roles superiores o el creador de la tarea
             const canDelete = isSuper || isAssigner;
-            const delBtn = canDelete ? `<button onclick="deleteQuickTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
+            const delBtn = canDelete ? `<button onclick="deleteQuickTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] opacity-0 group-hover:opacity-100 transition p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
             let statusBadge = '';
             let boxUI = '';
             if (isPending) {
-                statusBadge = `<span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">⏳ En Validación</span>`;
+                statusBadge = `<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase ml-2 shrink-0 mt-0.5">⏳ Validación</span>`;
                 if(isSuper) {
-                    boxUI = `<button onclick="toggleQuickTask('${t.id}')" class="h-4 w-4 rounded border border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ff9f0a]/40 transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></button>`;
+                    boxUI = `<button onclick="toggleQuickTask('${t.id}')" class="h-4 w-4 rounded-[2px] border border-[#ee6018] bg-[#ee6018]/20 text-[#ee6018] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ee6018] hover:text-[#fafafa] transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`;
                 } else {
-                    boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded border-[#ff9f0a] bg-[#ff9f0a]/20 text-[#ff9f0a] focus:ring-[#ff9f0a] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
+                    boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#ee6018] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
                 }
             } else if (isChecked) {
-                statusBadge = `<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner ml-2 shrink-0 mt-0.5">✅ Validada</span>`;
-                boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] focus:ring-[#30d158] h-4 w-4 shrink-0 cursor-pointer mt-0.5" ${!isSuper ? 'disabled class="... opacity-50 cursor-not-allowed"' : ''}>`;
+                statusBadge = `<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] uppercase ml-2 shrink-0 mt-0.5">✓ Validada</span>`;
+                boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${isSuper ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}" ${!isSuper ? 'disabled' : ''}>`;
             } else {
-                boxUI = `<input type="checkbox" onchange="toggleQuickTask('${t.id}')" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 ${checkCursor} mt-0.5" ${checkDisabled}>`;
+                boxUI = `<input type="checkbox" onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 ${checkCursor} mt-0.5" ${checkDisabled}>`;
             }
 
             return `
-            <div class="flex items-start gap-3 bg-black/30 p-2.5 rounded-xl border border-white/5 group transition ${isChecked ? 'opacity-40' : (isPending ? 'border-[#ff9f0a]/30 bg-[#ff9f0a]/5' : 'shadow-inner')}">
+            <div class="flex items-start gap-2.5 bg-[#101010] p-2.5 rounded-[10px] border ${isChecked ? 'border-[#3d3a39]/60 opacity-50' : (isPending ? 'border-[#ee6018]/60' : 'border-[#3d3a39]')} group transition">
                 ${boxUI}
                 <div class="flex flex-col flex-1 min-w-0">
                     <div class="flex items-start justify-between">
-                        <span class="text-xs text-white break-words pr-2 ${isChecked ? 'line-through text-gray-400' : ''}">${escapeHtml(t.text)}</span>
+                        <span class="text-xs text-[#eeeeee] break-words pr-2 ${isChecked ? 'line-through text-[#8a8380]' : ''}">${escapeHtml(t.text)}</span>
                         ${statusBadge}
                     </div>
-                    <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                        ${t.validatedDate ? `<span class="text-[9px] text-[#30d158] font-mono font-bold bg-[#30d158]/10 border border-[#30d158]/30 px-1.5 py-0.5 rounded">✅ Validada: ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
-                        ${t.deadline ? `<span class="text-[9px] ${dateColor}">🎯 Límite: ${escapeHtml(t.deadline)}</span>` : ''}
-                        ${t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-300 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">👤 ${escapeHtml(t.assignee)}</span>` : ''}
-                        ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/5 text-gray-400 border border-white/10 px-1.5 py-0.5 rounded shadow-inner">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                    <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                        ${t.validatedDate ? `<span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[2px]">✓ ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
+                        ${t.deadline ? `<span class="font-mono text-[9px] ${dateColor}">🎯 Límite: ${escapeHtml(t.deadline)}</span>` : ''}
+                        ${t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
+                        ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
-                    ${t.feedback ? `<div class="mt-2 text-[9px] text-gray-300 bg-black/40 border border-white/10 p-2 rounded shadow-inner">💬 ${escapeHtml(t.feedback)}</div>` : ''}
+                    ${t.feedback ? `<div class="mt-2 text-[10px] text-[#b8b3b0] bg-[#1d1a18] border border-[#3d3a39] p-2 rounded-[3px]">💬 ${escapeHtml(t.feedback)}</div>` : ''}
                 </div>
                 ${delBtn}
             </div>
@@ -4818,13 +4840,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
 
           const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
-          const isFlashlit = isSel && !isLight;
+          const isFlashlit = false;
           const projStrokeColor = isOver ? '#ee6018' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : (color || '#ee6018'));
+          if (isSel) {
+              const selFrame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              selFrame.setAttribute('x', '-3');
+              selFrame.setAttribute('y', '-3');
+              selFrame.setAttribute('width', '326');
+              selFrame.setAttribute('height', '62');
+              selFrame.setAttribute('rx', '12');
+              selFrame.setAttribute('fill', 'none');
+              selFrame.setAttribute('stroke', projStrokeColor);
+              selFrame.setAttribute('stroke-width', '1');
+              selFrame.setAttribute('stroke-dasharray', '4,3');
+              selFrame.setAttribute('opacity', '0.85');
+              selFrame.style.pointerEvents = 'none';
+              g.appendChild(selFrame);
+          }
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '10'); 
-          r.setAttribute('fill', isFlashlit ? '#eeeeee' : (isLight ? '#ffffff' : '#1d1a18')); 
+          r.setAttribute('fill', isLight ? '#ffffff' : '#1d1a18'); 
           r.setAttribute('stroke', projStrokeColor); 
-          r.setAttribute('stroke-width', isFlashlit ? '2' : (isOver ? '1.6' : (isSynergyMatch ? '2' : '1.2'))); 
+          r.setAttribute('stroke-width', isSel ? '2.2' : (isOver ? '1.6' : (isSynergyMatch ? '2' : '1.2'))); 
           r.style.pointerEvents = 'none';
           if (isOver) r.classList.add('overdue-capsule');
           if (isSynergyMatch) r.classList.add('synergy-capsule-glow');
@@ -5526,8 +5563,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const btn = document.getElementById(`histCatBtn-${c}`);
             if (btn) {
                 btn.className = c === 'all' 
-                    ? 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white border border-white/20 shadow-sm'
-                    : 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent';
+                    ? 'hist-cat-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase bg-[#eeeeee] text-[#101010] border border-[#eeeeee]'
+                    : 'hist-cat-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]';
             }
         });
         window.renderHistory();
@@ -5625,26 +5662,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         if (e) e.classList.add('hidden');
         c.innerHTML = filtered.map(log => {
-            const col = consultants[log.by] ? consultants[log.by].color : '#8e8e93';
+            const col = consultants[log.by] ? consultants[log.by].color : '#8a8380';
             const isVal = (log.action || '').includes('Validó') || (log.action || '').includes('Aprobó');
             const isRej = (log.action || '').includes('Rechazó');
             const isDel = (log.action || '').includes('Borró') || (log.action || '').includes('Eliminó');
             
             let tagBadge = '';
-            if (isVal) tagBadge = '<span class="text-[8px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-1.5 py-0.2 rounded font-bold uppercase">Validación</span>';
-            else if (isRej || isDel) tagBadge = '<span class="text-[8px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 px-1.5 py-0.2 rounded font-bold uppercase">Atención</span>';
+            if (isVal) tagBadge = '<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] uppercase">Validación</span>';
+            else if (isRej || isDel) tagBadge = '<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase">Atención</span>';
 
-            return `<div class="bg-black/30 border border-white/5 rounded-2xl p-4 relative overflow-hidden shadow-inner group hover:border-white/15 transition">
-                <div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-80" style="background-color: ${col}"></div>
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-[10px] text-gray-400 font-mono tracking-widest pl-1">🕒 ${log.timestamp}</span>
+            return `<div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 relative overflow-hidden group hover:border-[#4d4947] transition">
+                <div class="absolute left-0 top-0 bottom-0 w-1 opacity-90" style="background-color: ${col}"></div>
+                <div class="flex justify-between items-start mb-1.5">
+                    <span class="text-[10px] text-[#8a8380] font-mono pl-1.5">${log.timestamp}</span>
                     <div class="flex items-center gap-1.5">
                         ${tagBadge}
-                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/10 border border-white/5 uppercase" style="color: ${col}">👤 ${escapeHtml(log.by)}</span>
+                        <span class="font-mono text-[9px] px-2 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] uppercase flex items-center gap-1 text-[#eeeeee]"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>${escapeHtml(log.by)}</span>
                     </div>
                 </div>
-                <p class="text-xs font-semibold text-white mb-1 leading-tight pl-1">${escapeHtml(log.projectName)}</p>
-                <p class="text-[11px] text-gray-300 pl-1 leading-relaxed">${escapeHtml(log.action)}</p>
+                <p class="text-xs font-normal text-[#eeeeee] mb-1 leading-tight pl-1.5">${escapeHtml(log.projectName)}</p>
+                <p class="text-[11px] text-[#b8b3b0] pl-1.5 leading-relaxed">${escapeHtml(log.action)}</p>
             </div>`;
         }).join('');
     };
@@ -6240,42 +6277,42 @@ window.renderDailyTasks = function() {
     if (currentNotifTab === 'alerts') {
         if (alertsList.length === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">🎉</div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">¡Todo al día!</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No hay proyectos vencidos ni alertas importantes pendientes de atención.</p>
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
+                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
+                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sistema al día</h3>
+                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No hay proyectos vencidos ni alertas pendientes de atención.</p>
             </div>`;
             return;
         }
 
         const style = { 
-            danger: ['text-[#ff453a]', 'bg-[#ff453a]/10', 'border-[#ff453a]/30'], 
-            warning: ['text-[#ff9f0a]', 'bg-[#ff9f0a]/10', 'border-[#ff9f0a]/30'], 
-            info: ['text-brand-accent', 'bg-brand-accent/10', 'border-brand-accent/30'],
-            mention: ['text-[#64d2ff]', 'bg-[#0071e3]/15', 'border-[#0071e3]/40']
+            danger: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/60'], 
+            warning: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/40'], 
+            info: ['text-[#a0ca92]', 'bg-[#101010]', 'border-[#3d3a39]'],
+            mention: ['text-[#eeeeee]', 'bg-[#101010]', 'border-[#eeeeee]/50']
         };
 
         container.innerHTML = `
-        <div class="space-y-3 pb-6">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest px-1">Alertamientos del Sistema (${alertsList.length})</p>
+        <div class="space-y-2.5 pb-6">
+            <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Alertamientos del Sistema (${alertsList.length})</p>
             ${alertsList.map(a => {
                 const [txt, bg, br] = style[a.alertType] || style.info;
                 const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
                 const canOpen = a.pType && a.pType !== 'global';
                 const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
                 return `
-                <div class="${bg} border ${br} rounded-2xl p-4 ${canOpen ? 'cursor-pointer hover:opacity-85' : 'cursor-default'} transition shadow-inner" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
+                <div class="${bg} border ${br} rounded-[10px] p-3.5 ${canOpen ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'} transition" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
                     <div class="flex items-start gap-2.5">
-                        <span class="text-lg leading-none mt-0.5">${a.icon}</span>
+                        <span class="text-base leading-none mt-0.5">${a.icon}</span>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-2">
-                                <h4 class="text-xs font-semibold ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                ${canOpen ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded border border-white/5 shrink-0">Ver en mapa ↗</span>` : ''}
+                                <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
+                                ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa ↗</span>` : ''}
                             </div>
-                            <p class="text-[9px] text-gray-400 uppercase tracking-widest truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
-                            <p class="text-[10px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
-                            <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-gray-400 font-mono">
-                                <span class="bg-black/40 px-2 py-0.5 rounded border border-white/5">👤 ${escapeHtml(users)}</span>
+                            <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
+                            <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
+                            <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-[#b8b3b0] font-mono">
+                                <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
                             </div>
                         </div>
                     </div>
@@ -6289,11 +6326,10 @@ window.renderDailyTasks = function() {
     if (currentNotifTab === 'pending') {
         if (pendingTasks.length === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">📋</div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">Bandeja despejada</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No tienes tareas pendientes asignadas en este momento.</p>
-                <div class="mt-4 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] text-gray-400">💡 Usa el formulario superior para anotar tareas rápidas</div>
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
+                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#eeeeee] mb-3">00</div>
+                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja despejada</h3>
+                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes tareas pendientes asignadas en este momento.</p>
             </div>`;
             return;
         }
@@ -6313,22 +6349,22 @@ window.renderDailyTasks = function() {
             return a.localeCompare(b);
         });
 
-        container.innerHTML = `<div class="space-y-3 pb-6">${sortedConsultants.map(cons => {
+        container.innerHTML = `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
             const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
-            const cData = consultants[cons] || { color: '#8e8e93' };
+            const cData = consultants[cons] || { color: '#8a8380' };
             const isMe = cons === localAuthor;
 
             return `
-            <details open class="group bg-black/30 border border-white/10 rounded-2xl overflow-hidden transition shadow-inner">
-                <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none hover:bg-white/5 transition list-none [&::-webkit-details-marker]:hidden">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20 shrink-0" style="background-color: ${cData.color}"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider truncate" style="color: ${cData.color}">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
-                        <span class="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-mono shrink-0">${tasks.length} pdtes.</span>
+            <details open class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+                <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
+                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
+                        <span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px] shrink-0">${tasks.length} PDTES</span>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
-                <div class="p-3 space-y-2.5 border-t border-white/10 bg-black/20">
+                <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
                     ${tasks.map(t => {
                         const isMyTask = t.assignee === localAuthor;
                         const isAssigner = t.assignedBy === localAuthor;
@@ -6343,21 +6379,21 @@ window.renderDailyTasks = function() {
                             openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openProjectTaskModal();`;
                         }
 
-                        let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+                        let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
 
                         return `
-                        <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-white/10 group transition shadow-inner" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
-                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
+                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] hover:border-[#4d4947] group transition" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
+                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[2px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
                             <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
-                                <span class="text-xs text-white break-words leading-snug">${escapeHtml(t.text)}</span>
-                                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                                    <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                                    ${t.deadline ? `<span class="text-[9px] text-[#ff9f0a] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
-                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="text-[8px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded shadow-inner border border-white/5">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                                <span class="text-xs text-[#eeeeee] break-words leading-snug">${escapeHtml(t.text)}</span>
+                                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                    <span class="font-mono text-[9px] uppercase ${srcColor}">${escapeHtml(t.pName)}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                                    ${t.deadline ? `<span class="text-[9px] text-[#ee6018] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
+                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#101010] text-[#8a8380] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                                 </div>
                             </div>
-                            ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-gray-500 hover:text-[#ff453a] opacity-0 group-hover:opacity-100 transition p-1 shrink-0" title="Borrar tarea"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                            ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] opacity-0 group-hover:opacity-100 transition p-1 shrink-0" title="Borrar tarea"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
                         </div>`;
                     }).join('')}
                 </div>
@@ -6370,57 +6406,57 @@ window.renderDailyTasks = function() {
     if (currentNotifTab === 'validation') {
         if (validationTasks.length === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">⏳</div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">Sin entregas pendientes</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">No hay tareas esperando revisión o visto bueno de jefatura.</p>
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
+                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#b8b3b0] mb-3">⏳</div>
+                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sin entregas pendientes</h3>
+                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No hay tareas esperando revisión o visto bueno de jefatura.</p>
             </div>`;
             return;
         }
 
         container.innerHTML = `
-        <div class="space-y-3 pb-6">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest px-1">Esperando Aprobación de Jefatura (${validationTasks.length})</p>
+        <div class="space-y-2.5 pb-6">
+            <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Esperando Aprobación (${validationTasks.length})</p>
             ${validationTasks.map(t => {
                 const isAssigner = t.assignedBy === localAuthor;
                 const canApprove = isSuper || isAssigner;
                 const isMyTask = t.assignee === localAuthor;
 
-                let srcColor = t.sourceType === 'daily' ? 'text-[#35aee8]' : (t.sourceType === 'global' ? 'text-[#bf5af2]' : 'text-[#ff9f0a]');
+                let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
 
                 return `
-                <div class="bg-[#ff9f0a]/5 border border-[#ff9f0a]/30 rounded-2xl p-4 shadow-inner">
+                <div class="bg-[#101010] border border-[#ee6018]/60 rounded-[10px] p-3.5">
                     <div class="flex items-start justify-between gap-2">
-                        <span class="text-xs text-white font-medium break-words">${escapeHtml(t.text)}</span>
-                        <span class="text-[8px] bg-[#ff9f0a]/20 text-[#ff9f0a] border border-[#ff9f0a]/30 px-1.5 py-0.5 rounded font-bold uppercase shadow-inner shrink-0">⏳ En Validación</span>
+                        <span class="text-xs text-[#eeeeee] font-normal break-words">${escapeHtml(t.text)}</span>
+                        <span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase shrink-0">⏳ Validación</span>
                     </div>
 
-                    <div class="flex items-center gap-2 mt-2 flex-wrap">
-                        <span class="text-[9px] ${srcColor} font-semibold">${escapeHtml(t.pName)}</span>
-                        <span class="text-[9px] text-gray-300 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">👤 Por: ${escapeHtml(t.assignee || 'Sin asignar')}</span>
-                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                        ${t.submittedDate ? `<span class="text-[9px] text-[#ff9f0a] font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
-                        ${t.assignedBy ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                    <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                        <span class="font-mono text-[9px] uppercase ${srcColor}">${escapeHtml(t.pName)}</span>
+                        <span class="text-[9px] text-[#eeeeee] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">👤 ${escapeHtml(t.assignee || 'Sin asignar')}</span>
+                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                        ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
+                        ${t.assignedBy ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
 
-                    ${t.feedback ? `<div class="mt-2.5 text-[10px] text-gray-200 bg-black/60 border border-white/10 p-2.5 rounded-xl shadow-inner break-words">💬 <b>Evidencia registrada:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+                    ${t.feedback ? `<div class="mt-2.5 text-[10px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] p-2.5 rounded-[3px] break-words">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
 
-                    <div class="mt-3 pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                    <div class="mt-3 pt-2.5 border-t border-[#3d3a39] flex items-center justify-between gap-2">
                         ${canApprove ? `
                             <div class="flex gap-2 w-full">
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', true)" class="flex-1 py-1.5 px-3 bg-[#30d158]/20 hover:bg-[#30d158]/30 text-[#30d158] border border-[#30d158]/30 font-bold text-[10px] rounded-xl transition shadow-inner flex items-center justify-center gap-1">
-                                    ✅ Aprobar
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', true)" class="flex-1 py-1.5 px-3 bg-[#a0ca92]/15 hover:bg-[#a0ca92] text-[#a0ca92] hover:text-[#101010] border border-[#a0ca92]/40 font-mono uppercase text-[10px] rounded-[3px] transition flex items-center justify-center gap-1">
+                                    ✓ Aprobar
                                 </button>
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="flex-1 py-1.5 px-3 bg-[#ff453a]/20 hover:bg-[#ff453a]/30 text-[#ff453a] border border-[#ff453a]/30 font-bold text-[10px] rounded-xl transition shadow-inner flex items-center justify-center gap-1">
-                                    ❌ Rechazar
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="flex-1 py-1.5 px-3 bg-[#ee6018]/15 hover:bg-[#ee6018] text-[#ee6018] hover:text-[#fafafa] border border-[#ee6018]/40 font-mono uppercase text-[10px] rounded-[3px] transition flex items-center justify-center gap-1">
+                                    ✕ Rechazar
                                 </button>
                             </div>
                         ` : (isMyTask ? `
                             <div class="flex items-center justify-between w-full">
-                                <span class="text-[9px] text-gray-400 italic">Esperando que un supervisor valide tu entrega...</span>
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="py-1 px-2.5 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-[9px] rounded-lg transition">Cancelar envío</button>
+                                <span class="text-[10px] text-[#8a8380]">Esperando revisión de supervisión...</span>
+                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="py-1 px-2.5 bg-[#1d1a18] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] border border-[#3d3a39] font-mono uppercase text-[9px] rounded-[3px] transition">Cancelar envío</button>
                             </div>
-                        ` : '<span class="text-[9px] text-gray-500 italic">Pendiente de revisión</span>')}
+                        ` : '<span class="font-mono text-[9px] text-[#8a8380] uppercase">Pendiente de revisión</span>')}
                     </div>
                 </div>`;
             }).join('')}
@@ -6432,10 +6468,10 @@ window.renderDailyTasks = function() {
     if (currentNotifTab === 'completed') {
         if (completedTasks.length === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner mb-3.5">✅</div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">Sin historial reciente</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-[240px] leading-relaxed">Las tareas que completes y valides aparecerán organizadas aquí.</p>
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
+                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
+                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sin historial reciente</h3>
+                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">Las tareas completadas y validadas aparecerán organizadas aquí.</p>
             </div>`;
             return;
         }
@@ -6453,34 +6489,34 @@ window.renderDailyTasks = function() {
             return a.localeCompare(b);
         });
 
-        container.innerHTML = `<div class="space-y-3 pb-6">${sortedConsultants.map(cons => {
+        container.innerHTML = `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
             const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
-            const cData = consultants[cons] || { color: '#8e8e93' };
+            const cData = consultants[cons] || { color: '#8a8380' };
 
             return `
-            <details class="group bg-black/25 border border-white/10 rounded-2xl overflow-hidden transition shadow-inner">
-                <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none hover:bg-white/5 transition list-none [&::-webkit-details-marker]:hidden">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20 shrink-0" style="background-color: ${cData.color}"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider truncate" style="color: ${cData.color}">${escapeHtml(cons)}</span>
-                        <span class="text-[9px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30 px-2 py-0.5 rounded-full font-mono shrink-0">${tasks.length} hechas ✅</span>
+            <details class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+                <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
+                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)}</span>
+                        <span class="font-mono text-[9px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] shrink-0">${tasks.length} HECHAS ✓</span>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
-                <div class="p-3 space-y-2 border-t border-white/10 bg-black/20">
+                <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
                     ${tasks.map(t => {
                         const canRevert = isSuper || t.assignedBy === localAuthor;
                         return `
-                        <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 opacity-80 hover:opacity-100 transition shadow-inner">
-                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded border-[#30d158] bg-[#30d158]/20 text-[#30d158] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
+                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-80 hover:opacity-100 transition">
+                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[2px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
                             <div class="flex flex-col flex-1 min-w-0">
-                                <span class="text-xs text-gray-300 line-through break-words">${escapeHtml(t.text)}</span>
-                                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                                    <span class="text-[9px] text-gray-400 font-semibold">${escapeHtml(t.pName)}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-gray-400 font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                                    <span class="text-[9px] text-[#30d158] font-mono font-bold bg-[#30d158]/15 border border-[#30d158]/30 px-2 py-0.5 rounded">✅ Validada: ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
+                                <span class="text-xs text-[#8a8380] line-through break-words">${escapeHtml(t.text)}</span>
+                                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                    <span class="font-mono text-[9px] uppercase text-[#b8b3b0]">${escapeHtml(t.pName)}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[2px]">✓ ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
                                 </div>
-                                ${t.feedback ? `<div class="mt-1.5 text-[9px] text-gray-400 bg-black/60 p-2 rounded-lg border border-white/5">💬 <i>${escapeHtml(t.feedback)}</i></div>` : ''}
+                                ${t.feedback ? `<div class="mt-1.5 text-[10px] text-[#b8b3b0] bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39]">💬 ${escapeHtml(t.feedback)}</div>` : ''}
                             </div>
                         </div>`;
                     }).join('')}
@@ -6527,12 +6563,12 @@ window.renderDailyTasks = function() {
             // Selector de modo cuando hay 2 o más consultores seleccionados
             if (!isAllSelected && activeFilterConsultants.length >= 2) {
                 html += `
-                <div class="w-full flex items-center gap-1.5 p-1 bg-black/40 border border-[#bf5af2]/30 rounded-xl mb-2">
-                    <button type="button" onclick="setConsultantFilterMode('ANY')" class="flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${consultantFilterMode === 'ANY' ? 'bg-[#0071e3] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">
-                        🔗 Ver individuales y juntos
+                <div class="w-full flex items-center gap-1.5 p-1 bg-[#101010] border border-[#3d3a39] rounded-[10px] mb-2">
+                    <button type="button" onclick="setConsultantFilterMode('ANY')" class="flex-1 py-1.5 px-2 rounded-[3px] font-mono uppercase text-[9px] transition text-center ${consultantFilterMode === 'ANY' ? 'bg-[#eeeeee] text-[#101010]' : 'text-[#8a8380] hover:text-[#eeeeee]'}">
+                        🔗 Individuales y juntos
                     </button>
-                    <button type="button" onclick="setConsultantFilterMode('ALL_SELECTED')" class="flex-1 py-1 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${consultantFilterMode === 'ALL_SELECTED' ? 'bg-[#bf5af2] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">
-                        🤝 Solo donde colaboran juntos
+                    <button type="button" onclick="setConsultantFilterMode('ALL_SELECTED')" class="flex-1 py-1.5 px-2 rounded-[3px] font-mono uppercase text-[9px] transition text-center ${consultantFilterMode === 'ALL_SELECTED' ? 'bg-[#ee6018] text-[#fafafa]' : 'text-[#8a8380] hover:text-[#eeeeee]'}">
+                        🤝 Solo colaborando juntos
                     </button>
                 </div>`;
             }
@@ -6541,9 +6577,9 @@ window.renderDailyTasks = function() {
             
             allC.forEach(name => {
                 const isAct = !isAllSelected && activeFilterConsultants.includes(name);
-                const cColor = consultants[name]?.color || '#0071e3';
+                const cColor = consultants[name]?.color || '#ee6018';
                 html += `<button type="button" onclick="toggleFilterChip('consultant', '${jsArg(name)}')" class="filter-chip ${isAct ? 'active' : ''}">
-                    <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${cColor}; box-shadow: 0 0 5px ${cColor};"></span>
+                    <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${cColor};"></span>
                     <span>${escapeHtml(name)}</span>
                 </button>`;
             });

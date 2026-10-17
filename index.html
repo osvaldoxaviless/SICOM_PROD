@@ -591,8 +591,8 @@
 
       <!-- 5. FORO / BITÁCORA TÉCNICA -->
       <div id="infoNotesContainer" class="hidden relative w-full mb-4">
-          <details id="acc-notes-details" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden">
-              <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/25 transition">
+          <details id="acc-notes-details" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
+              <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/25 transition rounded-t-[10px]">
                   <div class="flex items-center gap-2">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                       <span class="font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px]">05 // Foro y Bitácora Técnica</span>
@@ -604,31 +604,29 @@
                   <div id="infoNotes" class="flex flex-col gap-2 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
                   
                   <div class="lector-hide pt-2.5 border-t border-[#3d3a39] space-y-2.5">
-                      <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                      <div class="flex items-center justify-between gap-1 flex-wrap">
                           <div class="flex items-center gap-1 flex-wrap">
-                              <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-1">Tipo:</span>
-                              <button type="button" onclick="setNoteTag('comentario', 'info')" id="tagBtn_info_comentario" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 bg-[#eeeeee] text-[#101010] border border-[#eeeeee]">
-                                  <span>💬</span> Comentario
+                              <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-0.5">Tipo:</span>
+                              <button type="button" onclick="setNoteTag('comentario', 'info')" id="tagBtn_info_comentario" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 bg-[#eeeeee] text-[#101010] border border-[#eeeeee]">
+                                  <span>💬</span> Nota
                               </button>
-                              <button type="button" onclick="setNoteTag('acuerdo', 'info')" id="tagBtn_info_acuerdo" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]">
+                              <button type="button" onclick="setNoteTag('acuerdo', 'info')" id="tagBtn_info_acuerdo" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]">
                                   <span>📌</span> Acuerdo
                               </button>
-                              <button type="button" onclick="setNoteTag('bloqueo', 'info')" id="tagBtn_info_bloqueo" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#ee6018] bg-[#101010] border border-[#3d3a39]">
+                              <button type="button" onclick="setNoteTag('bloqueo', 'info')" id="tagBtn_info_bloqueo" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#ee6018] bg-[#101010] border border-[#3d3a39]">
                                   <span>⚠️</span> Bloqueo
                               </button>
-                              <button type="button" onclick="setNoteTag('entregable', 'info')" id="tagBtn_info_entregable" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#a0ca92] bg-[#101010] border border-[#3d3a39]">
+                              <button type="button" onclick="setNoteTag('entregable', 'info')" id="tagBtn_info_entregable" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#a0ca92] bg-[#101010] border border-[#3d3a39]">
                                   <span>🔗</span> Entregable
                               </button>
                           </div>
-                          <div class="relative">
-                              <button type="button" onclick="toggleMentionDropdown('info')" id="btnMention_info" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 bg-[#101010] hover:border-[#eeeeee] text-[#eeeeee] border border-[#3d3a39]" title="Mencionar a un consultor con @">
-                                  <span>@</span> Mencionar
-                              </button>
-                              <div id="mentionMenu_info" class="hidden absolute right-0 bottom-full mb-2 w-56 bg-[#101010] border border-[#3d3a39] rounded-[10px] p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin space-y-1"></div>
-                          </div>
+                          <button type="button" onclick="toggleMentionDropdown('info')" id="btnMention_info" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 bg-[#101010] hover:border-[#eeeeee] text-[#eeeeee] border border-[#3d3a39] ml-auto" title="Mencionar a un consultor con @">
+                              <span class="text-[#ee6018] font-bold">@</span> Mencionar
+                          </button>
                       </div>
 
                       <div class="relative">
+                          <div id="mentionMenu_info" class="hidden absolute left-0 right-0 bottom-full mb-1.5 w-full bg-[#101010] border border-[#3d3a39] rounded-[10px] p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin grid grid-cols-1 sm:grid-cols-2 gap-1 shadow-2xl"></div>
                           <textarea id="infoNoteInput" rows="2" maxlength="1500" class="w-full liquid-input rounded-[3px] p-2.5 text-xs resize-none transition leading-relaxed text-[#eeeeee]" placeholder="Escribe una nota, acuerdo o bloqueo técnico..."></textarea>
                       </div>
 
@@ -1063,30 +1061,28 @@
                 </div>
                 <div id="editNotesHistory" class="bg-[#1d1a18] border border-[#3d3a39] p-3.5 rounded-[10px] flex flex-col gap-2 max-h-56 overflow-y-auto scrollbar-thin mb-2 hidden"></div>
                 <div class="space-y-2.5 pt-1">
-                    <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                    <div class="flex items-center justify-between gap-1 flex-wrap">
                         <div class="flex items-center gap-1 flex-wrap">
-                            <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-1">Tipo:</span>
-                            <button type="button" onclick="setNoteTag('comentario', 'edit')" id="tagBtn_edit_comentario" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 bg-[#eeeeee] text-[#101010] border border-[#eeeeee]">
-                                <span>💬</span> Comentario
+                            <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-0.5">Tipo:</span>
+                            <button type="button" onclick="setNoteTag('comentario', 'edit')" id="tagBtn_edit_comentario" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 bg-[#eeeeee] text-[#101010] border border-[#eeeeee]">
+                                <span>💬</span> Nota
                             </button>
-                            <button type="button" onclick="setNoteTag('acuerdo', 'edit')" id="tagBtn_edit_acuerdo" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">
+                            <button type="button" onclick="setNoteTag('acuerdo', 'edit')" id="tagBtn_edit_acuerdo" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">
                                 <span>📌</span> Acuerdo
                             </button>
-                            <button type="button" onclick="setNoteTag('bloqueo', 'edit')" id="tagBtn_edit_bloqueo" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#ee6018] bg-[#1d1a18] border border-[#3d3a39]">
+                            <button type="button" onclick="setNoteTag('bloqueo', 'edit')" id="tagBtn_edit_bloqueo" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#ee6018] bg-[#1d1a18] border border-[#3d3a39]">
                                 <span>⚠️</span> Bloqueo
                             </button>
-                            <button type="button" onclick="setNoteTag('entregable', 'edit')" id="tagBtn_edit_entregable" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 text-[#8a8380] hover:text-[#a0ca92] bg-[#1d1a18] border border-[#3d3a39]">
+                            <button type="button" onclick="setNoteTag('entregable', 'edit')" id="tagBtn_edit_entregable" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#a0ca92] bg-[#1d1a18] border border-[#3d3a39]">
                                 <span>🔗</span> Entregable
                             </button>
                         </div>
-                        <div class="relative">
-                            <button type="button" onclick="toggleMentionDropdown('edit')" id="btnMention_edit" class="note-tag-btn px-2 py-1 rounded-[3px] text-[10px] transition flex items-center gap-1 bg-[#1d1a18] hover:border-[#eeeeee] text-[#eeeeee] border border-[#3d3a39]" title="Mencionar a un consultor con @">
-                                <span>@</span> Mencionar
-                            </button>
-                            <div id="mentionMenu_edit" class="hidden absolute right-0 bottom-full mb-2 w-56 bg-[#101010] border border-[#3d3a39] rounded-[10px] p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin space-y-1"></div>
-                        </div>
+                        <button type="button" onclick="toggleMentionDropdown('edit')" id="btnMention_edit" class="note-tag-btn px-2 py-1 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1 bg-[#1d1a18] hover:border-[#eeeeee] text-[#eeeeee] border border-[#3d3a39] ml-auto" title="Mencionar a un consultor con @">
+                            <span class="text-[#ee6018] font-bold">@</span> Mencionar
+                        </button>
                     </div>
                     <div class="relative">
+                        <div id="mentionMenu_edit" class="hidden absolute left-0 right-0 bottom-full mb-1.5 w-full bg-[#101010] border border-[#3d3a39] rounded-[10px] p-2 z-50 max-h-48 overflow-y-auto scrollbar-thin grid grid-cols-1 sm:grid-cols-2 gap-1 shadow-2xl"></div>
                         <textarea id="editNotes" rows="2" maxlength="1500" class="w-full liquid-input rounded-[3px] p-3 text-xs resize-none transition leading-relaxed text-[#eeeeee]" placeholder="Escribe una nota, acuerdo o bloqueo técnico..."></textarea>
                     </div>
                     <div class="flex items-center justify-between">
