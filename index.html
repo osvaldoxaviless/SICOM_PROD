@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v828">
+  <link rel="stylesheet" href="styles.css?v=20261017_v829">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -1073,13 +1073,10 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                 <span>Elemento a Editar</span>
               </label>
-              <button type="button" id="btnLoadCurrentMapSelection" onclick="loadCurrentSelectionToEdit()" class="hidden font-mono text-[9px] uppercase px-2 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] transition flex items-center gap-1">
-                <span>🎯 Cargar selección del mapa</span>
-              </button>
             </div>
 
-            <!-- CARD DE ELEMENTO ACTIVO SELECCIONADO (Si hay uno cargado) -->
-            <div id="editCurrentActiveDisplay" class="hidden p-3 rounded-[6px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-3">
+            <!-- CARD DE ELEMENTO ACTIVO SELECCIONADO (Se muestra cuando hay elemento activo) -->
+            <div id="editCurrentActiveDisplay" class="hidden p-2.5 rounded-[6px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-3">
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <span id="editActiveDot" class="w-2.5 h-2.5 rounded-full shrink-0"></span>
                 <div class="min-w-0 flex-1">
@@ -1091,20 +1088,18 @@
                 </div>
               </div>
               <button type="button" onclick="focusEditSearch()" class="shrink-0 font-mono text-[9px] uppercase px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition" title="Buscar otro elemento">
-                Cambiar ▾
+                ✕ Cambiar
               </button>
             </div>
 
-            <!-- BUSCADOR PREDICTIVO EN TIEMPO REAL -->
+            <!-- BUSCADOR PREDICTIVO EN TIEMPO REAL (Se oculta al haber elemento activo para evitar duplicidad) -->
             <div id="editSearchBoxWrapper" class="relative">
               <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input type="text" id="editSearchInput" oninput="handleEditLiveSearch(this.value)" onfocus="handleEditSearchFocus()" placeholder="Buscar proyecto o módulo para editar..." autocomplete="off" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+              <input type="text" id="editSearchInput" oninput="handleEditLiveSearch(this.value)" onfocus="handleEditSearchFocus()" placeholder="Buscar proyecto o módulo..." autocomplete="off" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
               <button type="button" id="btnClearEditSearch" onclick="clearEditSearch()" class="hidden absolute right-2.5 top-2.5 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar">✕</button>
 
               <!-- PANEL FLOTANTE DE RESULTADOS PREDICTIVOS -->
-              <div id="editSearchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#141211] border border-[#3d3a39] rounded-[6px] shadow-2xl z-50 max-h-64 overflow-y-auto scrollbar-thin p-1 space-y-1">
-                <!-- Se llena dinámicamente con las coincidencias -->
-              </div>
+              <div id="editSearchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#141211] border border-[#3d3a39] rounded-[6px] shadow-2xl z-50 max-h-64 overflow-y-auto scrollbar-thin p-1 space-y-1"></div>
             </div>
 
             <!-- ELEMENTO SELECT OCULTO PARA COMPATIBILIDAD 100% -->
@@ -1113,7 +1108,7 @@
             </select>
           </div>
           
-          <div id="editFormArea" class="hidden space-y-5 pt-4 border-t border-[#1d1a18]">
+          <div id="editFormArea" class="hidden space-y-4 pt-3 border-t border-[#1d1a18]">
             <div class="flex justify-between items-center">
               <span id="editTypeBadge" class="font-mono text-[10px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2.5 py-1 rounded-[2px] border border-[#3d3a39]">TIPO</span>
               <button id="btnDeleteElement" onclick="requestDeleteCurrentSelection()" class="font-mono uppercase text-[10px] text-[#ee6018] hover:bg-[#ee6018] hover:text-[#fafafa] flex items-center gap-1.5 bg-[#1d1a18] px-3 py-1.5 rounded-[3px] transition border border-[#ee6018]/40 supremo-only hidden">
@@ -1121,59 +1116,74 @@
               </button>
             </div>
             
-            <div class="space-y-2">
-              <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Nombre</label>
-              <input type="text" id="editName" class="w-full liquid-input rounded-[3px] p-3.5 text-sm">
+            <div class="space-y-1.5">
+              <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Nombre</label>
+              <input type="text" id="editName" class="w-full liquid-input rounded-[3px] p-3 text-sm">
             </div>
             
-            <div id="editProjectFields" class="space-y-5 hidden">
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulo Principal / Ubicación Base</label>
-                  <span id="editProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+            <div id="editProjectFields" class="space-y-3 hidden">
+              <!-- ACORDEÓN: MÓDULO BASE -->
+              <details id="editDetailsBaseModule" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+                <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                    <span class="text-[#b8b3b0] tracking-wider">Módulo Base:</span>
+                    <span id="editProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+                  </div>
+                  <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="p-2 border-t border-[#3d3a39] bg-[#101010]">
+                  <div id="editProjLocationChips" class="flex flex-wrap gap-1.5"></div>
+                  <select id="editProjectLocation" class="hidden"></select>
                 </div>
-                <div id="editProjLocationChips" class="flex flex-wrap gap-1.5 p-2 bg-[#161413] border border-[#3d3a39] rounded-[6px]"></div>
-                <select id="editProjectLocation" class="hidden"></select>
-              </div>
+              </details>
 
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulos Vinculados / Sinergias</label>
-                  <span class="font-mono text-[9px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🔗 Multimódulo</span>
-                </div>
-                <div id="editProjSecondaryModulesContainer" class="p-2.5 bg-[#161413] border border-[#3d3a39] rounded-[6px]">
+              <!-- ACORDEÓN: SINERGIAS MULTIMÓDULO -->
+              <details id="editDetailsSecondaryModules" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+                <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span>🔗</span>
+                    <span class="text-[#b8b3b0] tracking-wider">Sinergias:</span>
+                    <span id="editProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
+                  </div>
+                  <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div id="editProjSecondaryModulesContainer" class="p-2 border-t border-[#3d3a39] bg-[#101010]">
                   <div id="editProjSecondaryModulesList" class="flex flex-wrap gap-1.5"></div>
-                  <p class="font-mono text-[9px] text-[#8a8380] mt-1.5 tracking-tight">Toca los módulos adicionales con los que interactúa o genera sinergia este proyecto.</p>
                 </div>
-              </div>
+              </details>
 
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Empresa(s) Destino</label>
-                  <span class="font-mono text-[9px] uppercase text-[#ee6018] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🏢 AFR / AVM / TEO...</span>
-                </div>
-                <div id="editProjCompaniesContainer" class="p-3 bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
+              <!-- ACORDEÓN: EMPRESAS -->
+              <details id="editDetailsCompanies" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+                <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span>🏢</span>
+                    <span class="text-[#b8b3b0] tracking-wider">Empresas:</span>
+                    <span id="editProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
+                  </div>
+                  <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div id="editProjCompaniesContainer" class="p-2.5 border-t border-[#3d3a39] bg-[#101010] space-y-2">
                   <div id="editProjCompaniesList" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin"></div>
-                  <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-[#3d3a39]">
-                    <input type="text" id="editProjCustomComp" placeholder="Otra empresa (ej. NUEVA)..." class="flex-1 liquid-input rounded-[3px] px-3 py-1.5 text-xs uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addCustomCompany('editProj');}">
-                    <button type="button" onclick="window.addCustomCompany('editProj')" class="pill-btn px-3 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition">+ Agregar</button>
+                  <div class="flex items-center gap-2 pt-2 border-t border-[#3d3a39]">
+                    <input type="text" id="editProjCustomComp" placeholder="Empresa..." class="flex-1 liquid-input rounded-[3px] px-2.5 py-1 text-xs uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addCustomCompany('editProj');}">
+                    <button type="button" onclick="window.addCustomCompany('editProj')" class="pill-btn px-2.5 py-1 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition">+ Agregar</button>
                   </div>
-                  <p class="text-[11px] text-[#8a8380] mt-2">Selecciona una o más empresas a las que aplica este proyecto.</p>
                 </div>
-              </div>
+              </details>
 
-              <div class="space-y-2 sm:col-span-2">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Carpeta Drive (URL)</label>
+              <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Carpeta Drive</label>
                   <div class="flex gap-2">
-                      <input type="url" id="editDriveLink" class="flex-1 liquid-input rounded-[3px] p-3 text-sm text-[#eeeeee]" placeholder="https://drive.google.com/...">
-                      <a id="btnOpenEditDrive" href="#" target="_blank" class="hidden pill-btn px-4 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#eeeeee] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[11px] flex justify-center items-center transition">Abrir ↗</a>
+                      <input type="url" id="editDriveLink" class="flex-1 liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="https://drive.google.com/...">
+                      <a id="btnOpenEditDrive" href="#" target="_blank" class="hidden pill-btn px-3 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#eeeeee] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[10px] flex justify-center items-center transition">Abrir ↗</a>
                   </div>
               </div>
-              <div class="space-y-2 sm:col-span-2">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Ticket Invgate (URL)</label>
+              <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Ticket Invgate</label>
                   <div class="flex gap-2">
-                      <input type="url" id="editInvgateLink" class="flex-1 liquid-input rounded-[3px] p-3 text-sm text-[#a0ca92]" placeholder="https://stgt.invgate.com/...">
-                      <a id="btnOpenEditInvgate" href="#" target="_blank" class="hidden pill-btn px-4 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#a0ca92] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[11px] flex justify-center items-center transition">Abrir ↗</a>
+                      <input type="url" id="editInvgateLink" class="flex-1 liquid-input rounded-[3px] p-2.5 text-xs text-[#a0ca92]" placeholder="https://stgt.invgate.com/...">
+                      <a id="btnOpenEditInvgate" href="#" target="_blank" class="hidden pill-btn px-3 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#a0ca92] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[10px] flex justify-center items-center transition">Abrir ↗</a>
                   </div>
               </div>
 
@@ -1202,7 +1212,7 @@
 
                   <div class="sm:col-span-2 mt-1 pt-3 border-t border-[#3d3a39]">
                      <div class="flex justify-between items-center mb-3">
-                        <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Documentación Base</label>
+                        <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Documentación</label>
                         <span id="editProgressLabel" class="font-mono text-[11px] text-[#a0ca92] bg-[#101010] px-2.5 py-0.5 rounded-[3px] border border-[#3d3a39]">0%</span>
                      </div>
                      <div id="editDocsContainer" class="space-y-2.5 max-h-72 overflow-y-auto scrollbar-thin pr-1"></div>
@@ -1213,13 +1223,13 @@
                   </div>
               </div>
               
-              <div class="space-y-2">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Prioridad (Numérica)</label>
-                <input type="number" step="any" id="editPriority" class="w-full liquid-input rounded-[3px] p-3.5 text-sm font-mono" placeholder="1 = urgencia máxima">
+              <div class="space-y-1.5">
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Prioridad</label>
+                <input type="number" step="any" id="editPriority" class="w-full liquid-input rounded-[3px] p-3 text-sm font-mono" placeholder="1 = Urgente">
               </div>
               
-              <div class="space-y-2">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Consultor(es)</label>
+              <div class="space-y-1.5">
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores</label>
                 <div id="editConsultantsChecks" class="bg-[#1d1a18] border border-[#3d3a39] p-3 rounded-[10px] grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto scrollbar-thin"></div>
               </div>
               
@@ -1282,7 +1292,7 @@
               </button>
             </div>
             
-            <button onclick="saveEditChanges()" class="pill-btn w-full py-3.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[12px] mt-6 flex justify-center items-center gap-2">Guardar Cambios Completos →</button>
+            <button onclick="saveEditChanges()" class="pill-btn w-full py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] mt-5 flex justify-center items-center gap-2">Guardar Cambios →</button>
           </div>
           
           <div id="editEmptyState" class="text-center py-20 opacity-60">
@@ -1298,52 +1308,70 @@
             <button onclick="setCreateType('module')" id="btnCreateTypeModule" class="flex-1 py-2.5 font-mono uppercase text-[11px] rounded-[2px] text-gray-400 hover:text-white transition supremo-only hidden">Módulos</button>
           </div>
           
-          <div id="createProjectForm" class="space-y-4">
-            <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulo Principal / Ubicación Base</label>
+          <div id="createProjectForm" class="space-y-3">
+            <!-- ACORDEÓN: MÓDULO BASE -->
+            <details id="newDetailsBaseModule" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                  <span class="text-[#b8b3b0] tracking-wider">Módulo Base:</span>
                   <span id="newProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
                 </div>
-                <div id="newProjLocationChips" class="flex flex-wrap gap-1.5 p-2 bg-[#161413] border border-[#3d3a39] rounded-[6px]"></div>
+                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div class="p-2 border-t border-[#3d3a39] bg-[#101010]">
+                <div id="newProjLocationChips" class="flex flex-wrap gap-1.5"></div>
                 <select id="newProjLocation" class="hidden"></select>
-            </div>
+              </div>
+            </details>
+
+            <!-- ACORDEÓN: SINERGIAS MULTIMÓDULO -->
+            <details id="newDetailsSecondaryModules" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span>🔗</span>
+                  <span class="text-[#b8b3b0] tracking-wider">Sinergias:</span>
+                  <span id="newProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div id="newProjSecondaryModulesContainer" class="p-2 border-t border-[#3d3a39] bg-[#101010]">
+                <div id="newProjSecondaryModulesList" class="flex flex-wrap gap-1.5"></div>
+              </div>
+            </details>
+
+            <!-- ACORDEÓN: EMPRESAS -->
+            <details id="newDetailsCompanies" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span>🏢</span>
+                  <span class="text-[#b8b3b0] tracking-wider">Empresas:</span>
+                  <span id="newProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div id="newProjCompaniesContainer" class="p-2.5 border-t border-[#3d3a39] bg-[#101010] space-y-2">
+                <div id="newProjCompaniesList" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin"></div>
+                <div class="flex items-center gap-2 pt-2 border-t border-[#3d3a39]">
+                  <input type="text" id="newProjCustomComp" placeholder="Empresa..." class="flex-1 liquid-input rounded-[3px] px-2.5 py-1 text-xs uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addCustomCompany('newProj');}">
+                  <button type="button" onclick="window.addCustomCompany('newProj')" class="pill-btn px-2.5 py-1 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition">+ Agregar</button>
+                </div>
+              </div>
+            </details>
+
             <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulos Vinculados / Sinergias</label>
-                  <span class="font-mono text-[9px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🔗 Multimódulo</span>
-                </div>
-                <div id="newProjSecondaryModulesContainer" class="p-2.5 bg-[#161413] border border-[#3d3a39] rounded-[6px]">
-                  <div id="newProjSecondaryModulesList" class="flex flex-wrap gap-1.5"></div>
-                  <p class="font-mono text-[9px] text-[#8a8380] mt-1.5 tracking-tight">Toca los módulos adicionales con los que interactúa o genera sinergia este proyecto.</p>
-                </div>
-            </div>
-            <div class="space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Empresa(s) Destino</label>
-                  <span class="font-mono text-[9px] uppercase text-[#ee6018] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🏢 AFR / AVM / TEO...</span>
-                </div>
-                <div id="newProjCompaniesContainer" class="p-3 bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
-                  <div id="newProjCompaniesList" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin"></div>
-                  <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-[#3d3a39]">
-                    <input type="text" id="newProjCustomComp" placeholder="Otra empresa (ej. NUEVA)..." class="flex-1 liquid-input rounded-[3px] px-3 py-1.5 text-xs uppercase" onkeydown="if(event.key==='Enter'){event.preventDefault();window.addCustomCompany('newProj');}">
-                    <button type="button" onclick="window.addCustomCompany('newProj')" class="pill-btn px-3 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition">+ Agregar</button>
-                  </div>
-                  <p class="text-[11px] text-[#8a8380] mt-2">Selecciona una o más empresas a las que aplica este proyecto.</p>
-                </div>
-            </div>
-            <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Nombre del Proyecto</label>
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Nombre del Proyecto</label>
                 <input type="text" id="newProjName" placeholder="Ej. Implementación Módulo Contable" class="w-full liquid-input rounded-[3px] p-3 text-sm">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="space-y-1.5">
-                    <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Fecha Límite</label>
-                    <input type="date" id="newProjDeadline" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-3 text-xs [color-scheme:dark]">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Fecha Límite</label>
+                    <input type="date" id="newProjDeadline" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Estado Inicial</label>
-                    <select id="newProjStatus" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none text-[#eeeeee]">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Estado Inicial</label>
+                    <select id="newProjStatus" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee]">
                         <option value="No Iniciado">⏸️ No Iniciado</option>
                         <option value="Pendiente">⏳ Pendiente</option>
                         <option value="En Progreso">🚀 En Progreso</option>
@@ -1353,26 +1381,26 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="space-y-1.5">
-                    <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Prioridad (Numérica)</label>
-                    <input type="number" id="newProjPriority" value="1" min="1" max="99" class="w-full liquid-input rounded-[3px] p-3 text-xs font-mono" placeholder="1 = Urgente">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Prioridad</label>
+                    <input type="number" id="newProjPriority" value="1" min="1" max="99" class="w-full liquid-input rounded-[3px] p-2.5 text-xs font-mono" placeholder="1 = Urgente">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Carpeta Drive (Opcional)</label>
-                    <input type="url" id="newProjDrive" class="w-full liquid-input rounded-[3px] p-3 text-xs text-[#eeeeee]" placeholder="https://drive.google.com/...">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Carpeta Drive</label>
+                    <input type="url" id="newProjDrive" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="https://drive.google.com/...">
                 </div>
             </div>
 
             <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Ticket Invgate (Opcional)</label>
-                <input type="url" id="newProjInvgate" class="w-full liquid-input rounded-[3px] p-3 text-xs text-[#a0ca92]" placeholder="https://stgt.invgate.com/...">
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Ticket Invgate</label>
+                <input type="url" id="newProjInvgate" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#a0ca92]" placeholder="https://stgt.invgate.com/...">
             </div>
 
             <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Consultor(es) Asignado(s)</label>
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores</label>
                 <div id="newProjConsultantsChecks" class="bg-[#1d1a18] border border-[#3d3a39] p-3 rounded-[10px] grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin"></div>
             </div>
 
-            <button onclick="createNewProject()" class="pill-btn w-full py-3.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[12px] mt-4 flex items-center justify-center gap-2">
+            <button onclick="createNewProject()" class="pill-btn w-full py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] mt-4 flex items-center justify-center gap-2">
                 <span>+ Crear Proyecto</span>
             </button>
           </div>
@@ -1641,7 +1669,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v828"></script>
+  <script type="module" src="app.js?v=20261017_v829"></script>
 
 </body>
 </html>

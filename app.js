@@ -3934,8 +3934,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
       }, 50);
     }
-    window.selectNodeAndOpenConfig = function(type, id) { if(window.innerWidth < 768) window.closePriorityDrawer(); window.openConfigDrawer(); window.switchTab('edit'); document.getElementById('globalEditSelector').value = `${type}|${id}`; window.selectNode(type, id); }
-    window.handleGlobalEditSelectionChange = function() { const v = document.getElementById('globalEditSelector').value; if(!v) { currentSelection={type:null,id:null}; document.getElementById('editFormArea').classList.add('hidden'); document.getElementById('editEmptyState').classList.remove('hidden'); const disp = document.getElementById('editCurrentActiveDisplay'); if(disp) disp.classList.add('hidden'); return;} window.selectNode(...v.split('|')); }
+    window.selectNodeAndOpenConfig = function(type, id) { 
+      if(window.innerWidth < 768) window.closePriorityDrawer(); 
+      window.openConfigDrawer(); 
+      window.switchTab('edit'); 
+      document.getElementById('globalEditSelector').value = `${type}|${id}`; 
+      window.selectNode(type, id); 
+    };
+
+    window.handleGlobalEditSelectionChange = function() { 
+      const v = document.getElementById('globalEditSelector').value; 
+      if(!v) { 
+        currentSelection = { type: null, id: null }; 
+        document.getElementById('editFormArea').classList.add('hidden'); 
+        document.getElementById('editEmptyState').classList.remove('hidden'); 
+        const disp = document.getElementById('editCurrentActiveDisplay'); 
+        if(disp) disp.classList.add('hidden'); 
+        const searchBox = document.getElementById('editSearchBoxWrapper');
+        if(searchBox) searchBox.classList.remove('hidden');
+        return;
+      } 
+      window.selectNode(...v.split('|')); 
+    };
 
     window.requestDeleteCurrentSelection = function() { if(!currentSelection.id || currentSelection.type === 'core' || currentSelection.type === 'direct-hub') return; itemToDelete = { category: 'element', id: currentSelection.id }; document.getElementById('deleteConfirmModal').classList.remove('hidden'); setTimeout(() => document.getElementById('deleteConfirmModal').classList.remove('opacity-0'), 10); }
     window.closeDeleteModal = function() { document.getElementById('deleteConfirmModal').classList.add('opacity-0'); setTimeout(() => { document.getElementById('deleteConfirmModal').classList.add('hidden'); itemToDelete = {category:null, id:null}; }, 400); }
@@ -4308,18 +4328,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         s.value = `${currentSelection.type}|${currentSelection.id}`;
         window.updateEditActiveItemDisplay(currentSelection.type, currentSelection.id);
       }
-      const btnLoadMap = document.getElementById('btnLoadCurrentMapSelection');
-      if (btnLoadMap) {
-        if (currentSelection && currentSelection.id) btnLoadMap.classList.remove('hidden');
-        else btnLoadMap.classList.add('hidden');
-      }
     };
 
     window.updateEditActiveItemDisplay = function(type, id) {
       const disp = document.getElementById('editCurrentActiveDisplay');
+      const searchBox = document.getElementById('editSearchBoxWrapper');
       if (!disp) return;
       if (!type || !id) {
         disp.classList.add('hidden');
+        if (searchBox) searchBox.classList.remove('hidden');
         return;
       }
       let item = null;
@@ -4360,6 +4377,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       if (!item) {
         disp.classList.add('hidden');
+        if (searchBox) searchBox.classList.remove('hidden');
         return;
       }
 
@@ -4373,8 +4391,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (title) title.textContent = item.name || 'Sin nombre';
 
       disp.classList.remove('hidden');
-      const btnLoadMap = document.getElementById('btnLoadCurrentMapSelection');
-      if (btnLoadMap) btnLoadMap.classList.remove('hidden');
+      if (searchBox) searchBox.classList.add('hidden');
     };
 
     window.handleEditLiveSearch = function(query) {
@@ -4487,6 +4504,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (searchInp) searchInp.value = '';
       const clearBtn = document.getElementById('btnClearEditSearch');
       if (clearBtn) clearBtn.classList.add('hidden');
+      const searchBox = document.getElementById('editSearchBoxWrapper');
+      if (searchBox) searchBox.classList.add('hidden');
 
       const ges = document.getElementById('globalEditSelector');
       if (ges) ges.value = `${type}|${id}`;
@@ -4494,10 +4513,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.focusEditSearch = function() {
+      const disp = document.getElementById('editCurrentActiveDisplay');
+      if (disp) disp.classList.add('hidden');
+      const searchBox = document.getElementById('editSearchBoxWrapper');
+      if (searchBox) searchBox.classList.remove('hidden');
       const inp = document.getElementById('editSearchInput');
       if (inp) {
+        inp.value = '';
         inp.focus();
-        window.handleEditLiveSearch(inp.value);
+        window.handleEditLiveSearch('');
       }
     };
 
@@ -4550,7 +4574,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       if (options.length === 0) {
         container.innerHTML = '<div class="text-[10px] font-mono text-[#8a8380] italic py-1 px-0.5">No hay otros módulos disponibles para vincular.</div>';
+        const secBadge = document.getElementById(`${prefix}SecBadge`);
+        if (secBadge) {
+          secBadge.textContent = 'Ninguna';
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+        }
         return;
+      }
+
+      const secBadge = document.getElementById(`${prefix}SecBadge`);
+      if (secBadge) {
+        const count = selSet.size;
+        if (count === 0) {
+          secBadge.textContent = 'Ninguna';
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+        } else {
+          secBadge.textContent = `${count} ${count === 1 ? 'módulo' : 'módulos'}`;
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#fafafa] border border-[#ee6018]';
+        }
       }
 
       container.innerHTML = options.map(opt => {
@@ -4637,6 +4678,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       selSet.forEach(c => {
         if (c && !allComps.includes(c)) allComps.push(c);
       });
+
+      const compBadge = document.getElementById(`${prefix}CompBadge`);
+      if (compBadge) {
+        const count = selSet.size;
+        if (count === 0) {
+          compBadge.textContent = '0';
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+        } else if (count <= 2) {
+          compBadge.textContent = Array.from(selSet).join(', ');
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
+        } else {
+          compBadge.textContent = `${count} empresas`;
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
+        }
+      }
 
       container.innerHTML = allComps.map(comp => {
         const isChecked = selSet.has(comp);
