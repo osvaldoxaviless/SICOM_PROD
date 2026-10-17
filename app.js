@@ -539,6 +539,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 } else {
                     t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
                     logActivity('daily', 'Actividades Diarias', `Envió tarea diaria a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
+                    window.sendExternalAlert('VALIDATION_SUBMITTED', {
+                        project: 'Actividad Diaria',
+                        task: t.text,
+                        feedback: feedback,
+                        consultant: localAuthor
+                    });
                 }
                 window.saveData(false);
             }
@@ -828,6 +834,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(isPriorityDrawerOpen) window.renderPriorityDrawer();
         window.renderAlerts(); // SENSOR DE ALERTAS
         refreshOpenInfoNotes();
+        const hookInp = document.getElementById('customWebhookInput');
+        if (hookInp && !hookInp.value) {
+            hookInp.value = (appData.config && appData.config.webhookUrl) || localStorage.getItem('sicom_custom_webhook') || '';
+        }
     }
 
     // Si la tarjeta de un proyecto está abierta, actualiza sus comentarios cuando llegan cambios de otros usuarios
@@ -2286,7 +2296,129 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         setTimeout(() => modal.classList.add('hidden'), 400);
     };
 
-    // --- MÓDULO DE ALERTAS EXTERNAS (TORRE DE CONTROL GOOGLE WORKSPACE / CHAT) ---
+    // === SENSOR DE ENFRIAMIENTO Y CÁLCULO DE DÍAS HÁBILES (FACTORY RISK ENGINE) ===
+    window.calcBusinessDaysSince = function(dateStr) {
+        if (!dateStr) return 0;
+        let d;
+        if (typeof dateStr === 'string' && dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts[0].length === 4) {
+                d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else {
+                d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            }
+        } else if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts[2] && parts[2].length === 4) {
+                d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            } else if (parts[0] && parts[0].length === 4) {
+                d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            } else {
+                d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            }
+        } else {
+            d = new Date(dateStr);
+        }
+        
+        if (isNaN(d.getTime())) return 0;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+
+        if (d >= today) return 0;
+
+        let count = 0;
+        let cur = new Date(d);
+        cur.setDate(cur.getDate() + 1);
+
+        while (cur <= today) {
+            const dayOfWeek = cur.getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Excluir sábados (6) y domingos (0)
+                count++;
+            }
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count;
+    };
+
+    window.getProjectRiskStatus = function(proj) {
+        if (!proj || proj.status === 'Completado') return null;
+
+        const now = new Date();
+        const todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        // RIESGO CRÍTICO (ROJO / FUEGO):
+        // 1. Fecha límite de proyecto vencida
+        let isDeadlineOver = false;
+        let daysOverdue = 0;
+        if (proj.deadline) {
+            const parts = proj.deadline.split('-');
+            if (parts.length === 3) {
+                const dTime = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getTime();
+                if (dTime < todayZero) {
+                    isDeadlineOver = true;
+                    daysOverdue = Math.ceil((todayZero - dTime) / (1000 * 60 * 60 * 24));
+                }
+            }
+        }
+
+        // 2. Entrega con cliente sin retorno por más de 5 días hábiles
+        let isClientDeliveryOver = false;
+        let clientWaitDays = 0;
+        if (proj.clientDeliveryDate && !proj.clientReturnDate) {
+            clientWaitDays = window.calcBusinessDaysSince(proj.clientDeliveryDate);
+            if (clientWaitDays >= 5) {
+                isClientDeliveryOver = true;
+            }
+        }
+
+        if (isDeadlineOver || isClientDeliveryOver) {
+            const label = isDeadlineOver 
+                ? `Fecha límite vencida hace ${daysOverdue} ${daysOverdue === 1 ? 'día' : 'días'}` 
+                : `Entrega a cliente sin retorno (+${clientWaitDays}d hábiles)`;
+            return {
+                level: 'critical',
+                color: '#ff453a',
+                bg: 'rgba(255, 69, 58, 0.12)',
+                label: label,
+                detail: `🚨 Alerta Crítica: ${label}`
+            };
+        }
+
+        // RIESGO DE ENFRIAMIENTO (ÁMBAR TÉCNICO):
+        // Más de 5 días hábiles en «Validación» sin revisión de supervisión
+        const tasks = Array.isArray(proj.tasks) ? proj.tasks : [];
+        const pendingTasks = tasks.filter(t => t && t.done === 'pending');
+
+        if (pendingTasks.length > 0) {
+            let maxDaysInValidation = 0;
+            pendingTasks.forEach(t => {
+                const dateStr = t.submittedDate || t.requestDate || t.assignDate;
+                if (dateStr) {
+                    const bDays = window.calcBusinessDaysSince(dateStr);
+                    if (bDays > maxDaysInValidation) maxDaysInValidation = bDays;
+                } else {
+                    maxDaysInValidation = Math.max(maxDaysInValidation, 5);
+                }
+            });
+
+            if (maxDaysInValidation >= 5) {
+                const label = `${pendingTasks.length} ${pendingTasks.length === 1 ? 'tarea' : 'tareas'} en validación (+${maxDaysInValidation}d hábiles)`;
+                return {
+                    level: 'cooling',
+                    color: '#ff9f0a',
+                    bg: 'rgba(255, 159, 10, 0.10)',
+                    label: label,
+                    detail: `⏳ Sensor de Enfriamiento: ${label}`
+                };
+            }
+        }
+
+        return null;
+    };
+
+    // --- MÓDULO DE ALERTAS EXTERNAS (TORRE DE CONTROL GOOGLE WORKSPACE / CHAT / SLACK / TEAMS) ---
     const _chatK = ['AIzaSyDdI0hCZtE', '6vySjMm-WEfRq3CPzqKqqsHI'].join('');
     const _chatT = '_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
     const GOOGLE_CHAT_WEBHOOK_URL = `https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=${_chatK}&token=${_chatT}`;
@@ -2340,6 +2472,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             console.log('🔔 [SICOM External Alert] Despachando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
 
             // Envío DIRECTO e INMEDIATO al Webhook de Google Chat (instantáneo, limpio y sin duplicados)
+            // 1. Envío al Webhook nativo de Google Chat
             if (GOOGLE_CHAT_WEBHOOK_URL) {
                 fetch(GOOGLE_CHAT_WEBHOOK_URL, {
                     method: 'POST',
@@ -2349,12 +2482,73 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }).then(() => {
                     console.log('✅ [SICOM Google Chat] Mensaje entregado directamente al Webhook de Google Chat');
                 }).catch(err => {
-                    console.warn('⚠️ [SICOM Google Chat] Error en Webhook directo:', err);
+                    console.warn('⚠️ [SICOM Google Chat] Error en Webhook de Google Chat:', err);
+                });
+            }
+
+            // 2. Envío al Webhook personalizado (Slack, Teams, Discord o genérico)
+            const customWebhook = (appData.config && appData.config.webhookUrl) || localStorage.getItem('sicom_custom_webhook');
+            if (customWebhook && customWebhook.trim().startsWith('http')) {
+                const targetUrl = customWebhook.trim();
+                let customBody;
+                if (targetUrl.includes('discord.com')) {
+                    customBody = JSON.stringify({ content: chatText });
+                } else if (targetUrl.includes('slack.com')) {
+                    customBody = JSON.stringify({ text: chatText });
+                } else if (targetUrl.includes('office.com') || targetUrl.includes('webhook.office')) {
+                    customBody = JSON.stringify({
+                        "@type": "MessageCard",
+                        "@context": "http://schema.org/extensions",
+                        "summary": "Alerta SICOM",
+                        "text": chatText.replace(/\n/g, '<br>')
+                    });
+                } else {
+                    customBody = JSON.stringify({
+                        text: chatText,
+                        type: type,
+                        payload: payload,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                fetch(targetUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: customBody
+                }).then(() => {
+                    console.log('✅ [SICOM Webhook] Notificación externa entregada con éxito');
+                }).catch(err => {
+                    console.warn('⚠️ [SICOM Webhook] Error en webhook externo:', err);
                 });
             }
         } catch (e) {
             console.warn('⚠️ [SICOM External Alert] Excepción silenciosa:', e);
         }
+    };
+
+    window.saveCustomWebhook = function(url) {
+        if (!appData.config) appData.config = {};
+        appData.config.webhookUrl = (url || '').trim();
+        try { localStorage.setItem('sicom_custom_webhook', appData.config.webhookUrl); } catch(e) {}
+        window.saveData(false);
+        window.showToast("Canal de notificaciones guardado");
+    };
+
+    window.testCustomWebhook = async function() {
+        const input = document.getElementById('customWebhookInput');
+        const url = input ? input.value.trim() : ((appData.config && appData.config.webhookUrl) || '');
+        if (!url && !GOOGLE_CHAT_WEBHOOK_URL) {
+            window.showToast("Ingresa un Webhook URL válido", true);
+            return;
+        }
+        window.showToast("Enviando prueba de alerta...");
+        await window.sendExternalAlert('VALIDATION_SUBMITTED', {
+            project: 'Proyecto Prueba SICOM',
+            task: 'Prueba de enlace operativo y alertas inmediatas',
+            feedback: 'El canal de notificaciones externas está conectado y operativo.',
+            consultant: localAuthor || 'Sistema'
+        });
+        window.showToast("✅ Notificación de prueba despachada");
     };
 
     window.generateMorningDigestText = function() {
@@ -3338,7 +3532,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('quickEditStatus').value = item.status || 'Pendiente'; document.getElementById('quickEditDeadline').value = item.deadline || ''; 
         document.getElementById('quickEditDeliveryDate').value = item.clientDeliveryDate || ''; document.getElementById('quickEditReturnDate').value = item.clientReturnDate || ''; 
         
-        if(item.deadline) {
+        const riskInfo = window.getProjectRiskStatus(item);
+        if (riskInfo) {
+            const rt = document.getElementById('infoRelativeTime');
+            rt.classList.remove('hidden');
+            if (riskInfo.level === 'critical') {
+                rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center justify-between gap-2 bg-[#ff453a]/10 text-[#ff453a] border-[#ff453a]/40";
+                rt.innerHTML = `<span>🚨 ${escapeHtml(riskInfo.label)}</span><span class="w-2 h-2 rounded-full bg-[#ff453a] animate-ping shrink-0"></span>`;
+            } else {
+                rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center justify-between gap-2 bg-[#ff9f0a]/10 text-[#ff9f0a] border-[#ff9f0a]/40";
+                rt.innerHTML = `<span>⏳ ${escapeHtml(riskInfo.label)}</span><span class="w-2 h-2 rounded-full bg-[#ff9f0a] animate-ping shrink-0"></span>`;
+            }
+        } else if (item.deadline) {
             const rt = document.getElementById('infoRelativeTime'); rt.classList.remove('hidden');
             const [y,m,d] = item.deadline.split('-'); const dDate = new Date(y, m-1, d); const today = new Date(new Date().setHours(0,0,0,0));
             const diffTime = dDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -4798,7 +5003,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const isSel = currentSelection.id === realId;
           const pMatches = isDefaultState || isFiltered(p);
           
-          let isOver = false; if(p.deadline && p.status !== 'Completado') { const [dy, dm, dd] = p.deadline.split('-'); if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true; }
+          const riskInfo = window.getProjectRiskStatus(p);
+          const isOver = riskInfo && riskInfo.level === 'critical';
+          const isCooling = riskInfo && riskInfo.level === 'cooling';
           const sCol = p.status==='En Progreso'?'#ee6018':(p.status==='Completado'?'#a0ca92':(p.status==='No Iniciado'?'#4d4947':'#8a8380'));
 
           // 1. CREACIÓN DEL CONTENEDOR PRINCIPAL
@@ -4865,20 +5072,42 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
 
           // 3. CAPA VISUAL (Factory Technical Card rx=10)
-          // AURA TÉCNICA PARA PROYECTOS VENCIDOS
-          if (isOver) {
+          // SENSOR DE ENFRIAMIENTO Y PULSO DE RIESGO TÉCNICO
+          if (riskInfo) {
               const aura = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               aura.setAttribute('x', '-4');
               aura.setAttribute('y', '-4');
               aura.setAttribute('width', '328');
               aura.setAttribute('height', '64');
               aura.setAttribute('rx', '12');
-              aura.setAttribute('fill', 'rgba(238, 96, 24, 0.08)');
-              aura.setAttribute('stroke', '#ee6018');
-              aura.setAttribute('stroke-width', '1');
-              aura.classList.add('overdue-aura-pulse');
+              aura.setAttribute('fill', riskInfo.bg);
+              aura.setAttribute('stroke', riskInfo.color);
+              aura.setAttribute('stroke-width', '1.4');
+              aura.classList.add(isCooling ? 'risk-pulse-amber' : 'risk-pulse-red');
               aura.style.pointerEvents = 'none';
+              
+              const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+              titleEl.textContent = riskInfo.detail;
+              aura.appendChild(titleEl);
               g.appendChild(aura);
+
+              // Indicador técnico luminoso (LED táctico en esquina superior derecha)
+              const ledG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              ledG.setAttribute('transform', 'translate(306, 10)');
+              ledG.style.pointerEvents = 'none';
+              
+              const ledPing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              ledPing.setAttribute('r', '4');
+              ledPing.setAttribute('fill', riskInfo.color);
+              ledPing.classList.add(isCooling ? 'risk-dot-amber' : 'risk-dot-red');
+              ledG.appendChild(ledPing);
+
+              const ledCore = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              ledCore.setAttribute('r', '2');
+              ledCore.setAttribute('fill', '#eeeeee');
+              ledG.appendChild(ledCore);
+              
+              g.appendChild(ledG);
           }
 
           const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
@@ -5215,6 +5444,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
              g.classList.add('interactive-node');
         }
         
+        // Pulso de riesgo a nivel módulo cuando está colapsado
+        if (isCollapsed) {
+            const hasCrit = (n.projects || []).some(p => { const r = window.getProjectRiskStatus(p); return r && r.level === 'critical'; });
+            const hasCool = !hasCrit && (n.projects || []).some(p => { const r = window.getProjectRiskStatus(p); return r && r.level === 'cooling'; });
+            if (hasCrit || hasCool) {
+                const modRiskAura = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                modRiskAura.setAttribute('x', '-3');
+                modRiskAura.setAttribute('y', '-3');
+                modRiskAura.setAttribute('width', '336');
+                modRiskAura.setAttribute('height', '56');
+                modRiskAura.setAttribute('rx', '12');
+                modRiskAura.setAttribute('fill', hasCrit ? 'rgba(255, 69, 58, 0.08)' : 'rgba(255, 159, 10, 0.08)');
+                modRiskAura.setAttribute('stroke', hasCrit ? '#ff453a' : '#ff9f0a');
+                modRiskAura.setAttribute('stroke-width', '1.2');
+                modRiskAura.classList.add(hasCrit ? 'risk-pulse-red' : 'risk-pulse-amber');
+                modRiskAura.style.pointerEvents = 'none';
+                g.appendChild(modRiskAura);
+            }
+        }
+
         const currentModType = n.type === 'direct-hub' ? 'direct-hub' : 'module';
         const currentModId = modId;
         

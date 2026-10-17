@@ -1067,3 +1067,62 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     stroke-dasharray: 6, 4 !important;
     animation: synergyConnectorFlow 1.2s linear infinite !important;
 }
+
+/* ==========================================================================
+   SENSOR DE ENFRIAMIENTO Y PULSO DE RIESGO TÉCNICO (FACTORY DESIGN SYSTEM)
+   ========================================================================== */
+@keyframes riskPulseAmber {
+    0%, 100% {
+        opacity: 0.35;
+        stroke-opacity: 0.50;
+        stroke-width: 1px;
+    }
+    50% {
+        opacity: 0.95;
+        stroke-opacity: 1;
+        stroke-width: 2px;
+    }
+}
+
+@keyframes riskPulseRed {
+    0%, 100% {
+        opacity: 0.40;
+        stroke-opacity: 0.55;
+        stroke-width: 1.2px;
+    }
+    50% {
+        opacity: 1;
+        stroke-opacity: 1;
+        stroke-width: 2.2px;
+    }
+}
+
+@keyframes riskDotPulse {
+    0%, 100% {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.35);
+        opacity: 1;
+    }
+}
+
+.risk-pulse-amber {
+    animation: riskPulseAmber 2.0s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.risk-pulse-red {
+    animation: riskPulseRed 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.risk-dot-amber {
+    transform-origin: center;
+    animation: riskDotPulse 2.0s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.risk-dot-red {
+    transform-origin: center;
+    animation: riskDotPulse 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+

@@ -1365,6 +1365,29 @@
             <button onclick="triggerChatMorningDigest(this)" class="pill-btn w-full py-2.5 px-3 bg-[#1d1a18] hover:border-[#ee6018] text-[#eeeeee] border border-[#3d3a39] font-mono uppercase text-[11px] transition flex items-center justify-center gap-2 mb-2" title="Publicar el resumen de riesgos y proyectos atrasados en Google Chat">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Publicar Resumen de Riesgos en Chat
             </button>
+            <!-- CANAL DE NOTIFICACIONES EXTERNAS (WEBHOOK) -->
+            <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition mb-3">
+              <summary class="cursor-pointer p-3 font-mono uppercase text-[10px] text-[#b8b3b0] hover:text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Canal Notificaciones Webhook
+                </span>
+                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div class="p-3 border-t border-[#3d3a39] bg-[#101010] space-y-2.5 text-[11px]">
+                <p class="leading-relaxed text-[#8a8380]">
+                  Despacha alertas automáticas al canal de supervisión cuando un consultor envíe entregables a validación.
+                </p>
+                <div>
+                  <label class="block font-mono text-[9px] uppercase text-[#8a8380] mb-1">Webhook URL (Slack / Teams / Discord)</label>
+                  <input type="url" id="customWebhookInput" placeholder="https://hooks.slack.com/services/... o Teams / Discord" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee]" onchange="saveCustomWebhook(this.value)">
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <span class="font-mono text-[9px] text-[#8a8380]">Google Chat: <b class="text-[#a0ca92]">Conectado</b></span>
+                  <button type="button" onclick="testCustomWebhook()" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[9px] transition">Probar Alerta</button>
+                </div>
+              </div>
+            </details>
+
             <div class="flex items-center justify-between">
               <h4 class="font-mono text-[10px] text-[#8a8380] uppercase">Exportación y Respaldo</h4>
               <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">● NUBE ACTIVA</span>
