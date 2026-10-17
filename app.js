@@ -4324,6 +4324,65 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.renderRegisteredConsultantsList();
     };
 
+    window.filterConsultant = function(name) {
+        if (!name) return;
+
+        // Conmutador (Toggle): Si ya estaba seleccionado únicamente este consultor, restablecer a vista completa
+        if (activeFilterConsultants.length === 1 && activeFilterConsultants[0] === name) {
+            window.resetAdvFilters();
+            if (isDrawerOpen) window.closeConfigDrawer();
+            window.showToast("🗺️ Filtro restablecido: Mostrando todos los proyectos");
+            setTimeout(() => {
+                if (typeof window.recenterCanvas === 'function') window.recenterCanvas();
+            }, 180);
+            return;
+        }
+
+        // Verificar si tiene proyectos asignados
+        let pCount = 0;
+        const countProjects = (p) => { if (getProjectConsultants(p).includes(name)) pCount++; };
+        (appData.directProjects || []).forEach(countProjects);
+        (appData.modules || []).forEach(m => { (m.projects || []).forEach(countProjects); });
+
+        if (pCount === 0) {
+            window.showToast(`ℹ️ ${name} no tiene proyectos asignados actualmente`, false);
+            return;
+        }
+
+        // Establecer filtro exclusivo para este consultor
+        activeFilterConsultants = [name];
+        activeFilterConsultant = name;
+
+        // Limpiar otros filtros para que no oculten sus proyectos
+        activeFilterModules = ['ALL'];
+        activeFilterModule = 'ALL';
+        activeFilterCompanies = ['ALL'];
+        activeFilterCompany = 'ALL';
+        activeFilterStatuses = ['ALL'];
+        activeFilterStatus = 'ALL';
+        activeFilterUrgency = 'ALL';
+        activeFilterPriority = 'ALL';
+        activeFilterBottleneck = 'ALL';
+
+        // Actualizar chips de filtros y renderizar mapa
+        if (typeof window.renderFilterChips === 'function') window.renderFilterChips();
+        if (typeof window.handleAdvFilter === 'function') window.handleAdvFilter();
+
+        // Cerrar el Centro de Control para revelar el mapa interactivo
+        if (isDrawerOpen) {
+            window.closeConfigDrawer();
+        }
+
+        window.showToast(`🗺️ Mostrando los ${pCount} proyectos de ${name}`);
+
+        // Centrar y enfocar suavemente en sus nodos
+        setTimeout(() => {
+            if (typeof window.focusFilteredMindMap === 'function') {
+                window.focusFilteredMindMap();
+            }
+        }, 180);
+    };
+
     window.renderRegisteredConsultantsList = function() {
         const listEl = document.getElementById('registeredConsultantsList');
         if (!listEl) return;
@@ -4457,8 +4516,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         ${inValCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/30 flex items-center gap-1">⏳ ${inValCount} en validación</span>` : ''}
                         ${overdueCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1">🚨 ${overdueCount} atrasados</span>` : ''}
                     </div>
-                    <button type="button" onclick="window.filterConsultant('${jsArg(n)}')" class="text-[9px] uppercase text-[#8a8380] hover:text-[#eeeeee] transition font-mono">
-                        Aislar en Mapa →
+                    <button type="button" onclick="window.filterConsultant('${jsArg(n)}')" class="text-[9px] uppercase text-[#8a8380] hover:text-[#eeeeee] transition font-mono flex items-center gap-1">
+                        <span>Ver en el Mapa</span> <span>→</span>
                     </button>
                 </div>
             </div>`;
