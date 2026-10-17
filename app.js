@@ -789,8 +789,59 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
 
+    // === PASTILLA DE IDENTIDAD Y PERFIL (FACTORY USER PILL) ===
+    window.updateUserProfilePill = function(customAuthor, customRole) {
+        const author = customAuthor || localAuthor || localStorage.getItem('sicom_author') || 'Consultor';
+        const role = customRole || currentUserRole || localStorage.getItem('sicom_role') || 'Consultor';
+        
+        let initials = 'OP';
+        const clean = author.replace(/[^\p{L}\s]/gu, '').trim();
+        const parts = clean.split(/\s+/).filter(Boolean);
+        if (parts.length === 1) {
+            initials = parts[0].substring(0, 2).toUpperCase();
+        } else if (parts.length >= 2) {
+            initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        const cData = (consultants && consultants[author]) || fallbackConsultants[author] || {};
+        const cColor = cData.color || '#ee6018';
+
+        const avInit = document.getElementById('userAvatarInitials');
+        if (avInit) {
+            avInit.textContent = initials;
+            avInit.style.color = cColor;
+            avInit.style.borderColor = cColor + '66';
+            avInit.style.backgroundColor = cColor + '1a';
+        }
+
+        const roleBadge = document.getElementById('userRoleBadgePill');
+        if (roleBadge) {
+            roleBadge.textContent = role.toUpperCase();
+        }
+
+        const drawerInit = document.getElementById('drawerAvatarInitials');
+        if (drawerInit) {
+            drawerInit.textContent = initials;
+            drawerInit.style.color = cColor;
+            drawerInit.style.borderColor = cColor + '66';
+            drawerInit.style.backgroundColor = cColor + '1a';
+        }
+
+        const drawerRole = document.getElementById('drawerUserRole');
+        if (drawerRole) {
+            drawerRole.textContent = role;
+            drawerRole.style.color = cColor;
+        }
+
+        const topBarWelcome = document.getElementById('topBarWelcome');
+        if (topBarWelcome) {
+            topBarWelcome.textContent = `Bienvenido, ${author}`;
+        }
+    };
+
     function finishInit() {
-        document.getElementById('cloudLoader').style.display = 'none'; document.getElementById('topBarWelcome').textContent = `Bienvenido, ${localAuthor}`;
+        document.getElementById('cloudLoader').style.display = 'none';
+        if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
         try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
         setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
@@ -823,6 +874,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (activeTabEl && !isSupervisorUp && (activeTabEl.id === 'tab-edit' || activeTabEl.id === 'tab-history')) {
             window.switchTab('dashboard');
         }
+        if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
     }
 
     function refreshUI() {
