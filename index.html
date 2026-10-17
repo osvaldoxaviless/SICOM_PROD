@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v82">
+  <link rel="stylesheet" href="styles.css?v=20261017_v821">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -122,18 +122,10 @@
       <svg class="w-4 h-4 text-[#b8b3b0] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
   </button>
 
-  <!-- PASTILLA FLOTANTE DISCRETA DE ZOOM Y CENTRADO (FACTORY CANVAS WIDGET - VERTICAL APILADA SOBRE PENDIENTES) -->
-  <div id="canvasZoomWidget" class="fixed bottom-[134px] left-6 z-[45] flex flex-col items-center w-11 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] overflow-hidden divide-y divide-[#3d3a39] shadow-none transition-all duration-200" title="Control de Navegación">
-    <button onclick="zoomCanvas(0.15)" class="w-11 h-9 flex items-center justify-center text-[#b8b3b0] hover:text-[#101010] hover:bg-[#eeeeee] transition-colors" title="Acercar (+)">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-    </button>
-    <button onclick="recenterCanvas()" class="w-11 h-9 flex items-center justify-center text-[#b8b3b0] hover:text-[#101010] hover:bg-[#eeeeee] transition-colors" title="Centrar Mapa">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-    </button>
-    <button onclick="zoomCanvas(-0.15)" class="w-11 h-9 flex items-center justify-center text-[#b8b3b0] hover:text-[#101010] hover:bg-[#eeeeee] transition-colors" title="Alejar (-)">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
-    </button>
-  </div>
+  <!-- BOTÓN FLOTANTE DISCRETO: CENTRAR MAPA (FACTORY RECENTER WIDGET) -->
+  <button id="canvasZoomWidget" onclick="recenterCanvas()" class="fixed bottom-[136px] left-6 z-[45] w-11 h-11 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center rounded-[3px] transition-all group border border-[#3d3a39] shadow-none" title="Centrar Mapa">
+    <svg class="w-4 h-4 text-[#b8b3b0] group-hover:text-[#101010] transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+  </button>
 
   <!-- SPEED DIAL: NÚCLEO DE CREACIÓN (abajo a la derecha) -->
   <div id="speedDial" class="lector-hide fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
@@ -1570,7 +1562,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v82"></script>
+  <script type="module" src="app.js?v=20261017_v821"></script>
 
 </body>
 </html>
