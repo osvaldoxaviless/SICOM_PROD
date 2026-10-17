@@ -1,428 +1,737 @@
 :root {
     color-scheme: dark;
-    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+
+    /* ==========================================================================
+       FACTORY DESIGN SYSTEM — TOKENS OFICIALES ("TERMINAL WAR ROOM")
+       ========================================================================== */
+    --color-obsidian-canvas: #101010;
+    --color-carbon-lift: #1d1a18;
+    --color-ash-stroke: #3d3a39;
+    --color-graphite-mid: #4d4947;
+    --color-warm-granite: #8a8380;
+    --color-pale-stone: #b8b3b0;
+    --color-bone: #eeeeee;
+    --color-chalk: #fafafa;
+    --color-signal-orange: #ee6018;
+    --color-metric-green: #a0ca92;
+
+    /* Tipografía — Dos Voces, Una Familia */
+    --font-geist: 'Geist', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-geist-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-heading: var(--font-geist);
+    --font-body: var(--font-geist);
+
+    /* Escala Tipográfica Factory */
+    --text-caption: 12px;
+    --leading-caption: 1;
+    --tracking-caption: -0.24px;
+    --text-body-sm: 14px;
+    --leading-body-sm: 1.43;
+    --text-body: 16px;
+    --leading-body: 1.5;
+    --text-heading: 36px;
+    --leading-heading: 1.1;
+    --tracking-heading: -1.12px;
+    --text-heading-lg: 44px;
+    --leading-heading-lg: 1.12;
+    --tracking-heading-lg: -1.1px;
+    --text-display: 72px;
+    --leading-display: 1;
+    --tracking-display: -2.88px;
+
+    /* Pesos Tipográficos (Autoridad por tamaño y tracking, no por negritas) */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+
+    /* Espaciado Base 8px */
+    --spacing-unit: 8px;
+    --spacing-8: 8px;
+    --spacing-16: 16px;
+    --spacing-24: 24px;
+    --spacing-32: 32px;
+    --spacing-40: 40px;
+    --spacing-56: 56px;
+    --spacing-80: 80px;
+    --spacing-96: 96px;
+    --spacing-120: 120px;
+
+    /* Radios Geométricos Técnicos */
+    --radius-sm: 3px;
+    --radius-lg: 10px;
+    --radius-2xl: 20px;
+    --radius-nav: 3px;
+    --radius-cards: 10px;
+    --radius-buttons: 3px;
+    --radius-largepanels: 20px;
+
+    /* Niveles de Superficie */
+    --surface-obsidian-canvas: #101010;
+    --surface-carbon-lift: #1d1a18;
+    --surface-bone-card: #eeeeee;
+    --surface-chalk-elevated: #fafafa;
 }
 
 body.theme-light {
     color-scheme: light;
 }
 
-/* TIPOGRAFÍA GLOBAL ELEGANTE (INTER / EMIL KOWALSKI STANDARD) */
+/* ==========================================================================
+   TIPOGRAFÍA GLOBAL FACTORY (GEIST 400 + GEIST MONO INSTRUMENTAL)
+   ========================================================================== */
+body {
+    background-color: var(--color-obsidian-canvas) !important;
+    color: var(--color-bone);
+    font-family: var(--font-geist);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.45;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 h1, h2, h3, h4, .font-heading {
-    font-family: var(--font-heading);
+    font-family: var(--font-geist);
+    font-weight: 400 !important;
+    letter-spacing: -0.031em;
+    line-height: 1.12;
+}
+
+p, span, input, select, textarea, button, .font-body {
+    font-family: var(--font-geist);
+    letter-spacing: -0.015em;
+}
+
+/* Voz Secundaria de Instrumento: Geist Mono 12px Uppercase */
+.font-mono,
+label,
+#infoType,
+#editTypeBadge,
+.note-tag-btn,
+.hist-cat-btn,
+.filter-chip,
+.tab-btn,
+kbd {
+    font-family: var(--font-geist-mono) !important;
     letter-spacing: -0.02em;
 }
 
-body, p, span, input, select, textarea, button, .font-body {
-    font-family: var(--font-body);
-    letter-spacing: -0.01em;
+label {
+    font-weight: 400 !important;
+    color: var(--color-pale-stone);
 }
 
-/* FÍSICA TÁCTIL Y MICRO-INTERACCIONES REFINADAS */
-.pill-btn, .sd-item, button:not([disabled]) {
-    transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, color 0.12s ease;
+/* ==========================================================================
+   FILOSOFÍA DE MOVIMIENTO: MECÁNICO Y PRECISO (CLI FEEL, 0.15s)
+   ========================================================================== */
+.pill-btn, .sd-item, button:not([disabled]), a, input, select, textarea {
+    transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pill-btn:active, .sd-item:active, button:not([disabled]):active {
-    transform: scale(0.98);
+    transform: translateY(1px);
 }
 
+.drawer-transition {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ==========================================================================
+   CONTROLES DE FORMULARIO E INPUTS TÉCNICOS
+   ========================================================================== */
 input[list]::-webkit-calendar-picker-indicator { display: none !important; }
 input[type="date"]::-webkit-calendar-picker-indicator { 
     display: block !important; 
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E") !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b8b3b0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat;
     background-position: right;
-    background-size: 16px;
+    background-size: 14px;
     cursor: pointer;
-    opacity: 0.9;
+    opacity: 0.85;
     filter: none !important;
 }
 
-option, optgroup { background-color: #151518 !important; color: #ffffff !important; }
-select.liquid-input { background-color: rgba(0, 0, 0, 0.3) !important; }
-select.bg-transparent { background-color: transparent !important; }
+option, optgroup {
+    background-color: var(--color-obsidian-canvas) !important;
+    color: var(--color-bone) !important;
+    font-family: var(--font-geist);
+}
+
+select.liquid-input {
+    background-color: var(--color-obsidian-canvas) !important;
+}
+
+select.bg-transparent {
+    background-color: transparent !important;
+}
+
 select.appearance-none {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238a8380'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
     background-position: right 0.65rem center;
     background-repeat: no-repeat;
     background-size: 13px;
     padding-right: 1.75rem !important;
 }
+
 select.bg-transparent.appearance-none {
     background-position: right 0.35rem center;
     padding-right: 1.3rem !important;
 }
-body { background-color: #000000; color: #f5f5f7; overflow: hidden; margin: 0; padding: 0; overscroll-behavior: none; -webkit-font-smoothing: antialiased; }
-.bg-grid { background-size: 50px 50px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px); background-color: #000000 !important; }
-.liquid-glass { background: rgba(18, 18, 24, 0.62); backdrop-filter: blur(35px) saturate(180%); -webkit-backdrop-filter: blur(35px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.12); border-top-color: rgba(255, 255, 255, 0.35); box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0,0,0,0.3) inset; }
-.liquid-glass-panel { background: rgba(14, 14, 18, 0.65); backdrop-filter: blur(35px) saturate(160%); -webkit-backdrop-filter: blur(35px) saturate(160%); border-left: 1px solid rgba(255, 255, 255, 0.12); border-top: 1px solid rgba(255, 255, 255, 0.25); }
-.liquid-input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); color: white; }
-.liquid-input:focus { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 0 15px rgba(255,255,255,0.05), inset 0 2px 5px rgba(0,0,0,0.5); outline: none; }
-.pill-btn { border-radius: 9999px; }
 
-.orb-container { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-.orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.6; mix-blend-mode: screen; }
-.orb-1 { width: 400px; height: 400px; background: #0071e3; top: 10%; left: 20%; animation: float1 12s infinite ease-in-out alternate; }
-.orb-2 { width: 350px; height: 350px; background: #bf5af2; bottom: 15%; right: 15%; animation: float2 15s infinite ease-in-out alternate; }
-.orb-3 { width: 250px; height: 250px; background: #30d158; top: 40%; left: 60%; animation: float3 10s infinite ease-in-out alternate; opacity: 0.4; }
-@keyframes float1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 150px) scale(1.2); } }
-@keyframes float2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-120px, -80px) scale(0.9); } }
-@keyframes float3 { 0% { transform: translate(0, 0) scale(0.8); } 100% { transform: translate(-80px, 100px) scale(1.1); } }
-.interactive-node { cursor: pointer; transition: filter 0.3s ease; }
-.interactive-node:hover { filter: brightness(1.25) drop-shadow(0 0 15px rgba(255,255,255,0.15)); }
-.node-overdue { animation: pulseRed 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-@keyframes pulseRed { 0% { filter: drop-shadow(0 0 4px rgba(255, 69, 58, 0.2)); } 50% { filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.7)); } 100% { filter: drop-shadow(0 0 4px rgba(255, 69, 58, 0.2)); } }
-.svg-text { pointer-events: none; user-select: none; font-family: var(--font-body); letter-spacing: -0.01em; }
-.svg-text-bold { font-weight: 600; font-family: var(--font-heading); }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+/* ==========================================================================
+   LIENZO, SUPERFICIES PLANAS Y TARJETAS "FLASHLIT DISPATCH" (CERO SOMBRAS)
+   ========================================================================== */
+#workspace,
+.bg-grid {
+    background-color: var(--color-obsidian-canvas) !important;
+    background-size: 40px 40px;
+    background-image: 
+        linear-gradient(to right, rgba(61, 58, 57, 0.22) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(61, 58, 57, 0.22) 1px, transparent 1px);
+}
+
+/* Reemplazo de Liquid Glass por Superficie de Control Plana Factory */
+.liquid-glass {
+    background: var(--color-obsidian-canvas) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+}
+
+.liquid-glass-panel {
+    background: var(--color-obsidian-canvas) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-left: 1px solid var(--color-ash-stroke) !important;
+    border-right: 1px solid var(--color-ash-stroke) !important;
+    border-top: none !important;
+    box-shadow: none !important;
+}
+
+/* Superficie de Tarjeta Clara Insignia (Bone #eeeeee sobre #101010) */
+.factory-bone-card {
+    background-color: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
+    border: 1px solid var(--color-bone) !important;
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+    background-image: radial-gradient(rgba(16, 16, 16, 0.04) 1px, transparent 0);
+    background-size: 4px 4px;
+}
+
+/* Tarjeta de Login como "Flashlit Dispatch" (#eeeeee sobre #101010) */
+#loginOverlay {
+    background-color: var(--color-obsidian-canvas) !important;
+    background-image: 
+        linear-gradient(to right, rgba(61, 58, 57, 0.18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(61, 58, 57, 0.18) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+.orb-container {
+    display: none !important;
+}
+
+#loginCard {
+    background: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+    padding: 28px 24px !important;
+}
+
+#loginCard h2 {
+    color: var(--color-obsidian-canvas) !important;
+    font-family: var(--font-geist) !important;
+    font-weight: 400 !important;
+    font-size: 36px !important;
+    letter-spacing: -1.12px !important;
+    line-height: 1.1 !important;
+}
+
+#loginCard p,
+#loginCard label {
+    color: #4d4947 !important;
+    font-family: var(--font-geist-mono) !important;
+    font-size: 11px !important;
+    letter-spacing: -0.02em !important;
+    font-weight: 400 !important;
+}
+
+#loginCard .liquid-input,
+#loginCard select.liquid-input {
+    background-color: var(--color-chalk) !important;
+    color: var(--color-obsidian-canvas) !important;
+    border: 1px solid #b8b3b0 !important;
+    border-radius: var(--radius-buttons) !important;
+    box-shadow: none !important;
+}
+
+#loginCard .liquid-input:focus,
+#loginCard select.liquid-input:focus {
+    border-color: var(--color-obsidian-canvas) !important;
+}
+
+#loginCard option {
+    background-color: var(--color-chalk) !important;
+    color: var(--color-obsidian-canvas) !important;
+}
+
+#loginCard button.pill-btn {
+    background-color: var(--color-obsidian-canvas) !important;
+    color: var(--color-bone) !important;
+    border: 1px solid var(--color-obsidian-canvas) !important;
+    border-radius: var(--radius-buttons) !important;
+    font-family: var(--font-geist-mono) !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: -0.02em !important;
+    font-weight: 400 !important;
+    box-shadow: none !important;
+}
+
+#loginCard button.pill-btn:hover {
+    background-color: var(--color-carbon-lift) !important;
+    border-color: var(--color-ash-stroke) !important;
+}
+
+/* Inputs Técnicos en Superficies Oscuras */
+.liquid-input {
+    background: var(--color-obsidian-canvas) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    border-radius: var(--radius-buttons) !important;
+    box-shadow: none !important;
+    color: var(--color-bone) !important;
+    font-weight: 400;
+}
+
+.liquid-input::placeholder {
+    color: var(--color-warm-granite) !important;
+}
+
+.liquid-input:focus {
+    background: var(--color-carbon-lift) !important;
+    border-color: var(--color-bone) !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+/* Botones Técnicos Factory (Radio 3px, Cero Sombra) */
+.pill-btn {
+    border-radius: var(--radius-buttons) !important;
+    box-shadow: none !important;
+    font-weight: 400 !important;
+}
+
+/* Header de Navegación Superior Factory */
+header {
+    background-color: var(--color-obsidian-canvas) !important;
+    border-bottom: 1px solid var(--color-carbon-lift) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Escala de radios y eliminación de sombras en contenedores internos */
+#infoCard,
+#manualModal > div,
+#taskFeedbackModal > div,
+#deleteConfirmModal > div,
+#passwordModal > div,
+#renameModal > div,
+#globalTaskModal > div,
+#fastDailyTaskModal > div,
+#mobileMenuDropdown {
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+    background-color: var(--color-obsidian-canvas) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+}
+
+/* InfoCard Header Dispatch Banner (El toque insignia #eeeeee sobre #101010) */
+#infoCard {
+    background-color: var(--color-obsidian-canvas) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+}
+
+#infoCard details {
+    background-color: var(--color-carbon-lift) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   NODOS E INTERACCIÓN EN EL MAPA MENTAL SVG (INSTRUMENT PANEL)
+   ========================================================================== */
+.interactive-node {
+    cursor: pointer;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-node:hover {
+    filter: none;
+}
+
+.interactive-node:hover rect:first-of-type {
+    stroke-width: 1.8px;
+}
+
+.node-overdue {
+    animation: pulseSignalOrange 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulseSignalOrange {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+}
+
+.svg-text {
+    pointer-events: none;
+    user-select: none;
+    font-family: var(--font-geist);
+    font-weight: 400 !important;
+    letter-spacing: -0.02em;
+}
+
+.svg-text-bold {
+    font-weight: 400 !important;
+    font-family: var(--font-geist);
+    letter-spacing: -0.025em;
+}
+
+/* Scrollbars técnicos minimalistas */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--color-obsidian-canvas); }
+::-webkit-scrollbar-thumb { background: var(--color-ash-stroke); border-radius: 0px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-warm-granite); }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 #workspace.is-panning #canvasGroup { transition: none !important; }
 #canvasGroup { will-change: transform; }
-#cloudLoader { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: #ffffff; border-radius: 50%; animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+/* Loader & Toast planos estilo CLI / Factory */
+#cloudLoader {
+    position: fixed;
+    inset: 0;
+    background: var(--color-obsidian-canvas);
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--color-ash-stroke);
+    border-top-color: var(--color-signal-orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
-#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(20, 20, 22, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15); border-top-color: rgba(255,255,255,0.3); color: white; padding: 12px 24px; border-radius: 100px; font-size: 13px; font-weight: 500; box-shadow: 0 20px 40px rgba(0,0,0,0.5); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 999999; }
-#toast.show { transform: translateX(-50%) translateY(0); }
-#toast.error { border-color: rgba(255, 69, 58, 0.5); color: #ff453a; box-shadow: 0 10px 30px rgba(255,69,58,0.2); }
+
+#toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--color-bone);
+    border: 1px solid var(--color-bone);
+    color: var(--color-obsidian-canvas);
+    padding: 10px 18px;
+    border-radius: var(--radius-buttons);
+    font-family: var(--font-geist-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    box-shadow: none;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999999;
+}
+
+#toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+#toast.error {
+    background: var(--color-carbon-lift);
+    border-color: var(--color-signal-orange);
+    color: var(--color-signal-orange);
+    box-shadow: none;
+}
 
 /* ESTILOS DE SCROLL Y ACORDEONES PARA NOTIFICACIONES Y TRABAJO */
 #dailyTasksContainer {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+    scrollbar-color: var(--color-ash-stroke) transparent;
 }
-#dailyTasksContainer::-webkit-scrollbar {
-    width: 6px;
-}
-#dailyTasksContainer::-webkit-scrollbar-track {
-    background: transparent;
-}
-#dailyTasksContainer::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.25);
-    border-radius: 9999px;
-}
-#dailyTasksContainer::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.45);
-}
+#dailyTasksContainer::-webkit-scrollbar { width: 4px; }
+#dailyTasksContainer::-webkit-scrollbar-track { background: transparent; }
+#dailyTasksContainer::-webkit-scrollbar-thumb { background: var(--color-ash-stroke); border-radius: 0; }
+#dailyTasksContainer::-webkit-scrollbar-thumb:hover { background: var(--color-warm-granite); }
 #dailyTasksContainer details {
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--radius-cards) !important;
+    background: var(--color-carbon-lift) !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    box-shadow: none !important;
 }
-#dailyTasksContainer details summary {
-    outline: none;
-}
-#dailyTasksContainer details[open] {
-    background-color: rgba(0, 0, 0, 0.35);
-}
-#dailyTasksContainer details:not([open]) summary {
-    border-bottom: none !important;
-}
+#dailyTasksContainer details summary { outline: none; }
+#dailyTasksContainer details[open] { background-color: var(--color-obsidian-canvas) !important; }
+#dailyTasksContainer details:not([open]) summary { border-bottom: none !important; }
 
 /* ==========================================================================
-   SISTEMA DE MODO CLARO (APPLE FROSTED GLASS & HIGH CONTRAST TOKENS)
+   SISTEMA DE MODO CLARO (INVERTED BONE CANVAS PARA PERFIL SUPREMO)
    ========================================================================== */
-
 body.theme-light {
-    background-color: #e2e8f2 !important;
-    color: #0f172a !important;
+    background-color: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
 }
 
-body.theme-light .bg-grid {
-    background-size: 28px 28px !important;
-    background-image: radial-gradient(circle, rgba(70, 95, 130, 0.18) 1.2px, transparent 1.2px) !important;
-    background-color: transparent !important;
-}
-
-#workspace {
-    position: relative;
-    background-color: #000000;
+body.theme-light .bg-grid,
+body.theme-light #workspace {
+    background-size: 40px 40px !important;
+    background-image: 
+        linear-gradient(to right, rgba(16, 16, 16, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(16, 16, 16, 0.07) 1px, transparent 1px) !important;
+    background-color: var(--color-bone) !important;
 }
 
 body.theme-light header {
-    background: rgba(255, 255, 255, 0.58) !important;
-    border-bottom-color: rgba(255, 255, 255, 0.60) !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    background: var(--color-bone) !important;
+    border-bottom: 1px solid #d4d0cd !important;
 }
 
-body.theme-light .liquid-glass {
-    background: rgba(255, 255, 255, 0.58) !important;
-    backdrop-filter: blur(35px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(35px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.65) !important;
-    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-    box-shadow: 0 20px 50px -10px rgba(0, 30, 80, 0.12), 0 0 1px rgba(0, 0, 0, 0.1) !important;
-    color: #0f172a !important;
+body.theme-light .liquid-glass,
+body.theme-light #infoCard,
+body.theme-light #manualModal > div,
+body.theme-light #taskFeedbackModal > div,
+body.theme-light #deleteConfirmModal > div,
+body.theme-light #passwordModal > div,
+body.theme-light #renameModal > div,
+body.theme-light #globalTaskModal > div,
+body.theme-light #fastDailyTaskModal > div {
+    background: var(--color-chalk) !important;
+    border: 1px solid #d4d0cd !important;
+    box-shadow: none !important;
+    color: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .liquid-glass-panel {
-    background: rgba(245, 248, 255, 0.70) !important;
-    backdrop-filter: blur(35px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(35px) saturate(160%) !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.60) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.75) !important;
-    color: #0f172a !important;
+    background: var(--color-chalk) !important;
+    border-left: 1px solid #d4d0cd !important;
+    border-right: 1px solid #d4d0cd !important;
+    color: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .liquid-input {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border: 1px solid rgba(0, 0, 0, 0.12) !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-    color: #1d1d1f !important;
+    background: #ffffff !important;
+    border: 1px solid #b8b3b0 !important;
+    box-shadow: none !important;
+    color: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .liquid-input:focus {
     background: #ffffff !important;
-    border-color: #0071e3 !important;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
+    border-color: var(--color-obsidian-canvas) !important;
+    box-shadow: none !important;
 }
 
 body.theme-light .liquid-input::placeholder {
-    color: #86868b !important;
+    color: var(--color-warm-granite) !important;
 }
 
-/* Colores de texto en modo claro */
 body.theme-light h1,
 body.theme-light h2,
 body.theme-light h3,
 body.theme-light h4,
-body.theme-light .text-white {
-    color: #1d1d1f !important;
+body.theme-light .text-white,
+body.theme-light .text-\[\#eeeeee\] {
+    color: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .text-gray-200,
-body.theme-light .text-gray-300 {
-    color: #3a3a3c !important;
+body.theme-light .text-gray-300,
+body.theme-light .text-\[\#b8b3b0\] {
+    color: #3d3a39 !important;
 }
 
 body.theme-light .text-gray-400,
-body.theme-light .text-gray-500 {
-    color: #6e6e73 !important;
+body.theme-light .text-gray-500,
+body.theme-light .text-\[\#8a8380\] {
+    color: #6e6a68 !important;
 }
 
-/* Textos blancos en botones y badges primarios */
-body.theme-light button.bg-brand-accent,
-body.theme-light button.bg-brand-accent *,
-body.theme-light button[class*="bg-[#30d158]"],
-body.theme-light button[class*="bg-[#30d158]"] *,
-body.theme-light button[class*="bg-[#ff453a]"],
-body.theme-light button[class*="bg-[#ff453a]"] *,
-body.theme-light button[class*="bg-[#bf5af2]"],
-body.theme-light button[class*="bg-[#bf5af2]"] *,
-body.theme-light span[class*="bg-[#30d158]"],
-body.theme-light span[class*="bg-[#ff453a]"],
-body.theme-light span[class*="bg-[#ff9f0a]"],
-body.theme-light span[class*="bg-brand-accent"] {
-    color: #ffffff !important;
-}
-
-/* Contenedores oscuros adaptados a claro */
 body.theme-light .bg-black\/20,
 body.theme-light .bg-black\/30,
 body.theme-light .bg-black\/40,
 body.theme-light .bg-black\/50,
-body.theme-light .bg-black\/60 {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-    border-color: rgba(0, 0, 0, 0.08) !important;
+body.theme-light .bg-black\/60,
+body.theme-light .bg-\[\#1d1a18\],
+body.theme-light #infoCard details,
+body.theme-light #dailyTasksContainer details {
+    background-color: var(--color-bone) !important;
+    border-color: #d4d0cd !important;
 }
 
 body.theme-light .border-white\/5,
 body.theme-light .border-white\/10,
 body.theme-light .border-white\/15,
 body.theme-light .border-white\/20,
-body.theme-light .border-white\/30 {
-    border-color: rgba(0, 0, 0, 0.08) !important;
+body.theme-light .border-white\/30,
+body.theme-light .border-\[\#3d3a39\],
+body.theme-light .border-\[\#1d1a18\] {
+    border-color: #d4d0cd !important;
 }
 
 body.theme-light .bg-white\/5,
 body.theme-light .bg-white\/10 {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+    background-color: rgba(16, 16, 16, 0.05) !important;
 }
 
-body.theme-light .hover\:bg-white\/5:hover,
-body.theme-light .hover\:bg-white\/10:hover,
-body.theme-light .hover\:bg-white\/20:hover {
-    background-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Speed Dial en modo claro */
 body.theme-light #speedDial .sd-item {
-    background-color: rgba(255, 255, 255, 0.60) !important;
-    border: 1px solid rgba(255, 255, 255, 0.7) !important;
-    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-    color: #0f172a !important;
-    box-shadow: 0 10px 30px rgba(0, 40, 90, 0.12) !important;
+    background-color: var(--color-chalk) !important;
+    border: 1px solid #b8b3b0 !important;
+    color: var(--color-obsidian-canvas) !important;
+    box-shadow: none !important;
 }
 
-body.theme-light #speedDial .sd-item:hover {
-    background-color: rgba(255, 255, 255, 0.80) !important;
-}
-
-body.theme-light #speedDial .sd-item span {
-    color: #1d1d1f !important;
-}
-
-/* Botones flotantes */
 body.theme-light #btnDailyTasks,
 body.theme-light #btnManual {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
-}
-
-body.theme-light #btnDailyTasks svg,
-body.theme-light #btnManual svg {
-    color: #1d1d1f !important;
-}
-
-/* Nodos SVG del Mapa Mental (Cristal Pintado Apple Grade) */
-body.theme-light .node-bg-rect,
-body.theme-light .module-bg-rect,
-body.theme-light .core-bg-circle {
-    /* Los colores de relleno de cristal pintado se asignan dinámicamente en SVG */
-    transition: filter 0.25s ease, stroke-width 0.2s ease;
+    background: var(--color-chalk) !important;
+    border-color: #b8b3b0 !important;
+    box-shadow: none !important;
+    color: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .svg-text {
-    fill: #0f172a !important;
+    fill: var(--color-obsidian-canvas) !important;
 }
 
 body.theme-light .mindmap-connector {
-    stroke: rgba(0, 0, 0, 0.22) !important;
+    stroke: rgba(16, 16, 16, 0.25) !important;
 }
 
-/* Conectores Secundarios Multimódulo (Dependencias Cruzadas On-Demand) */
+body.theme-light select,
+body.theme-light option,
+body.theme-light optgroup {
+    background-color: #ffffff !important;
+    color: var(--color-obsidian-canvas) !important;
+}
+
+/* ==========================================================================
+   CONECTORES SECUNDARIOS MULTIMÓDULO (TRAZOS TÉCNICOS DE INGENIERÍA)
+   ========================================================================== */
 .secondary-module-connector {
-    stroke-dasharray: 6, 4;
-    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.25s ease, filter 0.25s ease;
+    stroke-dasharray: 4, 4;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), stroke-width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     animation: dash-flow 35s linear infinite;
     opacity: 0;
     pointer-events: none;
 }
 
 @keyframes dash-flow {
-    from {
-        stroke-dashoffset: 200;
-    }
-    to {
-        stroke-dashoffset: 0;
-    }
+    from { stroke-dashoffset: 200; }
+    to { stroke-dashoffset: 0; }
 }
 
-/* Modo Global: activado cuando se enciende el botón "Vínculos" en la barra superior */
 body.show-all-sec-links .secondary-module-connector {
-    opacity: 0.40;
+    opacity: 0.45;
     pointer-events: stroke;
 }
 
 body.show-all-sec-links.theme-light .secondary-module-connector {
-    opacity: 0.45;
-    stroke: rgba(0, 113, 227, 0.5) !important;
+    opacity: 0.5;
+    stroke: var(--color-ash-stroke) !important;
 }
 
-/* Estado Activo / Hover / Seleccionado: Iluminación Neón / Fibra Óptica */
 .secondary-module-connector.sec-connector-highlight,
 .secondary-module-connector.sec-connector-selected {
-    opacity: 0.95 !important;
-    stroke-width: 2.6px !important;
-    filter: drop-shadow(0 0 8px rgba(0, 113, 227, 0.85)) !important;
+    opacity: 1 !important;
+    stroke-width: 2px !important;
     pointer-events: stroke !important;
 }
 
 .secondary-module-connector:hover {
-    stroke-width: 3.2px !important;
+    stroke-width: 2.5px !important;
     opacity: 1 !important;
-    filter: drop-shadow(0 0 12px rgba(53, 174, 232, 0.95)) !important;
     cursor: pointer;
 }
 
 .secondary-module-connector.sec-connector-dimmed {
-    opacity: 0.04 !important;
+    opacity: 0.05 !important;
     pointer-events: none !important;
 }
 
-/* Resaltado del nodo de módulo destino cuando se posa el cursor en un proyecto multimódulo */
 .target-module-highlight rect:first-child {
-    filter: drop-shadow(0 0 14px rgba(0, 113, 227, 0.85)) brightness(1.25) !important;
-    stroke: #38bdf8 !important;
-    stroke-width: 2.5px !important;
-    transition: all 0.25s ease;
-}
-
-body.theme-light .secondary-module-connector {
-    stroke: rgba(0, 113, 227, 0.45) !important;
-}
-
-/* Scrollbars y Acordeones en modo claro */
-body.theme-light ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.18);
-}
-
-body.theme-light ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.35);
-}
-
-body.theme-light #dailyTasksContainer {
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    stroke: var(--color-bone) !important;
+    stroke-width: 2px !important;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ==========================================================================
-   CHIPS DE MULTISELECCIÓN PARA FILTROS AVANZADOS (APPLE / LINEAR STYLE)
+   CHIPS DE MULTISELECCIÓN PARA FILTROS AVANZADOS (FACTORY 3PX RADIUS)
    ========================================================================== */
 .filter-chip {
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 11px;
-    font-weight: 500;
-    border-radius: 9999px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 400;
+    text-transform: uppercase;
+    border-radius: var(--radius-buttons);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
     user-select: none;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.7);
+    background: var(--color-carbon-lift);
+    border: 1px solid var(--color-ash-stroke);
+    color: var(--color-pale-stone);
 }
 
 .filter-chip:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.25);
+    background: var(--color-obsidian-canvas);
+    color: var(--color-bone);
+    border-color: var(--color-warm-granite);
 }
 
 .filter-chip.active {
-    background: rgba(0, 113, 227, 0.25) !important;
-    border-color: #0071e3 !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-    box-shadow: 0 0 12px rgba(0, 113, 227, 0.4) !important;
+    background: var(--color-bone) !important;
+    border-color: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
 }
 
 body.theme-light .filter-chip {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.12);
-    color: #334155;
-}
-
-body.theme-light .filter-chip:hover {
-    background: rgba(0, 0, 0, 0.08);
-    color: #0f172a;
+    background: #ffffff;
+    border-color: #d4d0cd;
+    color: #4d4947;
 }
 
 body.theme-light .filter-chip.active {
-    background: rgba(0, 113, 227, 0.15) !important;
-    border-color: #0071e3 !important;
-    color: #0071e3 !important;
-    box-shadow: 0 0 10px rgba(0, 113, 227, 0.2) !important;
+    background: var(--color-obsidian-canvas) !important;
+    border-color: var(--color-obsidian-canvas) !important;
+    color: var(--color-bone) !important;
 }
 
 /* Botón colapso/expansión interactivo en el nodo del módulo */
@@ -431,166 +740,85 @@ body.theme-light .filter-chip.active {
     user-select: none;
 }
 .mod-toggle-btn .btn-circle-bg {
-    transition: r 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.2s ease, filter 0.2s ease, stroke 0.2s ease;
+    transition: stroke-width 0.15s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1), fill 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mod-toggle-btn:hover .btn-circle-bg {
-    r: 13.5;
-    stroke-width: 2.2;
-    filter: drop-shadow(0 0 8px rgba(0, 113, 227, 0.75));
+    stroke: var(--color-bone) !important;
+    fill: var(--color-carbon-lift);
 }
 .mod-toggle-btn line {
-    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+    transition: stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mod-toggle-btn:hover line {
-    stroke: #0071e3 !important;
-    stroke-width: 2.2;
-}
-
-body.theme-light #dailyTasksContainer details[open] {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-
-/* Select, opciones y fechas en modo claro */
-body.theme-light select,
-body.theme-light option,
-body.theme-light optgroup {
-    background-color: #ffffff !important;
-    color: #1d1d1f !important;
-}
-
-body.theme-light input[type="date"]::-webkit-calendar-picker-indicator {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231d1d1f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E") !important;
-}
-
-body.theme-light select.appearance-none {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(0,0,0,0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-}
-
-/* Toast y Overlays en modo claro */
-body.theme-light #toast {
-    background: rgba(255, 255, 255, 0.94) !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
-    color: #1d1d1f !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
-}
-
-body.theme-light #cloudLoader {
-    background: rgba(245, 245, 247, 0.95) !important;
-}
-
-body.theme-light #cloudLoader h2 {
-    color: #1d1d1f !important;
-}
-
-body.theme-light #cloudLoader .spinner {
-    border-color: rgba(0, 0, 0, 0.1);
-    border-top-color: #0071e3;
-}
-
-body.theme-light #loginOverlay {
-    background: #f5f5f7 !important;
-}
-
-body.theme-light #loginOverlay .orb {
-    mix-blend-mode: multiply;
-    opacity: 0.2;
+    stroke: var(--color-signal-orange) !important;
 }
 
 /* ==========================================================================
-   AURA PARPADEANTE / FARO DE ALERTA PARA PROYECTOS VENCIDOS
+   ESTADOS DE ALERTA Y VENCIMIENTO (SIGNAL ORANGE #ee6018, CERO GLOW DIFUSO)
    ========================================================================== */
-
 @keyframes overdueAuraBlink {
     0%, 100% {
-        opacity: 0.18;
-        stroke-opacity: 0.35;
-        filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.40));
+        opacity: 0.25;
+        stroke-opacity: 0.45;
     }
-    45%, 55% {
-        opacity: 1;
+    50% {
+        opacity: 0.9;
         stroke-opacity: 1;
-        filter: drop-shadow(0 0 16px rgba(255, 69, 58, 0.95)) drop-shadow(0 0 32px rgba(255, 69, 58, 0.70));
     }
 }
 
 @keyframes overdueCapsulePulse {
     0%, 100% {
-        stroke: #ff453a;
-        stroke-width: 1.5px;
+        stroke: var(--color-signal-orange);
+        stroke-width: 1px;
     }
-    45%, 55% {
-        stroke: #ff6961;
-        stroke-width: 2.5px;
-        filter: drop-shadow(0 0 10px rgba(255, 69, 58, 0.85));
+    50% {
+        stroke: var(--color-signal-orange);
+        stroke-width: 2px;
     }
 }
 
 @keyframes overdueDotPulse {
-    0%, 100% {
-        opacity: 0.55;
-        filter: drop-shadow(0 0 3px #ff453a);
-    }
-    45%, 55% {
-        opacity: 1;
-        filter: drop-shadow(0 0 10px #ff453a) drop-shadow(0 0 18px rgba(255, 69, 58, 0.90));
-    }
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
 }
 
 .overdue-aura-pulse {
-    animation: overdueAuraBlink 1.4s ease-in-out infinite;
-    will-change: opacity, filter;
+    animation: overdueAuraBlink 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .overdue-capsule {
-    animation: overdueCapsulePulse 1.4s ease-in-out infinite;
-    will-change: stroke, stroke-width, filter;
+    animation: overdueCapsulePulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .overdue-dot {
-    animation: overdueDotPulse 1.4s ease-in-out infinite;
-    will-change: opacity, filter;
+    animation: overdueDotPulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* ==========================================================================
-   NÚCLEO COMANDO SICOM (CONCENTRIC HUB & PULSE)
+   NÚCLEO COMANDO SICOM (INSTRUMENT HUB & STATUS PULSE)
    ========================================================================== */
-
 @keyframes coreOrbitBreathe {
-    0%, 100% {
-        stroke-opacity: 0.30;
-        stroke-dashoffset: 0;
-    }
-    50% {
-        stroke-opacity: 0.65;
-        stroke-dashoffset: 14;
-    }
+    0%, 100% { stroke-opacity: 0.35; }
+    50% { stroke-opacity: 0.75; }
 }
 
 .core-orbit-ring {
-    animation: coreOrbitBreathe 6s ease-in-out infinite;
-    will-change: stroke-opacity, stroke-dashoffset;
+    animation: coreOrbitBreathe 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes coreBeaconPulse {
-    0%, 100% {
-        opacity: 0.55;
-        filter: drop-shadow(0 0 3px #35aee8);
-    }
-    50% {
-        opacity: 1;
-        filter: drop-shadow(0 0 8px #35aee8) drop-shadow(0 0 14px rgba(0, 113, 227, 0.9));
-    }
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 .core-status-beacon {
-    animation: coreBeaconPulse 2s ease-in-out infinite;
-    will-change: opacity, filter;
+    animation: coreBeaconPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* ==========================================================================
    OPTIMIZACIONES MÓVILES (TOUCH & RESPONSIVE PERFECTION)
    ========================================================================== */
-
 #workspace {
     touch-action: none !important;
     overscroll-behavior: none !important;
@@ -599,7 +827,6 @@ body.theme-light #loginOverlay .orb {
     -webkit-touch-callout: none !important;
 }
 
-/* Scroll vertical táctil suave en todos los contenedores */
 .overflow-y-auto,
 .overflow-y-scroll,
 #dailyTasksContainer,
@@ -621,22 +848,18 @@ body.theme-light #loginOverlay .orb {
     overscroll-behavior-y: contain !important;
 }
 
-/* Scroll horizontal táctil para pestañas (sin bloquear el scroll vertical del drawer) */
 .overflow-x-auto {
     touch-action: pan-x pan-y !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-x: contain !important;
 }
 
-/* La InfoCard vive dentro de #workspace: restaurar selección/escritura en inputs (iOS) */
 #infoCard, #infoCard input, #infoCard textarea, #infoCard select {
     user-select: text !important;
     -webkit-user-select: text !important;
     -webkit-touch-callout: default !important;
 }
 
-
-/* Ocultación de botones flotantes cuando infoCard o drawers están abiertos en móvil (vertical y horizontal) */
 @media (max-width: 767px), (orientation: landscape) and (max-height: 520px) {
     body.info-card-open #speedDial,
     body.info-card-open #btnDailyTasks,
@@ -659,7 +882,7 @@ body.theme-light #loginOverlay .orb {
         opacity: 0 !important;
         pointer-events: none !important;
         transform: translateY(12px) scale(0.95);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
 
@@ -670,7 +893,7 @@ body.theme-light #loginOverlay .orb {
         left: 10px !important;
         right: 10px !important;
         padding: 1rem !important;
-        border-radius: 1.5rem !important;
+        border-radius: var(--radius-cards) !important;
     }
 }
 
@@ -678,9 +901,8 @@ body.theme-light #loginOverlay .orb {
    ADAPTACIÓN TOTAL MÓVIL HORIZONTAL (LANDSCAPE — altura <= 520px)
    ========================================================================== */
 @media (orientation: landscape) and (max-height: 520px) {
-    /* 1. Header ultra-compacto (44px) */
     header {
-        height: 2.75rem !important; /* 44px */
+        height: 2.75rem !important;
         padding-left: 0.75rem !important;
         padding-right: 0.75rem !important;
     }
@@ -690,7 +912,6 @@ body.theme-light #loginOverlay .orb {
         height: 1.75rem !important;
     }
 
-    /* 2. Login Overlay con scroll y escala perfecta */
     #loginOverlay {
         align-items: flex-start !important;
         overflow-y: auto !important;
@@ -706,12 +927,12 @@ body.theme-light #loginOverlay .orb {
     #loginCard .w-20.h-20 {
         width: 3.25rem !important;
         height: 3.25rem !important;
-        border-radius: 1rem !important;
+        border-radius: var(--radius-cards) !important;
         margin-bottom: 0.5rem !important;
     }
 
     #loginCard h2 {
-        font-size: 1.25rem !important;
+        font-size: 1.5rem !important;
         margin-bottom: 0.15rem !important;
     }
 
@@ -733,7 +954,6 @@ body.theme-light #loginOverlay .orb {
         margin-top: 0.75rem !important;
     }
 
-    /* 3. Todos los modales centrados con scroll seguro */
     #manualModal,
     #taskFeedbackModal,
     #deleteConfirmModal,
@@ -757,10 +977,9 @@ body.theme-light #loginOverlay .orb {
         max-height: 92vh !important;
         overflow-y: auto !important;
         padding: 1.25rem !important;
-        border-radius: 1.25rem !important;
+        border-radius: var(--radius-cards) !important;
     }
 
-    /* 4. InfoCard acoplado lateralmente a la derecha en formato panel */
     #infoCard {
         top: 3.25rem !important;
         bottom: 0.5rem !important;
@@ -768,11 +987,10 @@ body.theme-light #loginOverlay .orb {
         left: auto !important;
         width: min(390px, 46vw) !important;
         max-height: calc(100vh - 3.75rem) !important;
-        border-radius: 1.25rem !important;
+        border-radius: var(--radius-cards) !important;
         padding: 0.85rem !important;
     }
 
-    /* 5. SpeedDial y botones flotantes reducidos y no invasivos */
     #speedDial {
         bottom: 0.65rem !important;
         right: 0.65rem !important;
@@ -786,7 +1004,7 @@ body.theme-light #loginOverlay .orb {
     #speedDial .sd-item {
         padding: 0.35rem 0.65rem !important;
         font-size: 0.75rem !important;
-        border-radius: 0.75rem !important;
+        border-radius: var(--radius-buttons) !important;
     }
 
     #btnDailyTasks {
@@ -803,7 +1021,6 @@ body.theme-light #loginOverlay .orb {
         height: 2.5rem !important;
     }
 
-    /* 6. Drawers laterales ocupan el ancho adecuado en horizontal */
     #configDrawer,
     #priorityDrawer,
     #filterDrawer {
@@ -829,104 +1046,98 @@ body.theme-light #loginOverlay .orb {
     user-select: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: var(--radius-buttons) !important;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .note-tag-btn:active {
-    transform: scale(0.95);
+    transform: translateY(1px);
 }
 
-/* Animaciones para los badges de notas no leídas en el mapa mental */
+/* Animaciones para los badges de notas no leídas en el mapa mental (Sin drop-shadow difuso) */
 @keyframes unreadPurplePulse {
-    0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 5px rgba(191, 90, 242, 0.8));
-    }
-    50% {
-        transform: scale(1.18);
-        filter: drop-shadow(0 0 12px rgba(191, 90, 242, 1));
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
 }
 @keyframes unreadBlockerPulse {
-    0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 6px rgba(255, 69, 58, 0.85));
-    }
-    50% {
-        transform: scale(1.22);
-        filter: drop-shadow(0 0 14px rgba(255, 69, 58, 1));
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+@keyframes unreadMentionPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.14); }
 }
 .unread-purple-pulse {
     transform-box: fill-box;
     transform-origin: center;
-    animation: unreadPurplePulse 2.2s infinite ease-in-out;
+    animation: unreadPurplePulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 .unread-blocker-pulse {
     transform-box: fill-box;
     transform-origin: center;
-    animation: unreadBlockerPulse 1.3s infinite ease-in-out;
-}
-
-@keyframes unreadMentionPulse {
-    0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 6px rgba(0, 113, 227, 0.85));
-    }
-    50% {
-        transform: scale(1.2);
-        filter: drop-shadow(0 0 14px rgba(0, 113, 227, 1));
-    }
+    animation: unreadBlockerPulse 1.3s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 .unread-mention-pulse {
     transform-box: fill-box;
     transform-origin: center;
-    animation: unreadMentionPulse 1.8s infinite ease-in-out;
+    animation: unreadMentionPulse 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ==========================================================================
-   SPEED DIAL: NÚCLEO DE CREACIÓN
+   SPEED DIAL: NÚCLEO DE CREACIÓN (ESTÉTICA FACTORY INSTRUMENTAL)
    ========================================================================== */
-/* El contenedor secundario inicia invisible y desplazado */
-#speedDial .sd-items { opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden; transition: opacity .2s ease-out, transform .2s ease-out, visibility 0s linear .2s; }
-/* Solo se hace visible cuando el contenedor principal tiene la clase 'sd-open' */
-#speedDial.sd-open .sd-items { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+#speedDial .sd-items {
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.15s;
+}
+#speedDial.sd-open .sd-items {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    visibility: visible;
+    transition-delay: 0s;
+}
 
 #speedDial .sd-item { 
-    background-color: rgba(20, 20, 26, 0.65); 
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: background-color .15s ease-out, transform .15s ease-out, border-color .15s ease-out; 
+    background-color: var(--color-carbon-lift) !important; 
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--color-ash-stroke) !important;
+    border-radius: var(--radius-buttons) !important;
+    box-shadow: none !important;
+    font-family: var(--font-geist-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: -0.02em !important;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s cubic-bezier(0.4, 0, 0.2, 1); 
 }
-#speedDial .sd-item:hover { background-color: rgba(40, 40, 50, 0.75); border-color: rgba(255, 255, 255, 0.3); }
-#speedDial .sd-item:active { transform: scale(.98); }
+#speedDial .sd-item:hover {
+    background-color: var(--color-bone) !important;
+    border-color: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
+}
 
-/* Animación del botón principal */
-#speedDial .sd-plus { transition: transform .2s ease-out; }
+#speedDial .sd-plus { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
 #speedDial.sd-open .sd-plus { transform: rotate(45deg); }
 
-#speedDial { transition: right .3s ease-out, opacity .2s ease-out; }
-/* Lógica para apartarse si abres paneles (Drawers) */
+#speedDial { transition: right 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
 body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-full), #priorityDrawer:not(.translate-x-full)) #speedDial { opacity: 0; pointer-events: none; }
 @media (min-width: 768px) { body:has(#infoCard:not(.hidden)) #speedDial { right: 440px; } }
 @media (max-width: 767px) { body:has(#infoCard:not(.hidden), #dailyDrawer:not(.-translate-x-full)) #speedDial { opacity: 0; pointer-events: none; } }
 @media (prefers-reduced-motion: reduce) { #speedDial, #speedDial * { transition: none !important; } }
 
 /* ==========================================================================
-   TRANSICIONES FLUIDAS ENTRADA Y SALIDA (100% PATH LENGTH + REVERSE COLLAPSE)
+   TRANSICIONES DE ENTRADA Y SALIDA DE NODOS (MECÁNICAS Y PRECISAS)
    ========================================================================== */
 @keyframes projectNodeBloomIn {
     0% {
         opacity: 0;
-        transform: var(--start-transform) scale(0.86);
-        filter: blur(4px);
+        transform: var(--start-transform) scale(0.95);
     }
     100% {
         opacity: 1;
         transform: var(--end-transform) scale(1);
-        filter: blur(0px);
     }
 }
 
@@ -934,12 +1145,10 @@ body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-fu
     0% {
         opacity: 1;
         transform: var(--end-transform) scale(1);
-        filter: blur(0px);
     }
     100% {
         opacity: 0;
-        transform: var(--start-transform) scale(0.86);
-        filter: blur(4px);
+        transform: var(--start-transform) scale(0.95);
     }
 }
 
@@ -970,58 +1179,48 @@ body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-fu
 
 .proj-animate-in {
     opacity: 0;
-    animation: projectNodeBloomIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity, filter;
+    animation: projectNodeBloomIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    will-change: transform, opacity;
 }
 
 .proj-animate-out {
     pointer-events: none !important;
-    animation: projectNodeBloomOut 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-    will-change: transform, opacity, filter;
+    animation: projectNodeBloomOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    will-change: transform, opacity;
 }
 
 .connector-animate-in {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: connectorDrawIn 0.40s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: connectorDrawIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .connector-animate-out {
     stroke-dasharray: 1;
     stroke-dashoffset: 0;
-    animation: connectorDrawOut 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    animation: connectorDrawOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
 }
 
 /* ==========================================================================
-   DESLIZAMIENTO FLIP DE MÓDULOS Y MODO SINERGIA (CO-ASIGNACIÓN)
+   DESLIZAMIENTO FLIP DE MÓDULOS Y MODO SINERGIA
    ========================================================================== */
 @keyframes moduleSlideTransition {
-    0% {
-        transform: var(--mod-prev-transform);
-    }
-    100% {
-        transform: var(--mod-curr-transform);
-    }
+    0% { transform: var(--mod-prev-transform); }
+    100% { transform: var(--mod-curr-transform); }
 }
 
 .module-slide-anim {
-    animation: moduleSlideTransition 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: moduleSlideTransition 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     will-change: transform;
 }
 
 @keyframes synergyPulseGlow {
-    0%, 100% {
-        stroke-width: 2.2px;
-        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.55));
-    }
-    50% {
-        stroke-width: 3px;
-        filter: drop-shadow(0 0 16px rgba(191, 90, 242, 0.90)) drop-shadow(0 0 24px rgba(0, 113, 227, 0.70));
-    }
+    0%, 100% { stroke-width: 1.5px; }
+    50% { stroke-width: 2.5px; }
 }
 
 .synergy-capsule-glow {
-    animation: synergyPulseGlow 2s ease-in-out infinite;
+    animation: synergyPulseGlow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes synergyConnectorFlow {
@@ -1030,8 +1229,7 @@ body:has(#configDrawer:not(.translate-x-full), #alertsDrawer:not(.translate-x-fu
 }
 
 .synergy-connector-line {
-    stroke-width: 2.8px !important;
-    stroke-dasharray: 8, 4 !important;
+    stroke-width: 2px !important;
+    stroke-dasharray: 6, 4 !important;
     animation: synergyConnectorFlow 1.2s linear infinite !important;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
 }

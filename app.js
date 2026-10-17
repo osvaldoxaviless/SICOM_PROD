@@ -61,9 +61,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     if (typeof Chart !== 'undefined') {
-      Chart.defaults.color = '#8e8e93'; 
-      Chart.defaults.borderColor = 'rgba(255,255,255,0.05)'; 
-      Chart.defaults.font.family = 'Inter';
+      Chart.defaults.color = '#8a8380'; 
+      Chart.defaults.borderColor = '#1d1a18'; 
+      Chart.defaults.font.family = "'Geist Mono', monospace";
     }
 
     // --- SISTEMA DE TEMAS DUAL (DARK / LIGHT MODO APPLE) ---
@@ -341,17 +341,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (val) {
             const userRole = consultants[val] ? (consultants[val].role || 'Consultor') : 'Consultor';
             if (userRole === 'Supremo') {
-                passLabel.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Acceso Supremo (Administración)`;
-                passLabel.className = 'block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-[#ff453a]';
+                passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Acceso Supremo (Administración)`;
+                passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#ee6018]';
             } else if (userRole === 'Supervisor') {
-                passLabel.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Acceso Supervisor (Edición Completa)`;
-                passLabel.className = 'block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-[#ff9f0a]';
+                passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Acceso Supervisor (Edición Completa)`;
+                passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#eeeeee]';
             } else if (userRole === 'Lector') {
-                passLabel.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Acceso Lector (Solo Vista)`;
-                passLabel.className = 'block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-gray-400';
+                passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Acceso Lector (Solo Vista)`;
+                passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#8a8380]';
             } else {
-                passLabel.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Acceso Consultor (Básico)`;
-                passLabel.className = 'block text-[10px] font-semibold mb-2 ml-1 flex items-center gap-1 uppercase tracking-widest text-brand-accent';
+                passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Acceso Consultor (Operativo)`;
+                passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#a0ca92]';
             }
             passDiv.classList.remove('hidden'); setTimeout(() => { passDiv.style.opacity = '1'; passDiv.style.transform = 'translateY(0)'; }, 10);
             
@@ -368,21 +368,110 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     }
 
+    // --- MOTOR SHA-256 PURO (SÍNCRONO Y COMPATIBLE CON CUALQUIER ENTORNO) ---
+    function sha256Hex(ascii) {
+        const str = unescape(encodeURIComponent(String(ascii ?? '')));
+        function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+        const mathPow = Math.pow, maxWord = mathPow(2, 32);
+        let i, j, result = '';
+        const words = [], asciiBitLength = str.length * 8;
+        let hash = sha256Hex.h = sha256Hex.h || [];
+        const k = sha256Hex.k = sha256Hex.k || [];
+        let primeCounter = k.length;
+        const isComposite = {};
+        for (let candidate = 2; primeCounter < 64; candidate++) {
+            if (!isComposite[candidate]) {
+                for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+                hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+                k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+            }
+        }
+        let s = str + '\x80';
+        while ((s.length % 64) - 56) s += '\x00';
+        for (i = 0; i < s.length; i++) {
+            j = s.charCodeAt(i);
+            if (j >> 8) return '';
+            words[i >> 2] |= j << ((3 - (i % 4)) * 8);
+        }
+        words[words.length] = (asciiBitLength / maxWord) | 0;
+        words[words.length] = asciiBitLength;
+        let H = hash.slice(0, 8);
+        for (j = 0; j < words.length;) {
+            const w = words.slice(j, (j += 16)), oldHash = H.slice(0);
+            for (i = 0; i < 64; i++) {
+                const w15 = w[i - 15], w2 = w[i - 2];
+                const a = H[0], e = H[4];
+                const temp1 = H[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & H[5]) ^ (~e & H[6])) + k[i] +
+                    (w[i] = i < 16 ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+                const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & H[1]) ^ (a & H[2]) ^ (H[1] & H[2]));
+                H = [(temp1 + temp2) | 0].concat(H);
+                H[4] = (H[4] + temp1) | 0;
+                H.pop();
+            }
+            for (i = 0; i < 8; i++) H[i] = (H[i] + oldHash[i]) | 0;
+        }
+        for (i = 0; i < 8; i++) {
+            for (j = 3; j + 1; j--) {
+                const b = (H[i] >> (j * 8)) & 255;
+                result += (b < 16 ? '0' : '') + b.toString(16);
+            }
+        }
+        return result;
+    }
+
+    // Sanitizador de enlaces externos (bloquea protocolos peligrosos como javascript: o data:)
+    window.sanitizeSafeUrl = function(rawUrl) {
+        const clean = String(rawUrl || '').trim();
+        if (!clean) return '';
+        if (/^(javascript|data|vbscript):/i.test(clean)) return '';
+        return (!clean.startsWith('http://') && !clean.startsWith('https://')) ? 'https://' + clean : clean;
+    };
+
+    // Hashes SHA-256 de credenciales por rol (Cero contraseñas en texto plano en el código fuente)
+    const ROLE_PASSWORD_HASHES = {
+        Supremo: '43521c6d451cdba4e26f837672ab85d0e40a8e05d1679e37587a30a851e006a5',
+        Supervisor: 'd7f4cd045526fd00bb0880cc98e7b38357843c9524f74d82f57ae873d40f96d9',
+        Lector: 'bb689e16a21690a2d6b3da908110a2e5a922e07942a8f8b62e8871f72a43d23a',
+        Consultor: '2d335d79507ea715ed46a2ce905b0baf721f194fb89930091fa9a2876d6cd16b'
+    };
+
+    let loginFailedAttempts = 0;
+    let loginLockUntil = 0;
+
     window.attemptLogin = function() {
+        const now = Date.now();
+        if (now < loginLockUntil) {
+            const waitSec = Math.ceil((loginLockUntil - now) / 1000);
+            window.showToast(`⏳ Demasiados intentos. Espera ${waitSec}s para volver a intentar.`, true);
+            shakeLogin();
+            return;
+        }
+
         const val = document.getElementById('loginUserSelect').value;
         const pass = document.getElementById('loginPasswordInput').value;
         if (!val) { window.showToast("Selecciona tu perfil", true); return; }
         
         const cData = consultants[val];
         const userRole = cData ? (cData.role || 'Consultor') : 'Consultor';
+        const inputHash = sha256Hex(pass);
         
-        // Determinar contraseña esperada (Personalizada vs Default)
-        let expectedPass = cData ? cData.password : null;
-        if (!expectedPass) {
-            if (userRole === 'Supremo') expectedPass = 'Sicom2026';
-            else if (userRole === 'Supervisor') expectedPass = 'Super2026';
-            else if (userRole === 'Lector') expectedPass = 'Lector2026';
-            else expectedPass = 'Consultor2026';
+        // Determinar validación de contraseña (Personalizada con soporte SHA-256 vs Hash de Rol por defecto)
+        let isValidPass = false;
+        const customPass = cData ? cData.password : null;
+        if (customPass) {
+            if (String(customPass).startsWith('sha256:')) {
+                isValidPass = ('sha256:' + inputHash) === customPass;
+            } else {
+                isValidPass = (pass === customPass);
+                if (isValidPass && cData) {
+                    // Migrar contraseña personalizada en texto plano a SHA-256 automáticamente
+                    cData.password = 'sha256:' + inputHash;
+                    window.saveData(false);
+                }
+            }
+        } else {
+            const expectedHash = ROLE_PASSWORD_HASHES[userRole] || ROLE_PASSWORD_HASHES.Consultor;
+            isValidPass = (inputHash === expectedHash);
         }
 
         let viewerName = '';
@@ -395,28 +484,41 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         }
 
-        if (pass !== expectedPass) { window.showToast("Contraseña incorrecta", true); shakeLogin(); return; }
+        if (!isValidPass) {
+            loginFailedAttempts++;
+            if (loginFailedAttempts >= 5) {
+                loginLockUntil = Date.now() + 30000;
+                loginFailedAttempts = 0;
+                window.showToast("🔒 Acceso bloqueado por 30s tras 5 intentos fallidos.", true);
+            } else {
+                window.showToast("Contraseña incorrecta", true);
+            }
+            shakeLogin();
+            return;
+        }
         
+        loginFailedAttempts = 0;
+        loginLockUntil = 0;
         currentUserRole = userRole; 
-    localAuthor = val;
-    localStorage.setItem('sicom_author', val); 
-    localStorage.setItem('sicom_role', currentUserRole);
-    
-    if (userRole === 'Lector') {
-        logActivity('login', 'Control de Accesos', `Acceso de lectura por: ${viewerName}`, val);
-    } else {
-        logActivity('login', 'Control de Accesos', `Inició sesión en el sistema`, val);
-    }
-    
-    // Ocultar overlay de forma inmediata y disparar la interfaz principal
-    const overlay = document.getElementById('loginOverlay'); 
-    if (overlay) {
-        overlay.style.opacity = '0'; 
-        setTimeout(() => { 
-            overlay.classList.add('hidden'); 
-            finishInit(); 
-        }, 200);
-    }
+        localAuthor = val;
+        localStorage.setItem('sicom_author', val); 
+        localStorage.setItem('sicom_role', currentUserRole);
+        
+        if (userRole === 'Lector') {
+            logActivity('login', 'Control de Accesos', `Acceso de lectura por: ${viewerName}`, val);
+        } else {
+            logActivity('login', 'Control de Accesos', `Inició sesión en el sistema`, val);
+        }
+        
+        // Ocultar overlay de forma inmediata y disparar la interfaz principal
+        const overlay = document.getElementById('loginOverlay'); 
+        if (overlay) {
+            overlay.style.opacity = '0'; 
+            setTimeout(() => { 
+                overlay.classList.add('hidden'); 
+                finishInit(); 
+            }, 200);
+        }
     }
     
     function shakeLogin() { document.getElementById('loginCard').style.transform = 'scale(0.98)'; setTimeout(() => document.getElementById('loginCard').style.transform = 'scale(1)', 150); }
@@ -1081,15 +1183,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.setConnectionStatus = function(status) {
         const dot = document.getElementById('connectionStatusDot');
         if(!dot) return;
-        dot.className = "w-2 h-2 rounded-full transition-all duration-300"; // Reset classes
+        dot.className = "w-1.5 h-1.5 rounded-full transition-colors duration-150";
         if(status === 'online') {
-            dot.classList.add('bg-[#30d158]', 'shadow-[0_0_8px_#30d158]', 'animate-pulse');
+            dot.classList.add('bg-[#a0ca92]');
             dot.title = "En Línea";
         } else if (status === 'syncing') {
-            dot.classList.add('bg-[#ff9f0a]', 'shadow-[0_0_8px_#ff9f0a]');
+            dot.classList.add('bg-[#ee6018]', 'animate-pulse');
             dot.title = "Sincronizando nube...";
         } else {
-            dot.classList.add('bg-[#ff453a]', 'shadow-[0_0_8px_#ff453a]');
+            dot.classList.add('bg-[#ee6018]');
             dot.title = "Sin Conexión (Modo Local)";
         }
     };
@@ -2072,7 +2174,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.toggleConfigDrawer = function() { isDrawerOpen ? window.closeConfigDrawer() : window.openConfigDrawer(); }
     window.openConfigDrawer = function() { 
         if (isDailyDrawerOpen) window.toggleDailyDrawer();
-        if (window.innerWidth < 768) window.closeInfoCardSafe();
+        if (window.innerWidth < 768) window.closeInfoCardSafe(true);
         if (isPriorityDrawerOpen) window.closePriorityDrawer(); 
         if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
@@ -2085,7 +2187,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.togglePriorityDrawer = function() { isPriorityDrawerOpen ? window.closePriorityDrawer() : window.openPriorityDrawer(); }
     window.openPriorityDrawer = function() { 
         if (isDailyDrawerOpen) window.toggleDailyDrawer();
-        if (window.innerWidth < 768) window.closeInfoCardSafe();
+        if (window.innerWidth < 768) window.closeInfoCardSafe(true);
         if(isDrawerOpen) window.closeConfigDrawer(); 
         if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
         document.getElementById('priorityDrawer').classList.remove('translate-x-full'); 
@@ -2109,9 +2211,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           return;
       }
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('bg-white/10','text-white','shadow-sm','text-gray-400'); el.classList.add('text-gray-400'); });
+      document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('bg-[#eeeeee]','text-[#101010]','bg-white/10','text-white','shadow-sm','text-gray-400','text-[#8a8380]'); el.classList.add('text-[#8a8380]'); });
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-      const btn = document.getElementById(`tabBtn-${tabId}`); if (btn) { btn.classList.remove('text-gray-400'); btn.classList.add('bg-white/10','text-white','shadow-sm'); }
+      const btn = document.getElementById(`tabBtn-${tabId}`); if (btn) { btn.classList.remove('text-[#8a8380]','text-gray-400'); btn.classList.add('bg-[#eeeeee]','text-[#101010]'); }
       if(tabId === 'edit') {
           window.populateGlobalEditSelector(); 
           if(currentSelection && currentSelection.id) {
@@ -2128,15 +2230,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.setCreateType = function(type) {
        currentCreateType = type; const btnP = document.getElementById('btnCreateTypeProject'), btnM = document.getElementById('btnCreateTypeModule'), formP = document.getElementById('createProjectForm'), formM = document.getElementById('createModuleForm');
        if(type === 'project') { 
-           btnP.classList.add('bg-white/10','text-white'); btnP.classList.remove('text-gray-400','border-transparent'); 
-           btnM.classList.remove('bg-white/10','text-white'); btnM.classList.add('text-gray-400','border-transparent'); 
+           btnP.classList.add('bg-[#eeeeee]','text-[#101010]'); btnP.classList.remove('bg-white/10','text-white','text-gray-400','text-[#8a8380]','border-transparent'); 
+           btnM.classList.remove('bg-[#eeeeee]','text-[#101010]','bg-white/10','text-white'); btnM.classList.add('text-[#8a8380]','border-transparent'); 
            formP.classList.remove('hidden'); formM.classList.add('hidden'); 
            if (typeof window.populateNewProjectLocationSelect === 'function') {
                const locSel = document.getElementById('newProjLocation');
                window.populateNewProjectLocationSelect(locSel ? locSel.value : null);
            }
        } 
-       else { btnM.classList.add('bg-white/10','text-white'); btnM.classList.remove('text-gray-400','border-transparent'); btnP.classList.remove('bg-white/10','text-white'); btnP.classList.add('text-gray-400','border-transparent'); formM.classList.remove('hidden'); formP.classList.add('hidden'); }
+       else { btnM.classList.add('bg-[#eeeeee]','text-[#101010]'); btnM.classList.remove('bg-white/10','text-white','text-gray-400','text-[#8a8380]','border-transparent'); btnP.classList.remove('bg-[#eeeeee]','text-[#101010]','bg-white/10','text-white'); btnP.classList.add('text-[#8a8380]','border-transparent'); formM.classList.remove('hidden'); formP.classList.add('hidden'); }
     }
     
     window.toggleSearch = function() {
@@ -2171,18 +2273,23 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.handleFilterChange = function() { const fc = document.getElementById('consultantFilter'), fs = document.getElementById('statusFilter'); if (fc) activeFilterConsultant = fc.value; if (fs) activeFilterStatus = fs.value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
-    window.closeInfoCardSafe = function() { 
-        if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return; } 
+    let infoCardHideTimer = null;
+    window.closeInfoCardSafe = function(keepSelection = false) { 
+        if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return false; } 
         document.body.classList.remove('info-card-open');
-        document.getElementById('infoCard').classList.add('opacity-0'); 
-        setTimeout(() => {
-            document.getElementById('infoCard').classList.add('hidden');
+        const card = document.getElementById('infoCard');
+        if (card) card.classList.add('opacity-0'); 
+        if (infoCardHideTimer) clearTimeout(infoCardHideTimer);
+        infoCardHideTimer = setTimeout(() => {
+            if (card) card.classList.add('hidden');
             document.body.classList.remove('info-card-open');
-        }, 400); 
-        if (currentSelection && currentSelection.id) {
+            infoCardHideTimer = null;
+        }, 250); 
+        if (!keepSelection && currentSelection && currentSelection.id) {
             currentSelection = { type: null, id: null };
             window.renderMindMap();
         }
+        return true;
     }
 
     
@@ -2288,7 +2395,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                            `👥 *Equipo Asignado:* ${payload.consultants || 'Por definir'}\n` +
                            `📅 *Fecha Límite:* ${payload.deadline || 'Sin fecha'}\n` +
                            `✍️ *Registrado por:* ${payload.author || localAuthor || 'Sistema'}\n` +
-                           `🔗 ${(typeof window !== 'undefined' && window.location) ? (window.location.origin + window.location.pathname) : 'https://panel-control-sicom.netlify.app/'}`;
+                           `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
             } else if (type === 'MORNING_DIGEST') {
                 chatText = payload.message || (typeof window.generateMorningDigestText === 'function' ? window.generateMorningDigestText() : '');
             } else {
@@ -2395,7 +2502,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             msg += `\n`;
         }
         
-        const appUrl = (typeof window !== 'undefined' && window.location) ? (window.location.origin + window.location.pathname) : 'https://panel-control-sicom.netlify.app/';
+        const appUrl = (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/';
         msg += `🔗 *Acceso al Panel:* ${appUrl}`;
         return msg;
     };
@@ -2783,8 +2890,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!currentSelection.id) return;
         let item = getSelectedItem();
         if (item) {
-            const newDrive = document.getElementById('quickEditDriveLink').value.trim();
-            const newInvgate = document.getElementById('quickEditInvgateLink').value.trim();
+            const newDrive = window.sanitizeSafeUrl(document.getElementById('quickEditDriveLink').value);
+            const newInvgate = window.sanitizeSafeUrl(document.getElementById('quickEditInvgateLink').value);
             item.driveLink = newDrive;
             item.invgateLink = newInvgate;
             logActivity(item.id, item.name, 'Actualizó enlaces del proyecto', localAuthor);
@@ -2794,15 +2901,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const btnInvgate = document.getElementById('infoInvgateBtn');
             
             if(item.driveLink) {
-                let formattedLink = item.driveLink;
-                if(!formattedLink.startsWith('http://') && !formattedLink.startsWith('https://')) formattedLink = 'https://' + formattedLink;
-                btnDrive.href = formattedLink; btnDrive.classList.remove('hidden');
+                btnDrive.href = item.driveLink; btnDrive.classList.remove('hidden');
             } else btnDrive.classList.add('hidden');
             
             if(item.invgateLink) {
-                let formattedLink = item.invgateLink;
-                if(!formattedLink.startsWith('http://') && !formattedLink.startsWith('https://')) formattedLink = 'https://' + formattedLink;
-                btnInvgate.href = formattedLink; btnInvgate.classList.remove('hidden');
+                btnInvgate.href = item.invgateLink; btnInvgate.classList.remove('hidden');
             } else btnInvgate.classList.add('hidden');
         }
     };
@@ -2869,26 +2972,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     p==='quick'?window.calculateQuickProgress():window.calculateEditProgress(); 
     if(p==='quick' && !na.checked) window.silentSaveInfoCard(); 
 };
-    window.confirmNa = function(p, id) { if(currentUserRole==='Lector') return; const btn = document.getElementById(`${p}BtnNa${id}`), valHidden = document.getElementById(`${p}NaValidated${id}`); if(valHidden)valHidden.value="true"; if(btn){btn.textContent="✓ Validado"; btn.className="pill-btn w-full py-2 bg-[#30d158]/20 border border-[#30d158]/50 text-[#30d158] text-[10px] font-bold mt-2";} p==='quick'?window.calculateQuickProgress():window.calculateEditProgress(); if(p==='quick') window.silentSaveInfoCard(); };
+    window.confirmNa = function(p, id) { if(currentUserRole==='Lector') return; const btn = document.getElementById(`${p}BtnNa${id}`), valHidden = document.getElementById(`${p}NaValidated${id}`); if(valHidden)valHidden.value="true"; if(btn){btn.textContent="✓ Validado"; btn.className="pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2";} p==='quick'?window.calculateQuickProgress():window.calculateEditProgress(); if(p==='quick') window.silentSaveInfoCard(); };
 
     window.calculateQuickProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`quickDoc${d.id}`)?.checked || (document.getElementById(`quickNa${d.id}`)?.checked && document.getElementById(`quickNaValidated${d.id}`)?.value==="true")) sc+=inc; }); document.getElementById('quickEditProgress').value = Math.round(sc); document.getElementById('quickEditProgressLabel').textContent = Math.round(sc)+'%'; }
     window.calculateEditProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`editDoc${d.id}`)?.checked || (document.getElementById(`editNa${d.id}`)?.checked && document.getElementById(`editNaValidated${d.id}`)?.value==="true")) sc+=inc; }); document.getElementById('editProgress').value = Math.round(sc); document.getElementById('editProgressLabel').textContent = Math.round(sc)+'%'; }
 
     window.renderDocChecklists = function(prefix, savedData) {
         const c = document.getElementById(`${prefix}DocsContainer`); if(!c) return; c.innerHTML = '';
-        if (globalDocs.length === 0) { c.innerHTML = `<p class="text-xs text-gray-500 italic">No hay documentos base.</p>`; document.getElementById(`${prefix}SliderContainer`).classList.remove('hidden'); return; }
+        if (globalDocs.length === 0) { c.innerHTML = `<p class="font-mono text-xs text-[#8a8380] uppercase">No hay documentos base.</p>`; document.getElementById(`${prefix}SliderContainer`).classList.remove('hidden'); return; }
         document.getElementById(`${prefix}SliderContainer`).classList.add('hidden');
-        c.innerHTML = globalDocs.map(doc => `<div class="bg-black/40 p-4 rounded-2xl border border-white/5 border-t-white/10 mb-3 shadow-inner">
-                 <div class="flex justify-between items-start mb-3 gap-3">
-                     <label class="flex items-start gap-3 text-xs text-white cursor-pointer flex-1 group">
-                        <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
-                        <span class="break-words whitespace-normal leading-relaxed group-hover:text-brand-accent transition tracking-wide" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
+        c.innerHTML = globalDocs.map(doc => `<div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] mb-2.5">
+                 <div class="flex justify-between items-start gap-3">
+                     <label class="flex items-start gap-3 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
+                        <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
+                        <span class="break-words whitespace-normal leading-relaxed group-hover:text-[#fafafa] transition" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
                      </label>
-                     <label class="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold tracking-widest cursor-pointer shrink-0 mt-0.5">
-                        <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded border-white/20 bg-black/40 text-gray-400 h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
+                     <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer shrink-0 mt-0.5">
+                        <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
                      </label>
                  </div>
-                 <div id="${prefix}ObsContainer${doc.id}" class="flex flex-col gap-2 hidden mt-2 pt-2 border-t border-white/5"><input type="text" id="${prefix}Obs${doc.id}" oninput="handleObsInput('${prefix}', '${doc.id}')" placeholder="Motivo N/A..." class="w-full liquid-input rounded-xl p-3 text-xs focus:outline-none" ${currentUserRole==='Lector'?'readonly':''}><button id="${prefix}BtnNa${doc.id}" type="button" onclick="confirmNa('${prefix}', '${doc.id}')" class="hidden pill-btn w-full py-2 bg-brand-accent text-[10px] font-bold text-white transition">Validar N/A</button></div>
+                 <div id="${prefix}ObsContainer${doc.id}" class="flex flex-col gap-2 hidden mt-2.5 pt-2.5 border-t border-[#3d3a39]"><input type="text" id="${prefix}Obs${doc.id}" oninput="handleObsInput('${prefix}', '${doc.id}')" placeholder="Motivo N/A..." class="w-full liquid-input rounded-[3px] p-2.5 text-xs focus:outline-none text-[#eeeeee]" ${currentUserRole==='Lector'?'readonly':''}><button id="${prefix}BtnNa${doc.id}" type="button" onclick="confirmNa('${prefix}', '${doc.id}')" class="hidden pill-btn w-full py-2 bg-[#fafafa] hover:bg-[#eeeeee] font-mono text-[10px] uppercase text-[#101010] transition">Validar N/A</button></div>
                  <input type="hidden" id="${prefix}NaValidated${doc.id}" value="false"></div>`).join('');
         
         globalDocs.forEach(doc => {
@@ -2902,7 +3005,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     if(data.obs) document.getElementById(`${prefix}Obs${doc.id}`).value = data.obs;
                 }
                 if(data.naValidated) document.getElementById(`${prefix}NaValidated${doc.id}`).value = "true";
-                if(data.na && data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "✓ Validado"; btn.className = "pill-btn w-full py-2 bg-[#30d158]/20 border border-[#30d158]/50 text-[#30d158] text-[10px] font-bold mt-2"; } else if(data.na && !data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "Validar N/A"; }
+                if(data.na && data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "✓ Validado"; btn.className = "pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2"; } else if(data.na && !data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "Validar N/A"; }
             }
         });
     }
@@ -3038,6 +3141,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.showInfoCard = function(type, id) {
+      if (infoCardHideTimer) { clearTimeout(infoCardHideTimer); infoCardHideTimer = null; }
       const card = document.getElementById('infoCard'); let item = null;
       document.getElementById('infoQuickEditContainer').classList.add('hidden'); document.getElementById('btnFullEditInfoCard').classList.add('hidden');
       document.getElementById('infoNotesContainer').classList.add('hidden');
@@ -3063,18 +3167,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('infoType').textContent = 'NÚCLEO';
         const totalProjects = (appData.directProjects || []).length + (appData.modules || []).reduce((acc, m) => acc + (m.projects || []).length, 0);
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'MÓDULOS ACTIVOS';
-        document.getElementById('infoConsultant').innerHTML = `<span class="text-white font-bold text-lg">${appData.modules.length}</span>`;
+        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${appData.modules.length}</span>`;
         document.getElementById('infoMetricLabel').textContent = 'PROYECTOS TOTALES';
-        document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${totalProjects}</span>`;
+        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${totalProjects}</span>`;
       } else if (type === 'direct-hub' || type === 'module') {
         item = type === 'module' ? appData.modules.find(m => m.id === id) : appData.directHub;
         document.getElementById('infoType').textContent = type==='module'?'MÓDULO':'AGRUPADOR';
         const projs = type === 'module' ? (item.projects || []) : (appData.directProjects || []);
         const avgProg = projs.length > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / projs.length) : 0;
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'PROYECTOS';
-        document.getElementById('infoConsultant').innerHTML = `<span class="text-white font-bold text-lg">${projs.length}</span>`;
+        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${projs.length}</span>`;
         document.getElementById('infoMetricLabel').textContent = 'AVANCE PROMEDIO';
-        document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold text-lg">${avgProg}%</span>`;
+        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#a0ca92] font-normal text-lg">${avgProg}%</span>`;
         
         // Detección de proyectos dependientes / vinculados de otros módulos
         const modIdCheck = type === 'module' ? id : 'DIRECT';
@@ -3087,15 +3191,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         (appData.modules || []).forEach(m => {
           (m.projects || []).forEach(p => {
             if (Array.isArray(p.secondaryModules) && (p.secondaryModules.includes(modIdCheck) || (modIdCheck === 'DIRECT' && p.secondaryModules.includes('hub-direct')))) {
-              sharedProjs.push({ proj: p, projType: 'project', parentColor: m.color || '#0071e3' });
+              sharedProjs.push({ proj: p, projType: 'project', parentColor: m.color || '#eeeeee' });
             }
           });
         });
         if (modContainer && sharedProjs.length > 0) {
           modContainer.innerHTML = `
-            <div class="w-full text-[10px] text-blue-300 bg-[#0071e3]/10 border border-[#0071e3]/25 px-3 py-2 rounded-xl flex items-center justify-between shadow-inner">
-              <span class="flex items-center gap-1.5 font-medium"><span>🔗</span> <b>${sharedProjs.length}</b> proyecto(s) vinculados como dependencia</span>
-              <span class="text-[9px] text-[#0071e3] font-bold bg-[#0071e3]/20 px-2 py-0.5 rounded-full border border-[#0071e3]/30">Multimódulo</span>
+            <div class="w-full font-mono text-[10px] uppercase text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-3 py-2 rounded-[3px] flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><span>🔗</span> <b>${sharedProjs.length}</b> proyecto(s) vinculados</span>
+              <span class="text-[9px] text-[#b8b3b0] bg-[#101010] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">Multimódulo</span>
             </div>
           `;
           const chipsWrap = document.createElement('div');
@@ -3103,9 +3207,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           sharedProjs.forEach(({ proj, projType, parentColor }) => {
             const chip = document.createElement('button');
             chip.type = 'button';
-            chip.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-xl text-blue-100 bg-[#0071e3]/15 hover:bg-[#0071e3]/30 border border-[#0071e3]/35 transition shadow-sm";
+            chip.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#101010] border transition";
+            chip.style.borderColor = parentColor || '#3d3a39';
             chip.title = "Ir al proyecto vinculado";
-            chip.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0 shadow-[0_0_4px_rgba(0,113,227,0.5)]" style="background-color: ${parentColor}"></span><span>🔗 ${escapeHtml(proj.name)}</span><span class="text-[9px] text-blue-300/80 ml-0.5">↗</span>`;
+            chip.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${parentColor}"></span><span>🔗 ${escapeHtml(proj.name)}</span><span class="text-[9px] text-[#8a8380] ml-0.5">↗</span>`;
             chip.onclick = () => {
               const modKey = type === 'module' ? id : 'hub-direct';
               if (collapsedModules.has(modKey)) {
@@ -3144,13 +3249,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             compContainer.innerHTML = '';
             compContainer.classList.remove('hidden');
             comps.forEach(c => {
-              const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)', border: 'rgba(255,159,10,0.3)', icon: '🏢' };
+              const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)', icon: '🏢' };
               const pill = document.createElement('span');
-              pill.className = "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl shadow-sm border";
+              pill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] border";
               pill.style.backgroundColor = st.bg;
               pill.style.borderColor = st.border;
               pill.style.color = st.color;
-              pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full shadow-[0_0_4px_currentColor]" style="background-color: ${st.color}"></span>${st.icon} ${escapeHtml(c)}`;
+              pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${st.color}"></span>${st.icon} ${escapeHtml(c)}`;
               compContainer.appendChild(pill);
             });
           }
@@ -3176,8 +3281,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           
           const pPill = document.createElement('button');
           pPill.type = 'button';
-          pPill.className = "inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl text-white bg-white/10 hover:bg-white/20 border border-white/15 transition shadow-sm";
-          pPill.innerHTML = `<span class="w-2 h-2 rounded-full shadow-[0_0_4px_rgba(255,255,255,0.4)]" style="background-color: ${primMod.color || '#0071e3'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[8px] text-gray-400 font-normal uppercase tracking-wider">(Base)</span>`;
+          pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#101010] border transition";
+          pPill.style.borderColor = primMod.color || '#3d3a39';
+          pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] font-normal uppercase">(Base)</span>`;
           pPill.onclick = () => window.selectNode(primType, primMod.id);
           modContainer.appendChild(pPill);
 
@@ -3193,9 +3299,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (sMod) {
               const sPill = document.createElement('button');
               sPill.type = 'button';
-              sPill.className = "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-xl text-blue-200 bg-[#0071e3]/15 hover:bg-[#0071e3]/25 border border-[#0071e3]/30 transition shadow-sm";
+              sPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] text-[#b8b3b0] hover:text-[#eeeeee] bg-[#101010] hover:bg-[#1d1a18] border transition";
+              sPill.style.borderColor = sMod.color || '#3d3a39';
               sPill.title = "Módulo dependiente / vinculación cruzada";
-              sPill.innerHTML = `<span class="w-2 h-2 rounded-full shadow-[0_0_4px_rgba(0,113,227,0.4)]" style="background-color: ${sMod.color || '#0071e3'}"></span>🔗 ${escapeHtml(sMod.name)}`;
+              sPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${sMod.color || '#eeeeee'}"></span>🔗 ${escapeHtml(sMod.name)}`;
               sPill.onclick = () => window.selectNode(sType, sMod.id);
               modContainer.appendChild(sPill);
             }
@@ -3203,8 +3310,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'CONSULTOR(ES)';
-        document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<div class="text-xs flex items-center gap-2"><span class="w-3 h-3 rounded-full border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.3)]" style="background-color: ${consultants[n]?consultants[n].color:'#8e8e93'}"></span> ${escapeHtml(n)}</div>`).join('') || 'Sin asignar';
-        document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD'; document.getElementById('infoMetricValue').innerHTML = `<span class="text-white font-bold bg-white/10 px-2.5 py-1 rounded-full border border-white/5">*${item.priority}</span>`;
+        document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<div class="text-xs flex items-center gap-2 text-[#eeeeee]"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n]?consultants[n].color:'#8a8380'}"></span> ${escapeHtml(n)}</div>`).join('') || '<span class="text-[#8a8380]">Sin asignar</span>';
+        document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD'; document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39]">*${item.priority}</span>`;
         document.getElementById('infoQuickEditContainer').classList.remove('hidden'); 
         
         const btnDrive = document.getElementById('infoDriveBtn');
@@ -3281,10 +3388,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const rt = document.getElementById('infoRelativeTime'); rt.classList.remove('hidden');
             const [y,m,d] = item.deadline.split('-'); const dDate = new Date(y, m-1, d); const today = new Date(new Date().setHours(0,0,0,0));
             const diffTime = dDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if(item.status === 'Completado') { rt.className = "text-xs font-semibold px-4 py-2.5 rounded-xl mb-5 border flex items-center gap-2 bg-[#30d158]/10 text-[#30d158] border-[#30d158]/30 shadow-inner"; rt.innerHTML = "✅ Entregado"; }
-            else if(diffDays < 0) { rt.className = "text-xs font-semibold px-4 py-2.5 rounded-xl mb-5 border flex items-center gap-2 bg-[#ff453a]/10 text-[#ff453a] border-[#ff453a]/30 shadow-inner"; rt.innerHTML = `⚠️ Vencido hace ${Math.abs(diffDays)} días`; }
-            else if(diffDays === 0) { rt.className = "text-xs font-semibold px-4 py-2.5 rounded-xl mb-5 border flex items-center gap-2 bg-[#ff9f0a]/10 text-[#ff9f0a] border-[#ff9f0a]/30 shadow-inner"; rt.innerHTML = `⚠️ Vence HOY`; }
-            else { rt.className = "text-xs font-semibold px-4 py-2.5 rounded-xl mb-5 border flex items-center gap-2 bg-white/5 text-gray-300 border-white/10 shadow-inner"; rt.innerHTML = `📅 Vence en ${diffDays} días`; }
+            if(item.status === 'Completado') { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#a0ca92] border-[#a0ca92]/40"; rt.innerHTML = "✅ ENTREGADO"; }
+            else if(diffDays < 0) { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#ee6018] border-[#ee6018]/60"; rt.innerHTML = `⚠️ VENCIDO HACE ${Math.abs(diffDays)} DÍAS`; }
+            else if(diffDays === 0) { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#ee6018] border-[#ee6018]/40"; rt.innerHTML = `⚠️ VENCE HOY`; }
+            else { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#b8b3b0] border-[#3d3a39]"; rt.innerHTML = `📅 VENCE EN ${diffDays} DÍAS`; }
         }
 
         window.renderTasksQuick(item);
@@ -3323,7 +3430,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       card.classList.remove('hidden'); 
       setTimeout(() => card.classList.remove('opacity-0'), 10);
     }
-    window.editFromInfoCard = function() { window.closeInfoCardSafe(); if(currentSelection.id) window.selectNodeAndOpenConfig(currentSelection.type, currentSelection.id); }
+    window.editFromInfoCard = function() {
+      if (!currentSelection || !currentSelection.id) return;
+      const targetType = currentSelection.type;
+      const targetId = currentSelection.id;
+      if (window.closeInfoCardSafe(true) === false) return;
+      window.selectNodeAndOpenConfig(targetType, targetId);
+      const card = document.getElementById('infoCard');
+      if (card) {
+        if (infoCardHideTimer) { clearTimeout(infoCardHideTimer); infoCardHideTimer = null; }
+        card.classList.add('opacity-0', 'hidden');
+        document.body.classList.remove('info-card-open');
+      }
+    }
 
     window.selectNode = function(type, id) {
       currentSelection = { type, id };
@@ -3560,7 +3679,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.openPasswordModal = function(name) {
         document.getElementById('passConsultantName').textContent = name;
         document.getElementById('passConsultantId').value = name;
-        document.getElementById('passNewValue').value = consultants[name].password || '';
+        const passInp = document.getElementById('passNewValue');
+        passInp.value = '';
+        passInp.placeholder = (consultants[name] && consultants[name].password)
+            ? '•••••••• (Activa — deja vacío para restablecer)'
+            : 'Nueva contraseña personalizada...';
         const modal = document.getElementById('passwordModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -3574,12 +3697,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const name = document.getElementById('passConsultantId').value;
         const newPass = document.getElementById('passNewValue').value.trim();
         if (newPass) {
-            consultants[name].password = newPass;
+            consultants[name].password = 'sha256:' + sha256Hex(newPass);
         } else {
-            delete consultants[name].password; // Vuelve a la default
+            delete consultants[name].password; // Vuelve a la default del rol
         }
         window.saveData(false);
-        window.showToast("Contraseña actualizada", false);
+        window.showToast("Contraseña actualizada y protegida (SHA-256)", false);
         window.closePasswordModal();
     }
 
@@ -3911,8 +4034,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
     window.populateConsultantSelects = function() {
       const f = document.getElementById('consultantFilter'), all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
-      if(f) f.innerHTML = `<option value="ALL" class="bg-black text-white">👥 Todos</option>` + all.map(n => `<option value="${escapeHtml(n)}" class="bg-black text-white">${escapeHtml(n)}</option>`).join('');
-      const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-medium text-gray-300 cursor-pointer p-2.5 hover:bg-white/10 rounded-xl transition border border-transparent hover:border-white/10"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4"><span class="w-3.5 h-3.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.3)] border border-white/20" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
+      if(f) f.innerHTML = `<option value="ALL" class="bg-[#101010] text-[#eeeeee]">👥 Todos</option>` + all.map(n => `<option value="${escapeHtml(n)}" class="bg-[#101010] text-[#eeeeee]">${escapeHtml(n)}</option>`).join('');
+      const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
       document.getElementById('editConsultantsChecks').innerHTML = mkChk('editProjCons'); document.getElementById('newProjConsultantsChecks').innerHTML = mkChk('newProjCons');
     }
     window.renderRegisteredConsultantsList = function() {
@@ -3920,19 +4043,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('registeredConsultantsList').innerHTML = all.map(n => {
         let cnt = 0; (appData.directProjects||[]).forEach(p=>{if(getProjectConsultants(p).includes(n))cnt++;}); appData.modules.forEach(m=>{(m.projects||[]).forEach(p=>{if(getProjectConsultants(p).includes(n))cnt++;});});
         const cData = consultants[n];
-        return `<div class="flex flex-col w-full p-4 bg-black/40 rounded-2xl border border-white/10 mb-3 shadow-inner group">
+        return `<div class="flex flex-col w-full p-4 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] mb-2.5 group" style="border-left: 2px solid ${cData.color};">
                    <div class="flex items-center justify-between gap-3 mb-2">
-                       <div class="w-10 h-10 rounded-xl overflow-hidden border border-white/20 relative shrink-0">
+                       <div class="w-9 h-9 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
                           <input type="color" value="${cData.color}" onchange="handleUpdateExistingConsultantColor('${jsArg(n)}', this.value)" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
                        </div>
-                       <div class="flex-1 min-w-0"><span class="text-sm text-white font-bold block truncate">${escapeHtml(n)}</span><span class="text-[10px] text-gray-500 font-medium tracking-widest block mt-0.5">${cnt} proyectos</span></div>
-                       <button onclick="openPasswordModal('${jsArg(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Cambiar Contraseña"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></button>
-                       <button onclick="openRenameModal('${jsArg(n)}')" class="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition shrink-0" title="Renombrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                       <button onclick="requestDeleteConsultant('${jsArg(n)}')" class="p-2 hover:bg-[#ff453a]/20 text-gray-400 hover:text-[#ff453a] rounded-xl transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                       <div class="flex-1 min-w-0"><span class="text-sm text-[#eeeeee] font-normal block truncate">${escapeHtml(n)}</span><span class="font-mono text-[10px] text-[#8a8380] uppercase block mt-0.5">${cnt} proyectos</span></div>
+                       <button onclick="openPasswordModal('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#b8b3b0] hover:text-[#eeeeee] border border-transparent hover:border-[#3d3a39] rounded-[3px] transition shrink-0" title="Cambiar Contraseña"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></button>
+                       <button onclick="openRenameModal('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#b8b3b0] hover:text-[#eeeeee] border border-transparent hover:border-[#3d3a39] rounded-[3px] transition shrink-0" title="Renombrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                       <button onclick="requestDeleteConsultant('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#8a8380] hover:text-[#ee6018] border border-transparent hover:border-[#ee6018] rounded-[3px] transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                    </div>
-                   <div class="flex items-center gap-2 border-t border-white/5 pt-2 mt-1">
-                       <span class="text-[9px] text-gray-500 uppercase tracking-widest">Rol asignado:</span>
-                       <select onchange="updateConsultantRole('${jsArg(n)}', this.value)" class="bg-transparent text-[10px] text-gray-300 border border-white/10 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer">
+                   <div class="flex items-center gap-2 border-t border-[#3d3a39] pt-2 mt-1">
+                       <span class="font-mono text-[9px] text-[#8a8380] uppercase">Rol asignado:</span>
+                       <select onchange="updateConsultantRole('${jsArg(n)}', this.value)" class="bg-[#101010] font-mono text-[10px] text-[#eeeeee] border border-[#3d3a39] rounded-[3px] px-2 py-0.5 focus:outline-none cursor-pointer">
                            <option value="Consultor" ${cData.role==='Consultor'?'selected':''}>Consultor</option>
                            <option value="Supervisor" ${cData.role==='Supervisor'?'selected':''}>Supervisor</option>
                            <option value="Supremo" ${cData.role==='Supremo'?'selected':''}>Supremo</option>
@@ -3944,35 +4067,117 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.registerGlobalDocument = function() { const n = document.getElementById('newDocName').value.trim(); if(!n) return; globalDocs.push({ id: 'doc_'+Date.now(), name: n }); document.getElementById('newDocName').value = ''; window.saveData(false); window.renderRegisteredDocsList(); }
     window.renderRegisteredDocsList = function() {
-        document.getElementById('registeredDocsList').innerHTML = globalDocs.map((d, i) => `<div class="flex items-center p-3 bg-black/40 rounded-2xl border border-white/10 gap-2 mb-2 shadow-inner"><div class="flex flex-col gap-1 shrink-0"><button onclick="moveDoc(${i}, -1)" class="text-gray-400 hover:text-white bg-white/10 hover:bg-white/20 rounded p-0.5 text-[9px] transition">&uarr;</button><button onclick="moveDoc(${i}, 1)" class="text-gray-400 hover:text-white bg-white/10 hover:bg-white/20 rounded p-0.5 text-[9px] transition">&darr;</button></div><span class="text-[9px] font-bold text-gray-400 bg-white/5 px-2 py-1 rounded-md shrink-0 border border-white/5">${i+1}</span><input type="text" value="${escapeHtml(d.name)}" onchange="globalDocs[${i}].name=this.value; saveData(false);" class="bg-transparent border border-transparent hover:border-white/20 focus:border-white/40 rounded-lg text-xs text-white font-medium w-full p-2 focus:outline-none transition"><button onclick="deleteDoc('${d.id}')" class="p-2 hover:bg-[#ff453a]/20 text-gray-500 hover:text-[#ff453a] rounded-lg transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>`).join('');
+        document.getElementById('registeredDocsList').innerHTML = globalDocs.map((d, i) => `<div class="flex items-center p-3 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] gap-2.5 mb-2"><div class="flex flex-col gap-1 shrink-0"><button onclick="moveDoc(${i}, -1)" class="text-[#b8b3b0] hover:text-[#101010] bg-[#101010] hover:bg-[#eeeeee] border border-[#3d3a39] rounded-[2px] p-0.5 text-[9px] transition">&uarr;</button><button onclick="moveDoc(${i}, 1)" class="text-[#b8b3b0] hover:text-[#101010] bg-[#101010] hover:bg-[#eeeeee] border border-[#3d3a39] rounded-[2px] p-0.5 text-[9px] transition">&darr;</button></div><span class="font-mono text-[10px] text-[#b8b3b0] bg-[#101010] px-2 py-1 rounded-[3px] shrink-0 border border-[#3d3a39]">${String(i+1).padStart(2, '0')}</span><input type="text" value="${escapeHtml(d.name)}" onchange="globalDocs[${i}].name=this.value; saveData(false);" class="bg-transparent border border-transparent hover:border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] text-xs text-[#eeeeee] font-normal w-full p-2 focus:outline-none transition"><button onclick="deleteDoc('${d.id}')" class="p-2 hover:bg-[#101010] text-[#8a8380] hover:text-[#ee6018] border border-transparent hover:border-[#ee6018] rounded-[3px] transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>`).join('');
     }
     window.moveDoc = function(idx, dir) { if(idx+dir < 0 || idx+dir >= globalDocs.length) return; const t = globalDocs[idx]; globalDocs[idx] = globalDocs[idx+dir]; globalDocs[idx+dir] = t; window.saveData(false); window.renderRegisteredDocsList(); }
     window.deleteDoc = function(id) { globalDocs = globalDocs.filter(d => d.id !== id); window.saveData(false); window.renderRegisteredDocsList(); }
 
+    let activePriorityConsultantTab = null;
+    window.setPriorityConsultantTab = function(cons) {
+        activePriorityConsultantTab = cons;
+        window.renderPriorityDrawer();
+        const c = document.getElementById('priorityListContainer');
+        if (c) c.scrollTop = 0;
+    };
+
     window.renderPriorityDrawer = function() {
-        const c = document.getElementById('priorityListContainer'); if(!c) return;
+        const c = document.getElementById('priorityListContainer');
+        const tabsBar = document.getElementById('priorityTabsBar');
+        if (!c) return;
         const all = (!activeFilterConsultants.includes('ALL') && activeFilterConsultants.length > 0) ? activeFilterConsultants : Object.keys(consultants);
-        let has = false; let h = '';
         const statusMatches = (p) => (activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0 || activeFilterStatuses.includes(p.status));
         const companyMatches = (p) => (activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0 || window.getProjectCompanies(p).some(comp => activeFilterCompanies.includes(comp)));
+
+        const groups = [];
         all.forEach(cons => {
-            const cData = consultants[cons]; if (!cData) return; let projs = [];
-            appData.directProjects.forEach(p => { if(getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({...p, parentName: appData.directHub.name, pType: 'direct-project'}); });
-            appData.modules.forEach(m => { (m.projects||[]).forEach(p => { if(getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({...p, parentName: m.name, pType: 'project'}); }); });
-            if(projs.length === 0) return; has = true; projs.sort((a,b) => parseFloat(a.priority||0) - parseFloat(b.priority||0));
-            h += `<div class="mb-8"><h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" style="color: ${cData.color}"><span class="w-3.5 h-3.5 rounded-full shadow-[0_0_8px_${cData.color}] border border-white/20" style="background-color: ${cData.color}"></span>${escapeHtml(cons)}<span class="bg-white/10 text-white px-2.5 py-0.5 rounded-full text-[9px] ml-auto border border-white/5 shadow-inner">${projs.length} proy.</span></h3><div class="space-y-4">`;
-            projs.forEach(p => {
-                let sIco = p.status==='En Progreso'?'🚀':(p.status==='Completado'?'✅':(p.status==='No Iniciado'?'⏸️':'⏳'));
-                let over = false; if(p.deadline && p.status !== 'Completado') { const [y,m,d] = p.deadline.split('-'); if(new Date(y,m-1,d) < new Date(new Date().setHours(0,0,0,0))) over=true; }
-                const pComps = window.getProjectCompanies(p);
-                const compBadges = pComps.map(c => {
-                    const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)', border: 'rgba(255,159,10,0.3)', icon: '🏢' };
-                    return `<span class="text-[9px] font-bold px-2 py-0.5 rounded-md shadow-sm border" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};">${st.icon} ${escapeHtml(c)}</span>`;
-                }).join('');
-                h += `<div class="bg-black/40 border border-white/10 rounded-[1.5rem] p-5 flex gap-4 hover:bg-white/10 transition-all cursor-pointer group shadow-inner ${over?'border-[#ff453a]/50 bg-[#ff453a]/5':''}" onclick="window.selectNodeAndOpenConfig('${p.pType}', '${p.id}')"><div class="text-xl font-bold mt-1.5 shrink-0 w-8 text-center drop-shadow-md" style="color: ${cData.color}">*${p.priority}</div><div class="flex-1 min-w-0"><h4 class="text-sm font-semibold text-white leading-tight group-hover:text-brand-accent transition truncate">${over?'⚠️ ':''}${escapeHtml(p.name)}</h4><p class="text-[9px] text-gray-500 mt-1.5 uppercase tracking-widest truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-2 mt-3">${compBadges}<span class="text-[9px] font-bold px-2.5 py-1 rounded-md bg-black/40 border border-white/5 text-gray-300 shadow-inner">${sIco} ${p.status||'Pendiente'} (${p.progress||0}%)</span>${p.deadline ? `<span class="text-[9px] font-mono font-bold text-[#ff453a] bg-[#ff453a]/10 border border-[#ff453a]/20 px-2.5 py-1 rounded-md">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
-            }); h += `</div></div>`;
+            const cData = consultants[cons];
+            if (!cData) return;
+            let projs = [];
+            appData.directProjects.forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({ ...p, parentName: appData.directHub.name, pType: 'direct-project' }); });
+            appData.modules.forEach(m => { (m.projects || []).forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({ ...p, parentName: m.name, pType: 'project' }); }); });
+            if (projs.length === 0) return;
+            projs.sort((a, b) => parseFloat(a.priority || 0) - parseFloat(b.priority || 0));
+            groups.push({ cons, cData, projs });
         });
-        c.innerHTML = has ? h : `<div class="flex flex-col items-center justify-center py-20 text-center opacity-50"><svg class="w-16 h-16 text-gray-500 mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><p class="text-gray-300 text-sm font-medium tracking-wide">No hay coincidencias.</p></div>`;
+
+        if (groups.length === 0) {
+            if (tabsBar) { tabsBar.innerHTML = ''; tabsBar.classList.add('hidden'); }
+            c.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-center opacity-50"><svg class="w-12 h-12 text-[#8a8380] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><p class="font-mono text-xs text-[#b8b3b0] uppercase">Sin coincidencias.</p></div>`;
+            return;
+        }
+
+        const validNames = groups.map(g => g.cons);
+        if (!activePriorityConsultantTab || (activePriorityConsultantTab !== 'ALL' && !validNames.includes(activePriorityConsultantTab))) {
+            activePriorityConsultantTab = groups[0].cons;
+        }
+
+        if (tabsBar) {
+            if (groups.length > 1) {
+                tabsBar.classList.remove('hidden');
+                const totalProjs = groups.reduce((acc, g) => acc + g.projs.length, 0);
+                let tabsHtml = `<div class="flex items-center justify-between mb-2"><span class="font-mono text-[10px] text-[#8a8380] uppercase">Seleccionar Consultor</span><span class="font-mono text-[10px] text-[#b8b3b0] uppercase">${groups.length} activos</span></div>`;
+                tabsHtml += `<div class="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin pr-0.5">`;
+                groups.forEach(g => {
+                    const isAct = activePriorityConsultantTab === g.cons;
+                    const borderStyle = isAct ? `border-color: ${g.cData.color}; background-color: #1d1a18;` : `border-color: #3d3a39; background-color: #101010;`;
+                    tabsHtml += `<button type="button" onclick="window.setPriorityConsultantTab('${jsArg(g.cons)}')" class="px-2.5 py-2 rounded-[3px] border text-left transition flex items-center justify-between gap-1.5 hover:bg-[#1d1a18]" style="${borderStyle}">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
+                            <span class="font-mono text-[10px] uppercase truncate ${isAct ? 'text-[#eeeeee]' : 'text-[#b8b3b0]'}">${escapeHtml(g.cons)}</span>
+                        </div>
+                        <span class="font-mono text-[9px] px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] shrink-0" style="color: ${isAct ? g.cData.color : '#8a8380'}">${g.projs.length}</span>
+                    </button>`;
+                });
+                const isAllAct = activePriorityConsultantTab === 'ALL';
+                tabsHtml += `<button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="col-span-2 px-2.5 py-1.5 rounded-[3px] border text-center transition flex items-center justify-center gap-2 ${isAllAct ? 'bg-[#eeeeee] text-[#101010] border-[#eeeeee]' : 'bg-[#101010] hover:bg-[#1d1a18] text-[#b8b3b0] border-[#3d3a39]'}">
+                    <span class="font-mono text-[10px] uppercase">Ver Todos los Consultores (${totalProjs})</span>
+                </button>`;
+                tabsHtml += `</div>`;
+                tabsBar.innerHTML = tabsHtml;
+            } else {
+                tabsBar.innerHTML = '';
+                tabsBar.classList.add('hidden');
+            }
+        }
+
+        const renderProjectCards = (projs, cData) => projs.map(p => {
+            let sIco = p.status === 'En Progreso' ? '🚀' : (p.status === 'Completado' ? '✅' : (p.status === 'No Iniciado' ? '⏸️' : '⏳'));
+            let over = false;
+            if (p.deadline && p.status !== 'Completado') {
+                const [y, m, d] = p.deadline.split('-');
+                if (new Date(y, m - 1, d) < new Date(new Date().setHours(0, 0, 0, 0))) over = true;
+            }
+            const pComps = window.getProjectCompanies(p);
+            const compBadges = pComps.map(comp => {
+                const st = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)', icon: '🏢' };
+                return `<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] border" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};">${st.icon} ${escapeHtml(comp)}</span>`;
+            }).join('');
+            return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]'} rounded-[10px] p-4 flex gap-3.5 transition-colors cursor-pointer group" style="border-left: 2px solid ${over ? '#ee6018' : cData.color};" onclick="window.selectNodeAndOpenConfig('${p.pType}', '${p.id}')"><div class="font-mono text-lg font-normal mt-0.5 shrink-0 w-8 text-center" style="color: ${cData.color}">*${p.priority}</div><div class="flex-1 min-w-0"><h4 class="text-sm font-normal text-[#eeeeee] leading-tight group-hover:text-[#fafafa] transition truncate">${over ? '⚠️ ' : ''}${escapeHtml(p.name)}</h4><p class="font-mono text-[10px] text-[#8a8380] mt-1 uppercase truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-1.5 mt-2.5">${compBadges}<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0]">${sIco} ${p.status || 'Pendiente'} (${p.progress || 0}%)</span>${p.deadline ? `<span class="font-mono text-[9px] uppercase ${over ? 'text-[#ee6018] border-[#ee6018]/50' : 'text-[#b8b3b0] border-[#3d3a39]'} bg-[#101010] border px-2 py-0.5 rounded-[3px]">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
+        }).join('');
+
+        let h = '';
+        const visibleGroups = (groups.length > 1 && activePriorityConsultantTab !== 'ALL')
+            ? groups.filter(g => g.cons === activePriorityConsultantTab)
+            : groups;
+
+        if (groups.length > 1 && activePriorityConsultantTab === 'ALL') {
+            visibleGroups.forEach(g => {
+                h += `<details class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] mb-3 overflow-hidden" open>
+                    <summary class="flex items-center gap-2.5 p-3.5 bg-[#1d1a18] cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/30 transition" style="border-left: 2px solid ${g.cData.color};">
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
+                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(g.cons)}</span>
+                        <span class="bg-[#101010] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] font-mono text-[10px] ml-auto border border-[#3d3a39]">${g.projs.length} PROYS</span>
+                        <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <div class="p-3 space-y-2.5 border-t border-[#3d3a39]">${renderProjectCards(g.projs, g.cData)}</div>
+                </details>`;
+            });
+        } else {
+            visibleGroups.forEach(g => {
+                h += `<div class="mb-4"><div class="flex items-center gap-2 mb-3 px-1"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span><h3 class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(g.cons)}</h3><span class="bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] font-mono text-[10px] ml-auto border border-[#3d3a39]">${g.projs.length} PROYS</span></div><div class="space-y-2.5">${renderProjectCards(g.projs, g.cData)}</div></div>`;
+            });
+        }
+        c.innerHTML = h;
     }
 
     window.renderMindMap = function() {
@@ -4292,8 +4497,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
               const cs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
               cs1.setAttribute('offset', '0%');
-              cs1.setAttribute('stop-color', '#0071e3');
-              cs1.setAttribute('stop-opacity', isLight ? '0.40' : '0.50');
+              cs1.setAttribute('stop-color', nItemColor);
+              cs1.setAttribute('stop-opacity', isLight ? '0.35' : '0.38');
               cGrad.appendChild(cs1);
 
               const cs2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -4530,7 +4735,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const pMatches = isDefaultState || isFiltered(p);
           
           let isOver = false; if(p.deadline && p.status !== 'Completado') { const [dy, dm, dd] = p.deadline.split('-'); if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true; }
-          const sCol = p.status==='En Progreso'?'#0071e3':(p.status==='Completado'?'#30d158':(p.status==='No Iniciado'?'#48484a':'#8e8e93'));
+          const sCol = p.status==='En Progreso'?'#ee6018':(p.status==='Completado'?'#a0ca92':(p.status==='No Iniciado'?'#4d4947':'#8a8380'));
 
           // 1. CREACIÓN DEL CONTENEDOR PRINCIPAL
           const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -4595,49 +4800,48 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               });
           }
 
-          // 3. CAPA VISUAL (Píldoras estilo original con liquid glass)
-          // AURA PARPADEANTE / FARO VISUAL PARA PROYECTOS VENCIDOS
+          // 3. CAPA VISUAL (Factory Technical Card rx=10 + Flashlit Dispatch #eeeeee when selected)
+          // AURA TÉCNICA PARA PROYECTOS VENCIDOS
           if (isOver) {
               const aura = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-              aura.setAttribute('x', '-5');
-              aura.setAttribute('y', '-5');
-              aura.setAttribute('width', '330');
-              aura.setAttribute('height', '66');
-              aura.setAttribute('rx', '21');
-              aura.setAttribute('fill', 'rgba(255, 69, 58, 0.12)');
-              aura.setAttribute('stroke', '#ff453a');
-              aura.setAttribute('stroke-width', '1.5');
+              aura.setAttribute('x', '-4');
+              aura.setAttribute('y', '-4');
+              aura.setAttribute('width', '328');
+              aura.setAttribute('height', '64');
+              aura.setAttribute('rx', '12');
+              aura.setAttribute('fill', 'rgba(238, 96, 24, 0.08)');
+              aura.setAttribute('stroke', '#ee6018');
+              aura.setAttribute('stroke-width', '1');
               aura.classList.add('overdue-aura-pulse');
               aura.style.pointerEvents = 'none';
               g.appendChild(aura);
           }
 
           const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
+          const isFlashlit = isSel && !isLight;
+          const projStrokeColor = isOver ? '#ee6018' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : (color || '#ee6018'));
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '16'); 
-          r.setAttribute('fill', isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 18, 24, 0.88)'); 
-          r.setAttribute('stroke', isOver ? '#ff453a' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : color)); 
-          r.setAttribute('stroke-width', isOver ? '2' : (isSynergyMatch ? '2.5' : (isSel ? '2' : '1'))); 
+          r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '10'); 
+          r.setAttribute('fill', isFlashlit ? '#eeeeee' : (isLight ? '#ffffff' : '#1d1a18')); 
+          r.setAttribute('stroke', projStrokeColor); 
+          r.setAttribute('stroke-width', isFlashlit ? '2' : (isOver ? '1.6' : (isSynergyMatch ? '2' : '1.2'))); 
           r.style.pointerEvents = 'none';
           if (isOver) r.classList.add('overdue-capsule');
           if (isSynergyMatch) r.classList.add('synergy-capsule-glow');
-          if(isSel || (!isDefaultState && pMatches)) r.setAttribute('filter', 'url(#glow)'); 
           g.appendChild(r);
 
           const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rSheen.setAttribute('width', '320'); rSheen.setAttribute('height', '56'); rSheen.setAttribute('rx', '16');
+          rSheen.setAttribute('width', '320'); rSheen.setAttribute('height', '56'); rSheen.setAttribute('rx', '10');
           rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
           rSheen.style.pointerEvents = 'none';
           g.appendChild(rSheen);
 
           const sC = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '4'); 
-          sC.setAttribute('fill', isOver ? '#ff453a' : sCol); 
+          sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '3'); 
+          sC.setAttribute('fill', isOver ? '#ee6018' : sCol); 
           sC.style.pointerEvents = 'none';
           if (isOver) {
               sC.classList.add('overdue-dot');
-          } else if (pMatches) {
-              sC.setAttribute('filter', `drop-shadow(0 0 5px ${sCol})`); 
           }
           g.appendChild(sC);
 
@@ -4645,20 +4849,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           let compBadgeOffset = 0;
           if (pComps.length > 0) {
               const mainC = pComps[0];
-              const cStyle = window.getCompanyStyle ? window.getCompanyStyle(mainC) : { color: '#ff9f0a', bg: 'rgba(255,159,10,0.15)' };
+              const cStyle = window.getCompanyStyle ? window.getCompanyStyle(mainC) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)' };
               const bText = pComps.length > 1 ? `${mainC} +${pComps.length - 1}` : mainC;
               const bWidth = pComps.length > 1 ? 46 : 34;
 
               const cG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-              cG.setAttribute('transform', 'translate(34, 10)');
+              cG.setAttribute('transform', 'translate(32, 10)');
               cG.style.pointerEvents = 'none';
 
               const cP = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               cP.setAttribute('width', String(bWidth));
               cP.setAttribute('height', '14');
-              cP.setAttribute('rx', '4');
-              cP.setAttribute('fill', cStyle.bg);
-              cP.setAttribute('stroke', cStyle.color);
+              cP.setAttribute('rx', '3');
+              cP.setAttribute('fill', isFlashlit ? '#101010' : cStyle.bg);
+              cP.setAttribute('stroke', isFlashlit ? '#101010' : cStyle.color);
               cP.setAttribute('stroke-width', '1');
               cG.appendChild(cP);
 
@@ -4666,8 +4870,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               cT.setAttribute('x', String(bWidth / 2));
               cT.setAttribute('y', '10.5');
               cT.setAttribute('text-anchor', 'middle');
-              cT.setAttribute('fill', cStyle.color);
-              cT.setAttribute('style', 'font-size: 8px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; letter-spacing: 0.3px;');
+              cT.setAttribute('fill', isFlashlit ? '#eeeeee' : cStyle.color);
+              cT.setAttribute('style', "font-size: 8px; font-weight: 500; font-family: 'Geist Mono', monospace; letter-spacing: 0.2px;");
               cT.textContent = bText;
               cG.appendChild(cT);
 
@@ -4677,18 +4881,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           const hasSecBadge = Array.isArray(p.secondaryModules) && p.secondaryModules.length > 0;
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          nT.setAttribute('x', String(34 + compBadgeOffset));
+          nT.setAttribute('x', String(32 + compBadgeOffset));
           nT.setAttribute('y', '22');
-          nT.setAttribute('fill', '#ffffff'); 
+          nT.setAttribute('fill', isFlashlit ? '#101010' : (isLight ? '#0f172a' : '#eeeeee')); 
           nT.classList.add('svg-text', 'svg-text-bold');
           let fullText = (isOver ? "⚠️ " : "") + p.name;
-          let fontSize = fullText.length > 35 ? 9 : (fullText.length > 25 ? 10 : 12);
-          nT.setAttribute('style', `font-size: ${fontSize}px; pointer-events: none;`);
+          let fontSize = fullText.length > 35 ? 9.5 : (fullText.length > 25 ? 10.5 : 12);
+          nT.setAttribute('style', `font-size: ${fontSize}px; font-weight: 400; pointer-events: none;`);
           const maxNameLen = (hasSecBadge || isSynergyMatch) ? (compBadgeOffset ? 22 : 28) : (compBadgeOffset ? 35 : 55);
           nT.textContent = fullText.length > maxNameLen ? fullText.substring(0, maxNameLen - 3)+'...' : fullText;
           g.appendChild(nT);
 
-          // Micro-badge de multimódulo en la pastilla del proyecto
+          // Micro-badge de multimódulo en la tarjeta del proyecto
           if (hasSecBadge) {
               const multiG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
               multiG.setAttribute('transform', 'translate(252, 9)');
@@ -4708,9 +4912,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const mPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               mPill.setAttribute('width', '38');
               mPill.setAttribute('height', '14');
-              mPill.setAttribute('rx', '7');
-              mPill.setAttribute('fill', isLight ? 'rgba(0,113,227,0.12)' : 'rgba(0,113,227,0.25)');
-              mPill.setAttribute('stroke', '#0071e3');
+              mPill.setAttribute('rx', '3');
+              mPill.setAttribute('fill', isFlashlit ? '#101010' : '#101010');
+              mPill.setAttribute('stroke', isFlashlit ? '#101010' : '#3d3a39');
               mPill.setAttribute('stroke-width', '1');
               multiG.appendChild(mPill);
 
@@ -4718,8 +4922,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               mTxt.setAttribute('x', '19');
               mTxt.setAttribute('y', '10.5');
               mTxt.setAttribute('text-anchor', 'middle');
-              mTxt.setAttribute('fill', isLight ? '#0071e3' : '#60a5fa');
-              mTxt.setAttribute('style', 'font-size: 8px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;');
+              mTxt.setAttribute('fill', '#eeeeee');
+              mTxt.setAttribute('style', "font-size: 8px; font-weight: 500; font-family: 'Geist Mono', monospace;");
               mTxt.textContent = `🔗+${p.secondaryModules.length}`;
               multiG.appendChild(mTxt);
 
@@ -4736,9 +4940,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const synBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               synBg.setAttribute('width', '54');
               synBg.setAttribute('height', '14');
-              synBg.setAttribute('rx', '7');
-              synBg.setAttribute('fill', 'rgba(191, 90, 242, 0.25)');
-              synBg.setAttribute('stroke', '#bf5af2');
+              synBg.setAttribute('rx', '3');
+              synBg.setAttribute('fill', isFlashlit ? '#101010' : 'rgba(238, 96, 24, 0.18)');
+              synBg.setAttribute('stroke', '#ee6018');
               synBg.setAttribute('stroke-width', '1');
               synG.appendChild(synBg);
 
@@ -4746,8 +4950,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               synTxt.setAttribute('x', '27');
               synTxt.setAttribute('y', '10.5');
               synTxt.setAttribute('text-anchor', 'middle');
-              synTxt.setAttribute('fill', '#ffffff');
-              synTxt.setAttribute('style', 'font-size: 7.5px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;');
+              synTxt.setAttribute('fill', '#eeeeee');
+              synTxt.setAttribute('style', "font-size: 7.5px; font-weight: 500; font-family: 'Geist Mono', monospace;");
               synTxt.textContent = '🤝 JUNTOS';
               synG.appendChild(synTxt);
 
@@ -4766,9 +4970,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               avG.appendChild(avTitle);
 
               pConsList.forEach((cName, cIdx) => {
-                  const cx = 40 + cIdx * 12;
+                  const cx = 38 + cIdx * 12;
                   const cData = consultants[cName];
-                  const cColor = cData?.color || '#0071e3';
+                  const cColor = cData?.color || '#ee6018';
                   const initial = (cName || '?').trim().charAt(0).toUpperCase();
 
                   const avCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -4776,7 +4980,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   avCircle.setAttribute('cy', '40');
                   avCircle.setAttribute('r', '6');
                   avCircle.setAttribute('fill', cColor);
-                  avCircle.setAttribute('stroke', isLight ? '#ffffff' : '#121218');
+                  avCircle.setAttribute('stroke', isFlashlit ? '#eeeeee' : (isLight ? '#ffffff' : '#1d1a18'));
                   avCircle.setAttribute('stroke-width', '1.2');
                   avG.appendChild(avCircle);
 
@@ -4785,7 +4989,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   avTxt.setAttribute('y', '42.5');
                   avTxt.setAttribute('text-anchor', 'middle');
                   avTxt.setAttribute('fill', '#ffffff');
-                  avTxt.setAttribute('style', 'font-size: 7px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
+                  avTxt.setAttribute('style', "font-size: 7px; font-weight: 500; font-family: 'Geist Mono', monospace; pointer-events: none;");
                   avTxt.textContent = initial;
                   avG.appendChild(avTxt);
               });
@@ -4794,35 +4998,34 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           
           const prog = Math.round(p.progress || 0);
-          const pbStartX = 34 + avatarOffset;
+          const pbStartX = 32 + avatarOffset;
           const pbMaxWidth = Math.max(30, 258 - pbStartX);
 
           // Pista base de la barra de progreso
           const pbBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          pbBg.setAttribute('x', String(pbStartX)); pbBg.setAttribute('y', '38');
-          pbBg.setAttribute('width', String(pbMaxWidth)); pbBg.setAttribute('height', '3.5');
-          pbBg.setAttribute('rx', '1.75');
-          pbBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)');
+          pbBg.setAttribute('x', String(pbStartX)); pbBg.setAttribute('y', '38.5');
+          pbBg.setAttribute('width', String(pbMaxWidth)); pbBg.setAttribute('height', '3');
+          pbBg.setAttribute('rx', '1.5');
+          pbBg.setAttribute('fill', isFlashlit ? 'rgba(16,16,16,0.16)' : (isLight ? 'rgba(0,0,0,0.08)' : '#101010'));
           pbBg.style.pointerEvents = 'none';
           g.appendChild(pbBg);
 
           if (prog > 0) {
              const pb = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-             pb.setAttribute('x', String(pbStartX)); pb.setAttribute('y', '38');
+             pb.setAttribute('x', String(pbStartX)); pb.setAttribute('y', '38.5');
              pb.setAttribute('width', String(Math.max(4, pbMaxWidth * (prog / 100))));
-             pb.setAttribute('height', '3.5'); pb.setAttribute('rx', '1.75');
-             pb.setAttribute('fill', isOver ? '#ff453a' : sCol);
+             pb.setAttribute('height', '3'); pb.setAttribute('rx', '1.5');
+             pb.setAttribute('fill', isOver ? '#ee6018' : (isFlashlit && p.status !== 'Completado' ? '#101010' : sCol));
              pb.style.pointerEvents = 'none';
-             if (pMatches) pb.setAttribute('filter', `drop-shadow(0 0 4px ${isOver ? '#ff453a' : sCol})`);
              g.appendChild(pb);
           }
 
           // Micro indicador numérico exacto de porcentaje a la derecha
           const pPerc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          pPerc.setAttribute('x', '302'); pPerc.setAttribute('y', '42');
+          pPerc.setAttribute('x', '304'); pPerc.setAttribute('y', '42.5');
           pPerc.setAttribute('text-anchor', 'end');
-          pPerc.setAttribute('fill', prog > 0 ? (prog === 100 ? '#30d158' : (isLight ? '#475569' : 'rgba(255,255,255,0.65)')) : (isLight ? '#94a3b8' : 'rgba(255,255,255,0.30)'));
-          pPerc.setAttribute('style', 'font-size: 9.5px; font-weight: 600; font-family: "SF Mono", monospace; pointer-events: none;');
+          pPerc.setAttribute('fill', isFlashlit ? '#101010' : (prog > 0 ? (prog === 100 ? '#a0ca92' : (isLight ? '#475569' : '#b8b3b0')) : (isLight ? '#94a3b8' : '#8a8380')));
+          pPerc.setAttribute('style', "font-size: 9.5px; font-weight: 400; font-family: 'Geist Mono', monospace; pointer-events: none;");
           pPerc.textContent = `${prog}%`;
           g.appendChild(pPerc);
 
@@ -4841,8 +5044,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const hasMention = unreadNotes.some(n => window.isUserMentionedInText && window.isUserMentionedInText(n.text, localAuthor));
                   const hasBlocker = unreadNotes.some(n => n.tag === 'bloqueo');
 
-                  // Prioridad visual: 1. Mención (@ Azul Eléctrico) > 2. Bloqueo (⚠️ Rojo) > 3. Normal (💬 Morado)
-                  const badgeColor = hasMention ? '#0071e3' : (hasBlocker ? '#ff453a' : '#bf5af2');
+                  const badgeColor = (hasMention || hasBlocker) ? '#ee6018' : '#eeeeee';
+                  const badgeTextColor = (hasMention || hasBlocker) ? '#fafafa' : '#101010';
                   const animClass = hasMention ? 'unread-mention-pulse' : (hasBlocker ? 'unread-blocker-pulse' : 'unread-purple-pulse');
                   const badgeText = hasMention ? '@' : (unreadCount > 9 ? '9+' : String(unreadCount));
 
@@ -4856,18 +5059,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       bCircle.setAttribute('cy', '4');
                       bCircle.setAttribute('r', '8.5');
                       bCircle.setAttribute('fill', badgeColor);
-                      bCircle.setAttribute('stroke', '#0d0d12');
+                      bCircle.setAttribute('stroke', '#101010');
                       bCircle.setAttribute('stroke-width', '1.5');
                       bCircle.setAttribute('class', animClass);
-                      bCircle.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
                       badgeG.appendChild(bCircle);
 
                       const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                       bTxt.setAttribute('x', '310');
                       bTxt.setAttribute('y', hasMention ? '7.5' : '7');
                       bTxt.setAttribute('text-anchor', 'middle');
-                      bTxt.setAttribute('fill', '#ffffff');
-                      bTxt.setAttribute('style', `font-size: ${hasMention ? '10px' : '9px'}; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;`);
+                      bTxt.setAttribute('fill', badgeTextColor);
+                      bTxt.setAttribute('style', `font-size: ${hasMention ? '10px' : '9px'}; font-weight: 500; font-family: 'Geist Mono', monospace; pointer-events: none;`);
                       bTxt.textContent = badgeText;
                       badgeG.appendChild(bTxt);
                   } else {
@@ -4876,20 +5078,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       bPill.setAttribute('y', '-5');
                       bPill.setAttribute('width', '24');
                       bPill.setAttribute('height', '18');
-                      bPill.setAttribute('rx', '9');
+                      bPill.setAttribute('rx', '3');
                       bPill.setAttribute('fill', badgeColor);
-                      bPill.setAttribute('stroke', '#0d0d12');
+                      bPill.setAttribute('stroke', '#101010');
                       bPill.setAttribute('stroke-width', '1.5');
                       bPill.setAttribute('class', animClass);
-                      bPill.setAttribute('filter', `drop-shadow(0 0 6px ${badgeColor})`);
                       badgeG.appendChild(bPill);
 
                       const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                       bTxt.setAttribute('x', '310');
                       bTxt.setAttribute('y', '7.5');
                       bTxt.setAttribute('text-anchor', 'middle');
-                      bTxt.setAttribute('fill', '#ffffff');
-                      bTxt.setAttribute('style', 'font-size: 8.5px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; pointer-events: none;');
+                      bTxt.setAttribute('fill', badgeTextColor);
+                      bTxt.setAttribute('style', "font-size: 8.5px; font-weight: 500; font-family: 'Geist Mono', monospace; pointer-events: none;");
                       bTxt.textContent = '9+';
                       badgeG.appendChild(bTxt);
                   }
@@ -4900,7 +5101,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           // 4. CAPA DE INTERCEPCIÓN (Caja invisible final con silueta continua)
           const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          hitBox.setAttribute('width', '320'); hitBox.setAttribute('height', '56'); hitBox.setAttribute('rx', '16');
+          hitBox.setAttribute('width', '320'); hitBox.setAttribute('height', '56'); hitBox.setAttribute('rx', '10');
           hitBox.setAttribute('fill', 'transparent');
           hitBox.style.cursor = 'pointer';
           g.appendChild(hitBox);
@@ -4909,9 +5110,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           });
         }
 
-        // PARCHE: Evaluación estricta de módulos y ghosting de bloques
+        // Evaluación estricta de módulos y ghosting de bloques
         const modName = n.item ? (n.item.name || '') : '';
-        const modCol = (n.item && n.item.color) ? n.item.color : '#0071e3';
+        const modCol = (n.item && n.item.color) ? n.item.color : '#ee6018';
         const hasSecMatchesMod = (appData.directProjects || []).concat(
             (appData.modules || []).flatMap(m => m.projects || [])
         ).some(p => {
@@ -4971,32 +5172,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         });
 
         const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        r.setAttribute('width', '330'); r.setAttribute('height', '50'); r.setAttribute('rx', '25'); 
-        r.setAttribute('fill', n.type==='direct-hub' ? 'rgba(0, 0, 0, 0.55)' : 'rgba(20, 20, 26, 0.65)');
-        r.setAttribute('stroke', modCol); r.setAttribute('stroke-width', isSel ? '2.5' : '1');
+        r.setAttribute('width', '330'); r.setAttribute('height', '50'); r.setAttribute('rx', '10'); 
+        r.setAttribute('fill', isLight ? '#ffffff' : (n.type==='direct-hub' ? '#101010' : '#1d1a18'));
+        r.setAttribute('stroke', modCol); r.setAttribute('stroke-width', isSel ? '2' : '1.2');
         r.style.pointerEvents = 'none';
-        if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '5,5'); 
-        if(isSel || (!isDefaultState && modMatches)) r.setAttribute('filter', 'url(#glow)'); 
+        if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '4,4'); 
         g.appendChild(r);
 
         const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rSheen.setAttribute('width', '330'); rSheen.setAttribute('height', '50'); rSheen.setAttribute('rx', '25');
+        rSheen.setAttribute('width', '330'); rSheen.setAttribute('height', '50'); rSheen.setAttribute('rx', '10');
         rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
         rSheen.style.pointerEvents = 'none';
         g.appendChild(rSheen);
 
-        // Indicador de color del módulo a la izquierda
+        // Indicador de color del módulo a la izquierda (6px = r=3)
         const mDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        mDot.setAttribute('cx', '20'); mDot.setAttribute('cy', '25'); mDot.setAttribute('r', '4');
+        mDot.setAttribute('cx', '18'); mDot.setAttribute('cy', '25'); mDot.setAttribute('r', '3.5');
         mDot.setAttribute('fill', modCol);
         mDot.style.pointerEvents = 'none';
-        if(modMatches) mDot.setAttribute('filter', `drop-shadow(0 0 5px ${modCol})`);
         g.appendChild(mDot);
         
         // Título del módulo completo sin truncamiento
         const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
-        t.setAttribute('x', '34'); t.setAttribute('y', '30'); 
-        t.setAttribute('fill', '#ffffff'); t.setAttribute('text-anchor', 'start'); 
+        t.setAttribute('x', '32'); t.setAttribute('y', '29'); 
+        t.setAttribute('fill', isLight ? '#0f172a' : '#eeeeee'); t.setAttribute('text-anchor', 'start'); 
         t.classList.add('svg-text', 'svg-text-bold'); 
         t.style.pointerEvents = 'none';
         
@@ -5007,11 +5206,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         else if (len > 28) mFontSize = 10.5;
         else if (len > 20) mFontSize = 11.5;
         let displayName = len > 45 ? rawName.substring(0, 42) + '…' : rawName;
-        t.setAttribute('style', `font-size: ${mFontSize}px; font-weight: 600; letter-spacing: -0.01em; pointer-events: none;`);
+        t.setAttribute('style', `font-size: ${mFontSize}px; font-weight: 400; letter-spacing: -0.02em; pointer-events: none;`);
         t.textContent = displayName; 
         g.appendChild(t);
 
-        // Micro-badge pill de conteo de proyectos a la derecha
+        // Micro-badge técnico de conteo de proyectos a la derecha
         const pCount = (n.ownProjects || []).length;
         const allProjsList = (appData.directProjects || []).concat((appData.modules || []).flatMap(m => m.projects || []));
         const secCount = allProjsList.filter(p => Array.isArray(p.secondaryModules) && (
@@ -5030,9 +5229,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const countBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         countBg.setAttribute('width', secCount > 0 ? '62' : '52'); countBg.setAttribute('height', '18');
-        countBg.setAttribute('rx', '9');
-        countBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)');
-        countBg.setAttribute('stroke', isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.14)');
+        countBg.setAttribute('rx', '3');
+        countBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.05)' : '#101010');
+        countBg.setAttribute('stroke', modCol);
+        countBg.setAttribute('stroke-opacity', '0.5');
         countBg.setAttribute('stroke-width', '1');
         countG.appendChild(countBg);
         
@@ -5040,14 +5240,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         countText.setAttribute('x', secCount > 0 ? '31' : '26'); countText.setAttribute('y', '12.5');
         countText.setAttribute('text-anchor', 'middle');
         countText.setAttribute('fill', modCol);
-        countText.setAttribute('style', 'font-size: 8.5px; font-weight: 700; font-family: "SF Mono", monospace; letter-spacing: 0.04em;');
+        countText.setAttribute('style', "font-size: 8.5px; font-weight: 500; font-family: 'Geist Mono', monospace; letter-spacing: 0.02em;");
         countText.textContent = secCount > 0 ? `${pCount}+${secCount}P` : `${pCount} ${pCount === 1 ? 'PROY' : 'PROYS'}`;
         countG.appendChild(countText);
         g.appendChild(countG);
 
         // Capa invisible para interacción de módulos
         const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        hitBox.setAttribute('width', '330'); hitBox.setAttribute('height', '50'); hitBox.setAttribute('rx', '25');
+        hitBox.setAttribute('width', '330'); hitBox.setAttribute('height', '50'); hitBox.setAttribute('rx', '10');
         hitBox.setAttribute('fill', 'transparent');
         hitBox.style.cursor = 'pointer';
         g.appendChild(hitBox);
@@ -5066,27 +5266,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             btnCircle.classList.add('btn-circle-bg');
             btnCircle.setAttribute('cx', '0');
             btnCircle.setAttribute('cy', '0');
-            btnCircle.setAttribute('r', '11');
-            btnCircle.setAttribute('fill', isLight ? '#ffffff' : '#14141a');
+            btnCircle.setAttribute('r', '10');
+            btnCircle.setAttribute('fill', isLight ? '#ffffff' : '#101010');
             btnCircle.setAttribute('stroke', modCol);
-            btnCircle.setAttribute('stroke-width', '1.6');
-            btnCircle.setAttribute('filter', 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))');
+            btnCircle.setAttribute('stroke-width', '1.3');
             toggleBtnG.appendChild(btnCircle);
             
             const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            hLine.setAttribute('x1', '-4.5'); hLine.setAttribute('y1', '0');
-            hLine.setAttribute('x2', '4.5'); hLine.setAttribute('y2', '0');
-            hLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
-            hLine.setAttribute('stroke-width', '2');
+            hLine.setAttribute('x1', '-4'); hLine.setAttribute('y1', '0');
+            hLine.setAttribute('x2', '4'); hLine.setAttribute('y2', '0');
+            hLine.setAttribute('stroke', isLight ? '#0f172a' : '#eeeeee');
+            hLine.setAttribute('stroke-width', '1.5');
             hLine.setAttribute('stroke-linecap', 'round');
             toggleBtnG.appendChild(hLine);
             
             if (isCollapsed) {
                 const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-4.5');
-                vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '4.5');
-                vLine.setAttribute('stroke', isLight ? '#0f172a' : '#ffffff');
-                vLine.setAttribute('stroke-width', '2');
+                vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-4');
+                vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '4');
+                vLine.setAttribute('stroke', isLight ? '#0f172a' : '#eeeeee');
+                vLine.setAttribute('stroke-width', '1.5');
                 vLine.setAttribute('stroke-linecap', 'round');
                 toggleBtnG.appendChild(vLine);
             }
@@ -5117,71 +5316,127 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       });
 
       if (appData.core) appData.core._renderData = { x: 0, y: 0 };
+      const totalCoreProjects = (appData.directProjects || []).length + (appData.modules || []).reduce((acc, m) => acc + (m.projects || []).length, 0);
+      const isCoreSel = currentSelection.id === 'sicom';
       const coreG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       coreG.setAttribute('transform', `translate(-60, -60)`);
       coreG.classList.add('interactive-node');
       coreG.onclick = (e) => { e.stopPropagation(); window.selectNode('core', 'sicom'); };
       
-      // Anillo orbital concéntrico
+      // 1. Anillo perimetral técnico sutil
       const orbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      orbit.setAttribute('cx', '60'); orbit.setAttribute('cy', '60'); orbit.setAttribute('r', '74');
+      orbit.setAttribute('cx', '60'); orbit.setAttribute('cy', '60'); orbit.setAttribute('r', '68');
       orbit.setAttribute('fill', 'none');
-      orbit.setAttribute('stroke', isLight ? 'rgba(0, 113, 227, 0.25)' : 'rgba(0, 113, 227, 0.35)');
+      orbit.setAttribute('stroke', isLight ? 'rgba(0,0,0,0.22)' : '#3d3a39');
       orbit.setAttribute('stroke-width', '1');
-      orbit.setAttribute('stroke-dasharray', '5 7');
+      orbit.setAttribute('stroke-dasharray', '3 5');
       orbit.classList.add('core-orbit-ring');
       orbit.style.pointerEvents = 'none';
       coreG.appendChild(orbit);
 
-      // Base de cristal oscura y núcleo iluminado
+      // 2. Chasis exterior Obsidian (#101010)
+      const ccChassis = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ccChassis.setAttribute('cx', '60'); ccChassis.setAttribute('cy', '60'); ccChassis.setAttribute('r', '60');
+      ccChassis.setAttribute('fill', '#101010');
+      ccChassis.setAttribute('stroke', isCoreSel ? '#eeeeee' : '#3d3a39');
+      ccChassis.setAttribute('stroke-width', '1.2');
+      ccChassis.style.pointerEvents = 'none';
+      coreG.appendChild(ccChassis);
+
+      // 3. Superficie principal Carbon Lift (#1d1a18) integrada con el resto del mapa
       const cc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      cc.setAttribute('cx', '60'); cc.setAttribute('cy', '60'); cc.setAttribute('r', '60');
-      cc.setAttribute('fill', isLight ? 'rgba(0, 113, 227, 0.12)' : 'rgba(10, 24, 48, 0.55)');
-      cc.setAttribute('stroke', '#0071e3');
-      cc.setAttribute('stroke-width', '2');
-      cc.style.filter = 'drop-shadow(0 0 24px rgba(0, 113, 227, 0.45))';
+      cc.setAttribute('cx', '60'); cc.setAttribute('cy', '60'); cc.setAttribute('r', '55');
+      cc.setAttribute('fill', '#1d1a18');
+      cc.setAttribute('stroke', isCoreSel ? '#eeeeee' : '#4d4947');
+      cc.setAttribute('stroke-width', isCoreSel ? '1.8' : '1.2');
       cc.classList.add('core-bg-circle');
       cc.style.pointerEvents = 'none';
       coreG.appendChild(cc);
 
-      // Brillo especular
-      const ccSheen = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      ccSheen.setAttribute('cx', '60'); ccSheen.setAttribute('cy', '60'); ccSheen.setAttribute('r', '60');
-      ccSheen.setAttribute('fill', isLight ? 'url(#capsule-sheen-light)' : 'url(#capsule-sheen-dark)');
-      ccSheen.style.pointerEvents = 'none';
-      coreG.appendChild(ccSheen);
+      // 4. Anillo interno de calibración
+      const innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      innerRing.setAttribute('cx', '60'); innerRing.setAttribute('cy', '60'); innerRing.setAttribute('r', '47');
+      innerRing.setAttribute('fill', 'none');
+      innerRing.setAttribute('stroke', '#3d3a39');
+      innerRing.setAttribute('stroke-opacity', '0.55');
+      innerRing.setAttribute('stroke-width', '1');
+      innerRing.style.pointerEvents = 'none';
+      coreG.appendChild(innerRing);
 
-      // Faro/Punto de pulso activo del sistema
+      // 5. Puertos cardinales de conexión (N, S, E, O en los puntos exactos de salida de fibra)
+      [
+          { cx: 60, cy: 0 },
+          { cx: 60, cy: 120 },
+          { cx: 0, cy: 60 },
+          { cx: 120, cy: 60 }
+      ].forEach(pt => {
+          const port = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          port.setAttribute('cx', String(pt.cx)); port.setAttribute('cy', String(pt.cy)); port.setAttribute('r', '3');
+          port.setAttribute('fill', '#101010');
+          port.setAttribute('stroke', isCoreSel ? '#eeeeee' : '#8a8380');
+          port.setAttribute('stroke-width', '1.2');
+          port.style.pointerEvents = 'none';
+          coreG.appendChild(port);
+      });
+
+      // 6. Cápsula superior STGT con faro #ee6018
+      const stgtPill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      stgtPill.setAttribute('x', '39'); stgtPill.setAttribute('y', '29');
+      stgtPill.setAttribute('width', '42'); stgtPill.setAttribute('height', '13');
+      stgtPill.setAttribute('rx', '3');
+      stgtPill.setAttribute('fill', '#101010');
+      stgtPill.setAttribute('stroke', '#3d3a39');
+      stgtPill.setAttribute('stroke-width', '1');
+      stgtPill.style.pointerEvents = 'none';
+      coreG.appendChild(stgtPill);
+
       const coreDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      coreDot.setAttribute('cx', '60'); coreDot.setAttribute('cy', '40'); coreDot.setAttribute('r', '2.5');
-      coreDot.setAttribute('fill', '#35aee8');
+      coreDot.setAttribute('cx', '46'); coreDot.setAttribute('cy', '35.5'); coreDot.setAttribute('r', '2');
+      coreDot.setAttribute('fill', '#ee6018');
       coreDot.classList.add('core-status-beacon');
       coreDot.style.pointerEvents = 'none';
       coreG.appendChild(coreDot);
 
-      // Título Principal
+      const coreTag = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      coreTag.setAttribute('x', '52'); coreTag.setAttribute('y', '38');
+      coreTag.setAttribute('fill', '#b8b3b0');
+      coreTag.setAttribute('text-anchor', 'start');
+      coreTag.setAttribute('style', "font-size: 7px; font-weight: 500; letter-spacing: 0.14em; font-family: 'Geist Mono', monospace; pointer-events: none;");
+      coreTag.textContent = 'STGT';
+      coreG.appendChild(coreTag);
+
+      // 7. Título Principal SICOM en Hueso (#eeeeee) sobre Carbon (#1d1a18)
       const ct = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      ct.setAttribute('x', '60'); ct.setAttribute('y', '58');
-      ct.setAttribute('fill', '#ffffff');
+      ct.setAttribute('x', '60'); ct.setAttribute('y', '60');
+      ct.setAttribute('fill', '#eeeeee');
       ct.setAttribute('text-anchor', 'middle');
       ct.classList.add('svg-text');
-      ct.setAttribute('style', 'font-size: 14px; font-weight: 800; letter-spacing: 0.14em; pointer-events: none;');
+      ct.setAttribute('style', "font-size: 16px; font-weight: 500; letter-spacing: 0.14em; font-family: 'Geist Mono', monospace; pointer-events: none;");
       ct.textContent = 'SICOM';
       coreG.appendChild(ct);
 
-      // Subtítulo micro-tecnológico
+      // 8. Divisor técnico de 1px
+      const coreDiv = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      coreDiv.setAttribute('x1', '36'); coreDiv.setAttribute('y1', '68');
+      coreDiv.setAttribute('x2', '84'); coreDiv.setAttribute('y2', '68');
+      coreDiv.setAttribute('stroke', '#3d3a39');
+      coreDiv.setAttribute('stroke-width', '1');
+      coreDiv.style.pointerEvents = 'none';
+      coreG.appendChild(coreDiv);
+
+      // 9. Telemetría en vivo inferior (conteo de proyectos)
       const cSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      cSub.setAttribute('x', '60'); cSub.setAttribute('y', '72');
-      cSub.setAttribute('fill', isLight ? '#0071e3' : 'rgba(53, 174, 232, 0.75)');
+      cSub.setAttribute('x', '60'); cSub.setAttribute('y', '79');
+      cSub.setAttribute('fill', '#8a8380');
       cSub.setAttribute('text-anchor', 'middle');
       cSub.classList.add('svg-text');
-      cSub.setAttribute('style', 'font-size: 7.5px; font-weight: 700; letter-spacing: 0.16em; font-family: "SF Mono", monospace; pointer-events: none;');
-      cSub.textContent = 'NÚCLEO ERP';
+      cSub.setAttribute('style', "font-size: 7.5px; font-weight: 500; letter-spacing: 0.1em; font-family: 'Geist Mono', monospace; pointer-events: none;");
+      cSub.textContent = `${totalCoreProjects} PROYS`;
       coreG.appendChild(cSub);
 
       // HitBox
       const coreHit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      coreHit.setAttribute('cx', '60'); coreHit.setAttribute('cy', '60'); coreHit.setAttribute('r', '74');
+      coreHit.setAttribute('cx', '60'); coreHit.setAttribute('cy', '60'); coreHit.setAttribute('r', '68');
       coreHit.setAttribute('fill', 'transparent');
       coreHit.style.cursor = 'pointer';
       coreG.appendChild(coreHit);
@@ -5193,17 +5448,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           
           const sccBase = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           sccBase.setAttribute('cx', '60'); sccBase.setAttribute('cy', '60'); sccBase.setAttribute('r', '60');
-          sccBase.setAttribute('fill', isLight ? 'rgba(255, 255, 255, 0.50)' : 'rgba(14, 14, 20, 0.20)');
+          sccBase.setAttribute('fill', isLight ? '#ffffff' : '#101010');
           sccBase.style.pointerEvents = 'none';
           sucomG.appendChild(sccBase);
 
           const scc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           scc.setAttribute('cx', '60'); scc.setAttribute('cy', '60'); scc.setAttribute('r', '60');
-          scc.setAttribute('fill', isLight ? 'rgba(255, 159, 10, 0.12)' : 'rgba(255, 159, 10, 0.14)');
-          scc.setAttribute('stroke', '#ff9f0a');
-          scc.setAttribute('stroke-width', '2');
-          scc.setAttribute('stroke-dasharray', '5,5');
-          scc.style.filter = isLight ? 'drop-shadow(0 6px 20px rgba(255, 159, 10, 0.28))' : 'drop-shadow(0 0 24px rgba(255, 159, 10, 0.40))';
+          scc.setAttribute('fill', isLight ? '#ffffff' : '#1d1a18');
+          scc.setAttribute('stroke', '#ee6018');
+          scc.setAttribute('stroke-width', '1.5');
+          scc.setAttribute('stroke-dasharray', '4,4');
           scc.classList.add('core-bg-circle');
           scc.style.pointerEvents = 'none';
           sucomG.appendChild(scc);
@@ -5215,11 +5469,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           sucomG.appendChild(sccSheen);
 
           const sct = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          sct.setAttribute('x', '60'); sct.setAttribute('y', '65');
-          sct.setAttribute('fill', isLight ? '#ff9f0a' : '#ffffff');
+          sct.setAttribute('x', '60'); sct.setAttribute('y', '64');
+          sct.setAttribute('fill', isLight ? '#ee6018' : '#eeeeee');
           sct.setAttribute('text-anchor', 'middle');
           sct.classList.add('svg-text');
-          sct.setAttribute('style', 'font-size: 15px; font-weight: 700; letter-spacing: 0.06em; font-family: var(--font-heading), \'Inter\', sans-serif; pointer-events: none;');
+          sct.setAttribute('style', "font-size: 14px; font-weight: 400; letter-spacing: 0.12em; font-family: 'Geist Mono', monospace; pointer-events: none;");
           sct.textContent = 'SUCOM';
           sucomG.appendChild(sct);
 
@@ -5243,9 +5497,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const btn = document.getElementById(`histCatBtn-${c}`);
             if (btn) {
                 if (c === cat) {
-                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white border border-white/20 shadow-sm';
+                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase bg-[#eeeeee] text-[#101010] border border-[#eeeeee]';
                 } else {
-                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-transparent';
+                    btn.className = 'hist-cat-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]';
                 }
             }
         });
@@ -5507,9 +5761,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const elSlaRate = document.getElementById('dashSlaRate'); if (elSlaRate) elSlaRate.textContent = `${slaRate}%`;
         const elSlaSub = document.getElementById('dashSlaSub');
         if (elSlaSub) {
-            if (slaRate >= 85) { elSlaSub.textContent = 'Excelente ritmo'; elSlaSub.className = 'text-[9px] text-[#30d158] mt-0.5 font-medium truncate'; }
-            else if (slaRate >= 70) { elSlaSub.textContent = 'En margen regular'; elSlaSub.className = 'text-[9px] text-[#ff9f0a] mt-0.5 font-medium truncate'; }
-            else { elSlaSub.textContent = 'Atención requerida'; elSlaSub.className = 'text-[9px] text-[#ff453a] mt-0.5 font-medium truncate'; }
+            if (slaRate >= 85) { elSlaSub.textContent = 'Excelente ritmo'; elSlaSub.className = 'font-mono text-[10px] text-[#a0ca92] uppercase truncate'; }
+            else if (slaRate >= 70) { elSlaSub.textContent = 'En margen regular'; elSlaSub.className = 'font-mono text-[10px] text-[#ee6018] uppercase truncate'; }
+            else { elSlaSub.textContent = 'Atención requerida'; elSlaSub.className = 'font-mono text-[10px] text-[#ee6018] uppercase truncate'; }
         }
 
         const elRiskCount = document.getElementById('dashRiskCount'); if (elRiskCount) elRiskCount.textContent = riskCount;
@@ -5541,20 +5795,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 data: {
                     labels: cLabels,
                     datasets: [
-                        { label: 'Completados', data: dataDone, backgroundColor: '#30d158', borderRadius: 4, stack: 'carga' },
-                        { label: 'En Tiempo', data: dataProg, backgroundColor: '#0071e3', borderRadius: 4, stack: 'carga' },
-                        { label: 'Vencidos', data: dataOver, backgroundColor: '#ff453a', borderRadius: 4, stack: 'carga' }
+                        { label: 'Completados', data: dataDone, backgroundColor: '#a0ca92', borderRadius: 2, stack: 'carga' },
+                        { label: 'En Tiempo', data: dataProg, backgroundColor: '#eeeeee', borderRadius: 2, stack: 'carga' },
+                        { label: 'Vencidos', data: dataOver, backgroundColor: '#ee6018', borderRadius: 2, stack: 'carga' }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#8e8e93', font: { size: 9, family: 'Inter' }, boxWidth: 10, padding: 8 } }
+                        legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { color: '#8e8e93', font: { size: 9 } }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#636366', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        x: { stacked: true, ticks: { color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } }
                     }
                 }
             });
@@ -5568,7 +5822,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             moduleStats.sort((a, b) => b.avg - a.avg);
             const mLabels = moduleStats.map(m => m.name.length > 24 ? m.name.substring(0, 22) + '…' : m.name);
             const mData = moduleStats.map(m => m.avg);
-            const mColors = moduleStats.map(m => m.color || '#0071e3');
+            const mColors = moduleStats.map(m => m.color || '#ee6018');
 
             window.moduleChartInstance = new Chart(ctxMod, {
                 type: 'bar',
@@ -5578,7 +5832,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         label: 'Avance %',
                         data: mData,
                         backgroundColor: mColors,
-                        borderRadius: 6
+                        borderRadius: 2
                     }]
                 },
                 options: {
@@ -5594,8 +5848,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         }
                     },
                     scales: {
-                        x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8e8e93', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#ffffff', font: { size: 9.5, weight: '600' } }, grid: { display: false } }
+                        x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } },
+                        y: { ticks: { color: '#eeeeee', font: { size: 9.5, family: "'Geist Mono', monospace" } }, grid: { display: false } }
                     }
                 }
             });
@@ -5611,18 +5865,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados', 'Vencidos'],
                     datasets: [{
                         data: [c, p, pend, noIni, o],
-                        backgroundColor: ['#30d158', '#0071e3', '#ff9f0a', '#48484a', '#ff453a'],
+                        backgroundColor: ['#a0ca92', '#eeeeee', '#8a8380', '#4d4947', '#ee6018'],
                         borderWidth: 0,
-                        hoverOffset: 4
+                        hoverOffset: 3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#8e8e93', font: { size: 9.5, family: 'Inter' }, boxWidth: 10, padding: 8 } }
+                        legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
                     },
-                    cutout: '72%'
+                    cutout: '74%'
                 }
             });
         }
@@ -5659,17 +5913,34 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.importData = function(event) {
+      if (currentUserRole !== 'Supremo') {
+        window.showToast("🔒 Solo el perfil Supremo puede importar respaldos.", true);
+        return;
+      }
       const file = event.target.files[0]; if (!file) return;
+      if (!file.name.toLowerCase().endsWith('.json')) {
+        window.showToast("⚠️ Solo se permiten archivos con extensión .json", true);
+        event.target.value = '';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        window.showToast("⚠️ El archivo excede el límite de seguridad (10 MB)", true);
+        event.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if(imported.appData && imported.consultants) {
-            appData = imported.appData; consultants = imported.consultants; if(imported.globalDocs) globalDocs = imported.globalDocs;
+          if(imported && typeof imported === 'object' && imported.appData && Array.isArray(imported.appData.modules) && imported.consultants && typeof imported.consultants === 'object') {
+            appData = imported.appData; consultants = imported.consultants; if(Array.isArray(imported.globalDocs)) globalDocs = imported.globalDocs;
             ensureDataStructure(); window.saveData(true); refreshUI();
-            window.showToast("Datos importados con éxito");
+            window.showToast("Datos importados y verificados con éxito");
+          } else {
+            window.showToast("⚠️ Estructura de respaldo inválida", true);
           }
-        } catch (err) { window.showToast("Error al importar", true); }
+        } catch (err) { window.showToast("Error al importar archivo JSON", true); }
+        event.target.value = '';
       };
       reader.readAsText(file);
     };
@@ -5844,13 +6115,13 @@ window.setNotifTab = function(tabName) {
 
 window.updateNotifTabsUI = function() {
     const activeThemes = {
-        alerts: 'bg-[#ff453a]/15 border-[#ff453a]/60 text-white shadow-[0_0_15px_rgba(255,69,58,0.25)] ring-1 ring-[#ff453a]/50',
-        pending: 'bg-brand-accent/20 border-brand-accent text-white shadow-[0_0_15px_rgba(0,113,227,0.3)] ring-1 ring-brand-accent/50',
-        validation: 'bg-[#ff9f0a]/15 border-[#ff9f0a]/60 text-white shadow-[0_0_15px_rgba(255,159,10,0.25)] ring-1 ring-[#ff9f0a]/50',
-        completed: 'bg-[#30d158]/15 border-[#30d158]/60 text-white shadow-[0_0_15px_rgba(48,209,88,0.25)] ring-1 ring-[#30d158]/50'
+        alerts: 'bg-[#101010] border-[#ee6018] text-[#eeeeee]',
+        pending: 'bg-[#101010] border-[#eeeeee] text-[#eeeeee]',
+        validation: 'bg-[#101010] border-[#ee6018] text-[#eeeeee]',
+        completed: 'bg-[#101010] border-[#a0ca92] text-[#eeeeee]'
     };
-    const inactiveTheme = 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white shadow-sm';
-    const baseClasses = 'p-2.5 rounded-2xl transition-all duration-200 flex items-center justify-between text-left border cursor-pointer';
+    const inactiveTheme = 'bg-[#1d1a18] border-[#3d3a39] text-[#8a8380] hover:border-[#4d4947] hover:text-[#eeeeee]';
+    const baseClasses = 'p-2.5 rounded-[3px] transition-colors duration-150 flex items-center justify-between text-left border cursor-pointer';
 
     ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
         const btn = document.getElementById(`notifTabBtn-${t}`);
@@ -6515,12 +6786,12 @@ window.renderDailyTasks = function() {
         isFocusMode = !isFocusMode;
         const btn = document.getElementById('btnFocusMode');
         if (isFocusMode) {
-            btn.classList.add('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
-            btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-400');
+            btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
+            btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
             window.showToast("Modo Enfoque: Mostrando Riesgos", false);
         } else {
-            btn.classList.remove('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
-            btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+            btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]', 'bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+            btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
         }
         window.renderMindMap();
     };
@@ -6532,13 +6803,13 @@ window.renderDailyTasks = function() {
         const mText = document.getElementById('mobileToggleLinksText');
         if (btn) {
             if (showAllSecondaryLinks) {
-                btn.classList.add('bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
-                btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-400');
+                btn.classList.add('bg-[#eeeeee]', 'border-[#eeeeee]', 'text-[#101010]');
+                btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
                 if (mText) mText.textContent = "Vínculos Multimódulo: On";
                 window.showToast("🔗 Mostrando todos los vínculos multimódulo", false);
             } else {
-                btn.classList.remove('bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
-                btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+                btn.classList.remove('bg-[#eeeeee]', 'border-[#eeeeee]', 'text-[#101010]', 'bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
+                btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
                 if (mText) mText.textContent = "Vínculos Multimódulo: Off";
                 window.showToast("🔗 Vínculos en modo inteligente (hover/selección)", false);
             }
