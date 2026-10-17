@@ -332,12 +332,6 @@
           <span class="hidden sm:inline">Enfoque</span>
       </button>
 
-      <!-- BOTÓN VÍNCULOS MULTIMÓDULO -->
-      <button id="btnToggleLinks" onclick="toggleSecondaryLinks()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Mostrar u ocultar todos los vínculos multimódulo">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-          <span class="hidden sm:inline">Vínculos</span>
-      </button>
-
       <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS -->
       <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Alternar entre vista compacta y vista completa">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -387,10 +381,6 @@
           <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
               <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
               Centrar Mapa
-          </button>
-          <button id="btnMobileToggleLinks" onclick="toggleSecondaryLinks(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-              <span id="mobileToggleLinksText">Vínculos Multimódulo: Off</span>
           </button>
           <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
               <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -757,6 +747,19 @@
         <div><label class="block font-mono text-[11px] text-[#ee6018] mb-2 uppercase">Temporalidad y Riesgo</label><select id="advFilterUrgency" onchange="handleAdvFilter()" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none text-[#eeeeee]"><option value="ALL">Cualquier fecha</option><option value="OVERDUE">🚨 Vencidos</option><option value="WEEK">⚠️ Vencen esta semana (7 días)</option><option value="MONTH">📅 Próximos 30 días</option><option value="NONE">Indefinidos (Sin fecha)</option></select></div>
         <div><label class="block font-mono text-[11px] text-[#b8b3b0] mb-2 uppercase">Nivel de Prioridad</label><select id="advFilterPriority" onchange="handleAdvFilter()" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none text-[#eeeeee]"><option value="ALL">Cualquier prioridad</option><option value="HIGH">🔥 Alta (1 - 3)</option><option value="MED">⚡ Media (4 - 6)</option><option value="LOW">🧊 Baja (7+)</option></select></div>
         <div><label class="block font-mono text-[11px] text-[#b8b3b0] mb-2 uppercase">Cuellos de Botella</label><select id="advFilterBottleneck" onchange="handleAdvFilter()" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none text-[#eeeeee]"><option value="ALL">Sin filtro de dependencias</option><option value="CLIENT">⏳ Esperando al Cliente</option><option value="NA">⚠️ N/A sin validar</option><option value="VALIDATION">👀 Tareas en Validación</option></select></div>
+        <div class="h-px w-full bg-[#1d1a18] my-2"></div>
+        <div class="p-3.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-between gap-3">
+            <div>
+                <span class="block font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    Vínculos de Sinergia
+                </span>
+                <p class="font-mono text-[10px] text-[#8a8380] uppercase mt-0.5">Mostrar conexiones secundarias globales</p>
+            </div>
+            <button id="advFilterToggleLinksBtn" type="button" onclick="toggleSecondaryLinks()" class="shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#3d3a39] bg-[#101010] text-[#8a8380] hover:text-[#eeeeee]">
+                Inactivo
+            </button>
+        </div>
     </div>
     <div class="p-5 border-t border-[#1d1a18] bg-[#101010]">
         <button onclick="resetAdvFilters()" class="pill-btn w-full py-3 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#eeeeee] hover:text-[#101010] font-mono uppercase text-[11px] transition border border-[#3d3a39]">Limpiar Filtros</button>

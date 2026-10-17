@@ -6675,6 +6675,7 @@ window.renderDailyTasks = function() {
         if (botSel) botSel.value = activeFilterBottleneck;
 
         window.renderFilterChips();
+        if (typeof window.updateSecondaryLinksBtnUI === 'function') window.updateSecondaryLinksBtnUI();
     };
 
     window.handleAdvFilter = function() {
@@ -6693,6 +6694,7 @@ window.renderDailyTasks = function() {
         if (activeFilterUrgency !== 'ALL') c++;
         if (activeFilterPriority !== 'ALL') c++;
         if (activeFilterBottleneck !== 'ALL') c++;
+        if (showAllSecondaryLinks) c++;
         
         const badge = document.getElementById('activeFiltersBadge');
         if (badge) {
@@ -6720,6 +6722,9 @@ window.renderDailyTasks = function() {
         activeFilterPriority = 'ALL';
         activeFilterBottleneck = 'ALL';
         consultantFilterMode = 'ANY';
+        showAllSecondaryLinks = false;
+        document.body.classList.remove('show-all-sec-links');
+        if (typeof window.updateSecondaryLinksBtnUI === 'function') window.updateSecondaryLinksBtnUI();
         
         const badge = document.getElementById('activeFiltersBadge');
         if (badge) badge.classList.add('hidden');
@@ -6826,22 +6831,30 @@ window.renderDailyTasks = function() {
     window.toggleSecondaryLinks = function() {
         showAllSecondaryLinks = !showAllSecondaryLinks;
         document.body.classList.toggle('show-all-sec-links', showAllSecondaryLinks);
-        const btn = document.getElementById('btnToggleLinks');
-        const mText = document.getElementById('mobileToggleLinksText');
+        window.updateSecondaryLinksBtnUI();
+        if (showAllSecondaryLinks) {
+            window.showToast("🔗 Mostrando todos los vínculos multimódulo", false);
+        } else {
+            window.showToast("🔗 Vínculos en modo inteligente (hover/selección)", false);
+        }
+        if (typeof window.handleAdvFilter === 'function') {
+            window.handleAdvFilter();
+        } else {
+            window.renderMindMap();
+        }
+    };
+
+    window.updateSecondaryLinksBtnUI = function() {
+        const btn = document.getElementById('advFilterToggleLinksBtn');
         if (btn) {
             if (showAllSecondaryLinks) {
-                btn.classList.add('bg-[#eeeeee]', 'border-[#eeeeee]', 'text-[#101010]');
-                btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
-                if (mText) mText.textContent = "Vínculos Multimódulo: On";
-                window.showToast("🔗 Mostrando todos los vínculos multimódulo", false);
+                btn.className = "shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#ee6018] bg-[#ee6018] text-[#fafafa]";
+                btn.textContent = "Activo";
             } else {
-                btn.classList.remove('bg-[#eeeeee]', 'border-[#eeeeee]', 'text-[#101010]', 'bg-[#0071e3]/20', 'border-[#0071e3]/60', 'text-[#38bdf8]', 'shadow-[0_0_12px_rgba(0,113,227,0.35)]');
-                btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
-                if (mText) mText.textContent = "Vínculos Multimódulo: Off";
-                window.showToast("🔗 Vínculos en modo inteligente (hover/selección)", false);
+                btn.className = "shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#3d3a39] bg-[#101010] text-[#8a8380] hover:text-[#eeeeee]";
+                btn.textContent = "Inactivo";
             }
         }
-        window.renderMindMap();
     };
 
     // Fondo cósmico de la Nebulosa de Orión renderizado de forma ultraligera y nítida en el DOM
