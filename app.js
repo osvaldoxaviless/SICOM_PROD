@@ -625,6 +625,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     document.addEventListener('click', handleCloseMobileMenuOutside);
     document.addEventListener('touchend', handleCloseMobileMenuOutside, { passive: true });
 
+    // Cierre al hacer clic fuera del menú predictivo de edición
+    document.addEventListener('click', function(e) {
+        const wrap = document.getElementById('editSelectorWrapper');
+        const dropdown = document.getElementById('editSearchResultsDropdown');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            if (wrap && !wrap.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        }
+    });
+
     // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K)
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -3744,6 +3755,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       currentSelection = { type, id };
       const ges = document.getElementById('globalEditSelector');
       if (ges) ges.value = `${type}|${id}`;
+      if (typeof window.updateEditActiveItemDisplay === 'function') {
+        window.updateEditActiveItemDisplay(type, id);
+      }
       document.getElementById('editEmptyState').classList.add('hidden'); 
       document.getElementById('editFormArea').classList.remove('hidden');
       document.getElementById('editProjectFields').classList.add('hidden'); 
@@ -3921,7 +3935,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }, 50);
     }
     window.selectNodeAndOpenConfig = function(type, id) { if(window.innerWidth < 768) window.closePriorityDrawer(); window.openConfigDrawer(); window.switchTab('edit'); document.getElementById('globalEditSelector').value = `${type}|${id}`; window.selectNode(type, id); }
-    window.handleGlobalEditSelectionChange = function() { const v = document.getElementById('globalEditSelector').value; if(!v) { currentSelection={type:null,id:null}; document.getElementById('editFormArea').classList.add('hidden'); document.getElementById('editEmptyState').classList.remove('hidden'); return;} window.selectNode(...v.split('|')); }
+    window.handleGlobalEditSelectionChange = function() { const v = document.getElementById('globalEditSelector').value; if(!v) { currentSelection={type:null,id:null}; document.getElementById('editFormArea').classList.add('hidden'); document.getElementById('editEmptyState').classList.remove('hidden'); const disp = document.getElementById('editCurrentActiveDisplay'); if(disp) disp.classList.add('hidden'); return;} window.selectNode(...v.split('|')); }
 
     window.requestDeleteCurrentSelection = function() { if(!currentSelection.id || currentSelection.type === 'core' || currentSelection.type === 'direct-hub') return; itemToDelete = { category: 'element', id: currentSelection.id }; document.getElementById('deleteConfirmModal').classList.remove('hidden'); setTimeout(() => document.getElementById('deleteConfirmModal').classList.remove('opacity-0'), 10); }
     window.closeDeleteModal = function() { document.getElementById('deleteConfirmModal').classList.add('opacity-0'); setTimeout(() => { document.getElementById('deleteConfirmModal').classList.add('hidden'); itemToDelete = {category:null, id:null}; }, 400); }
@@ -4292,7 +4306,219 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       if (currentSelection && currentSelection.id) {
         s.value = `${currentSelection.type}|${currentSelection.id}`;
+        window.updateEditActiveItemDisplay(currentSelection.type, currentSelection.id);
       }
+      const btnLoadMap = document.getElementById('btnLoadCurrentMapSelection');
+      if (btnLoadMap) {
+        if (currentSelection && currentSelection.id) btnLoadMap.classList.remove('hidden');
+        else btnLoadMap.classList.add('hidden');
+      }
+    };
+
+    window.updateEditActiveItemDisplay = function(type, id) {
+      const disp = document.getElementById('editCurrentActiveDisplay');
+      if (!disp) return;
+      if (!type || !id) {
+        disp.classList.add('hidden');
+        return;
+      }
+      let item = null;
+      let typeName = 'PROYECTO';
+      let parentModName = '';
+      let color = '#eeeeee';
+
+      if (type === 'core') {
+        item = appData.core;
+        typeName = 'NÚCLEO';
+        parentModName = 'SISTEMA GENERAL';
+        color = '#38bdf8';
+      } else if (type === 'direct-hub') {
+        item = appData.directHub || { name: 'PROYECTOS DIRECTOS SICOM' };
+        typeName = 'AGRUPADOR';
+        parentModName = 'DIRECTOS';
+        color = (appData.directHub && appData.directHub.color) || '#f59e0b';
+      } else if (type === 'module') {
+        item = (appData.modules || []).find(m => m.id === id);
+        typeName = 'MÓDULO';
+        parentModName = 'MÓDULO BASE';
+        color = (item && item.color) || '#ee6018';
+      } else if (type === 'direct-project') {
+        item = (appData.directProjects || []).find(p => p.id === id);
+        typeName = 'DIRECTO';
+        parentModName = (appData.directHub && appData.directHub.name) || 'PROYECTOS DIRECTOS';
+        color = (appData.directHub && appData.directHub.color) || '#f59e0b';
+      } else if (type === 'project') {
+        (appData.modules || []).forEach(m => {
+          const found = (m.projects || []).find(p => p.id === id);
+          if (found) {
+            item = found;
+            parentModName = m.name;
+            color = m.color || '#0071e3';
+          }
+        });
+      }
+
+      if (!item) {
+        disp.classList.add('hidden');
+        return;
+      }
+
+      const dot = document.getElementById('editActiveDot');
+      if (dot) dot.style.backgroundColor = color;
+      const tag = document.getElementById('editActiveTypeTag');
+      if (tag) tag.textContent = typeName;
+      const parentTag = document.getElementById('editActiveParentModule');
+      if (parentTag) parentTag.textContent = parentModName ? `· ${parentModName}` : '';
+      const title = document.getElementById('editActiveItemTitle');
+      if (title) title.textContent = item.name || 'Sin nombre';
+
+      disp.classList.remove('hidden');
+      const btnLoadMap = document.getElementById('btnLoadCurrentMapSelection');
+      if (btnLoadMap) btnLoadMap.classList.remove('hidden');
+    };
+
+    window.handleEditLiveSearch = function(query) {
+      const dropdown = document.getElementById('editSearchResultsDropdown');
+      const clearBtn = document.getElementById('btnClearEditSearch');
+      if (!dropdown) return;
+      const q = (query || '').toLowerCase().trim();
+
+      if (clearBtn) {
+        if (q) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      const items = [];
+      
+      // 1. Core
+      items.push({
+        type: 'core',
+        id: 'sicom',
+        name: (appData.core && appData.core.name) || 'SICOM',
+        parentName: 'Núcleo Central',
+        color: '#38bdf8',
+        icon: '🌐',
+        badge: 'NÚCLEO'
+      });
+
+      // 2. Direct Hub
+      const hub = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+      items.push({
+        type: 'direct-hub',
+        id: hub.id || 'hub-direct',
+        name: hub.name,
+        parentName: 'Agrupador Directo',
+        color: hub.color || '#f59e0b',
+        icon: '⚡',
+        badge: 'AGRUPADOR'
+      });
+
+      // 3. Direct Projects
+      (appData.directProjects || []).forEach(p => {
+        items.push({
+          type: 'direct-project',
+          id: p.id,
+          name: p.name,
+          parentName: hub.name,
+          color: hub.color || '#f59e0b',
+          icon: '⚡',
+          badge: 'DIRECTO'
+        });
+      });
+
+      // 4. Modules and their projects
+      (appData.modules || []).forEach(m => {
+        items.push({
+          type: 'module',
+          id: m.id,
+          name: m.name,
+          parentName: 'Módulo Base',
+          color: m.color || '#0071e3',
+          icon: '📦',
+          badge: 'MÓDULO'
+        });
+        (m.projects || []).forEach(p => {
+          items.push({
+            type: 'project',
+            id: p.id,
+            name: p.name,
+            parentName: m.name,
+            color: m.color || '#0071e3',
+            icon: '📦',
+            badge: 'PROYECTO'
+          });
+        });
+      });
+
+      const filtered = q 
+        ? items.filter(it => it.name.toLowerCase().includes(q) || it.parentName.toLowerCase().includes(q))
+        : items;
+
+      if (filtered.length === 0) {
+        dropdown.innerHTML = `<div class="p-3 text-center text-[#8a8380] font-mono text-[11px] uppercase">No se encontraron coincidencias para "${escapeHtml(q)}"</div>`;
+        dropdown.classList.remove('hidden');
+        return;
+      }
+
+      dropdown.innerHTML = filtered.map(it => {
+        const isCurrent = (currentSelection && currentSelection.id === it.id && currentSelection.type === it.type);
+        return `
+          <button type="button" onclick="window.selectEditItem('${it.type}', '${it.id}')" class="w-full text-left p-2 rounded-[3px] flex items-center justify-between gap-2.5 transition group ${isCurrent ? 'bg-[#ee6018]/15 border border-[#ee6018]/50 text-[#fafafa]' : 'hover:bg-[#1d1a18] text-[#eeeeee] border border-transparent'}">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${it.color}"></span>
+              <span class="text-xs shrink-0">${it.icon}</span>
+              <span class="text-xs font-mono truncate group-hover:text-[#fafafa]">${escapeHtml(it.name)}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-[9px] font-mono text-[#8a8380] truncate max-w-[120px] hidden sm:inline">${escapeHtml(it.parentName)}</span>
+              <span class="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] group-hover:text-[#eeeeee]">${it.badge}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      dropdown.classList.remove('hidden');
+    };
+
+    window.selectEditItem = function(type, id) {
+      const dropdown = document.getElementById('editSearchResultsDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      const searchInp = document.getElementById('editSearchInput');
+      if (searchInp) searchInp.value = '';
+      const clearBtn = document.getElementById('btnClearEditSearch');
+      if (clearBtn) clearBtn.classList.add('hidden');
+
+      const ges = document.getElementById('globalEditSelector');
+      if (ges) ges.value = `${type}|${id}`;
+      window.selectNode(type, id);
+    };
+
+    window.focusEditSearch = function() {
+      const inp = document.getElementById('editSearchInput');
+      if (inp) {
+        inp.focus();
+        window.handleEditLiveSearch(inp.value);
+      }
+    };
+
+    window.clearEditSearch = function() {
+      const inp = document.getElementById('editSearchInput');
+      if (inp) inp.value = '';
+      const dropdown = document.getElementById('editSearchResultsDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      const clearBtn = document.getElementById('btnClearEditSearch');
+      if (clearBtn) clearBtn.classList.add('hidden');
+    };
+
+    window.loadCurrentSelectionToEdit = function() {
+      if (currentSelection && currentSelection.id) {
+        window.selectEditItem(currentSelection.type, currentSelection.id);
+      }
+    };
+
+    window.handleEditSearchFocus = function() {
+      const inp = document.getElementById('editSearchInput');
+      window.handleEditLiveSearch(inp ? inp.value : '');
     };
 
     window.populateSecondaryModulesChecklist = function(prefix, primaryModId, selectedIds = []) {

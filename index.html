@@ -1065,10 +1065,50 @@
         </div>
 
         <!-- EDITAR COMPLETO -->
-        <div id="tab-edit" class="tab-content hidden space-y-6">
-          <div class="space-y-2">
-            <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Elemento a Editar</label>
-            <select id="globalEditSelector" onchange="handleGlobalEditSelectionChange()" class="w-full liquid-input rounded-[3px] p-3.5 text-sm appearance-none text-[#eeeeee]">
+        <div id="tab-edit" class="tab-content hidden space-y-5">
+          <!-- SELECTOR PREDICTIVO MODERNO EN VIVO -->
+          <div class="space-y-2 relative" id="editSelectorWrapper">
+            <div class="flex items-center justify-between">
+              <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                <span>Elemento a Editar</span>
+              </label>
+              <button type="button" id="btnLoadCurrentMapSelection" onclick="loadCurrentSelectionToEdit()" class="hidden font-mono text-[9px] uppercase px-2 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] transition flex items-center gap-1">
+                <span>🎯 Cargar selección del mapa</span>
+              </button>
+            </div>
+
+            <!-- CARD DE ELEMENTO ACTIVO SELECCIONADO (Si hay uno cargado) -->
+            <div id="editCurrentActiveDisplay" class="hidden p-3 rounded-[6px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <span id="editActiveDot" class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 mb-0.5">
+                    <span id="editActiveTypeTag" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]">PROYECTO</span>
+                    <span id="editActiveParentModule" class="font-mono text-[9px] uppercase text-[#ee6018] truncate"></span>
+                  </div>
+                  <h4 id="editActiveItemTitle" class="text-sm font-medium text-[#eeeeee] truncate">Nombre</h4>
+                </div>
+              </div>
+              <button type="button" onclick="focusEditSearch()" class="shrink-0 font-mono text-[9px] uppercase px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition" title="Buscar otro elemento">
+                Cambiar ▾
+              </button>
+            </div>
+
+            <!-- BUSCADOR PREDICTIVO EN TIEMPO REAL -->
+            <div id="editSearchBoxWrapper" class="relative">
+              <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="editSearchInput" oninput="handleEditLiveSearch(this.value)" onfocus="handleEditSearchFocus()" placeholder="Buscar proyecto o módulo para editar..." autocomplete="off" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+              <button type="button" id="btnClearEditSearch" onclick="clearEditSearch()" class="hidden absolute right-2.5 top-2.5 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar">✕</button>
+
+              <!-- PANEL FLOTANTE DE RESULTADOS PREDICTIVOS -->
+              <div id="editSearchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#141211] border border-[#3d3a39] rounded-[6px] shadow-2xl z-50 max-h-64 overflow-y-auto scrollbar-thin p-1 space-y-1">
+                <!-- Se llena dinámicamente con las coincidencias -->
+              </div>
+            </div>
+
+            <!-- ELEMENTO SELECT OCULTO PARA COMPATIBILIDAD 100% -->
+            <select id="globalEditSelector" onchange="handleGlobalEditSelectionChange()" class="hidden">
               <option value="">-- Selecciona un elemento --</option>
             </select>
           </div>
@@ -1593,7 +1633,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v826"></script>
+  <script type="module" src="app.js?v=20261017_v827"></script>
 
 </body>
 </html>
