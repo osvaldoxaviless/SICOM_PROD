@@ -248,3 +248,61 @@ function generarTextoResumenMatutino() {
     return "⚠️ Excepción al generar resumen matutino: " + e.toString();
   }
 }
+
+/**
+ * BACKUP AUTOMÁTICO DE FIRESTORE EN GOOGLE DRIVE
+ * Puedes programar esta función con un activador por tiempo diario (ej. medianoche)
+ * para mantener un snapshot histórico JSON de la base de datos de SICOM.
+ */
+function ejecutarBackupDiarioFirestore() {
+  try {
+    // 1. Autenticación anónima para leer Firestore
+    var authRes = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FIREBASE_API_KEY, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ returnSecureToken: true }),
+      muteHttpExceptions: true
+    });
+    var authData = JSON.parse(authRes.getContentText());
+    if (!authData.idToken) throw new Error("No se pudo autenticar en Firebase para el backup.");
+
+    // 2. Obtener documento principal
+    var docRes = UrlFetchApp.fetch(FIRESTORE_DOC_URL, {
+      headers: { 'Authorization': 'Bearer ' + authData.idToken },
+      muteHttpExceptions: true
+    });
+    if (docRes.getResponseCode() !== 200) {
+      throw new Error("HTTP " + docRes.getResponseCode() + " al leer Firestore: " + docRes.getContentText());
+    }
+
+    var docData = JSON.parse(docRes.getContentText());
+    var rawJson = JSON.stringify(docData, null, 2);
+
+    // 3. Crear o buscar carpeta de respaldos en Google Drive
+    var folderName = "SICOM_BACKUPS_FIRESTORE";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var targetFolder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+
+    // 4. Guardar archivo con marca de tiempo ISO (YYYY-MM-DD_HH-mm)
+    var fechaStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || "GMT-6", "yyyy-MM-dd_HH-mm");
+    var fileName = "sicom_state_backup_" + fechaStr + ".json";
+    
+    var file = targetFolder.createFile(fileName, rawJson, MimeType.PLAIN_TEXT);
+    Logger.log("✅ Respaldo generado con éxito: " + fileName + " (" + file.getSize() + " bytes)");
+
+    // 5. Notificar al Webhook de Google Chat
+    var msg = "💾 *RESPALDO AUTOMÁTICO GENERADO*\n" +
+              "📁 *Archivo:* `" + fileName + "`\n" +
+              "📂 *Carpeta en Drive:* `" + folderName + "`\n" +
+              "📦 *Tamaño:* " + Math.round(file.getSize() / 1024) + " KB\n" +
+              "⏰ *Hora:* " + fechaStr;
+    enviarAGoogleChat(msg);
+
+    return { status: 'success', file: fileName, size: file.getSize() };
+  } catch (err) {
+    Logger.log("❌ Error en backup: " + err.toString());
+    enviarAGoogleChat("🚨 *ERROR EN RESPALDO DIARIO SICOM:*\n" + err.toString());
+    return { status: 'error', error: err.toString() };
+  }
+}
+
