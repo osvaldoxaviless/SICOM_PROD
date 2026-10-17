@@ -1223,4 +1223,35 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     pointer-events: none;
 }
 
+/* ==========================================================================
+   MARQUESINA DE ANUNCIOS Y COMUNICADOS GLOBALES (FACTORY BROADCAST TICKER)
+   ========================================================================== */
+@keyframes tickerMove {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.ticker-track {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: tickerMove var(--ticker-duration, 35s) linear infinite;
+    will-change: transform;
+}
+
+#tickerTrackWrapper:hover .ticker-track,
+#tickerTrackWrapper:active .ticker-track,
+.ticker-paused {
+    animation-play-state: paused !important;
+}
+
+.mask-ticker {
+    mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+}
+
+
 

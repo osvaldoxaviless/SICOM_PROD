@@ -59,8 +59,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         set: (v) => { appData = v; },
         configurable: true
       });
+      Object.defineProperty(window, 'currentUserRole', {
+        get: () => currentUserRole,
+        set: (v) => { currentUserRole = v; },
+        configurable: true
+      });
     } catch (_) {
       window.appData = appData;
+      window.currentUserRole = currentUserRole;
     }
 
     if (typeof Chart !== 'undefined') {
@@ -179,6 +185,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             }
                         } else {
                             window.populateLoginDropdown(); 
+                            if (typeof window.renderAnnouncementsTicker === 'function') window.renderAnnouncementsTicker();
                         }
                     } else {
                         loadLocalFallback(); 
@@ -217,6 +224,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!appData.modules) appData.modules = [];
         if(!appData.dailyTasks) appData.dailyTasks = [];
         if(!appData.globalTasks) appData.globalTasks = [];
+        if(!appData.announcementConfig) appData.announcementConfig = { autoBiweeklyEnabled: true, autoMonthEndEnabled: true };
+        if(!Array.isArray(appData.announcements)) {
+            appData.announcements = [
+                {
+                    id: 'ann_welcome',
+                    text: 'Bienvenido al sistema SICOM // Avisos y comunicados operativos emitidos en tiempo real.',
+                    type: 'info',
+                    active: true,
+                    createdBy: 'Sistema',
+                    createdAt: new Date().toLocaleDateString('es-MX')
+                }
+            ];
+        }
 
         // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
         const idsVistos = new Set();
@@ -258,6 +278,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             currentUserRole = consultants[localAuthor].role;
             localStorage.setItem('sicom_role', currentUserRole);
         }
+        if (typeof window.renderAnnouncementsTicker === 'function') window.renderAnnouncementsTicker();
     }
 
     window.populateLoginDropdown = function() {
@@ -900,7 +921,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (activeTabEl && !isSupremo && (activeTabEl.id === 'tab-consultants' || activeTabEl.id === 'tab-docs')) {
             window.switchTab('dashboard');
         }
-        if (activeTabEl && !isSupervisorUp && (activeTabEl.id === 'tab-edit' || activeTabEl.id === 'tab-history')) {
+        if (activeTabEl && !isSupervisorUp && (activeTabEl.id === 'tab-edit' || activeTabEl.id === 'tab-history' || activeTabEl.id === 'tab-announcements')) {
             window.switchTab('dashboard');
         }
         if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
@@ -910,6 +931,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.ensureDomReferences(); window.populateConsultantSelects();
         if (isDrawerOpen) {
             window.renderRegisteredConsultantsList(); window.renderRegisteredDocsList(); window.populateGlobalEditSelector();
+            const activeTab = document.querySelector('.tab-content:not(.hidden)');
+            if (activeTab && activeTab.id === 'tab-announcements' && typeof window.renderAnnouncementsManager === 'function') {
+                window.renderAnnouncementsManager();
+            }
+        }
+        if (typeof window.renderAnnouncementsTicker === 'function') {
+            window.renderAnnouncementsTicker();
         }
         window.updateDatalist(); window.renderMindMap(); window.renderHistory(); window.renderDashboard(); 
         if(isPriorityDrawerOpen) window.renderPriorityDrawer();
@@ -2236,6 +2264,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           window.showToast("Acceso denegado: El Historial solo es accesible para Supervisores y Administrador.", true);
           return;
       }
+      if (tabId === 'announcements' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
+          window.showToast("Acceso denegado: El Gestor de Anuncios es exclusivo para Supervisores y Administrador.", true);
+          return;
+      }
       if (tabId === 'edit' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
           window.showToast("Acceso denegado: Función para Supervisores y Administrador.", true);
           return;
@@ -2257,6 +2289,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if(tabId === 'new') window.populateNewProjectLocationSelect(); 
       if(tabId === 'dashboard') window.renderDashboard();
       if(tabId === 'history') window.renderHistory();
+      if(tabId === 'announcements' && typeof window.renderAnnouncementsManager === 'function') window.renderAnnouncementsManager();
       if(tabId === 'consultants') window.renderRegisteredConsultantsList();
       if(tabId === 'docs') window.renderRegisteredDocsList();
     }
@@ -8727,6 +8760,367 @@ window.renderDailyTasks = function() {
                 btn.textContent = "Inactivo";
             }
         }
+    };
+
+    // ==========================================================================
+    // SISTEMA DE COMUNICADOS, MARQUESINA Y REGLAS AUTOMÁTICAS (FACTORY TICKER)
+    // ==========================================================================
+    let isTickerPaused = false;
+    window._tempPreviewRule = null;
+
+    window.getActiveAnnouncements = function() {
+        ensureDataStructure();
+        const list = [];
+        const now = new Date();
+        const day = now.getDate();
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+        // 1. Regla Quincenal (días 10 a 15 de cada mes)
+        if (appData.announcementConfig && appData.announcementConfig.autoBiweeklyEnabled !== false) {
+            if (day >= 10 && day <= 15) {
+                list.push({
+                    id: 'auto_biweekly',
+                    isAuto: true,
+                    type: 'reminder',
+                    tag: 'QUINCENA (10-15)',
+                    text: 'Favor de enviar sus formatos de vacaciones válidos en tiempo y forma a Administración.'
+                });
+            }
+        }
+
+        // 2. Regla Cierre de Mes (días 25 al último día del mes)
+        if (appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false) {
+            if (day >= 25 && day <= lastDay) {
+                list.push({
+                    id: 'auto_monthend',
+                    isAuto: true,
+                    type: 'urgent',
+                    tag: 'CIERRE MENSUAL',
+                    text: 'Favor de enviar formatos de vacaciones y actualizar avances de proyectos para la realización de indicadores.'
+                });
+            }
+        }
+
+        // 3. Simulación temporal manual para supervisión
+        if (window._tempPreviewRule) {
+            if (window._tempPreviewRule === 'biweekly') {
+                list.unshift({
+                    id: 'preview_biweekly',
+                    isAuto: true,
+                    type: 'reminder',
+                    tag: 'VISTA PREVIA QUINCENA',
+                    text: 'Favor de enviar sus formatos de vacaciones válidos en tiempo y forma a Administración.'
+                });
+            } else if (window._tempPreviewRule === 'monthend') {
+                list.unshift({
+                    id: 'preview_monthend',
+                    isAuto: true,
+                    type: 'urgent',
+                    tag: 'VISTA PREVIA CIERRE',
+                    text: 'Favor de enviar formatos de vacaciones y actualizar avances de proyectos para la realización de indicadores.'
+                });
+            }
+        }
+
+        // 4. Anuncios personalizados manuales
+        const todayStr = now.toISOString().slice(0, 10);
+        (appData.announcements || []).forEach(a => {
+            if (!a || !a.active || !a.text) return;
+            if (a.validFrom && a.validFrom > todayStr) return;
+            if (a.validTo && a.validTo < todayStr) return;
+            list.push(a);
+        });
+
+        return list;
+    };
+
+    window.renderAnnouncementsTicker = function() {
+        const bar = document.getElementById('announcementTickerBar');
+        const track = document.getElementById('tickerTrack');
+        if (!bar || !track) return;
+
+        if (sessionStorage.getItem('sicom_ticker_dismissed') === 'true') {
+            bar.classList.add('hidden');
+            return;
+        }
+
+        const items = window.getActiveAnnouncements();
+        if (!items || items.length === 0) {
+            bar.classList.add('hidden');
+            return;
+        }
+
+        bar.classList.remove('hidden');
+
+        const itemsHtml = items.map(ann => {
+            let tagStyle = 'bg-[#0071e3]/20 text-[#2997ff] border-[#0071e3]/40';
+            let tagLabel = ann.tag || 'INFO';
+            if (ann.type === 'urgent') {
+                tagStyle = 'bg-[#ee6018]/25 text-[#ee6018] border-[#ee6018]/50';
+                if (!ann.tag) tagLabel = 'URGENTE';
+            } else if (ann.type === 'reminder') {
+                tagStyle = 'bg-[#f59e0b]/20 text-[#fbbf24] border-[#f59e0b]/40';
+                if (!ann.tag) tagLabel = 'RECORDATORIO';
+            }
+
+            return `<span class="inline-flex items-center gap-2 mx-6 shrink-0">
+                <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${escapeHtml(tagLabel)}</span>
+                <span class="text-[#f5f5f4]">${escapeHtml(ann.text)}</span>
+                <span class="text-[#55504c] font-light select-none ml-2">//</span>
+            </span>`;
+        }).join('');
+
+        let repeatedHtml = itemsHtml;
+        while (repeatedHtml.length < 320) {
+            repeatedHtml += itemsHtml;
+        }
+
+        track.innerHTML = repeatedHtml + repeatedHtml;
+
+        const totalChars = repeatedHtml.length;
+        const durationSec = Math.max(22, Math.min(80, Math.round(totalChars * 0.1)));
+        track.style.setProperty('--ticker-duration', `${durationSec}s`);
+    };
+
+    window.toggleTickerPause = function() {
+        isTickerPaused = !isTickerPaused;
+        const track = document.getElementById('tickerTrack');
+        const iconPause = document.getElementById('iconTickerPause');
+        const iconPlay = document.getElementById('iconTickerPlay');
+        if (track) {
+            if (isTickerPaused) {
+                track.classList.add('ticker-paused');
+                if (iconPause) iconPause.classList.add('hidden');
+                if (iconPlay) iconPlay.classList.remove('hidden');
+            } else {
+                track.classList.remove('ticker-paused');
+                if (iconPause) iconPause.classList.remove('hidden');
+                if (iconPlay) iconPlay.classList.add('hidden');
+            }
+        }
+    };
+
+    window.dismissTickerSession = function() {
+        sessionStorage.setItem('sicom_ticker_dismissed', 'true');
+        const bar = document.getElementById('announcementTickerBar');
+        if (bar) bar.classList.add('hidden');
+        window.showToast("Marquesina minimizada durante esta sesión. Puedes reabrirla desde el Centro de Control.", false);
+    };
+
+    window.openAnnouncementManager = function() {
+        window.openConfigDrawer();
+        window.switchTab('announcements');
+    };
+
+    window.testPreviewTicker = function() {
+        sessionStorage.removeItem('sicom_ticker_dismissed');
+        window.renderAnnouncementsTicker();
+        window.showToast("Marquesina visible y actualizada en tiempo real", false);
+    };
+
+    window.previewAutoRule = function(ruleType) {
+        window._tempPreviewRule = ruleType;
+        sessionStorage.removeItem('sicom_ticker_dismissed');
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(`Simulando en marquesina: ${ruleType === 'biweekly' ? 'Aviso Quincenal' : 'Cierre Mensual'}`);
+    };
+
+    window.toggleAutoBiweeklyRule = function(enabled) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        appData.announcementConfig.autoBiweeklyEnabled = enabled;
+        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} aviso quincenal automático (días 10-15)`, localAuthor);
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(enabled ? "Aviso quincenal activado" : "Aviso quincenal desactivado");
+    };
+
+    window.toggleAutoMonthEndRule = function(enabled) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        appData.announcementConfig.autoMonthEndEnabled = enabled;
+        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} aviso fin de mes automático (días 25-fin)`, localAuthor);
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(enabled ? "Aviso de fin de mes activado" : "Aviso de fin de mes desactivado");
+    };
+
+    window.createCustomAnnouncement = function() {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
+            window.showToast("Acceso denegado: solo Supervisores y Administrador pueden publicar anuncios.", true);
+            return;
+        }
+        ensureDataStructure();
+        const textInp = document.getElementById('newAnnouncementText');
+        const typeInp = document.getElementById('newAnnouncementType');
+        const validToInp = document.getElementById('newAnnouncementValidTo');
+        
+        const text = (textInp ? textInp.value : '').trim();
+        if (!text) {
+            window.showToast("Ingresa el mensaje del comunicado", true);
+            if (textInp) textInp.focus();
+            return;
+        }
+
+        const type = (typeInp ? typeInp.value : 'info') || 'info';
+        const validTo = (validToInp ? validToInp.value : '') || '';
+
+        const newAnn = {
+            id: 'ann_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            text: text,
+            type: type,
+            active: true,
+            validTo: validTo,
+            createdBy: localAuthor || 'Supervisor',
+            createdAt: new Date().toLocaleString('es-MX', { hour12: false })
+        };
+
+        appData.announcements.unshift(newAnn);
+        logActivity('announcement', 'Nuevo Comunicado', `Publicó anuncio: "${text.slice(0, 40)}${text.length > 40 ? '...' : ''}"`, localAuthor);
+        
+        sessionStorage.removeItem('sicom_ticker_dismissed');
+        window.saveData(false);
+
+        if (textInp) textInp.value = '';
+        if (validToInp) validToInp.value = '';
+        const details = document.getElementById('detailsNewAnnouncement');
+        if (details) details.removeAttribute('open');
+
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast("Comunicado emitido en la marquesina");
+    };
+
+    window.toggleAnnouncementActive = function(annId) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        const ann = appData.announcements.find(a => a.id === annId);
+        if (!ann) return;
+        ann.active = !ann.active;
+        logActivity('announcement', 'Estado Comunicado', `${ann.active ? 'Reactivó' : 'Pausó'} anuncio: "${ann.text.slice(0, 30)}..."`, localAuthor);
+        sessionStorage.removeItem('sicom_ticker_dismissed');
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(ann.active ? "Anuncio reactivado en marquesina" : "Anuncio pausado");
+    };
+
+    window.deleteAnnouncement = function(annId) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        const ann = appData.announcements.find(a => a.id === annId);
+        if (!ann) return;
+        if (!confirm(`¿Eliminar definitivamente este anuncio?\n\n"${ann.text}"`)) return;
+        appData.announcements = appData.announcements.filter(a => a.id !== annId);
+        logActivity('announcement', 'Eliminó Comunicado', `Eliminó anuncio: "${ann.text.slice(0, 30)}..."`, localAuthor);
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast("Anuncio eliminado");
+    };
+
+    window.renderAnnouncementsManager = function() {
+        ensureDataStructure();
+        const now = new Date();
+        const day = now.getDate();
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+        // 1. Actualizar switches automáticos
+        const chkBiweekly = document.getElementById('chkAutoBiweekly');
+        const chkMonthEnd = document.getElementById('chkAutoMonthEnd');
+        const statusBiweekly = document.getElementById('statusAutoBiweekly');
+        const statusMonthEnd = document.getElementById('statusAutoMonthEnd');
+
+        const isBiweeklyOn = appData.announcementConfig && appData.announcementConfig.autoBiweeklyEnabled !== false;
+        const isMonthEndOn = appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false;
+
+        if (chkBiweekly) chkBiweekly.checked = isBiweeklyOn;
+        if (chkMonthEnd) chkMonthEnd.checked = isMonthEndOn;
+
+        if (statusBiweekly) {
+            if (!isBiweeklyOn) {
+                statusBiweekly.innerHTML = '<span class="text-[#8a8380]">○ Regla desactivada</span>';
+            } else if (day >= 10 && day <= 15) {
+                statusBiweekly.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa hoy (Día 10-15)</span>';
+            } else {
+                statusBiweekly.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próxima emisión: día 10)</span>`;
+            }
+        }
+
+        if (statusMonthEnd) {
+            if (!isMonthEndOn) {
+                statusMonthEnd.innerHTML = '<span class="text-[#8a8380]">○ Regla desactivada</span>';
+            } else if (day >= 25 && day <= lastDay) {
+                statusMonthEnd.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa hoy (Fin de mes)</span>';
+            } else {
+                statusMonthEnd.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próxima emisión: día 25)</span>`;
+            }
+        }
+
+        // 2. Renderizar lista de comunicados personalizados
+        const container = document.getElementById('announcementsListContainer');
+        const emptyState = document.getElementById('announcementsEmptyState');
+        const countBadge = document.getElementById('announcementsCountBadge');
+        if (!container) return;
+
+        const list = appData.announcements || [];
+        const activeCount = list.filter(a => a.active).length;
+        if (countBadge) countBadge.textContent = `${activeCount} activos (${list.length} total)`;
+
+        if (list.length === 0) {
+            container.innerHTML = '';
+            if (emptyState) emptyState.classList.remove('hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('hidden');
+
+        const todayStr = now.toISOString().slice(0, 10);
+
+        container.innerHTML = list.map(a => {
+            let tagStyle = 'bg-[#0071e3]/20 text-[#2997ff] border-[#0071e3]/40';
+            let tagLabel = 'INFORMATIVO';
+            if (a.type === 'urgent') {
+                tagStyle = 'bg-[#ee6018]/25 text-[#ee6018] border-[#ee6018]/50';
+                tagLabel = 'URGENTE';
+            } else if (a.type === 'reminder') {
+                tagStyle = 'bg-[#f59e0b]/20 text-[#fbbf24] border-[#f59e0b]/40';
+                tagLabel = 'RECORDATORIO';
+            }
+
+            const isExpired = Boolean(a.validTo && a.validTo < todayStr);
+            const statusBadge = !a.active
+                ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#3d3a39] text-[#8a8380]">PAUSADO</span>'
+                : (isExpired
+                    ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30">VENCIDO</span>'
+                    : '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30">EMITIENDO</span>');
+
+            return `
+            <div class="p-3 bg-[#101010] border ${a.active && !isExpired ? 'border-[#3d3a39]' : 'border-[#252220] opacity-75'} rounded-[6px] space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${tagLabel}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="toggleAnnouncementActive('${a.id}')" class="p-1 px-2 rounded-[3px] font-mono text-[10px] uppercase transition ${a.active ? 'bg-[#1d1a18] text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220]' : 'bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40 hover:bg-[#ee6018] hover:text-white'}" title="${a.active ? 'Pausar emisión' : 'Activar emisión'}">
+                            ${a.active ? 'Pausar' : 'Activar'}
+                        </button>
+                        <button type="button" onclick="deleteAnnouncement('${a.id}')" class="p-1 text-[#8a8380] hover:text-[#ff453a] hover:bg-[#1d1a18] rounded-[3px] transition" title="Eliminar anuncio">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-[#eeeeee] font-mono leading-relaxed">${escapeHtml(a.text)}</p>
+                <div class="flex items-center justify-between text-[10px] font-mono text-[#8a8380] pt-1 border-t border-[#1d1a18]">
+                    <span>Por: ${escapeHtml(a.createdBy || 'Supervisor')}${a.createdAt ? ' (' + a.createdAt + ')' : ''}</span>
+                    <span>${a.validTo ? 'Vence: ' + a.validTo : 'Permanente'}</span>
+                </div>
+            </div>`;
+        }).join('');
     };
 
     // Fondo cósmico de la Nebulosa de Orión renderizado de forma ultraligera y nítida en el DOM
