@@ -10,6 +10,7 @@ var _chatToken = '_iCQr9wsy0wvYbtRNBhbkQEbc9akwecjFXn8Hqg8v0c';
 var GOOGLE_CHAT_WEBHOOK_URL = 'https://chat.googleapis.com/v1/spaces/AAQAyNI0CRc/messages?key=' + _chatKey + '&token=' + _chatToken;
 var FIREBASE_API_KEY = ['AIzaSyD5_UtypfJ', 'g5qsFDdv-MBamP18IZ_vZhVE'].join('');
 var FIRESTORE_DOC_URL = 'https://firestore.googleapis.com/v1/projects/sicom-stgt/databases/(default)/documents/artifacts/sicom-stgt/public/data/sicom_state/main';
+var PANEL_URL = 'https://tablerocontrolaplstgt.vercel.app/';
 
 /**
  * Endpoint receptor de peticiones POST desde SICOM Web
@@ -34,7 +35,7 @@ function doPost(e) {
                  "📝 *Tarea:* \"" + (payload.task || '') + "\"\n" +
                  "📅 *Fecha Límite:* " + (payload.deadline || 'Sin fecha') + "\n" +
                  "✍️ *Asignado por:* " + (payload.author || 'Sistema') + "\n" +
-                 "🔗 https://panel-control-sicom.netlify.app/";
+                 "🔗 " + PANEL_URL;
 
     } else if (type === 'VALIDATION_SUBMITTED') {
       // 2. Tarea enviada a validación con evidencia
@@ -44,7 +45,7 @@ function doPost(e) {
                  "📝 *Tarea:* \"" + (payload.task || '') + "\"\n" +
                  "💬 *Evidencia:* \"" + (payload.feedback || 'Sin comentarios') + "\"\n" +
                  "⚖️ *Acción Requerida:* Revisión por Supervisor / Supremo\n" +
-                 "🔗 https://panel-control-sicom.netlify.app/";
+                 "🔗 " + PANEL_URL;
 
     } else if (type === 'TASK_VALIDATED') {
       // 3. Tarea aprobada / validada
@@ -62,7 +63,7 @@ function doPost(e) {
                  "👥 *Equipo Asignado:* " + (payload.consultants || 'Por definir') + "\n" +
                  "📅 *Fecha Límite:* " + (payload.deadline || 'Sin fecha') + "\n" +
                  "✍️ *Registrado por:* " + (payload.author || 'Sistema') + "\n" +
-                 "🔗 https://panel-control-sicom.netlify.app/";
+                 "🔗 " + PANEL_URL;
 
     } else if (type === 'MORNING_DIGEST') {
       // 5. Solicitud directa de resumen matutino
@@ -240,7 +241,7 @@ function generarTextoResumenMatutino() {
       msg += "\n";
     }
 
-    msg += "🔗 *Acceso al Panel:* https://panel-control-sicom.netlify.app/";
+    msg += "🔗 *Acceso al Panel:* " + PANEL_URL;
     return msg;
 
   } catch (e) {
