@@ -4,13 +4,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     
     let appId, db, auth, isFirebaseReady = false, unsubscribeSnapshot = null;
     let globalDoc, globalSetDoc;
-    let isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
     
-    let svgElem, canvasGroup, svgDefs;
+    let svgElem, canvasGroup;
     let translateX = 0, translateY = 0, scale = 1;
     let isPanning = false, startX, startY;
     let initialPinchDistance = null;
-    let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
+    let isDrawerOpen = false, isPriorityDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
     let activeSearchQuery = '';
     let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeFilterCompany = 'ALL';
     let activeFilterModules = ['ALL'], activeFilterConsultants = ['ALL'], activeFilterStatuses = ['ALL'], activeFilterCompanies = ['ALL'];
@@ -48,7 +47,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       "Lector (Jefatura)": {"color": "#8e8e93", "role": "Lector"}
     };
 
-    const defaultTestingData = {"directHub":{"id":"hub-direct","name":"PROYECTOS DIRECTOS SICOM","color":"#f59e0b"},"secondaryCore":{"name":"SUCOM","active":false,"id":"sucom"},"directProjects":[{"deadline":"2026-10-13","driveLink":"","notes":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193015065":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"checked":true,"obs":"","na":false,"naValidated":false}},"clientReturnDate":"2026-10-06","id":"dp1","_renderData":{"x":-840,"y":-412.5,"color":"#f97316","type":"direct-project"},"priority":3,"invgateLink":"","name":"Implementación ATN","clientDeliveryDate":"2026-10-21","progress":33,"status":"No Iniciado","consultants":["Emmanuel Sánchez"]},{"progress":0,"notes":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193027382":{"checked":false,"naValidated":false,"na":false,"obs":""},"doc_1791192995498":{"naValidated":false,"obs":"","na":false,"checked":false}},"id":"dp2","_renderData":{"x":-840,"y":-337.5,"color":"#f97316","type":"direct-project"},"clientDeliveryDate":"","status":"No Iniciado","consultants":["Emmanuel Sánchez"],"clientReturnDate":"","deadline":"","name":"Boletos por SMS","priority":8}],"history":[],"core":{"id":"sicom","name":"SICOM"},"modules":[{"name":"COM","id":"m1","projects":[{"consultants":["Óscar González"],"docs":{},"status":"Pendiente","progress":0,"tasks":[],"priority":1,"deadline":"","_renderData":{"x":-840,"y":-262.5,"color":"#10b981","type":"project"},"name":"Flechamigo","id":"p1"},{"clientDeliveryDate":"2026-10-13","docs":{"doc_1791193015065":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"obs":"","na":false,"checked":false,"naValidated":false}},"notes":"seguimiento","tasks":[],"deadline":"2026-10-14","consultants":["Óscar González"],"driveLink":"","progress":0,"id":"p2","_renderData":{"x":-840,"y":-187.5,"color":"#10b981","type":"project"},"priority":3,"name":"Versión Paytech","invgateLink":"","clientReturnDate":"2026-10-08","status":"En Progreso"},{"id":"p3","deadline":"","name":"Versión CPU","consultants":["Óscar González"],"priority":3,"_renderData":{"x":-840,"y":-112.5,"color":"#10b981","type":"project"},"status":"Pendiente","docs":{},"tasks":[],"progress":0},{"progress":0,"name":"OV Dinámica","_renderData":{"x":-840,"y":-37.5,"color":"#10b981","type":"project"},"id":"p4","consultants":["Óscar González"],"docs":{},"tasks":[],"status":"Pendiente","deadline":"","priority":3},{"status":"Pendiente","id":"p5","consultants":["Óscar González"],"progress":0,"name":"Separación Destinos Fav.","_renderData":{"x":-840,"y":37.5,"color":"#10b981","type":"project"},"deadline":"","priority":4,"docs":{},"tasks":[]}],"color":"#0071e3"},{"name":"CONTROLES VOLUMÉTRICOS","id":"m2","projects":[{"clientReturnDate":"","consultants":["Osvaldo Avilés"],"progress":0,"id":"p6","name":"Gestión Web / Competencia","priority":1,"deadline":"2027-01-01","clientDeliveryDate":"","status":"En Progreso","tasks":[],"docs":{"doc_1791193027382":{"naValidated":false,"na":false,"obs":"","checked":false},"doc_1791192995498":{"na":false,"obs":"","checked":false,"naValidated":false},"doc_1791193015065":{"na":false,"naValidated":false,"checked":false,"obs":""}},"_renderData":{"x":840,"y":-412.5,"color":"#7eaefb","type":"project"}},{"id":"p7","notes":"","clientReturnDate":"","deadline":"","clientDeliveryDate":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false},"doc_1791193027382":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"checked":false,"na":false,"obs":""}},"driveLink":"","_renderData":{"x":840,"y":-337.5,"color":"url(#grad-5ac8fa-a855f7-7eaefb)","type":"project"},"invgateLink":"","name":"Pantallas Volumétricos","priority":1,"progress":0,"status":"Pendiente","consultants":["Manuel Gutierrez","Rafael Romero","Osvaldo Avilés"]},{"_renderData":{"x":840,"y":-262.5,"color":"#7eaefb","type":"project"},"id":"p8","status":"Pendiente","progress":0,"docs":{},"tasks":[],"deadline":"","priority":2,"consultants":["Osvaldo Avilés"],"name":"Carta Porte"},{"docs":{},"tasks":[],"deadline":"","priority":3,"_renderData":{"x":840,"y":-187.5,"color":"#7eaefb","type":"project"},"name":"Versión .NET","status":"Pendiente","consultants":["Osvaldo Avilés"],"id":"p9","progress":0},{"progress":0,"name":"Reporte P.H.","_renderData":{"x":840,"y":-112.5,"color":"#7eaefb","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","consultants":["Osvaldo Avilés"],"deadline":"","id":"p10","priority":4},{"progress":0,"id":"p11","_renderData":{"x":840,"y":-37.5,"color":"#7eaefb","type":"project"},"name":"Tabla Int.","status":"Pendiente","priority":5,"docs":{},"tasks":[],"consultants":["Osvaldo Avilés"],"deadline":""}],"color":"#30d158"},{"color":"#bf5af2","projects":[{"consultants":["Emmanuel Sánchez"],"name":"Correcciones Panel","deadline":"","priority":1,"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":-840,"y":112.5,"color":"#f97316","type":"project"},"id":"p12"},{"status":"Pendiente","name":"Contador Pasajeros COP COM","notes":"","deadline":"","clientReturnDate":"","id":"p13","consultants":["Emmanuel Sánchez"],"progress":0,"driveLink":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"naValidated":false,"checked":false,"na":false,"obs":""},"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false}},"_renderData":{"x":-840,"y":187.5,"color":"#f97316","type":"project"},"invgateLink":"","priority":2,"clientDeliveryDate":""},{"id":"p14","consultants":["Emmanuel Sánchez"],"name":"Fase 2 ATR","progress":0,"_renderData":{"x":-840,"y":262.5,"color":"#f97316","type":"project"},"status":"Pendiente","deadline":"","priority":5,"docs":{},"tasks":[]},{"priority":6,"deadline":"","name":"Implementación AVM","_renderData":{"x":-840,"y":337.5,"color":"#f97316","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","progress":0,"consultants":["Emmanuel Sánchez"],"id":"p15"},{"priority":9,"deadline":"","id":"p16","docs":{},"tasks":[],"status":"Pendiente","consultants":["Emmanuel Sánchez"],"_renderData":{"x":-840,"y":412.5,"color":"#f97316","type":"project"},"name":"Requerimientos TEO","progress":0}],"id":"m3","name":"PORTAL OPERATIVO"},{"name":"PANTALLAS EN TERMINAL","id":"m4","color":"#ff453a","projects":[{"consultants":["Emmanuel Sánchez"],"docs":{},"tasks":[],"id":"p17","progress":0,"deadline":"","status":"Pendiente","priority":4,"_renderData":{"x":840,"y":37.5,"color":"#f97316","type":"project"},"name":"Pantalla a Público"},{"consultants":["Emmanuel Sánchez"],"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":840,"y":112.5,"color":"#f97316","type":"project"},"priority":4,"deadline":"","name":"Pantalla p. Jefes Op.","id":"p18"}]},{"projects":[{"status":"Pendiente","_renderData":{"x":840,"y":187.5,"color":"#f97316","type":"project"},"name":"Reportes / Vistas BI","progress":0,"deadline":"","priority":7,"docs":{},"tasks":[],"id":"p19","consultants":["Emmanuel Sánchez"]}],"name":"BI","color":"#ff9f0a","id":"m5"},{"projects":[{"priority":3,"consultants":["Óscar González"],"deadline":"","status":"Pendiente","name":"Despacho Centralizado","_renderData":{"x":840,"y":262.5,"color":"#10b981","type":"project"},"docs":{},"tasks":[],"progress":0,"id":"p20"}],"id":"m6","name":"DESPACHO CENTRALIZADO","color":"#5ac8fa"},{"id":"m7","color":"#ffd60a","projects":[{"name":"Reportes Ciberseguridad","clientReturnDate":"","consultants":["Osvaldo Avilés"],"clientDeliveryDate":"","priority":6,"deadline":"","tasks":[],"docs":{"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193015065":{"obs":"","na":false,"naValidated":false,"checked":false}},"progress":0,"id":"p21","status":"En Progreso","_renderData":{"x":-840,"y":487.5,"color":"#7eaefb","type":"project"}}],"name":"PLATAFORMA ÚNICA DE IDENTIDAD"},{"projects":[],"id":"m_1791193338595","name":"Módulo de Planeación y Servicios (MPS)","color":"#00ffff"},{"id":"m_1791193355710","color":"#00ffff","projects":[],"name":"Módulo Comercial (MC)"},{"name":"Módulo de Liquidación a Conductores (MLC)","id":"m_1791193408237","projects":[],"color":"#00ffff"}],"globalTasks":[],"dailyTasks":[]};
+    const defaultTestingData = {"directHub":{"id":"hub-direct","name":"PROYECTOS DIRECTOS SICOM","color":"#f59e0b"},"directProjects":[{"deadline":"2026-10-13","driveLink":"","notes":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193015065":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"checked":true,"obs":"","na":false,"naValidated":false}},"clientReturnDate":"2026-10-06","id":"dp1","_renderData":{"x":-840,"y":-412.5,"color":"#f97316","type":"direct-project"},"priority":3,"invgateLink":"","name":"Implementación ATN","clientDeliveryDate":"2026-10-21","progress":33,"status":"No Iniciado","consultants":["Emmanuel Sánchez"]},{"progress":0,"notes":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193027382":{"checked":false,"naValidated":false,"na":false,"obs":""},"doc_1791192995498":{"naValidated":false,"obs":"","na":false,"checked":false}},"id":"dp2","_renderData":{"x":-840,"y":-337.5,"color":"#f97316","type":"direct-project"},"clientDeliveryDate":"","status":"No Iniciado","consultants":["Emmanuel Sánchez"],"clientReturnDate":"","deadline":"","name":"Boletos por SMS","priority":8}],"history":[],"core":{"id":"sicom","name":"SICOM"},"modules":[{"name":"COM","id":"m1","projects":[{"consultants":["Óscar González"],"docs":{},"status":"Pendiente","progress":0,"tasks":[],"priority":1,"deadline":"","_renderData":{"x":-840,"y":-262.5,"color":"#10b981","type":"project"},"name":"Flechamigo","id":"p1"},{"clientDeliveryDate":"2026-10-13","docs":{"doc_1791193015065":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"obs":"","na":false,"checked":false,"naValidated":false}},"notes":"seguimiento","tasks":[],"deadline":"2026-10-14","consultants":["Óscar González"],"driveLink":"","progress":0,"id":"p2","_renderData":{"x":-840,"y":-187.5,"color":"#10b981","type":"project"},"priority":3,"name":"Versión Paytech","invgateLink":"","clientReturnDate":"2026-10-08","status":"En Progreso"},{"id":"p3","deadline":"","name":"Versión CPU","consultants":["Óscar González"],"priority":3,"_renderData":{"x":-840,"y":-112.5,"color":"#10b981","type":"project"},"status":"Pendiente","docs":{},"tasks":[],"progress":0},{"progress":0,"name":"OV Dinámica","_renderData":{"x":-840,"y":-37.5,"color":"#10b981","type":"project"},"id":"p4","consultants":["Óscar González"],"docs":{},"tasks":[],"status":"Pendiente","deadline":"","priority":3},{"status":"Pendiente","id":"p5","consultants":["Óscar González"],"progress":0,"name":"Separación Destinos Fav.","_renderData":{"x":-840,"y":37.5,"color":"#10b981","type":"project"},"deadline":"","priority":4,"docs":{},"tasks":[]}],"color":"#0071e3"},{"name":"CONTROLES VOLUMÉTRICOS","id":"m2","projects":[{"clientReturnDate":"","consultants":["Osvaldo Avilés"],"progress":0,"id":"p6","name":"Gestión Web / Competencia","priority":1,"deadline":"2027-01-01","clientDeliveryDate":"","status":"En Progreso","tasks":[],"docs":{"doc_1791193027382":{"naValidated":false,"na":false,"obs":"","checked":false},"doc_1791192995498":{"na":false,"obs":"","checked":false,"naValidated":false},"doc_1791193015065":{"na":false,"naValidated":false,"checked":false,"obs":""}},"_renderData":{"x":840,"y":-412.5,"color":"#7eaefb","type":"project"}},{"id":"p7","notes":"","clientReturnDate":"","deadline":"","clientDeliveryDate":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false},"doc_1791193027382":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"checked":false,"na":false,"obs":""}},"driveLink":"","_renderData":{"x":840,"y":-337.5,"color":"url(#grad-5ac8fa-a855f7-7eaefb)","type":"project"},"invgateLink":"","name":"Pantallas Volumétricos","priority":1,"progress":0,"status":"Pendiente","consultants":["Manuel Gutierrez","Rafael Romero","Osvaldo Avilés"]},{"_renderData":{"x":840,"y":-262.5,"color":"#7eaefb","type":"project"},"id":"p8","status":"Pendiente","progress":0,"docs":{},"tasks":[],"deadline":"","priority":2,"consultants":["Osvaldo Avilés"],"name":"Carta Porte"},{"docs":{},"tasks":[],"deadline":"","priority":3,"_renderData":{"x":840,"y":-187.5,"color":"#7eaefb","type":"project"},"name":"Versión .NET","status":"Pendiente","consultants":["Osvaldo Avilés"],"id":"p9","progress":0},{"progress":0,"name":"Reporte P.H.","_renderData":{"x":840,"y":-112.5,"color":"#7eaefb","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","consultants":["Osvaldo Avilés"],"deadline":"","id":"p10","priority":4},{"progress":0,"id":"p11","_renderData":{"x":840,"y":-37.5,"color":"#7eaefb","type":"project"},"name":"Tabla Int.","status":"Pendiente","priority":5,"docs":{},"tasks":[],"consultants":["Osvaldo Avilés"],"deadline":""}],"color":"#30d158"},{"color":"#bf5af2","projects":[{"consultants":["Emmanuel Sánchez"],"name":"Correcciones Panel","deadline":"","priority":1,"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":-840,"y":112.5,"color":"#f97316","type":"project"},"id":"p12"},{"status":"Pendiente","name":"Contador Pasajeros COP COM","notes":"","deadline":"","clientReturnDate":"","id":"p13","consultants":["Emmanuel Sánchez"],"progress":0,"driveLink":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"naValidated":false,"checked":false,"na":false,"obs":""},"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false}},"_renderData":{"x":-840,"y":187.5,"color":"#f97316","type":"project"},"invgateLink":"","priority":2,"clientDeliveryDate":""},{"id":"p14","consultants":["Emmanuel Sánchez"],"name":"Fase 2 ATR","progress":0,"_renderData":{"x":-840,"y":262.5,"color":"#f97316","type":"project"},"status":"Pendiente","deadline":"","priority":5,"docs":{},"tasks":[]},{"priority":6,"deadline":"","name":"Implementación AVM","_renderData":{"x":-840,"y":337.5,"color":"#f97316","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","progress":0,"consultants":["Emmanuel Sánchez"],"id":"p15"},{"priority":9,"deadline":"","id":"p16","docs":{},"tasks":[],"status":"Pendiente","consultants":["Emmanuel Sánchez"],"_renderData":{"x":-840,"y":412.5,"color":"#f97316","type":"project"},"name":"Requerimientos TEO","progress":0}],"id":"m3","name":"PORTAL OPERATIVO"},{"name":"PANTALLAS EN TERMINAL","id":"m4","color":"#ff453a","projects":[{"consultants":["Emmanuel Sánchez"],"docs":{},"tasks":[],"id":"p17","progress":0,"deadline":"","status":"Pendiente","priority":4,"_renderData":{"x":840,"y":37.5,"color":"#f97316","type":"project"},"name":"Pantalla a Público"},{"consultants":["Emmanuel Sánchez"],"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":840,"y":112.5,"color":"#f97316","type":"project"},"priority":4,"deadline":"","name":"Pantalla p. Jefes Op.","id":"p18"}]},{"projects":[{"status":"Pendiente","_renderData":{"x":840,"y":187.5,"color":"#f97316","type":"project"},"name":"Reportes / Vistas BI","progress":0,"deadline":"","priority":7,"docs":{},"tasks":[],"id":"p19","consultants":["Emmanuel Sánchez"]}],"name":"BI","color":"#ff9f0a","id":"m5"},{"projects":[{"priority":3,"consultants":["Óscar González"],"deadline":"","status":"Pendiente","name":"Despacho Centralizado","_renderData":{"x":840,"y":262.5,"color":"#10b981","type":"project"},"docs":{},"tasks":[],"progress":0,"id":"p20"}],"id":"m6","name":"DESPACHO CENTRALIZADO","color":"#5ac8fa"},{"id":"m7","color":"#ffd60a","projects":[{"name":"Reportes Ciberseguridad","clientReturnDate":"","consultants":["Osvaldo Avilés"],"clientDeliveryDate":"","priority":6,"deadline":"","tasks":[],"docs":{"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193015065":{"obs":"","na":false,"naValidated":false,"checked":false}},"progress":0,"id":"p21","status":"En Progreso","_renderData":{"x":-840,"y":487.5,"color":"#7eaefb","type":"project"}}],"name":"PLATAFORMA ÚNICA DE IDENTIDAD"},{"projects":[],"id":"m_1791193338595","name":"Módulo de Planeación y Servicios (MPS)","color":"#00ffff"},{"id":"m_1791193355710","color":"#00ffff","projects":[],"name":"Módulo Comercial (MC)"},{"name":"Módulo de Liquidación a Conductores (MLC)","id":"m_1791193408237","projects":[],"color":"#00ffff"}],"globalTasks":[],"dailyTasks":[]};
 
     let appData = JSON.parse(JSON.stringify(defaultTestingData));
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
@@ -70,72 +69,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       Chart.defaults.font.family = "'Geist Mono', monospace";
     }
 
-    // --- SISTEMA DE TEMAS DUAL (DARK / LIGHT MODO APPLE) ---
-    // NOTA: Por directiva de UX, el modo Claro está temporalmente bloqueado y restringido al perfil 'Supremo'.
-    window.setTheme = function(theme) {
-        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
-            theme = 'dark';
-        }
-        const isLight = theme === 'light';
-        if (isLight) {
-            document.body.classList.add('theme-light');
-            document.documentElement.classList.add('theme-light');
-            document.documentElement.classList.remove('dark');
-        } else {
-            document.body.classList.remove('theme-light');
-            document.documentElement.classList.remove('theme-light');
-            document.documentElement.classList.add('dark');
-        }
-        localStorage.setItem('sicom_theme', isLight ? 'light' : 'dark');
-
-        const sunIcon = document.getElementById('themeIconSun');
-        const moonIcon = document.getElementById('themeIconMoon');
-        const themeLabel = document.getElementById('themeToggleLabel');
-        const mobileThemeText = document.getElementById('mobileThemeText');
-
-        if (sunIcon && moonIcon) {
-            if (isLight) {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-                if (themeLabel) themeLabel.textContent = 'Claro';
-                if (mobileThemeText) mobileThemeText.textContent = 'Modo Oscuro';
-            } else {
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-                if (themeLabel) themeLabel.textContent = 'Oscuro';
-                if (mobileThemeText) mobileThemeText.textContent = 'Modo Claro';
-            }
-        }
-
-        if (window.Chart) {
-            Chart.defaults.color = isLight ? '#6e6e73' : '#8e8e93';
-            Chart.defaults.borderColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
-        }
-
-        if (typeof window.renderMindMap === 'function' && canvasGroup) {
-            window.renderMindMap();
-        }
-    };
-
-    window.toggleTheme = function() {
-        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
-            window.showToast('🔒 El cambio de tema está bloqueado. Exclusivo para perfil Supremo.', true);
-            return;
-        }
-        const currentTheme = localStorage.getItem('sicom_theme') || 'dark';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        window.setTheme(newTheme);
-        window.showToast(newTheme === 'light' ? '☀️ Modo Claro activado (Supremo)' : '🌙 Modo Oscuro activado (Supremo)');
-    };
-
-    window.initTheme = function() {
-        let savedTheme = localStorage.getItem('sicom_theme') || 'dark';
-        if (typeof currentUserRole !== 'undefined' && currentUserRole && currentUserRole !== 'Supremo') {
-            savedTheme = 'dark';
-        }
-        window.setTheme(savedTheme);
-    };
-
     // --- EXPERIENCIA DELEITE (CONFETTI CELEBRACIÓN DUOLINGO) ---
     window.triggerCelebration = function(originX = 0.5, originY = 0.6) {
         if (typeof confetti === 'function') {
@@ -155,13 +88,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         }
     };
-
-    // Inicialización inmediata de tema
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', window.initTheme);
-    } else {
-        window.initTheme();
-    }
 
 
     async function initData() {
@@ -285,7 +211,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     function ensureDataStructure() {
         if(!appData.history) appData.history = []; 
-        if(!appData.secondaryCore) appData.secondaryCore = { id: 'sucom', name: 'SUCOM', active: false };
         if(!appData.directHub) appData.directHub = { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
         if(!appData.core) appData.core = { id: 'sicom', name: 'SICOM' };
         if(!appData.directProjects) appData.directProjects = [];
@@ -716,7 +641,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.openManual = function() {
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
-        if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
         if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer();
         
         const content = document.getElementById('manualContent');
@@ -861,7 +785,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     function finishInit() {
         document.getElementById('cloudLoader').style.display = 'none'; document.getElementById('topBarWelcome').textContent = `Bienvenido, ${localAuthor}`;
-        try { window.initTheme(); ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
+        try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
         setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
     }
@@ -869,10 +793,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.applyRolePermissions = function() {
         const isSupremo = currentUserRole === 'Supremo';
         const isSupervisorUp = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
-
-        if (!isSupremo) {
-            window.setTheme('dark');
-        }
 
         document.querySelectorAll('.supremo-only').forEach(el => { 
             if(isSupremo) el.classList.remove('hidden'); else el.classList.add('hidden'); 
@@ -925,30 +845,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } catch (e) { console.warn('No se pudieron refrescar los comentarios:', e); }
     }
 
-    // === LÓGICA DE ALERTAS INTERNAS (PARCHADA PARA SUPREMO/SUPERVISOR) ===
-    window.toggleAlertsDrawer = function() {
-        if (isDailyDrawerOpen) window.toggleDailyDrawer();
-        if(isAlertsDrawerOpen) {
-            document.getElementById('alertsDrawer').classList.add('translate-x-full');
-            isAlertsDrawerOpen = false;
-        } else {
-            if(isDrawerOpen) window.closeConfigDrawer();
-            if(isPriorityDrawerOpen) window.closePriorityDrawer();
-            document.getElementById('alertsDrawer').classList.remove('translate-x-full');
-            isAlertsDrawerOpen = true;
-            window.renderAlerts();
-        }
-    };
-
-   window.renderAlerts = function() {
+    // === LÓGICA DE ALERTAS INTERNAS (UNIFICADA CON PANEL DE NOTIFICACIONES Y TRABAJO) ===
+    window.renderAlerts = function() {
         if(!localAuthor) return;
-        const container = document.getElementById('alertsListContainer');
-        const badge = document.getElementById('alertsBadge');
         if (currentUserRole === 'Lector') {
             window.__lastAlerts = [];
-            if(badge) badge.classList.add('hidden');
-            const badgeMobile = document.getElementById('alertsBadgeMobile'); if(badgeMobile) badgeMobile.classList.add('hidden');
-            if(container) container.innerHTML = `<div class="text-center py-10 opacity-50"><p class="text-sm text-gray-300">Modo Lector Activo. Las alertas son exclusivas para el equipo operativo.</p></div>`;
             window.renderDailyTasks();
             return;
         }
@@ -1108,88 +1009,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         
         window.__lastAlerts = myAlerts; // Lo consume el panel izquierdo (Notificaciones y Trabajo)
-        if(myAlerts.length > 0) {
-            if (badge) {
-                badge.textContent = myAlerts.length;
-                badge.classList.remove('hidden');
-            }
-            
-            if (container) {
-                container.innerHTML = myAlerts.map(a => {
-                    const isDanger = a.alertType === 'danger';
-                    const isWarning = a.alertType === 'warning';
-                    const isMention = a.alertType === 'mention';
-                    const colorClassText = (isDanger || isWarning) ? 'text-[#ee6018]' : (isMention ? 'text-[#eeeeee]' : 'text-[#a0ca92]');
-                    const colorClassBg = 'bg-[#101010]';
-                    const colorClassBorder = (isDanger || isWarning) ? 'border-[#ee6018]/60' : 'border-[#3d3a39]';
-                    const colorClassBadgeBg = (isDanger || isWarning) ? 'bg-[#ee6018]/15 border-[#ee6018]/40' : 'bg-[#1d1a18] border-[#3d3a39]';
-                    
-                    // BLINDAJE DE SEGURIDAD
-                    const userText = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
-                    
-                    let clickAction = `window.selectNode('${a.pType}', '${a.id}'); window.toggleAlertsDrawer();`;
-                    let extraGlobalHTML = '';
-                    let cursorStyle = 'cursor-pointer hover:border-[#eeeeee]';
-                    let assignedByText = '';
-                    
-                    if (a.isPendingVal) {
-                        clickAction = '';
-                        cursorStyle = 'cursor-default';
-                        assignedByText = a.taskInfo ? (a.taskInfo.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(a.taskInfo.assignedBy)}</span>` : '') : (a.globalTaskInfo && a.globalTaskInfo.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(a.globalTaskInfo.assignedBy)}</span>` : '');
-                        
-                        if (a.pType === 'global') {
-                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', true)" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 font-mono uppercase text-[9px] hover:bg-[#a0ca92] hover:text-[#101010] transition">✓ Aprobar</button><button onclick="validateGlobalTask('${a.globalTaskInfo.id}', false)" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 font-mono uppercase text-[9px] hover:bg-[#ee6018] hover:text-[#fafafa] transition">✕ Rechazar</button></div>`;
-                        } else {
-                            extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7"><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', true); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 font-mono uppercase text-[9px] hover:bg-[#a0ca92] hover:text-[#101010] transition">✓ Aprobar</button><button onclick="validateProjectTask('${a.pType}', '${a.id}', '${a.taskInfo.id}', false); event.stopPropagation();" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 font-mono uppercase text-[9px] hover:bg-[#ee6018] hover:text-[#fafafa] transition">✕ Rechazar</button></div>`;
-                        }
-                    } else if (a.pType === 'global') {
-                        clickAction = ''; 
-                        cursorStyle = 'cursor-default';
-                        
-                        const t = a.globalTaskInfo;
-                        const isMyTask = t.assignee === localAuthor;
-                        const isAssigner = t.assignedBy === localAuthor;
-                        const canComplete = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || isMyTask || !t.assignee;
-                        const canDelete = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || isAssigner;
-                        
-                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
-                        
-                        extraGlobalHTML = `<div class="flex gap-2 mt-3 ml-7">`;
-                        if(canComplete) extraGlobalHTML += `<button onclick="completeGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#a0ca92]/15 text-[#a0ca92] hover:bg-[#a0ca92] hover:text-[#101010] border border-[#a0ca92]/40 font-mono uppercase text-[9px] transition">✓ Marcar Lista</button>`;
-                        if(canDelete) extraGlobalHTML += `<button onclick="deleteGlobalTask('${t.id}')" class="pill-btn py-1.5 px-3 bg-[#ee6018]/15 text-[#ee6018] hover:bg-[#ee6018] hover:text-[#fafafa] border border-[#ee6018]/40 font-mono uppercase text-[9px] transition">Borrar</button>`;
-                        extraGlobalHTML += `</div>`;
-                    } else if (a.taskInfo) {
-                        const t = a.taskInfo;
-                        assignedByText = t.assignedBy ? `<span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[280px]">De: ${escapeHtml(t.assignedBy)} (${t.assignDate||''} ${t.assignTime||''})</span>` : '';
-                    }
-                    
-                    return `
-                    <div class="${colorClassBg} border ${colorClassBorder} rounded-[10px] p-3.5 ${cursorStyle} transition" onclick="if('${a.pType}' !== 'global') { ${clickAction} }">
-                        <div class="flex items-start gap-2.5 mb-1">
-                            <span class="text-base mt-0.5">${a.icon}</span>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-xs font-normal ${colorClassText} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName)}</p>
-                            </div>
-                        </div>
-                        <div class="ml-7 mt-2 flex flex-col gap-2">
-                            <span class="text-[10px] ${colorClassText} ${colorClassBadgeBg} border px-2 py-1 rounded-[3px] self-start leading-snug break-words max-w-[280px]">${escapeHtml(a.reason)}</span>
-                            <div class="flex flex-wrap gap-1.5">
-                                <span class="text-[9px] text-[#b8b3b0] font-mono bg-[#1d1a18] border border-[#3d3a39] px-2 py-0.5 rounded-[3px] self-start truncate max-w-[200px]">👤 ${escapeHtml(userText)}</span>
-                                ${assignedByText}
-                                ${a.globalTaskInfo && a.globalTaskInfo.feedback ? `<span class="text-[9px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-2 py-1.5 rounded-[3px] w-full mt-1 block">💬 <b>Evidencia:</b> ${escapeHtml(a.globalTaskInfo.feedback)}</span>` : ''}
-                                ${a.taskInfo && a.taskInfo.feedback ? `<span class="text-[9px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-2 py-1.5 rounded-[3px] w-full mt-1 block">💬 <b>Evidencia:</b> ${escapeHtml(a.taskInfo.feedback)}</span>` : ''}
-                            </div>
-                        </div>
-                        ${extraGlobalHTML}
-                    </div>
-                    `;
-                }).join('');
-            }
-        } else {
-            if (badge) badge.classList.add('hidden');
-            if (container) container.innerHTML = `<div class="text-center py-10 px-4 bg-[#101010] border border-[#3d3a39] rounded-[10px]"><span class="font-mono text-xs text-[#a0ca92] uppercase block mb-1">✓ SISTEMA AL DÍA</span><p class="text-xs text-[#8a8380]">No tienes tareas asignadas pendientes ni compromisos vencidos.</p></div>`;
-        }
         window.renderDailyTasks();
     };
 
@@ -1870,7 +1689,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.ensureDomReferences = function() { 
         svgElem = document.getElementById('mindmapCanvas'); 
         canvasGroup = document.getElementById('canvasGroup'); 
-        svgDefs = document.getElementById('svgDefs'); 
         if (!window._forumKeybindingsInitialized) {
             window._forumKeybindingsInitialized = true;
             ['infoNoteInput', 'editNotes'].forEach(id => {
@@ -1963,7 +1781,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }, true);
 
     function isAnyDrawerActive() {
-        return isDrawerOpen || isPriorityDrawerOpen || isAlertsDrawerOpen || 
+        return isDrawerOpen || isPriorityDrawerOpen || 
                (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) || 
                (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen);
     }
@@ -2225,7 +2043,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (isDailyDrawerOpen) window.toggleDailyDrawer();
         if (window.innerWidth < 768) window.closeInfoCardSafe(true);
         if (isPriorityDrawerOpen) window.closePriorityDrawer(); 
-        if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
         isDrawerOpen = true; 
         window.populateGlobalEditSelector(); 
@@ -2238,7 +2055,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (isDailyDrawerOpen) window.toggleDailyDrawer();
         if (window.innerWidth < 768) window.closeInfoCardSafe(true);
         if(isDrawerOpen) window.closeConfigDrawer(); 
-        if(isAlertsDrawerOpen) window.toggleAlertsDrawer(); 
         document.getElementById('priorityDrawer').classList.remove('translate-x-full'); 
         isPriorityDrawerOpen = true; 
         window.renderPriorityDrawer(); 
@@ -2293,20 +2109,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.toggleSearch = function() {
         const inp = document.getElementById('searchInput');
         const btn = document.getElementById('searchBtnIcon');
-        const wrapC = document.getElementById('filterConsultantWrapper');
-        const wrapS = document.getElementById('filterStatusWrapper');
         
         if (inp.classList.contains('opacity-0')) {
             inp.classList.remove('opacity-0', 'w-0', 'pointer-events-none'); inp.classList.add('opacity-100', 'w-48', 'sm:w-64'); btn.classList.add('bg-white/10'); 
             btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
-            if(wrapC) wrapC.classList.add('hidden');
-            if(wrapS) wrapS.classList.add('hidden');
             inp.focus();
         } else {
             inp.classList.add('opacity-0', 'w-0', 'pointer-events-none'); inp.classList.remove('opacity-100', 'w-48', 'sm:w-64'); btn.classList.remove('bg-white/10'); 
             btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
-            if(wrapC) wrapC.classList.remove('hidden');
-            if(wrapS) wrapS.classList.remove('hidden');
             inp.value = ''; window.handleSearch();
             window.recenterCanvas();
         }
@@ -2319,7 +2129,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.handleSearch = function() { activeSearchQuery = document.getElementById('searchInput').value.trim(); window.renderMindMap(); setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40); }
-    window.handleFilterChange = function() { const fc = document.getElementById('consultantFilter'), fs = document.getElementById('statusFilter'); if (fc) activeFilterConsultant = fc.value; if (fs) activeFilterStatus = fs.value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
     let infoCardHideTimer = null;
@@ -2347,7 +2156,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (currentUserRole === 'Lector') return;
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
-        if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
         if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer();
         
         const projSelect = document.getElementById('gtProject');
@@ -4082,8 +3890,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }, 350);
     };
     window.populateConsultantSelects = function() {
-      const f = document.getElementById('consultantFilter'), all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
-      if(f) f.innerHTML = `<option value="ALL" class="bg-[#101010] text-[#eeeeee]">👥 Todos</option>` + all.map(n => `<option value="${escapeHtml(n)}" class="bg-[#101010] text-[#eeeeee]">${escapeHtml(n)}</option>`).join('');
+      const all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
       const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
       document.getElementById('editConsultantsChecks').innerHTML = mkChk('editProjCons'); document.getElementById('newProjConsultantsChecks').innerHTML = mkChk('newProjCons');
     }
@@ -4246,7 +4053,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const dynamicDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       canvasGroup.appendChild(dynamicDefs);
       const q = activeSearchQuery.toLowerCase();
-      const isLight = document.body.classList.contains('theme-light');
 
       ensureDataStructure();
       if (!initialCollapseApplied) {
@@ -4637,13 +4443,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const cs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
               cs1.setAttribute('offset', '0%');
               cs1.setAttribute('stop-color', nItemColor);
-              cs1.setAttribute('stop-opacity', isLight ? '0.35' : '0.38');
+              cs1.setAttribute('stop-opacity', '0.38');
               cGrad.appendChild(cs1);
 
               const cs2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
               cs2.setAttribute('offset', '100%');
               cs2.setAttribute('stop-color', nItemColor);
-              cs2.setAttribute('stop-opacity', isLight ? '0.75' : '0.85');
+              cs2.setAttribute('stop-opacity', '0.85');
               cGrad.appendChild(cs2);
 
               dynamicDefs.appendChild(cGrad);
@@ -4694,7 +4500,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   pP.setAttribute('pathLength', '1');
                   pP.setAttribute('data-parent-mod', String(modId));
                   pP.style.setProperty('--target-opacity', pMatches ? '1' : '0.12');
-                  const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
+                  const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : '#48484a';
                   const endCol = isOver ? '#ee6018' : solidColor;
 
                   // Conexión limpia y fluida que nace exactamente en el botón de colapso
@@ -4722,13 +4528,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const ps1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   ps1.setAttribute('offset', '0%');
                   ps1.setAttribute('stop-color', nItemColor);
-                  ps1.setAttribute('stop-opacity', isLight ? '0.45' : '0.50');
+                  ps1.setAttribute('stop-opacity', '0.50');
                   pGrad.appendChild(ps1);
 
                   const ps2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   ps2.setAttribute('offset', '100%');
                   ps2.setAttribute('stop-color', endCol);
-                  ps2.setAttribute('stop-opacity', isLight ? '0.85' : '0.85');
+                  ps2.setAttribute('stop-opacity', '0.85');
                   pGrad.appendChild(ps2);
 
                   dynamicDefs.appendChild(pGrad);
@@ -4740,7 +4546,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   } else {
                       pP.setAttribute('stroke', `url(#${pGradId})`);
                   }
-                  pP.setAttribute('stroke-width', isLight ? '2' : '1.5'); 
+                  pP.setAttribute('stroke-width', '1.5'); 
                   pP.setAttribute('opacity', pMatches ? '1' : '0.12'); 
                   if (lastExpandedModuleId === modId && !isSynergyMatch && !isModCorrMatch) {
                       pP.classList.add('connector-animate-in');
@@ -4851,13 +4657,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop1.setAttribute('offset', '0%');
                   stop1.setAttribute('stop-color', secColor);
-                  stop1.setAttribute('stop-opacity', isLight ? '0.75' : '0.88');
+                  stop1.setAttribute('stop-opacity', '0.88');
                   sGrad.appendChild(stop1);
 
                   const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop2.setAttribute('offset', '100%');
                   stop2.setAttribute('stop-color', containerModColor);
-                  stop2.setAttribute('stop-opacity', isLight ? '0.80' : '0.92');
+                  stop2.setAttribute('stop-opacity', '0.92');
                   sGrad.appendChild(stop2);
 
                   dynamicDefs.appendChild(sGrad);
@@ -4953,7 +4759,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               });
           }
 
-          // 3. CAPA VISUAL (Factory Technical Card rx=10 + Flashlit Dispatch #eeeeee when selected)
+          // 3. CAPA VISUAL (Factory Technical Card rx=10)
           // AURA TÉCNICA PARA PROYECTOS VENCIDOS
           if (isOver) {
               const aura = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -4972,7 +4778,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
           const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
           const isModCorrMatch = isProjectModCorrelated(p);
-          const isFlashlit = false;
           const projStrokeColor = isOver ? '#ee6018' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : (color || '#ee6018'));
           if (isSel) {
               const selFrame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -4991,19 +4796,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '10'); 
-          r.setAttribute('fill', isLight ? '#ffffff' : '#1d1a18'); 
+          r.setAttribute('fill', '#1d1a18'); 
           r.setAttribute('stroke', projStrokeColor); 
           r.setAttribute('stroke-width', isSel ? '2.2' : (isOver ? '1.6' : ((isSynergyMatch || isModCorrMatch) ? '2' : '1.2'))); 
           r.style.pointerEvents = 'none';
           if (isOver) r.classList.add('overdue-capsule');
           if (isSynergyMatch || isModCorrMatch) r.classList.add('synergy-capsule-glow');
           g.appendChild(r);
-
-          const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rSheen.setAttribute('width', '320'); rSheen.setAttribute('height', '56'); rSheen.setAttribute('rx', '10');
-          rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
-          rSheen.style.pointerEvents = 'none';
-          g.appendChild(rSheen);
 
           const sC = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           sC.setAttribute('cx', '18'); sC.setAttribute('cy', '18'); sC.setAttribute('r', '3'); 
@@ -5030,8 +4829,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               cP.setAttribute('width', String(bWidth));
               cP.setAttribute('height', '14');
               cP.setAttribute('rx', '3');
-              cP.setAttribute('fill', isFlashlit ? '#101010' : cStyle.bg);
-              cP.setAttribute('stroke', isFlashlit ? '#101010' : cStyle.color);
+              cP.setAttribute('fill', cStyle.bg);
+              cP.setAttribute('stroke', cStyle.color);
               cP.setAttribute('stroke-width', '1');
               cG.appendChild(cP);
 
@@ -5039,7 +4838,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               cT.setAttribute('x', String(bWidth / 2));
               cT.setAttribute('y', '10.5');
               cT.setAttribute('text-anchor', 'middle');
-              cT.setAttribute('fill', isFlashlit ? '#eeeeee' : cStyle.color);
+              cT.setAttribute('fill', cStyle.color);
               cT.setAttribute('style', "font-size: 8px; font-weight: 500; font-family: 'Geist Mono', monospace; letter-spacing: 0.2px;");
               cT.textContent = bText;
               cG.appendChild(cT);
@@ -5052,7 +4851,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const nT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           nT.setAttribute('x', String(32 + compBadgeOffset));
           nT.setAttribute('y', '22');
-          nT.setAttribute('fill', isFlashlit ? '#101010' : (isLight ? '#0f172a' : '#eeeeee')); 
+          nT.setAttribute('fill', '#eeeeee'); 
           nT.classList.add('svg-text', 'svg-text-bold');
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9.5 : (fullText.length > 25 ? 10.5 : 12);
@@ -5149,7 +4948,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   avCircle.setAttribute('cy', '40');
                   avCircle.setAttribute('r', '6');
                   avCircle.setAttribute('fill', cColor);
-                  avCircle.setAttribute('stroke', isFlashlit ? '#eeeeee' : (isLight ? '#ffffff' : '#1d1a18'));
+                  avCircle.setAttribute('stroke', '#1d1a18');
                   avCircle.setAttribute('stroke-width', '1.2');
                   avG.appendChild(avCircle);
 
@@ -5175,7 +4974,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           pbBg.setAttribute('x', String(pbStartX)); pbBg.setAttribute('y', '38.5');
           pbBg.setAttribute('width', String(pbMaxWidth)); pbBg.setAttribute('height', '3');
           pbBg.setAttribute('rx', '1.5');
-          pbBg.setAttribute('fill', isFlashlit ? 'rgba(16,16,16,0.16)' : (isLight ? 'rgba(0,0,0,0.08)' : '#101010'));
+          pbBg.setAttribute('fill', '#101010');
           pbBg.style.pointerEvents = 'none';
           g.appendChild(pbBg);
 
@@ -5184,7 +4983,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
              pb.setAttribute('x', String(pbStartX)); pb.setAttribute('y', '38.5');
              pb.setAttribute('width', String(Math.max(4, pbMaxWidth * (prog / 100))));
              pb.setAttribute('height', '3'); pb.setAttribute('rx', '1.5');
-             pb.setAttribute('fill', isOver ? '#ee6018' : (isFlashlit && p.status !== 'Completado' ? '#101010' : sCol));
+             pb.setAttribute('fill', isOver ? '#ee6018' : sCol);
              pb.style.pointerEvents = 'none';
              g.appendChild(pb);
           }
@@ -5193,7 +4992,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const pPerc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           pPerc.setAttribute('x', '304'); pPerc.setAttribute('y', '42.5');
           pPerc.setAttribute('text-anchor', 'end');
-          pPerc.setAttribute('fill', isFlashlit ? '#101010' : (prog > 0 ? (prog === 100 ? '#a0ca92' : (isLight ? '#475569' : '#b8b3b0')) : (isLight ? '#94a3b8' : '#8a8380')));
+          pPerc.setAttribute('fill', prog > 0 ? (prog === 100 ? '#a0ca92' : '#b8b3b0') : '#8a8380');
           pPerc.setAttribute('style', "font-size: 9.5px; font-weight: 400; font-family: 'Geist Mono', monospace; pointer-events: none;");
           pPerc.textContent = `${prog}%`;
           g.appendChild(pPerc);
@@ -5332,17 +5131,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         r.setAttribute('width', '330'); r.setAttribute('height', '50'); r.setAttribute('rx', '10'); 
-        r.setAttribute('fill', isLight ? '#ffffff' : (n.type==='direct-hub' ? '#101010' : '#1d1a18'));
+        r.setAttribute('fill', n.type==='direct-hub' ? '#101010' : '#1d1a18');
         r.setAttribute('stroke', modCol); r.setAttribute('stroke-width', isSel ? '2' : '1.2');
         r.style.pointerEvents = 'none';
         if(n.type==='direct-hub') r.setAttribute('stroke-dasharray', '4,4'); 
         g.appendChild(r);
-
-        const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rSheen.setAttribute('width', '330'); rSheen.setAttribute('height', '50'); rSheen.setAttribute('rx', '10');
-        rSheen.setAttribute('fill', 'url(#capsule-sheen-dark)');
-        rSheen.style.pointerEvents = 'none';
-        g.appendChild(rSheen);
 
         // Indicador de color del módulo a la izquierda (6px = r=3)
         const mDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -5354,7 +5147,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         // Título del módulo completo sin truncamiento
         const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
         t.setAttribute('x', '32'); t.setAttribute('y', '29'); 
-        t.setAttribute('fill', isLight ? '#0f172a' : '#eeeeee'); t.setAttribute('text-anchor', 'start'); 
+        t.setAttribute('fill', '#eeeeee'); t.setAttribute('text-anchor', 'start'); 
         t.classList.add('svg-text', 'svg-text-bold'); 
         t.style.pointerEvents = 'none';
         
@@ -5389,7 +5182,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const countBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         countBg.setAttribute('width', secCount > 0 ? '62' : '52'); countBg.setAttribute('height', '18');
         countBg.setAttribute('rx', '3');
-        countBg.setAttribute('fill', isLight ? 'rgba(0,0,0,0.05)' : '#101010');
+        countBg.setAttribute('fill', '#101010');
         countBg.setAttribute('stroke', modCol);
         countBg.setAttribute('stroke-opacity', '0.5');
         countBg.setAttribute('stroke-width', '1');
@@ -5426,7 +5219,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             btnCircle.setAttribute('cx', '0');
             btnCircle.setAttribute('cy', '0');
             btnCircle.setAttribute('r', '10');
-            btnCircle.setAttribute('fill', isLight ? '#ffffff' : '#101010');
+            btnCircle.setAttribute('fill', '#101010');
             btnCircle.setAttribute('stroke', modCol);
             btnCircle.setAttribute('stroke-width', '1.3');
             toggleBtnG.appendChild(btnCircle);
@@ -5434,7 +5227,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             hLine.setAttribute('x1', '-4'); hLine.setAttribute('y1', '0');
             hLine.setAttribute('x2', '4'); hLine.setAttribute('y2', '0');
-            hLine.setAttribute('stroke', isLight ? '#0f172a' : '#eeeeee');
+            hLine.setAttribute('stroke', '#eeeeee');
             hLine.setAttribute('stroke-width', '1.5');
             hLine.setAttribute('stroke-linecap', 'round');
             toggleBtnG.appendChild(hLine);
@@ -5443,7 +5236,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 vLine.setAttribute('x1', '0'); vLine.setAttribute('y1', '-4');
                 vLine.setAttribute('x2', '0'); vLine.setAttribute('y2', '4');
-                vLine.setAttribute('stroke', isLight ? '#0f172a' : '#eeeeee');
+                vLine.setAttribute('stroke', '#eeeeee');
                 vLine.setAttribute('stroke-width', '1.5');
                 vLine.setAttribute('stroke-linecap', 'round');
                 toggleBtnG.appendChild(vLine);
@@ -5486,7 +5279,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const orbit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       orbit.setAttribute('cx', '60'); orbit.setAttribute('cy', '60'); orbit.setAttribute('r', '68');
       orbit.setAttribute('fill', 'none');
-      orbit.setAttribute('stroke', isLight ? 'rgba(0,0,0,0.22)' : '#3d3a39');
+      orbit.setAttribute('stroke', '#3d3a39');
       orbit.setAttribute('stroke-width', '1');
       orbit.setAttribute('stroke-dasharray', '3 5');
       orbit.classList.add('core-orbit-ring');
@@ -5601,49 +5394,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       coreG.appendChild(coreHit);
 
       canvasGroup.appendChild(coreG);
-      
-      if(appData.secondaryCore && appData.secondaryCore.active) {
-          const sucomG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); sucomG.setAttribute('transform', `translate(-60, 100)`); sucomG.classList.add('interactive-node');
-          
-          const sccBase = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          sccBase.setAttribute('cx', '60'); sccBase.setAttribute('cy', '60'); sccBase.setAttribute('r', '60');
-          sccBase.setAttribute('fill', isLight ? '#ffffff' : '#101010');
-          sccBase.style.pointerEvents = 'none';
-          sucomG.appendChild(sccBase);
-
-          const scc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          scc.setAttribute('cx', '60'); scc.setAttribute('cy', '60'); scc.setAttribute('r', '60');
-          scc.setAttribute('fill', isLight ? '#ffffff' : '#1d1a18');
-          scc.setAttribute('stroke', '#ee6018');
-          scc.setAttribute('stroke-width', '1.5');
-          scc.setAttribute('stroke-dasharray', '4,4');
-          scc.classList.add('core-bg-circle');
-          scc.style.pointerEvents = 'none';
-          sucomG.appendChild(scc);
-
-          const sccSheen = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          sccSheen.setAttribute('cx', '60'); sccSheen.setAttribute('cy', '60'); sccSheen.setAttribute('r', '60');
-          sccSheen.setAttribute('fill', isLight ? 'url(#capsule-sheen-light)' : 'url(#capsule-sheen-dark)');
-          sccSheen.style.pointerEvents = 'none';
-          sucomG.appendChild(sccSheen);
-
-          const sct = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          sct.setAttribute('x', '60'); sct.setAttribute('y', '64');
-          sct.setAttribute('fill', isLight ? '#ee6018' : '#eeeeee');
-          sct.setAttribute('text-anchor', 'middle');
-          sct.classList.add('svg-text');
-          sct.setAttribute('style', "font-size: 14px; font-weight: 400; letter-spacing: 0.12em; font-family: 'Geist Mono', monospace; pointer-events: none;");
-          sct.textContent = 'SUCOM';
-          sucomG.appendChild(sct);
-
-          const sucomHit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          sucomHit.setAttribute('cx', '60'); sucomHit.setAttribute('cy', '60'); sucomHit.setAttribute('r', '60');
-          sucomHit.setAttribute('fill', 'transparent');
-          sucomHit.style.cursor = 'pointer';
-          sucomG.appendChild(sucomHit);
-
-          canvasGroup.appendChild(sucomG);
-      }
 
       // Calcular caja delimitadora exacta de los módulos y proyectos filtrados para auto-enfoque de cámara
       if (!isDefaultState) {
@@ -6148,7 +5898,6 @@ window.toggleDailyDrawer = function() {
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
-            if(isAlertsDrawerOpen) { document.getElementById('alertsDrawer').classList.add('translate-x-full'); isAlertsDrawerOpen = false; }
             if (window.innerWidth < 768) window.closeInfoCardSafe();
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
@@ -6204,7 +5953,6 @@ window.toggleDailyDrawer = function() {
     window.openFastDailyTaskModal = function() {
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
-        if (isAlertsDrawerOpen) window.toggleAlertsDrawer();
         
         document.getElementById('fdtDescription').value = '';
         document.getElementById('fastDailyTaskModal').classList.remove('hidden');
@@ -6718,7 +6466,6 @@ window.renderDailyTasks = function() {
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
-            if(isAlertsDrawerOpen) window.toggleAlertsDrawer();
             document.getElementById('filterDrawer').classList.remove('translate-x-full');
             isFilterDrawerOpen = true;
             window.populateAdvFilters();
@@ -6920,12 +6667,6 @@ window.renderDailyTasks = function() {
     };
 
     window.populateAdvFilters = function() {
-        const modSel = document.getElementById('advFilterModule');
-        if (modSel) {
-            modSel.innerHTML = `<option value="ALL">Todos los módulos</option><option value="direct-hub">⚡ ${escapeHtml(appData.directHub.name)}</option>` + (appData.modules || []).map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join('');
-            modSel.value = activeFilterModule;
-        }
-        
         const urgSel = document.getElementById('advFilterUrgency');
         if (urgSel) urgSel.value = activeFilterUrgency;
         const prioSel = document.getElementById('advFilterPriority');
@@ -6937,11 +6678,6 @@ window.renderDailyTasks = function() {
     };
 
     window.handleAdvFilter = function() {
-        const modSel = document.getElementById('advFilterModule');
-        if (modSel) {
-            activeFilterModule = modSel.value;
-            activeFilterModules = activeFilterModule === 'ALL' ? ['ALL'] : [activeFilterModule];
-        }
         const urgSel = document.getElementById('advFilterUrgency');
         if (urgSel) activeFilterUrgency = urgSel.value;
         const prioSel = document.getElementById('advFilterPriority');

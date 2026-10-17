@@ -56,8 +56,7 @@
 
   <!-- LOGIN FACTORY: LIGHT SURFACE CARD ON OBSIDIAN CANVAS ("FLASHLIT DISPATCH") -->
   <div id="loginOverlay" class="fixed inset-0 z-[99999] bg-[#101010] hidden transition-opacity duration-200 flex items-center justify-center">
-      <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
-      <div class="factory-bone-card rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 flex flex-col items-start transform transition-all duration-200 scale-95 opacity-0 relative z-10" id="loginCard">
+      <div class="rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 flex flex-col items-start transform transition-all duration-200 scale-95 opacity-0 relative z-10" id="loginCard">
           <div class="w-full flex items-center justify-between mb-6 pb-4 border-b border-[#101010]/15">
               <div class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] inline-block"></span>
@@ -352,9 +351,6 @@
           <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5">1</span>
       </button>
 
-      <span id="alertsBadge" style="display:none;"></span>
-      <button id="themeToggleBtn" style="display:none;" onclick="toggleTheme()"></button>
-
       <div class="hidden md:flex items-center gap-1.5">
         <div class="flex bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] overflow-hidden hidden lg:flex ml-1 shrink-0">
           <button onclick="recenterCanvas()" class="px-2.5 py-1.5 hover:bg-[#3d3a39]/40 text-[#b8b3b0] hover:text-[#eeeeee] transition-colors border-r border-[#3d3a39]" title="Centrar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></button>
@@ -401,11 +397,6 @@
               <span id="mobileToggleCollapseText">Colapsar Módulos</span>
           </button>
           <div class="h-px w-full bg-[#3d3a39] my-1"></div>
-          <button id="mobileThemeToggleBtn" onclick="toggleTheme(); toggleMobileMenu()" class="supremo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-              <span id="mobileThemeText">Cambiar Tema</span>
-              <span class="ml-auto font-mono text-[9px] px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">Supremo</span>
-          </button>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
               <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
@@ -425,18 +416,6 @@
 
   <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
     <svg id="mindmapCanvas" class="w-full h-full absolute inset-0 pointer-events-none z-10">
-      <defs id="svgDefs">
-        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feComposite in="SourceGraphic" operator="over" /></filter>
-        <filter id="glow-intense" x="-50%" y="-50%" width="200%" height="200%"><feComposite in="SourceGraphic" operator="over" /></filter>
-        <linearGradient id="capsule-sheen-light" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.0"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
-        </linearGradient>
-        <linearGradient id="capsule-sheen-dark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.0"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
-        </linearGradient>
-      </defs>
       <g id="canvasGroup" class="pointer-events-auto transition-transform duration-100 ease-out"></g>
     </svg>
 
@@ -655,18 +634,6 @@
       </button>
     </div>
   </main>
-
-  <!-- DRAWER ALERTAS -->
-  <div id="alertsDrawer" class="fixed top-0 right-0 h-full w-full md:w-[400px] liquid-glass-panel z-50 transform translate-x-full drawer-transition flex flex-col">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-[#1d1a18] bg-[#101010]">
-      <div class="flex items-center gap-2.5 text-[#eeeeee]">
-        <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
-        <h2 class="font-mono text-[12px] uppercase tracking-[-0.24px]">Alertas del Sistema</h2>
-      </div>
-      <button onclick="toggleAlertsDrawer()" class="text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] p-2 rounded-[3px] border border-[#3d3a39]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
-    </div>
-    <div id="alertsListContainer" class="flex-1 overflow-y-auto p-5 scrollbar-thin space-y-3"></div>
-  </div>
 
   <!-- DRAWER ACTIVIDADES DIARIAS -->
   <div id="dailyDrawer" class="fixed top-0 left-0 h-full max-h-screen w-full md:w-[420px] liquid-glass-panel z-40 transform -translate-x-full drawer-transition flex flex-col overflow-hidden">
