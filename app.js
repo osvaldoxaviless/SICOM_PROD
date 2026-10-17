@@ -3513,34 +3513,77 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
           }
           
-          const pPill = document.createElement('button');
-          pPill.type = 'button';
-          pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#101010] border transition";
-          pPill.style.borderColor = primMod.color || '#3d3a39';
-          pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] font-normal uppercase">(Base)</span>`;
-          pPill.onclick = () => window.selectNode(primType, primMod.id);
-          modContainer.appendChild(pPill);
-
           const secList = Array.isArray(item.secondaryModules) ? item.secondaryModules : [];
-          secList.forEach(sId => {
-            let sMod = null, sType = 'module';
-            if (sId === 'DIRECT' || sId === 'hub-direct') {
-              sMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
-              sType = 'direct-hub';
-            } else {
-              sMod = (appData.modules || []).find(m => m.id === sId);
-            }
-            if (sMod) {
-              const sPill = document.createElement('button');
-              sPill.type = 'button';
-              sPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] text-[#b8b3b0] hover:text-[#eeeeee] bg-[#101010] hover:bg-[#1d1a18] border transition";
-              sPill.style.borderColor = sMod.color || '#3d3a39';
-              sPill.title = "Módulo dependiente / vinculación cruzada";
-              sPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${sMod.color || '#eeeeee'}"></span>🔗 ${escapeHtml(sMod.name)}`;
-              sPill.onclick = () => window.selectNode(sType, sMod.id);
-              modContainer.appendChild(sPill);
-            }
-          });
+          
+          if (secList.length === 0) {
+            const pPill = document.createElement('button');
+            pPill.type = 'button';
+            pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
+            pPill.style.borderColor = primMod.color || '#3d3a39';
+            pPill.title = "Módulo base donde reside el proyecto";
+            pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] font-normal uppercase">(Módulo Base)</span>`;
+            pPill.onclick = () => window.selectNode(primType, primMod.id);
+            modContainer.appendChild(pPill);
+          } else {
+            modContainer.className = "w-full mb-4 space-y-2.5";
+
+            // 1. MÓDULO BASE PRINCIPAL
+            const baseBlock = document.createElement('div');
+            baseBlock.innerHTML = `
+              <div class="font-mono text-[9px] uppercase text-[#8a8380] mb-1 tracking-wider flex items-center gap-1.5">
+                <span>MÓDULO BASE (ORIGEN)</span>
+              </div>
+            `;
+            const pPill = document.createElement('button');
+            pPill.type = 'button';
+            pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
+            pPill.style.borderColor = primMod.color || '#3d3a39';
+            pPill.title = "Módulo base principal";
+            pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)}`;
+            pPill.onclick = () => window.selectNode(primType, primMod.id);
+            baseBlock.appendChild(pPill);
+            modContainer.appendChild(baseBlock);
+
+            // 2. MÓDULOS EN CONJUNTO / IMPACTO (AFECTA A ESTOS MÓDULOS)
+            const secBlock = document.createElement('div');
+            secBlock.className = "p-2.5 rounded-[6px] bg-[#161413] border border-[#3d3a39]/80";
+            secBlock.innerHTML = `
+              <div class="flex items-center gap-1.5 font-mono text-[9px] text-[#ee6018] uppercase tracking-wider mb-2 font-medium">
+                <svg class="w-3.5 h-3.5 text-[#ee6018] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                <span>EN CONJUNTO / AFECTA A ESTOS MÓDULOS (${secList.length}):</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="infoSecPillsGroup"></div>
+              <p class="font-mono text-[9px] text-[#8a8380] mt-2 tracking-tight">Este proyecto genera sinergia y tiene impacto directo en el flujo de estos módulos.</p>
+            `;
+            const secGroup = secBlock.querySelector('#infoSecPillsGroup');
+
+            secList.forEach(sId => {
+              let sMod = null, sType = 'module';
+              if (sId === 'DIRECT' || sId === 'hub-direct') {
+                sMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+                sType = 'direct-hub';
+              } else {
+                sMod = (appData.modules || []).find(m => m.id === sId);
+              }
+              if (sMod) {
+                const sPill = document.createElement('button');
+                sPill.type = 'button';
+                sPill.className = "sec-module-pill inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#fafafa] bg-[#101010] hover:bg-[#1d1a18] border transition group";
+                sPill.style.borderColor = sMod.color || '#3d3a39';
+                sPill.title = "Clic para enfocar módulo";
+                sPill.innerHTML = `
+                  <span class="w-2 h-2 rounded-full" style="background-color: ${sMod.color || '#eeeeee'}"></span>
+                  <span class="text-[#ee6018] font-bold">🔗</span>
+                  <span>${escapeHtml(sMod.name)}</span>
+                  <span class="text-[8px] px-1 py-0.2 rounded bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/30 font-medium">AFECTA</span>
+                `;
+                sPill.onclick = () => window.selectNode(sType, sMod.id);
+                secGroup.appendChild(sPill);
+              }
+            });
+
+            modContainer.appendChild(secBlock);
+          }
         }
 
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'CONSULTOR(ES)';
@@ -4858,24 +4901,40 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (groups.length > 1) {
                 tabsBar.classList.remove('hidden');
                 const totalProjs = groups.reduce((acc, g) => acc + g.projs.length, 0);
-                let tabsHtml = `<div class="flex items-center justify-between mb-2"><span class="font-mono text-[10px] text-[#8a8380] uppercase">Seleccionar Consultor</span><span class="font-mono text-[10px] text-[#b8b3b0] uppercase">${groups.length} activos</span></div>`;
-                tabsHtml += `<div class="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin pr-0.5">`;
+                const isAllAct = activePriorityConsultantTab === 'ALL';
+                
+                let tabsHtml = `<div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-[10px] text-[#8a8380] uppercase tracking-wider">Filtrar por Consultor</span>
+                        <span class="font-mono text-[10px] text-[#ee6018] uppercase font-semibold">${groups.length} Consultores · ${totalProjs} Proys</span>
+                    </div>
+
+                    <!-- BOTÓN MASTER: VER TODOS LOS CONSULTORES (SIEMPRE VISIBLE ARRIBA) -->
+                    <button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="w-full px-3 py-2 rounded-[3px] border font-mono text-[11px] uppercase transition flex items-center justify-between select-none ${isAllAct ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018] font-semibold shadow-sm' : 'bg-[#161413] hover:bg-[#1d1a18] text-[#eeeeee] border-[#3d3a39]'}">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${isAllAct ? 'bg-[#fafafa]' : 'bg-[#ee6018]'}"></span>
+                            <span>🌐 Ver Todos los Consultores</span>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded-[2px] ${isAllAct ? 'bg-[#101010]/30 text-[#fafafa]' : 'bg-[#101010] text-[#ee6018] border border-[#3d3a39]'} font-semibold">${totalProjs}</span>
+                    </button>
+
+                    <!-- CUADRÍCULA DE CONSULTORES INDIVIDUALES -->
+                    <div class="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto scrollbar-thin pr-0.5">`;
+
                 groups.forEach(g => {
                     const isAct = activePriorityConsultantTab === g.cons;
-                    const borderStyle = isAct ? `border-color: ${g.cData.color}; background-color: #1d1a18;` : `border-color: #3d3a39; background-color: #101010;`;
-                    tabsHtml += `<button type="button" onclick="window.setPriorityConsultantTab('${jsArg(g.cons)}')" class="px-2.5 py-2 rounded-[3px] border text-left transition flex items-center justify-between gap-1.5 hover:bg-[#1d1a18]" style="${borderStyle}">
-                        <div class="flex items-center gap-2 min-w-0">
+                    const borderStyle = isAct ? `border-color: ${g.cData.color}; background-color: #1d1a18; box-shadow: 0 0 0 1px ${g.cData.color};` : `border-color: #3d3a39; background-color: #101010;`;
+                    tabsHtml += `<button type="button" onclick="window.setPriorityConsultantTab('${jsArg(g.cons)}')" class="px-2.5 py-1.5 rounded-[3px] border text-left transition flex items-center justify-between gap-1.5 hover:bg-[#1d1a18]" style="${borderStyle}">
+                        <div class="flex items-center gap-1.5 min-w-0">
                             <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
-                            <span class="font-mono text-[10px] uppercase truncate ${isAct ? 'text-[#eeeeee]' : 'text-[#b8b3b0]'}">${escapeHtml(g.cons)}</span>
+                            <span class="font-mono text-[10px] uppercase truncate ${isAct ? 'text-[#eeeeee] font-medium' : 'text-[#b8b3b0]'}">${escapeHtml(g.cons)}</span>
                         </div>
                         <span class="font-mono text-[9px] px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] shrink-0" style="color: ${isAct ? g.cData.color : '#8a8380'}">${g.projs.length}</span>
                     </button>`;
                 });
-                const isAllAct = activePriorityConsultantTab === 'ALL';
-                tabsHtml += `<button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="col-span-2 px-2.5 py-1.5 rounded-[3px] border text-center transition flex items-center justify-center gap-2 ${isAllAct ? 'bg-[#eeeeee] text-[#101010] border-[#eeeeee]' : 'bg-[#101010] hover:bg-[#1d1a18] text-[#b8b3b0] border-[#3d3a39]'}">
-                    <span class="font-mono text-[10px] uppercase">Ver Todos los Consultores (${totalProjs})</span>
-                </button>`;
-                tabsHtml += `</div>`;
+
+                tabsHtml += `</div>
+                </div>`;
                 tabsBar.innerHTML = tabsHtml;
             } else {
                 tabsBar.innerHTML = '';
@@ -4905,15 +4964,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         if (groups.length > 1 && activePriorityConsultantTab === 'ALL') {
             visibleGroups.forEach(g => {
-                h += `<details class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] mb-3 overflow-hidden" open>
-                    <summary class="flex items-center gap-2.5 p-3.5 bg-[#1d1a18] cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/30 transition" style="border-left: 2px solid ${g.cData.color};">
-                        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
-                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(g.cons)}</span>
-                        <span class="bg-[#101010] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] font-mono text-[10px] ml-auto border border-[#3d3a39]">${g.projs.length} PROYS</span>
-                        <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-                    </summary>
-                    <div class="p-3 space-y-2.5 border-t border-[#3d3a39]">${renderProjectCards(g.projs, g.cData)}</div>
-                </details>`;
+                h += `<div class="bg-[#141211] border border-[#3d3a39] rounded-[10px] overflow-hidden mb-3.5 block shrink-0">
+                    <div class="flex items-center justify-between p-3.5 bg-[#1d1a18] border-b border-[#3d3a39]" style="border-left: 3px solid ${g.cData.color};">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
+                            <span class="font-mono text-[11px] uppercase text-[#eeeeee] font-semibold tracking-wide truncate">${escapeHtml(g.cons)}</span>
+                        </div>
+                        <span class="bg-[#101010] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] font-mono text-[10px] border border-[#3d3a39] shrink-0 font-medium">${g.projs.length} PROYS</span>
+                    </div>
+                    <div class="p-3 space-y-2.5 bg-[#101010]/40">${renderProjectCards(g.projs, g.cData)}</div>
+                </div>`;
             });
         } else {
             visibleGroups.forEach(g => {

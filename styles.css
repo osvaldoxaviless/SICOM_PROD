@@ -1165,3 +1165,14 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 #desktopSearchInput:focus {
     box-shadow: 0 0 0 1px #ee6018;
 }
+
+/* ==========================================================================
+   SINERGIAS MULTIMÓDULO: EN CONJUNTO CON / AFECTA A
+   ========================================================================== */
+.sec-module-pill {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sec-module-pill:hover {
+    border-color: #ee6018 !important;
+    background-color: rgba(238, 96, 24, 0.12) !important;
+}
