@@ -1126,3 +1126,30 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     animation: riskDotPulse 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* ==========================================================================
+   DOCS BASE DRAG & DROP & EQUIPO FACTORY ENHANCEMENTS
+   ========================================================================== */
+.doc-drag-item {
+    transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.doc-drag-item.is-dragging {
+    opacity: 0.35;
+    border-color: #ee6018 !important;
+}
+
+.doc-drag-item.drag-over-top {
+    border-top: 2px solid #ee6018 !important;
+}
+
+.doc-drag-item.drag-over-bottom {
+    border-bottom: 2px solid #ee6018 !important;
+}
+
+.cons-role-pill.active {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+

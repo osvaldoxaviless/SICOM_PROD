@@ -4003,19 +4003,122 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }, 100);
     }
 
+    window.setNewConsultantColor = function(hex) {
+        const picker = document.getElementById('newConsultantColor');
+        const hexInp = document.getElementById('newConsultantColorHex');
+        if (picker) picker.value = hex;
+        if (hexInp) hexInp.value = hex.toUpperCase();
+    };
+
+    window.setEditConsultantColor = function(hex) {
+        const picker = document.getElementById('editConsColor');
+        const hexInp = document.getElementById('editConsColorHex');
+        if (picker) picker.value = hex;
+        if (hexInp) hexInp.value = hex.toUpperCase();
+    };
+
     window.registerConsultant = function() { 
         if (currentUserRole === 'Lector') return; 
         const n = document.getElementById('newConsultantName').value.trim();
+        const title = (document.getElementById('newConsultantTitle')?.value || '').trim();
         const c = document.getElementById('newConsultantColor').value; 
         const r = document.getElementById('newConsultantRole').value; 
-        if (!n || consultants[n]) return; 
-        consultants[n] = { color: c, role: r }; 
+        if (!n) {
+            window.showToast("⚠️ Ingresa el nombre del operador", true);
+            return;
+        }
+        if (consultants[n]) {
+            window.showToast("⚠️ Ya existe un operador con ese nombre", true);
+            return;
+        }
+        consultants[n] = { color: c, role: r, title: title }; 
         document.getElementById('newConsultantName').value = ''; 
+        if (document.getElementById('newConsultantTitle')) document.getElementById('newConsultantTitle').value = '';
         window.saveData(false); 
         window.populateConsultantSelects(); 
         window.renderRegisteredConsultantsList(); 
         window.renderMindMap(); 
-        window.showToast(`Consultor "${n}" registrado con éxito`, false);
+        window.showToast(`Operador "${n}" registrado con éxito`, false);
+    };
+
+    window.openEditConsultantModal = function(name) {
+        if (!consultants[name]) return;
+        const cData = consultants[name];
+        document.getElementById('editConsOldName').value = name;
+        document.getElementById('editConsName').value = name;
+        document.getElementById('editConsTitle').value = cData.title || '';
+        document.getElementById('editConsRole').value = cData.role || 'Consultor';
+        document.getElementById('editConsColor').value = cData.color || '#ee6018';
+        document.getElementById('editConsColorHex').value = (cData.color || '#ee6018').toUpperCase();
+        document.getElementById('editConsModalTitle').textContent = `Perfil: ${name}`;
+        
+        const m = document.getElementById('editConsultantModal');
+        if (m) {
+            m.classList.remove('hidden');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+    };
+
+    window.closeEditConsultantModal = function() {
+        const m = document.getElementById('editConsultantModal');
+        if (m) {
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 200);
+        }
+    };
+
+    window.confirmEditConsultant = function() {
+        if (currentUserRole === 'Lector') return;
+        const oldName = document.getElementById('editConsOldName').value;
+        const newName = document.getElementById('editConsName').value.trim();
+        const newTitle = document.getElementById('editConsTitle').value.trim();
+        const newRole = document.getElementById('editConsRole').value;
+        const newColor = document.getElementById('editConsColor').value;
+
+        if (!newName) {
+            window.showToast("⚠️ El nombre no puede estar vacío", true);
+            return;
+        }
+
+        if (newName !== oldName) {
+            if (consultants[newName]) {
+                window.showToast("⚠️ Ya existe un operador con ese nombre", true);
+                return;
+            }
+            consultants[newName] = Object.assign({}, consultants[oldName]);
+            delete consultants[oldName];
+
+            (appData.directProjects || []).forEach(p => {
+                let idx = (p.consultants || []).indexOf(oldName);
+                if (idx !== -1) p.consultants[idx] = newName;
+            });
+            (appData.modules || []).forEach(m => {
+                (m.projects || []).forEach(p => {
+                    let idx = (p.consultants || []).indexOf(oldName);
+                    if (idx !== -1) p.consultants[idx] = newName;
+                });
+            });
+
+            if (activeFilterConsultant === oldName) activeFilterConsultant = newName;
+            activeFilterConsultants = activeFilterConsultants.map(c => c === oldName ? newName : c);
+            if (localAuthor === oldName) {
+                localAuthor = newName;
+                localStorage.setItem('sicom_author', newName);
+            }
+        }
+
+        const targetName = (newName !== oldName) ? newName : oldName;
+        consultants[targetName].title = newTitle;
+        consultants[targetName].role = newRole;
+        consultants[targetName].color = newColor;
+
+        window.saveData(false);
+        window.populateConsultantSelects();
+        window.renderRegisteredConsultantsList();
+        if (isDrawerOpen && currentSelection && currentSelection.id) window.handleGlobalEditSelectionChange();
+        window.renderMindMap();
+        window.closeEditConsultantModal();
+        window.showToast(`Perfil de "${targetName}" guardado`, false);
     };
 
     window.handleUpdateExistingConsultantColor = function(name, newColor) { 
@@ -4032,6 +4135,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(consultants[name]) { 
             consultants[name].role = newRole; 
             window.saveData(false); 
+            window.renderRegisteredConsultantsList();
             window.showToast(`Rol de ${name} actualizado a ${newRole}`, false);
         } 
     };
@@ -4205,39 +4309,344 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
       document.getElementById('editConsultantsChecks').innerHTML = mkChk('editProjCons'); document.getElementById('newProjConsultantsChecks').innerHTML = mkChk('newProjCons');
     }
-    window.renderRegisteredConsultantsList = function() {
-      const all = Object.keys(consultants); document.getElementById('consultantsCountBadge').textContent = all.length;
-      document.getElementById('registeredConsultantsList').innerHTML = all.map(n => {
-        let cnt = 0; (appData.directProjects||[]).forEach(p=>{if(getProjectConsultants(p).includes(n))cnt++;}); appData.modules.forEach(m=>{(m.projects||[]).forEach(p=>{if(getProjectConsultants(p).includes(n))cnt++;});});
-        const cData = consultants[n];
-        return `<div class="flex flex-col w-full p-4 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] mb-2.5 group" style="border-left: 2px solid ${cData.color};">
-                   <div class="flex items-center justify-between gap-3 mb-2">
-                       <div class="w-9 h-9 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
-                          <input type="color" value="${cData.color}" onchange="handleUpdateExistingConsultantColor('${jsArg(n)}', this.value)" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
-                       </div>
-                       <div class="flex-1 min-w-0"><span class="text-sm text-[#eeeeee] font-normal block truncate">${escapeHtml(n)}</span><span class="font-mono text-[10px] text-[#8a8380] uppercase block mt-0.5">${cnt} proyectos</span></div>
-                       <button onclick="openPasswordModal('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#b8b3b0] hover:text-[#eeeeee] border border-transparent hover:border-[#3d3a39] rounded-[3px] transition shrink-0" title="Cambiar Contraseña"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></button>
-                       <button onclick="openRenameModal('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#b8b3b0] hover:text-[#eeeeee] border border-transparent hover:border-[#3d3a39] rounded-[3px] transition shrink-0" title="Renombrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                       <button onclick="requestDeleteConsultant('${jsArg(n)}')" class="p-2 hover:bg-[#101010] text-[#8a8380] hover:text-[#ee6018] border border-transparent hover:border-[#ee6018] rounded-[3px] transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-                   </div>
-                   <div class="flex items-center gap-2 border-t border-[#3d3a39] pt-2 mt-1">
-                       <span class="font-mono text-[9px] text-[#8a8380] uppercase">Rol asignado:</span>
-                       <select onchange="updateConsultantRole('${jsArg(n)}', this.value)" class="bg-[#101010] font-mono text-[10px] text-[#eeeeee] border border-[#3d3a39] rounded-[3px] px-2 py-0.5 focus:outline-none cursor-pointer">
-                           <option value="Consultor" ${cData.role==='Consultor'?'selected':''}>Consultor</option>
-                           <option value="Supervisor" ${cData.role==='Supervisor'?'selected':''}>Supervisor</option>
-                           <option value="Supremo" ${cData.role==='Supremo'?'selected':''}>Supremo</option>
-                           <option value="Lector" ${cData.role==='Lector'?'selected':''}>Lector</option>
-                       </select>
-                   </div>
-                </div>`}).join('');
-    }
+    let activeConsultantRoleFilter = 'ALL';
+    window.setConsultantRoleFilter = function(role) {
+        activeConsultantRoleFilter = role;
+        document.querySelectorAll('.cons-role-pill').forEach(btn => {
+            btn.classList.remove('active', 'bg-white/15', 'text-white', 'border-white/20');
+            btn.classList.add('text-[#8a8380]', 'bg-[#101010]', 'border-[#3d3a39]');
+        });
+        const curBtn = document.getElementById(`consRoleFilterBtn-${role}`);
+        if (curBtn) {
+            curBtn.classList.add('active', 'bg-white/15', 'text-white', 'border-white/20');
+            curBtn.classList.remove('text-[#8a8380]', 'bg-[#101010]', 'border-[#3d3a39]');
+        }
+        window.renderRegisteredConsultantsList();
+    };
 
-    window.registerGlobalDocument = function() { const n = document.getElementById('newDocName').value.trim(); if(!n) return; globalDocs.push({ id: 'doc_'+Date.now(), name: n }); document.getElementById('newDocName').value = ''; window.saveData(false); window.renderRegisteredDocsList(); }
+    window.renderRegisteredConsultantsList = function() {
+        const listEl = document.getElementById('registeredConsultantsList');
+        if (!listEl) return;
+        
+        let all = Object.keys(consultants);
+        const countBadge = document.getElementById('consultantsCountBadge');
+        if (countBadge) countBadge.textContent = all.length;
+
+        // Filtro por rol
+        if (activeConsultantRoleFilter !== 'ALL') {
+            all = all.filter(n => (consultants[n] && consultants[n].role === activeConsultantRoleFilter));
+        }
+
+        // Búsqueda en vivo
+        const searchInp = document.getElementById('searchConsultantInput');
+        const term = searchInp ? searchInp.value.trim().toLowerCase() : '';
+        if (term) {
+            all = all.filter(n => {
+                const cData = consultants[n] || {};
+                const title = (cData.title || '').toLowerCase();
+                const role = (cData.role || '').toLowerCase();
+                return n.toLowerCase().includes(term) || title.includes(term) || role.includes(term);
+            });
+        }
+
+        if (all.length === 0) {
+            listEl.innerHTML = `<div class="text-center py-10 opacity-50"><p class="font-mono text-[11px] text-[#8a8380] uppercase">No se encontraron operadores.</p></div>`;
+            return;
+        }
+
+        const todayZero = new Date(new Date().setHours(0,0,0,0)).getTime();
+
+        listEl.innerHTML = all.map(n => {
+            const cData = consultants[n] || { color: '#ee6018', role: 'Consultor' };
+            
+            let pCount = 0;
+            let inValCount = 0;
+            let overdueCount = 0;
+
+            const checkP = (p) => {
+                if (getProjectConsultants(p).includes(n)) {
+                    pCount++;
+                    if (p.deadline && p.status !== 'Completado') {
+                        const parts = p.deadline.split('-');
+                        if (parts.length === 3) {
+                            const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getTime();
+                            if (dt < todayZero) overdueCount++;
+                        }
+                    }
+                    (p.tasks || []).forEach(t => {
+                        if ((t.assignee === n || (!t.assignee && getProjectConsultants(p).includes(n))) && t.done === 'pending') {
+                            inValCount++;
+                        }
+                    });
+                }
+            };
+
+            (appData.directProjects || []).forEach(checkP);
+            (appData.modules || []).forEach(m => { (m.projects || []).forEach(checkP); });
+
+            (appData.globalTasks || []).forEach(t => {
+                if (t.assignee === n && t.done === 'pending') inValCount++;
+            });
+            (appData.dailyTasks || []).forEach(t => {
+                if (t.assignee === n && t.done === 'pending') inValCount++;
+            });
+
+            const initials = n.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'OP';
+
+            const displayTitle = cData.title || (
+                cData.role === 'Supremo' ? 'Dirección Técnica & Arquitectura' :
+                (cData.role === 'Supervisor' ? 'Supervisor Operativo & Calidad' :
+                (cData.role === 'Lector' ? 'Auditoría / Vista Ejecutiva' : 'Consultor Especialista'))
+            );
+
+            let roleBadgeStyle = 'text-[#ee6018] bg-[#ee6018]/10 border-[#ee6018]/30';
+            let roleIcon = '⚡';
+            if (cData.role === 'Supremo') {
+                roleBadgeStyle = 'text-[#0071e3] bg-[#0071e3]/10 border-[#0071e3]/30';
+                roleIcon = '👑';
+            } else if (cData.role === 'Supervisor') {
+                roleBadgeStyle = 'text-[#30d158] bg-[#30d158]/10 border-[#30d158]/30';
+                roleIcon = '🛡️';
+            } else if (cData.role === 'Lector') {
+                roleBadgeStyle = 'text-[#8e8e93] bg-[#8e8e93]/10 border-[#8e8e93]/30';
+                roleIcon = '👁️';
+            }
+
+            return `
+            <div class="flex flex-col w-full p-3 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] mb-2 hover:border-[#4d4947] transition group" style="border-left: 3px solid ${cData.color};">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="relative shrink-0">
+                        <div class="w-9 h-9 rounded-full bg-[#101010] flex items-center justify-center font-mono font-bold text-[11px] text-[#eeeeee] transition shadow-inner select-none" style="border: 2px solid ${cData.color};" title="Operador: ${escapeHtml(n)}">
+                            ${escapeHtml(initials)}
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#30d158] absolute bottom-0 right-0 border-2 border-[#1d1a18]" title="Activo"></span>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs font-medium text-[#eeeeee] truncate">${escapeHtml(n)}</span>
+                            <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] border ${roleBadgeStyle}">
+                                ${roleIcon} ${escapeHtml(cData.role || 'Consultor')}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-[#8a8380] truncate mt-0.5 font-normal">${escapeHtml(displayTitle)}</p>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="window.filterConsultant('${jsArg(n)}')" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#101010] rounded-[3px] border border-transparent hover:border-[#3d3a39] transition" title="Ver proyectos en el Mapa">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        </button>
+                        <button onclick="openEditConsultantModal('${jsArg(n)}')" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#101010] rounded-[3px] border border-transparent hover:border-[#3d3a39] transition" title="Editar Perfil y Cargo">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button onclick="openPasswordModal('${jsArg(n)}')" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#101010] rounded-[3px] border border-transparent hover:border-[#3d3a39] transition" title="Seguridad / Cambiar PIN">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        </button>
+                        <button onclick="requestDeleteConsultant('${jsArg(n)}')" class="p-1.5 text-[#8a8380] hover:text-[#ee6018] hover:bg-[#101010] rounded-[3px] border border-transparent hover:border-[#ee6018] transition" title="Eliminar Operador">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 mt-2 pt-1.5 border-t border-[#3d3a39]/60 text-[9px] font-mono text-[#8a8380] flex-wrap justify-between">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="flex items-center gap-1 text-[#b8b3b0]">
+                            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cData.color}"></span>
+                            ${pCount} ${pCount === 1 ? 'proyecto' : 'proyectos'}
+                        </span>
+                        ${inValCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/30 flex items-center gap-1">⏳ ${inValCount} en validación</span>` : ''}
+                        ${overdueCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1">🚨 ${overdueCount} atrasados</span>` : ''}
+                    </div>
+                    <button type="button" onclick="window.filterConsultant('${jsArg(n)}')" class="text-[9px] uppercase text-[#8a8380] hover:text-[#eeeeee] transition font-mono">
+                        Aislar en Mapa →
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    let draggedDocIndex = null;
+
+    window.handleDocDragStart = function(e, idx) {
+        draggedDocIndex = idx;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', idx);
+        const card = e.currentTarget;
+        setTimeout(() => {
+            if (card) card.classList.add('is-dragging');
+        }, 0);
+    };
+
+    window.handleDocDragEnd = function(e) {
+        draggedDocIndex = null;
+        document.querySelectorAll('.doc-drag-item').forEach(el => {
+            el.classList.remove('is-dragging', 'drag-over-top', 'drag-over-bottom');
+        });
+    };
+
+    window.handleDocDragOver = function(e, idx) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.currentTarget;
+        const rect = target.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+            target.classList.add('drag-over-top');
+            target.classList.remove('drag-over-bottom');
+        } else {
+            target.classList.add('drag-over-bottom');
+            target.classList.remove('drag-over-top');
+        }
+    };
+
+    window.handleDocDragLeave = function(e) {
+        const target = e.currentTarget;
+        target.classList.remove('drag-over-top', 'drag-over-bottom');
+    };
+
+    window.handleDocDrop = function(e, targetIdx) {
+        e.preventDefault();
+        if (draggedDocIndex === null || draggedDocIndex === targetIdx) {
+            window.handleDocDragEnd(e);
+            return;
+        }
+        const target = e.currentTarget;
+        const rect = target.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        let insertIdx = (e.clientY < midY) ? targetIdx : targetIdx + 1;
+        
+        const item = globalDocs.splice(draggedDocIndex, 1)[0];
+        if (draggedDocIndex < insertIdx) {
+            insertIdx--;
+        }
+        globalDocs.splice(insertIdx, 0, item);
+        window.saveData(false);
+        window.renderRegisteredDocsList();
+    };
+
+    window.getDocPhase = function(doc, idx) {
+        if (doc && doc.phase) return doc.phase;
+        const name = ((doc && doc.name) || '').toLowerCase();
+        if (name.includes('propuesta') || name.includes('contrato') || name.includes('plano') || name.includes('plan de trabajo') || name.includes('alcance')) {
+            return 'Fase 1: Contractual';
+        }
+        if (name.includes('prueba') || name.includes('validación') || name.includes('matriz') || name.includes('qa')) {
+            return 'Fase 2: Calidad';
+        }
+        if (name.includes('comité') || name.includes('capacitación') || name.includes('liberación') || name.includes('factura') || name.includes('cierre')) {
+            return 'Fase 3: Cierre';
+        }
+        return idx < 4 ? 'Fase 1: Contractual' : (idx < 7 ? 'Fase 2: Calidad' : 'Fase 3: Cierre');
+    };
+
+    window.registerGlobalDocument = function() { 
+        const n = document.getElementById('newDocName').value.trim(); 
+        if (!n) {
+            window.showToast("⚠️ Ingresa el nombre del documento", true);
+            return; 
+        }
+        const phaseEl = document.getElementById('newDocPhase');
+        const phase = phaseEl ? phaseEl.value : 'Fase 1: Contractual';
+        globalDocs.push({ id: 'doc_' + Date.now(), name: n, phase: phase }); 
+        document.getElementById('newDocName').value = ''; 
+        window.saveData(false); 
+        window.renderRegisteredDocsList(); 
+        window.showToast(`Requisito "${n}" registrado`, false);
+    };
+
     window.renderRegisteredDocsList = function() {
-        document.getElementById('registeredDocsList').innerHTML = globalDocs.map((d, i) => `<div class="flex items-center p-3 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] gap-2.5 mb-2"><div class="flex flex-col gap-1 shrink-0"><button onclick="moveDoc(${i}, -1)" class="text-[#b8b3b0] hover:text-[#101010] bg-[#101010] hover:bg-[#eeeeee] border border-[#3d3a39] rounded-[2px] p-0.5 text-[9px] transition">&uarr;</button><button onclick="moveDoc(${i}, 1)" class="text-[#b8b3b0] hover:text-[#101010] bg-[#101010] hover:bg-[#eeeeee] border border-[#3d3a39] rounded-[2px] p-0.5 text-[9px] transition">&darr;</button></div><span class="font-mono text-[10px] text-[#b8b3b0] bg-[#101010] px-2 py-1 rounded-[3px] shrink-0 border border-[#3d3a39]">${String(i+1).padStart(2, '0')}</span><input type="text" value="${escapeHtml(d.name)}" onchange="globalDocs[${i}].name=this.value; saveData(false);" class="bg-transparent border border-transparent hover:border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] text-xs text-[#eeeeee] font-normal w-full p-2 focus:outline-none transition"><button onclick="deleteDoc('${d.id}')" class="p-2 hover:bg-[#101010] text-[#8a8380] hover:text-[#ee6018] border border-transparent hover:border-[#ee6018] rounded-[3px] transition shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div>`).join('');
-    }
-    window.moveDoc = function(idx, dir) { if(idx+dir < 0 || idx+dir >= globalDocs.length) return; const t = globalDocs[idx]; globalDocs[idx] = globalDocs[idx+dir]; globalDocs[idx+dir] = t; window.saveData(false); window.renderRegisteredDocsList(); }
-    window.deleteDoc = function(id) { globalDocs = globalDocs.filter(d => d.id !== id); window.saveData(false); window.renderRegisteredDocsList(); }
+        const listEl = document.getElementById('registeredDocsList');
+        if (!listEl) return;
+
+        if (!globalDocs || globalDocs.length === 0) {
+            listEl.innerHTML = `<div class="text-center py-10 opacity-50"><p class="font-mono text-[11px] text-[#8a8380] uppercase">No hay documentos base configurados.</p></div>`;
+            return;
+        }
+
+        let totalProjects = (appData.directProjects || []).length;
+        (appData.modules || []).forEach(m => { totalProjects += (m.projects || []).length; });
+
+        listEl.innerHTML = globalDocs.map((d, i) => {
+            const phase = window.getDocPhase(d, i);
+            let phaseStyle = 'text-[#5ac8fa] bg-[#5ac8fa]/10 border-[#5ac8fa]/30';
+            if (phase.includes('Calidad')) {
+                phaseStyle = 'text-[#ffd60a] bg-[#ffd60a]/10 border-[#ffd60a]/30';
+            } else if (phase.includes('Cierre')) {
+                phaseStyle = 'text-[#a0ca92] bg-[#a0ca92]/10 border-[#a0ca92]/30';
+            }
+
+            let validatedIn = 0;
+            (appData.directProjects || []).forEach(p => {
+                if (p.docs && p.docs[d.id] && (p.docs[d.id].checked || (p.docs[d.id].na && p.docs[d.id].naValidated))) validatedIn++;
+            });
+            (appData.modules || []).forEach(m => {
+                (m.projects || []).forEach(p => {
+                    if (p.docs && p.docs[d.id] && (p.docs[d.id].checked || (p.docs[d.id].na && p.docs[d.id].naValidated))) validatedIn++;
+                });
+            });
+            const pct = totalProjects > 0 ? Math.round((validatedIn / totalProjects) * 100) : 0;
+
+            return `
+            <div class="doc-drag-item flex flex-col p-2.5 bg-[#1d1a18] rounded-[10px] border border-[#3d3a39] mb-2 hover:border-[#4d4947] transition select-none"
+                 draggable="true"
+                 ondragstart="handleDocDragStart(event, ${i})"
+                 ondragend="handleDocDragEnd(event)"
+                 ondragover="handleDocDragOver(event, ${i})"
+                 ondragleave="handleDocDragLeave(event)"
+                 ondrop="handleDocDrop(event, ${i})">
+                
+                <div class="flex items-center gap-2">
+                    <div class="cursor-grab active:cursor-grabbing text-[#4d4947] hover:text-[#8a8380] transition p-1 shrink-0" title="Arrastra hacia arriba o abajo para reordenar">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+                    </div>
+
+                    <span class="font-mono text-[9px] text-[#b8b3b0] bg-[#101010] px-1.5 py-0.5 rounded-[3px] shrink-0 border border-[#3d3a39] select-none">
+                        ${String(i+1).padStart(2, '0')}
+                    </span>
+
+                    <div class="flex-1 min-w-0">
+                        <input type="text" value="${escapeHtml(d.name)}" 
+                               onchange="globalDocs[${i}].name=this.value; saveData(false);" 
+                               class="bg-transparent border border-transparent hover:border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] text-xs text-[#eeeeee] font-normal w-full p-1 focus:outline-none transition" 
+                               title="Clic para editar el nombre">
+                    </div>
+
+                    <div class="flex items-center gap-0.5 shrink-0">
+                        <button onclick="moveDoc(${i}, -1)" ${i === 0 ? 'disabled' : ''} class="p-1 rounded-[3px] transition ${i === 0 ? 'opacity-20 cursor-not-allowed text-[#4d4947]' : 'text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#101010]'}" title="Subir">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button onclick="moveDoc(${i}, 1)" ${i === globalDocs.length - 1 ? 'disabled' : ''} class="p-1 rounded-[3px] transition ${i === globalDocs.length - 1 ? 'opacity-20 cursor-not-allowed text-[#4d4947]' : 'text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#101010]'}" title="Bajar">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+
+                    <button onclick="deleteDoc('${d.id}')" class="p-1 text-[#8a8380] hover:text-[#ee6018] hover:bg-[#101010] rounded-[3px] transition shrink-0" title="Eliminar requisito">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between text-[9px] font-mono mt-1.5 pt-1.5 border-t border-[#3d3a39]/60 text-[#8a8380] pl-6">
+                    <span class="px-1.5 py-0.2 rounded-[2px] border ${phaseStyle}">${escapeHtml(phase)}</span>
+                    <span class="text-[#8a8380]">Validado en <b class="text-[#eeeeee]">${validatedIn}/${totalProjects}</b> proyectos (${pct}%)</span>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    window.moveDoc = function(idx, dir) { 
+        if(idx+dir < 0 || idx+dir >= globalDocs.length) return; 
+        const t = globalDocs[idx]; 
+        globalDocs[idx] = globalDocs[idx+dir]; 
+        globalDocs[idx+dir] = t; 
+        window.saveData(false); 
+        window.renderRegisteredDocsList(); 
+    };
+
+    window.deleteDoc = function(id) { 
+        globalDocs = globalDocs.filter(d => d.id !== id); 
+        window.saveData(false); 
+        window.renderRegisteredDocsList(); 
+    };
 
     let activePriorityConsultantTab = null;
     window.setPriorityConsultantTab = function(cons) {

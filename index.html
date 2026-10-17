@@ -255,6 +255,64 @@
       </div>
   </div>
 
+  <!-- MODAL EDITAR PERFIL COMPLETO CONSULTOR -->
+  <div id="editConsultantModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+      <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
+          <div class="flex items-center gap-2 mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+              <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">PERFIL DE OPERADOR</span>
+          </div>
+          <h3 class="text-xl font-normal text-[#eeeeee] leading-tight mb-1" id="editConsModalTitle">Editar Operador</h3>
+          <p class="text-xs text-[#8a8380] mb-4">Personaliza la identidad técnica, cargo y nivel de acceso.</p>
+          <input type="hidden" id="editConsOldName">
+          
+          <div class="space-y-3.5 mb-5">
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nombre Completo</label>
+                  <input type="text" id="editConsName" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Nombre del consultor...">
+              </div>
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Cargo / Especialidad Técnica</label>
+                  <input type="text" id="editConsTitle" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. Consultor Funcional ERP, Líder Técnico...">
+              </div>
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nivel de Permisos (Rol)</label>
+                  <select id="editConsRole" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                      <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
+                      <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
+                      <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
+                      <option value="Lector">Lector (Solo vista - Para jefatura)</option>
+                  </select>
+              </div>
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Color Identificador</label>
+                  <div class="flex items-center gap-2.5">
+                      <div class="w-9 h-9 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
+                          <input type="color" id="editConsColor" onchange="document.getElementById('editConsColorHex').value=this.value" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
+                      </div>
+                      <input type="text" id="editConsColorHex" class="flex-1 liquid-input rounded-[3px] p-2 text-xs font-mono uppercase" readonly>
+                  </div>
+                  <!-- Pastillas de Colores Factory -->
+                  <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <button type="button" onclick="setEditConsultantColor('#ee6018')" class="w-4 h-4 rounded-[2px] bg-[#ee6018] border border-[#3d3a39] hover:scale-115 transition" title="Naranja Industrial"></button>
+                      <button type="button" onclick="setEditConsultantColor('#0071e3')" class="w-4 h-4 rounded-[2px] bg-[#0071e3] border border-[#3d3a39] hover:scale-115 transition" title="Azul Cobalto"></button>
+                      <button type="button" onclick="setEditConsultantColor('#30d158')" class="w-4 h-4 rounded-[2px] bg-[#30d158] border border-[#3d3a39] hover:scale-115 transition" title="Verde Esmeralda"></button>
+                      <button type="button" onclick="setEditConsultantColor('#ffd60a')" class="w-4 h-4 rounded-[2px] bg-[#ffd60a] border border-[#3d3a39] hover:scale-115 transition" title="Amarillo Táctico"></button>
+                      <button type="button" onclick="setEditConsultantColor('#bf5af2')" class="w-4 h-4 rounded-[2px] bg-[#bf5af2] border border-[#3d3a39] hover:scale-115 transition" title="Púrpura Neón"></button>
+                      <button type="button" onclick="setEditConsultantColor('#ff375f')" class="w-4 h-4 rounded-[2px] bg-[#ff375f] border border-[#3d3a39] hover:scale-115 transition" title="Magenta"></button>
+                      <button type="button" onclick="setEditConsultantColor('#ff9f0a')" class="w-4 h-4 rounded-[2px] bg-[#ff9f0a] border border-[#3d3a39] hover:scale-115 transition" title="Ámbar"></button>
+                      <button type="button" onclick="setEditConsultantColor('#5ac8fa')" class="w-4 h-4 rounded-[2px] bg-[#5ac8fa] border border-[#3d3a39] hover:scale-115 transition" title="Cian Eléctrico"></button>
+                  </div>
+              </div>
+          </div>
+
+          <div class="flex gap-2.5">
+              <button onclick="closeEditConsultantModal()" class="flex-1 py-2.5 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
+              <button onclick="confirmEditConsultant()" class="flex-1 py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] uppercase rounded-[3px] transition">Guardar Perfil</button>
+          </div>
+      </div>
+  </div>
+
   <!-- MODAL ASIGNAR TAREA POR PROYECTO -->
   <div id="globalTaskModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
@@ -1302,19 +1360,30 @@
             </div>
         </div>
 
-        <!-- CONSULTORES -->
-        <div id="tab-consultants" class="tab-content hidden space-y-6">
-          <div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] p-5 mb-6">
-            <h3 class="font-mono text-[11px] text-[#eeeeee] uppercase mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Nuevo Consultor</h3>
-            <div class="space-y-4">
+        <!-- CONSULTORES / EQUIPO -->
+        <div id="tab-consultants" class="tab-content hidden space-y-5">
+          <!-- FORMULARIO PLEGABLE: NUEVO OPERADOR -->
+          <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+            <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#252220]">
+              <span class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> + Registrar Nuevo Operador
+              </span>
+              <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <div class="p-4 border-t border-[#3d3a39] bg-[#101010] space-y-3 text-xs">
               <div>
-                 <label class="font-mono text-[10px] text-[#b8b3b0] uppercase block mb-1.5">Nombre</label>
-                 <input type="text" id="newConsultantName" placeholder="Ej. Carlos" class="w-full liquid-input rounded-[3px] p-3 text-sm">
+                 <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Nombre Completo</label>
+                 <input type="text" id="newConsultantName" placeholder="Ej. Carlos Islas" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]">
+              </div>
+
+              <div>
+                 <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Cargo / Especialidad Técnica</label>
+                 <input type="text" id="newConsultantTitle" placeholder="Ej. Consultor Funcional ERP, Líder Técnico..." class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]">
               </div>
               
               <div>
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase block mb-1.5">Nivel de Permisos</label>
-                  <select id="newConsultantRole" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none cursor-pointer text-[#eeeeee]">
+                  <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Nivel de Permisos</label>
+                  <select id="newConsultantRole" class="w-full liquid-input rounded-[3px] p-2 text-xs appearance-none cursor-pointer text-[#eeeeee]">
                       <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
                       <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
                       <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
@@ -1323,39 +1392,94 @@
               </div>
 
               <div>
-                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase block mb-1.5">Color Identificador</label>
-                  <div class="flex gap-3">
-                      <div class="w-11 h-11 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
-                          <input type="color" id="newConsultantColor" value="#ee6018" onchange="document.getElementById('newConsultantColorHex').value=this.value" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0">
+                  <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Color Identificador</label>
+                  <div class="flex gap-2.5 items-center">
+                      <div class="w-8 h-8 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
+                          <input type="color" id="newConsultantColor" value="#ee6018" onchange="document.getElementById('newConsultantColorHex').value=this.value" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0">
                       </div>
-                      <input type="text" id="newConsultantColorHex" value="#EE6018" class="flex-1 liquid-input rounded-[3px] p-3 text-sm font-mono uppercase" readonly>
+                      <input type="text" id="newConsultantColorHex" value="#EE6018" class="flex-1 liquid-input rounded-[3px] p-2 text-xs font-mono uppercase" readonly>
+                  </div>
+                  <!-- Pastillas de Colores Factory -->
+                  <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <button type="button" onclick="setNewConsultantColor('#ee6018')" class="w-4 h-4 rounded-[2px] bg-[#ee6018] border border-[#3d3a39] hover:scale-115 transition" title="Naranja Industrial"></button>
+                      <button type="button" onclick="setNewConsultantColor('#0071e3')" class="w-4 h-4 rounded-[2px] bg-[#0071e3] border border-[#3d3a39] hover:scale-115 transition" title="Azul Cobalto"></button>
+                      <button type="button" onclick="setNewConsultantColor('#30d158')" class="w-4 h-4 rounded-[2px] bg-[#30d158] border border-[#3d3a39] hover:scale-115 transition" title="Verde Esmeralda"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ffd60a')" class="w-4 h-4 rounded-[2px] bg-[#ffd60a] border border-[#3d3a39] hover:scale-115 transition" title="Amarillo Táctico"></button>
+                      <button type="button" onclick="setNewConsultantColor('#bf5af2')" class="w-4 h-4 rounded-[2px] bg-[#bf5af2] border border-[#3d3a39] hover:scale-115 transition" title="Púrpura Neón"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ff375f')" class="w-4 h-4 rounded-[2px] bg-[#ff375f] border border-[#3d3a39] hover:scale-115 transition" title="Magenta"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ff9f0a')" class="w-4 h-4 rounded-[2px] bg-[#ff9f0a] border border-[#3d3a39] hover:scale-115 transition" title="Ámbar"></button>
+                      <button type="button" onclick="setNewConsultantColor('#5ac8fa')" class="w-4 h-4 rounded-[2px] bg-[#5ac8fa] border border-[#3d3a39] hover:scale-115 transition" title="Cian Eléctrico"></button>
                   </div>
               </div>
-              <button onclick="registerConsultant()" class="pill-btn w-full py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] mt-2">Registrar Operador →</button>
+              <button onclick="registerConsultant()" class="pill-btn w-full py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] mt-1">Registrar Operador →</button>
             </div>
-          </div>
-          <div>
-            <div class="flex justify-between items-center mb-4 px-1">
-                <h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Operadores Activos</h3>
+          </details>
+
+          <!-- BARRA DE BÚSQUEDA Y FILTROS DE ROL -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#30d158]"></span>
+                    <h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Operadores Activos</h3>
+                </div>
                 <span id="consultantsCountBadge" class="bg-[#1d1a18] text-[#eeeeee] font-mono text-[10px] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">0</span>
             </div>
-            <div id="registeredConsultantsList" class="space-y-2.5"></div>
+
+            <div class="relative">
+                <input type="text" id="searchConsultantInput" oninput="renderRegisteredConsultantsList()" placeholder="Buscar por nombre, cargo o rol..." class="w-full liquid-input rounded-[3px] p-2 pl-2.5 pr-7 text-xs text-[#eeeeee]">
+                <button onclick="document.getElementById('searchConsultantInput').value=''; renderRegisteredConsultantsList();" class="absolute right-2 top-2 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar">✕</button>
+            </div>
+
+            <!-- FILTRO POR ROLES -->
+            <div class="flex gap-1 overflow-x-auto scrollbar-thin pb-0.5">
+                <button type="button" onclick="setConsultantRoleFilter('ALL')" id="consRoleFilterBtn-ALL" class="cons-role-pill active px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition bg-white/15 text-white border border-white/20 shrink-0">Todos</button>
+                <button type="button" onclick="setConsultantRoleFilter('Supremo')" id="consRoleFilterBtn-Supremo" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Supremos</button>
+                <button type="button" onclick="setConsultantRoleFilter('Supervisor')" id="consRoleFilterBtn-Supervisor" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Supervisores</button>
+                <button type="button" onclick="setConsultantRoleFilter('Consultor')" id="consRoleFilterBtn-Consultor" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Consultores</button>
+                <button type="button" onclick="setConsultantRoleFilter('Lector')" id="consRoleFilterBtn-Lector" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Lectores</button>
+            </div>
           </div>
+
+          <div id="registeredConsultantsList" class="space-y-2"></div>
         </div>
 
-        <!-- DOC GENERAL -->
-        <div id="tab-docs" class="tab-content hidden space-y-6">
-           <div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] p-5 mb-6">
-               <h3 class="font-mono text-[11px] text-[#eeeeee] uppercase mb-2 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Nuevo Documento Base</h3>
-               <p class="text-xs text-[#8a8380] mb-4 leading-relaxed">Agrega requisitos normativos para el cálculo automático de avance.</p>
-               <div class="space-y-3">
-                   <input type="text" id="newDocName" placeholder="Ej. Contrato..." class="w-full liquid-input rounded-[3px] p-3 text-sm">
-                   <button onclick="registerGlobalDocument()" class="pill-btn w-full py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px]">Añadir Requisito →</button>
+        <!-- DOC GENERAL / REQUISITOS NORMATIVOS -->
+        <div id="tab-docs" class="tab-content hidden space-y-5">
+           <!-- FORMULARIO PLEGABLE: NUEVO DOCUMENTO BASE -->
+           <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+             <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#252220]">
+               <span class="flex items-center gap-2">
+                 <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> + Nuevo Documento Base (ISO)
+               </span>
+               <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+             </summary>
+             <div class="p-4 border-t border-[#3d3a39] bg-[#101010] space-y-3 text-xs">
+               <p class="text-[#8a8380] leading-relaxed">Agrega requisitos normativos obligatorios para el cálculo automático de avance del proyecto.</p>
+               <div>
+                   <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Nombre del Requisito / Entregable</label>
+                   <input type="text" id="newDocName" placeholder="Ej. Acta de Aceptación Técnica..." class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]">
                </div>
-           </div>
+               <div>
+                   <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Fase de Entrega</label>
+                   <select id="newDocPhase" class="w-full liquid-input rounded-[3px] p-2 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                       <option value="Fase 1: Contractual">Fase 1: Contractual & Definición</option>
+                       <option value="Fase 2: Calidad">Fase 2: Ejecución & Pruebas</option>
+                       <option value="Fase 3: Cierre">Fase 3: Cierre & Facturación</option>
+                   </select>
+               </div>
+               <button onclick="registerGlobalDocument()" class="pill-btn w-full py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] mt-1">Añadir Requisito →</button>
+             </div>
+           </details>
+
            <div>
-               <div class="flex justify-between px-1 mb-3"><h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Documentos Actuales</h3></div>
-               <div id="registeredDocsList" class="space-y-2 max-h-72 overflow-y-auto scrollbar-thin"></div>
+               <div class="flex justify-between items-center px-1 mb-2.5">
+                   <div class="flex items-center gap-2">
+                       <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
+                       <h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Requisitos Normativos Actuales</h3>
+                   </div>
+                   <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">⠿ Arrastra para reordenar</span>
+               </div>
+               <div id="registeredDocsList" class="space-y-2"></div>
            </div>
         </div>
       </div>
