@@ -247,6 +247,24 @@ select.bg-transparent.appearance-none {
     border-color: var(--color-ash-stroke) !important;
 }
 
+/* Tarjetas Bone de Superficie Clara Factory (#eeeeee sobre fondo #101010) */
+.factory-bone-card {
+    background-color: var(--color-bone) !important;
+    color: var(--color-obsidian-canvas) !important;
+    border: 1px solid rgba(61, 58, 57, 0.25) !important;
+    border-radius: var(--radius-cards) !important;
+    box-shadow: none !important;
+}
+
+.factory-bone-card #infoTitle,
+.factory-bone-card h3 {
+    color: var(--color-obsidian-canvas) !important;
+}
+
+.factory-bone-card #infoType {
+    color: #4d4947 !important;
+}
+
 /* Inputs Técnicos en Superficies Oscuras */
 .liquid-input {
     background: var(--color-obsidian-canvas) !important;
@@ -497,6 +515,45 @@ body.show-all-sec-links .secondary-module-connector {
     box-shadow: none !important;
 }
 
+.filter-chip.blocked {
+    opacity: 0.45;
+    border-color: rgba(255, 69, 58, 0.35) !important;
+    color: #ff6b6b !important;
+    background: rgba(255, 69, 58, 0.05) !important;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 69, 58, 0.5);
+}
+
+.filter-chip.blocked:hover {
+    background: rgba(255, 69, 58, 0.08) !important;
+    border-color: rgba(255, 69, 58, 0.5) !important;
+    color: #ff8585 !important;
+}
+
+.filter-chip .chip-count {
+    font-size: 8.5px;
+    font-family: 'Geist Mono', monospace;
+    font-weight: 500;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: #101010;
+    color: #8a8380;
+    margin-left: 3px;
+    pointer-events: none;
+}
+
+.filter-chip.active .chip-count {
+    background: #101010;
+    color: #eeeeee;
+}
+
+.filter-chip.blocked .chip-count {
+    background: rgba(255, 69, 58, 0.15) !important;
+    color: #ff453a !important;
+    border: 1px solid rgba(255, 69, 58, 0.3);
+}
+
 /* Botón colapso/expansión interactivo en el nodo del módulo */
 .mod-toggle-btn {
     cursor: pointer;
@@ -622,24 +679,40 @@ body.show-all-sec-links .secondary-module-connector {
     -webkit-touch-callout: default !important;
 }
 
+/* Ocultar botones flotantes de la izquierda cuando el drawer de actividades está abierto (Universal para cualquier resolución) */
+body:has(#dailyDrawer:not(.-translate-x-full)) #btnDailyTasks,
+body:has(#dailyDrawer:not(.-translate-x-full)) #btnManual,
+body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(12px) scale(0.95);
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @media (max-width: 767px), (orientation: landscape) and (max-height: 520px) {
     body.info-card-open #speedDial,
     body.info-card-open #btnDailyTasks,
     body.info-card-open #btnManual,
+    body.info-card-open #canvasZoomWidget,
     body:has(#infoCard:not(.hidden)) #speedDial,
     body:has(#infoCard:not(.hidden)) #btnDailyTasks,
     body:has(#infoCard:not(.hidden)) #btnManual,
+    body:has(#infoCard:not(.hidden)) #canvasZoomWidget,
     body:has(#dailyDrawer:not(.-translate-x-full)) #btnDailyTasks,
     body:has(#dailyDrawer:not(.-translate-x-full)) #btnManual,
+    body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget,
     body:has(#dailyDrawer:not(.-translate-x-full)) #speedDial,
     body:has(#configDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#configDrawer:not(.translate-x-full)) #btnManual,
+    body:has(#configDrawer:not(.translate-x-full)) #canvasZoomWidget,
     body:has(#configDrawer:not(.translate-x-full)) #speedDial,
     body:has(#priorityDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#priorityDrawer:not(.translate-x-full)) #btnManual,
+    body:has(#priorityDrawer:not(.translate-x-full)) #canvasZoomWidget,
     body:has(#priorityDrawer:not(.translate-x-full)) #speedDial,
     body:has(#filterDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#filterDrawer:not(.translate-x-full)) #btnManual,
+    body:has(#filterDrawer:not(.translate-x-full)) #canvasZoomWidget,
     body:has(#filterDrawer:not(.translate-x-full)) #speedDial {
         opacity: 0 !important;
         pointer-events: none !important;
@@ -770,6 +843,17 @@ body.show-all-sec-links .secondary-module-connector {
         left: 0.65rem !important;
         width: 2.5rem !important;
         height: 2.5rem !important;
+    }
+
+    #canvasZoomWidget {
+        bottom: 6.85rem !important;
+        left: 0.65rem !important;
+        width: 2.5rem !important;
+    }
+
+    #canvasZoomWidget button {
+        width: 2.5rem !important;
+        height: 1.85rem !important;
     }
 
     #configDrawer,

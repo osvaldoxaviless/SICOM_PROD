@@ -836,7 +836,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const card = document.getElementById('infoCard');
             if (!card || card.classList.contains('hidden')) return;
             if (currentSelection.type !== 'project' && currentSelection.type !== 'direct-project') return;
-            const item = getSelectedItem(); if (!item) return;
+            const item = getSelectedItem();
+            if (!item) {
+                window.closeInfoCardSafe(true);
+                currentSelection = { type: null, id: null };
+                return;
+            }
             const n = Array.isArray(item.notes) ? item.notes : [];
             const sig = n.length + ':' + (n.length ? n[n.length - 1].id : '');
             if (card.dataset.notesSig === sig) return; // sin cambios: no mover el scroll del lector
@@ -1044,11 +1049,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             return;
         }
         window.setConnectionStatus('syncing');
+        try {
+            localStorage.setItem('sicom_data', JSON.stringify(appData));
+            localStorage.setItem('sicom_consultants', JSON.stringify(consultants));
+            localStorage.setItem('sicom_global_docs', JSON.stringify(globalDocs));
+        } catch (e) {}
+
         if (isFirebaseReady && db && appId && globalDoc && globalSetDoc) {
             const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
             globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false });
-        } else {
-            localStorage.setItem('sicom_data', JSON.stringify(appData)); localStorage.setItem('sicom_consultants', JSON.stringify(consultants)); localStorage.setItem('sicom_global_docs', JSON.stringify(globalDocs));
         }
         
         setTimeout(() => { if(navigator.onLine) window.setConnectionStatus('online'); }, 800);
@@ -1122,17 +1131,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     
     function generateJointGradient(consultantNames) {
       if (!consultantNames || consultantNames.length === 0) return '#48484a';
-      if (consultantNames.length === 1) return consultants[consultantNames[0]] ? consultants[consultantNames[0]].color : '#48484a';
-      const validColors = consultantNames.map(name => consultants[name] ? consultants[name].color : null).filter(c => c);
+      if (consultantNames.length === 1) return (consultants && consultants[consultantNames[0]]) ? consultants[consultantNames[0]].color : '#48484a';
+      const validColors = consultantNames.map(name => (consultants && consultants[name]) ? consultants[name].color : null).filter(Boolean);
       if (validColors.length === 0) return '#48484a';
       if (validColors.length === 1) return validColors[0];
-      const gradKey = validColors.map(c => c.replace('#','')).join('-');
+      const gradKey = validColors.map(c => String(c).replace('#','')).join('-');
       const gradId = `grad-${gradKey}`;
-      if (!document.getElementById(gradId) && svgDefs) {
-        const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        linearGradient.setAttribute('id', gradId); linearGradient.setAttribute('x1', '0%'); linearGradient.setAttribute('y1', '0%'); linearGradient.setAttribute('x2', '100%'); linearGradient.setAttribute('y2', '100%');
-        validColors.forEach((color, i) => { const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop'); stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`); stop.setAttribute('stop-color', color); linearGradient.appendChild(stop); });
-        svgDefs.appendChild(linearGradient);
+      if (!document.getElementById(gradId)) {
+        const defsContainer = document.getElementById('svgDefs') || (typeof canvasGroup !== 'undefined' && canvasGroup ? canvasGroup.querySelector('defs') : null) || document.querySelector('svg defs');
+        if (defsContainer) {
+          const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+          linearGradient.setAttribute('id', gradId);
+          linearGradient.setAttribute('x1', '0%');
+          linearGradient.setAttribute('y1', '0%');
+          linearGradient.setAttribute('x2', '100%');
+          linearGradient.setAttribute('y2', '100%');
+          validColors.forEach((color, i) => {
+            const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop.setAttribute('offset', `${(i / (validColors.length - 1)) * 100}%`);
+            stop.setAttribute('stop-color', color);
+            linearGradient.appendChild(stop);
+          });
+          defsContainer.appendChild(linearGradient);
+        }
       }
       return `url(#${gradId})`;
     }
@@ -1726,13 +1747,37 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     
     window.updateCanvasTransform = function() {
         if(!canvasGroup) return; 
-        const limit = 4000; translateX = Math.max(-limit, Math.min(limit, translateX)); translateY = Math.max(-limit, Math.min(limit, translateY));
+        if(!svgElem) window.ensureDomReferences();
+        const rect = svgElem ? svgElem.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
         
-        // FIX MAESTRO: Forzamos el transform nativo de SVG en vez del de CSS.
-        // Esto recalcula el área sólida del mapa y permite dar clic sin importar qué tan a la orilla esté.
+        const b = window._currentMapBounds || { minX: -590, maxX: 590, minY: -250, maxY: 250 };
+        
+        // Mantener siempre visible en pantalla un margen sustancial del contenido del mapa
+        // Esto previene al 100% que el mapa se pierda o vuele fuera de la pantalla al hacer zoom o pan
+        const marginX = Math.min(rect.width * 0.22, 200);
+        const marginY = Math.min(rect.height * 0.22, 140);
+
+        const minTx = marginX - (b.maxX * scale);
+        const maxTx = rect.width - marginX - (b.minX * scale);
+        const minTy = marginY - (b.maxY * scale);
+        const maxTy = rect.height - marginY - (b.minY * scale);
+
+        if (minTx <= maxTx) {
+            translateX = Math.max(minTx, Math.min(maxTx, translateX));
+        } else {
+            translateX = (minTx + maxTx) / 2;
+        }
+
+        if (minTy <= maxTy) {
+            translateY = Math.max(minTy, Math.min(maxTy, translateY));
+        } else {
+            translateY = (minTy + maxTy) / 2;
+        }
+        
+        // Forzamos el transform nativo de SVG en vez del de CSS
         canvasGroup.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
         if(svgElem) svgElem.style.overflow = 'visible';
-    }
+    };
 
     window.animateCameraTo = function(targetTx, targetTy, targetScale, duration = 480) {
         if (cameraAnimId) {
@@ -1944,41 +1989,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 cancelAnimationFrame(cameraAnimId);
                 cameraAnimId = null;
             }
-            window.zoomCanvas(-e.deltaY * 0.001, e.clientX, e.clientY); 
+            // Zoom proporcional suave (factor 1.07 / 0.93) para que la pantalla nunca salte ni se aleje de golpe
+            const factor = e.deltaY < 0 ? 1.07 : 0.93;
+            window.zoomCanvasByFactor(factor, e.clientX, e.clientY); 
         }, {passive: false});
     }
 
-    // CANDADO DE ZOOM: Calcula dinámicamente el límite mínimo de zoom
-    // para que el mapa NUNCA se aleje más allá de los extremos donde terminan los proyectos.
+    // CANDADO DE ZOOM SEGURO: Mantiene el mapa siempre en un rango visual confortable
+    // Impide alejarse al infinito o encoger el mapa a un punto minúsculo
     window.getMinZoomLimit = function() {
         const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-        if (!svgElem || !canvasGroup) return isSmallScreen ? 0.12 : 0.25;
-        try {
-            const bbox = canvasGroup.getBBox();
-            if (bbox.width > 0 && bbox.height > 0) {
-                const rect = svgElem.getBoundingClientRect();
-                const padX = isSmallScreen ? 16 : 60;
-                const padY = isSmallScreen ? 24 : 55;
-                const fitX = (rect.width - padX * 2) / bbox.width;
-                const fitY = (rect.height - padY * 2) / bbox.height;
-                const fitScale = Math.min(fitX, fitY);
-                // Piso flexible adaptable a la altura vertical y amplitud de columnas
-                const minFloor = isSmallScreen ? 0.08 : 0.18;
-                return Math.max(minFloor, Math.min(0.85, fitScale * 0.95));
-            }
-        } catch(e) {}
-        return isSmallScreen ? 0.12 : 0.25;
+        return isSmallScreen ? 0.22 : 0.28;
     };
 
     window.zoomCanvas = function(delta, mx = window.innerWidth/2, my = window.innerHeight/2) {
       if(!svgElem) window.ensureDomReferences();
       const minScale = window.getMinZoomLimit();
-      const maxScale = 2.2;
+      const maxScale = 2.0;
       const targetScale = scale + delta;
-      // Previene inversión y asegura el candado estricto
       const newScale = Math.max(minScale, Math.min(maxScale, targetScale));
       
-      // Si ya alcanzó el límite del candado, evitar trabajo y saltos
       if (Math.abs(newScale - scale) < 0.0001) return;
 
       const rect = svgElem.getBoundingClientRect(); 
@@ -1987,7 +2017,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       translateY = y - (y - translateY) * (newScale / scale);
       scale = newScale; 
       window.updateCanvasTransform();
-    }
+    };
+
+    window.zoomCanvasByFactor = function(factor, mx = window.innerWidth/2, my = window.innerHeight/2) {
+      if(!svgElem) window.ensureDomReferences();
+      const minScale = window.getMinZoomLimit();
+      const maxScale = 2.0;
+      const targetScale = scale * factor;
+      const newScale = Math.max(minScale, Math.min(maxScale, targetScale));
+      
+      if (Math.abs(newScale - scale) < 0.0001) return;
+
+      const rect = svgElem.getBoundingClientRect(); 
+      const x = mx - rect.left, y = my - rect.top;
+      translateX = x - (x - translateX) * (newScale / scale); 
+      translateY = y - (y - translateY) * (newScale / scale);
+      scale = newScale; 
+      window.updateCanvasTransform();
+    };
     
     window.focusNode = function(nodeX, nodeY) {
         if(!svgElem) return;
@@ -2011,32 +2058,63 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.animateCameraTo(targetTx, targetTy, targetScale, 520);
     };
 
-    window.recenterCanvas = function() {
+    window.recenterCanvas = function(customDuration = 480) {
+        if(!svgElem || !canvasGroup) window.ensureDomReferences();
         if(!svgElem || !canvasGroup) return; 
         const rect = svgElem.getBoundingClientRect();
-        let targetTx, targetTy, targetScale;
-        try {
-            const bbox = canvasGroup.getBBox(); if (bbox.width === 0 || bbox.height === 0) throw new Error();
-            const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-            const padX = isSmallScreen ? 16 : 60;
-            const padY = isSmallScreen ? 24 : 55;
-            
-            const sX = (rect.width - padX * 2) / bbox.width;
-            const sY = (rect.height - padY * 2) / bbox.height;
-            
-            const minAllowed = window.getMinZoomLimit();
-            targetScale = Math.max(minAllowed, Math.min(1.10, Math.min(sX, sY)));
-            
-            targetTx = (rect.width / 2) - ((bbox.x + bbox.width / 2) * targetScale); 
-            targetTy = (rect.height / 2) - ((bbox.y + bbox.height / 2) * targetScale);
-        } catch(e) { 
-            targetTx = rect.width / 2; 
-            targetTy = rect.height * 0.35; 
-            const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
-            targetScale = isSmallScreen ? 0.28 : 0.85; 
+        const isDesktop = window.innerWidth >= 768;
+        const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
+
+        let availW = rect.width;
+        let availH = rect.height;
+        let offsetLeft = 0;
+
+        if (isDesktop) {
+            if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) {
+                offsetLeft += 420;
+                availW -= 420;
+            }
+            if ((typeof isDrawerOpen !== 'undefined' && isDrawerOpen) || 
+                (typeof isPriorityDrawerOpen !== 'undefined' && isPriorityDrawerOpen) || 
+                (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen)) {
+                availW -= 420;
+            }
+            availW = Math.max(320, availW);
         }
-        window.animateCameraTo(targetTx, targetTy, targetScale, 520);
-    }
+
+        const b = window._currentMapBounds || { minX: -590, maxX: 590, minY: -250, maxY: 250 };
+        const contentW = Math.max(200, b.maxX - b.minX);
+        const contentH = Math.max(150, b.maxY - b.minY);
+        const contentCenterX = (b.minX + b.maxX) / 2;
+        const contentCenterY = (b.minY + b.maxY) / 2;
+
+        const allModuleIds = ['hub-direct', ...(appData.modules || []).map(m => m && m.id).filter(Boolean)];
+        const isAllCollapsed = allModuleIds.every(id => collapsedModules.has(id)) || (canvasGroup.querySelectorAll('.mindmap-project-node').length === 0);
+
+        let targetTx, targetTy, targetScale;
+
+        if (isAllCollapsed) {
+            // Forma original limpia y centrada exactamente en el Hub
+            targetTx = offsetLeft + (availW / 2);
+            targetTy = (availH / 2);
+            const fitScale = Math.min((availW - 60) / contentW, (availH - 60) / contentH);
+            targetScale = isSmallScreen ? Math.min(0.70, fitScale) : Math.min(0.85, Math.max(0.65, fitScale));
+        } else {
+            // Previsualización panorámica con proyectos legibles en encuadre seguro
+            const padX = isSmallScreen ? 20 : 60;
+            const padY = isSmallScreen ? 25 : 50;
+            const fitX = (availW - padX * 2) / contentW;
+            const fitY = (availH - padY * 2) / contentH;
+            const fitScale = Math.min(fitX, fitY);
+            
+            const minPreview = isSmallScreen ? 0.24 : 0.32;
+            const maxPreview = isSmallScreen ? 0.45 : 0.58;
+            targetScale = Math.min(maxPreview, Math.max(minPreview, fitScale));
+            targetTx = offsetLeft + (availW / 2) - (contentCenterX * targetScale); 
+            targetTy = (availH / 2) - (contentCenterY * targetScale);
+        }
+        window.animateCameraTo(targetTx, targetTy, targetScale, customDuration);
+    };
 
     window.toggleConfigDrawer = function() { isDrawerOpen ? window.closeConfigDrawer() : window.openConfigDrawer(); }
     window.openConfigDrawer = function() { 
@@ -2764,6 +2842,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if(item.invgateLink) {
                 btnInvgate.href = item.invgateLink; btnInvgate.classList.remove('hidden');
             } else btnInvgate.classList.add('hidden');
+
+            const linksCont = document.getElementById('infoLinksContainer');
+            if (linksCont) {
+                if (item.driveLink || item.invgateLink) linksCont.classList.remove('hidden');
+                else linksCont.classList.add('hidden');
+            }
+            window.showToast("Enlaces actualizados con éxito", false);
         }
     };
 
@@ -2831,7 +2916,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 };
     window.confirmNa = function(p, id) { if(currentUserRole==='Lector') return; const btn = document.getElementById(`${p}BtnNa${id}`), valHidden = document.getElementById(`${p}NaValidated${id}`); if(valHidden)valHidden.value="true"; if(btn){btn.textContent="✓ Validado"; btn.className="pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2";} p==='quick'?window.calculateQuickProgress():window.calculateEditProgress(); if(p==='quick') window.silentSaveInfoCard(); };
 
-    window.calculateQuickProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`quickDoc${d.id}`)?.checked || (document.getElementById(`quickNa${d.id}`)?.checked && document.getElementById(`quickNaValidated${d.id}`)?.value==="true")) sc+=inc; }); document.getElementById('quickEditProgress').value = Math.round(sc); document.getElementById('quickEditProgressLabel').textContent = Math.round(sc)+'%'; }
+    window.calculateQuickProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`quickDoc${d.id}`)?.checked || (document.getElementById(`quickNa${d.id}`)?.checked && document.getElementById(`quickNaValidated${d.id}`)?.value==="true")) sc+=inc; }); const rounded = Math.round(sc); document.getElementById('quickEditProgress').value = rounded; document.getElementById('quickEditProgressLabel').textContent = rounded+'%'; const pp = document.getElementById('infoProgressPill'); if (pp) pp.textContent = rounded+'%'; }
     window.calculateEditProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`editDoc${d.id}`)?.checked || (document.getElementById(`editNa${d.id}`)?.checked && document.getElementById(`editNaValidated${d.id}`)?.value==="true")) sc+=inc; }); document.getElementById('editProgress').value = Math.round(sc); document.getElementById('editProgressLabel').textContent = Math.round(sc)+'%'; }
 
     window.renderDocChecklists = function(prefix, savedData) {
@@ -3008,6 +3093,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('infoRelativeTime').classList.add('hidden');
       document.getElementById('infoDriveBtn').classList.add('hidden');
       document.getElementById('infoInvgateBtn').classList.add('hidden');
+      const linksCont = document.getElementById('infoLinksContainer');
+      if (linksCont) linksCont.classList.add('hidden');
       const modContainer = document.getElementById('infoModulesContainer');
       if (modContainer) {
         modContainer.innerHTML = '';
@@ -3024,18 +3111,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('infoType').textContent = 'NÚCLEO';
         const totalProjects = (appData.directProjects || []).length + (appData.modules || []).reduce((acc, m) => acc + (m.projects || []).length, 0);
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'MÓDULOS ACTIVOS';
-        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${appData.modules.length}</span>`;
-        document.getElementById('infoMetricLabel').textContent = 'PROYECTOS TOTALES';
-        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${totalProjects}</span>`;
+        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-medium text-sm">${appData.modules.length} MÓDULOS</span>`;
+        document.getElementById('infoMetricLabel').textContent = 'PROYECTOS';
+        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#eeeeee] font-medium text-sm">${totalProjects} TOTALES</span>`;
       } else if (type === 'direct-hub' || type === 'module') {
         item = type === 'module' ? appData.modules.find(m => m.id === id) : appData.directHub;
         document.getElementById('infoType').textContent = type==='module'?'MÓDULO':'AGRUPADOR';
         const projs = type === 'module' ? (item.projects || []) : (appData.directProjects || []);
         const avgProg = projs.length > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / projs.length) : 0;
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'PROYECTOS';
-        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal text-lg">${projs.length}</span>`;
-        document.getElementById('infoMetricLabel').textContent = 'AVANCE PROMEDIO';
-        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#a0ca92] font-normal text-lg">${avgProg}%</span>`;
+        document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-medium text-sm">${projs.length} ASIGNADOS</span>`;
+        document.getElementById('infoMetricLabel').textContent = 'AVANCE';
+        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#a0ca92] font-medium text-sm">${avgProg}%</span>`;
         
         // Detección de proyectos dependientes / vinculados de otros módulos
         const modIdCheck = type === 'module' ? id : 'DIRECT';
@@ -3167,12 +3254,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'CONSULTOR(ES)';
-        document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<div class="text-xs flex items-center gap-2 text-[#eeeeee]"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n]?consultants[n].color:'#8a8380'}"></span> ${escapeHtml(n)}</div>`).join('') || '<span class="text-[#8a8380]">Sin asignar</span>';
-        document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD'; document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[#eeeeee] font-normal bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39]">*${item.priority}</span>`;
+        document.getElementById('infoConsultant').innerHTML = getProjectConsultants(item).map(n => `<span class="inline-flex items-center gap-1.5 text-xs text-[#eeeeee]"><span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${consultants[n]?consultants[n].color:'#8a8380'}"></span>${escapeHtml(n)}</span>`).join('') || '<span class="text-[#8a8380] text-xs">Sin asignar</span>';
+        document.getElementById('infoMetricLabel').textContent = 'PRIORIDAD';
+        const prioNum = parseFloat(item.priority || 1);
+        const prioTag = prioNum <= 3 ? 'ALTA' : (prioNum <= 6 ? 'MEDIA' : 'BAJA');
+        const prioColor = prioNum <= 3 ? 'text-[#ee6018] border-[#ee6018]/40' : (prioNum <= 6 ? 'text-[#eeeeee] border-[#3d3a39]' : 'text-[#8a8380] border-[#3d3a39]');
+        document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border ${prioColor} font-medium">#${item.priority || 1} · ${prioTag}</span>`;
         document.getElementById('infoQuickEditContainer').classList.remove('hidden'); 
         
         const btnDrive = document.getElementById('infoDriveBtn');
         const btnInvgate = document.getElementById('infoInvgateBtn');
+        const linksCont = document.getElementById('infoLinksContainer');
         
         if(item.driveLink) {
             let formattedLink = item.driveLink;
@@ -3185,6 +3277,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if(!formattedLink.startsWith('http://') && !formattedLink.startsWith('https://')) formattedLink = 'https://' + formattedLink;
             btnInvgate.href = formattedLink; btnInvgate.classList.remove('hidden');
         } else btnInvgate.classList.add('hidden');
+
+        if (linksCont) {
+            if (item.driveLink || item.invgateLink) linksCont.classList.remove('hidden');
+            else linksCont.classList.add('hidden');
+        }
 
         const isLector = currentUserRole === 'Lector';
         const canEditProject = !isLector && (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || getProjectConsultants(item).includes(localAuthor));
@@ -3283,6 +3380,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
       }
       document.getElementById('infoTitle').textContent = item.name; 
+      const progPill = document.getElementById('infoProgressPill');
+      if (progPill) {
+        if (type === 'project' || type === 'direct-project') {
+          progPill.textContent = Math.round(item.progress || 0) + '%';
+          progPill.classList.remove('hidden');
+        } else {
+          progPill.classList.add('hidden');
+        }
+      }
       document.body.classList.add('info-card-open');
       card.classList.remove('hidden'); 
       setTimeout(() => card.classList.remove('opacity-0'), 10);
@@ -4263,15 +4369,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       };
 
       const buildModuleProjectsList = (modId, ownP, linkedP) => {
-          let rawList = ownP.length > 0 ? ownP : linkedP;
-          // Si hay filtro de módulos activo y este módulo está seleccionado, incluir vinculados cuyo primario no esté seleccionado
-          if (!isModAll && selectedNormMods.has(normModId(modId)) && ownP.length > 0 && linkedP.length > 0) {
-              const extraLinked = linkedP.filter(lp => {
-                  const origMod = normModId((lp._origProj || lp)._modId);
-                  return !selectedNormMods.has(origMod);
-              });
-              if (extraLinked.length > 0) rawList = ownP.concat(extraLinked);
-          }
+          const rawList = ownP.length > 0 ? ownP : linkedP;
           return isDefaultState ? rawList : rawList.filter(p => isFiltered(p));
       };
 
@@ -4598,12 +4696,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const normSecId = normModId(secNodeId);
                   const normContainerId = normModId(containerModId);
 
-                  // Regla clave de ruido cero:
-                  // - Si hay 1 solo módulo filtrado, NO encender líneas cruzadas automáticamente
-                  // - Si hay 2+ módulos filtrados (multiselección), encender SOLO las líneas que correlacionan los módulos seleccionados entre sí
+                  // Regla clave de ruido cero estricta:
+                  // 1. Si hay filtro de módulos activo, NUNCA conectar hacia un módulo que no esté seleccionado
+                  if (!isModAll && !selectedNormMods.has(normSecId)) {
+                      return;
+                  }
+                  // 2. Si solo hay 1 módulo seleccionado (no multiselección), NUNCA cruzar líneas a otros módulos
+                  if (!isModAll && !isMultiModSelected && !showAllSecondaryLinks) {
+                      return;
+                  }
+                  // 3. En multiselección, encender las líneas que correlacionan los módulos seleccionados entre sí
                   const isMultiModCorrelationLink = isMultiModSelected && pMatches && selectedNormMods.has(normContainerId) && selectedNormMods.has(normSecId);
-                  if (!isModAll && !isMultiModCorrelationLink && !isProjectSel && !showAllSecondaryLinks) {
-                      return; // Omitir conectores secundarios hacia módulos no seleccionados para eliminar ruido visual
+                  if (!isModAll && !isMultiModCorrelationLink && !showAllSecondaryLinks) {
+                      return;
                   }
 
                   const pX = pData.x;
@@ -5422,6 +5527,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           window._lastFilteredBounds = null;
       }
 
+      // Calcular caja delimitadora global de todo el contenido visible para encuadre y candado de zoom
+      let totalMinX = -80, totalMaxX = 80, totalMinY = -80, totalMaxY = 80;
+      [...lNodes, ...rNodes].forEach(n => {
+          if (n._renderData) {
+              totalMinX = Math.min(totalMinX, n._renderData.x - 190);
+              totalMaxX = Math.max(totalMaxX, n._renderData.x + 190);
+              totalMinY = Math.min(totalMinY, n._renderData.y - 45);
+              totalMaxY = Math.max(totalMaxY, n._renderData.y + 45);
+          }
+          (n.projects || []).forEach(p => {
+              if (p._renderData) {
+                  totalMinX = Math.min(totalMinX, p._renderData.x - 180);
+                  totalMaxX = Math.max(totalMaxX, p._renderData.x + 180);
+                  totalMinY = Math.min(totalMinY, p._renderData.y - 45);
+                  totalMaxY = Math.max(totalMaxY, p._renderData.y + 45);
+              }
+          });
+      });
+      window._currentMapBounds = { minX: totalMinX, maxX: totalMaxX, minY: totalMinY, maxY: totalMaxY };
+
       lastExpandedModuleId = null;
     };
 
@@ -5585,15 +5710,94 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }).join('');
     };
 
+    window.toggleTaskFromDashboard = function(pType, projId, taskId) {
+        let p = null;
+        if (pType === 'direct-project') p = (appData.directProjects || []).find(x => x.id === projId);
+        else (appData.modules || []).forEach(m => { const found = (m.projects || []).find(x => x.id === projId); if (found) p = found; });
+        if (!p || !Array.isArray(p.tasks)) return;
+        const task = p.tasks.find(t => t.id === taskId);
+        if (!task) return;
+        task.done = !task.done;
+        logActivity(p.id, p.name, `${task.done ? 'Completó' : 'Reabrió'} tarea: ${task.text}`, localAuthor);
+        window.saveData(true);
+        window.renderDashboard();
+        window.showToast(task.done ? "Tarea completada" : "Tarea reactivada", false);
+    };
+
     window.renderDashboard = function() {
         const dashTab = document.getElementById('tab-dashboard');
         if (!isDrawerOpen || (dashTab && dashTab.classList.contains('hidden'))) return;
+
+        const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+        let targetConsultant = null;
+
+        const scopeContainer = document.getElementById('dashScopeSelectorContainer');
+        const scopeSel = document.getElementById('dashScopeSelect');
+
+        if (isSuper) {
+            if (scopeContainer) {
+                scopeContainer.classList.remove('hidden');
+                const curVal = scopeSel ? scopeSel.value : 'GLOBAL';
+                if (scopeSel) {
+                    scopeSel.innerHTML = '<option value="GLOBAL">🌐 Visión Global (Empresa Completa)</option>';
+                    Object.keys(consultants).sort().forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c;
+                        opt.textContent = `👤 Resumen de: ${c}`;
+                        if (c === curVal) opt.selected = true;
+                        scopeSel.appendChild(opt);
+                    });
+                }
+                if (scopeSel && scopeSel.value !== 'GLOBAL') {
+                    targetConsultant = scopeSel.value;
+                }
+            }
+        } else {
+            if (scopeContainer) scopeContainer.classList.add('hidden');
+            targetConsultant = localAuthor;
+        }
+
+        // Títulos según rol
+        const drawerTitle = document.getElementById('configDrawerTitle');
+        const sectionTitle = document.getElementById('dashSectionTitle');
+        const telemetryBadge = document.getElementById('dashTelemetryBadge');
+        const globalTitle = document.getElementById('dashGlobalTitle');
+        const totalUnit = document.getElementById('dashTotalUnit');
+        const slaLbl = document.getElementById('dashSlaLabel');
+        const riskLbl = document.getElementById('dashRiskLabel');
+        const overLbl = document.getElementById('dashOverdueLabel');
+        const docsLbl = document.getElementById('dashDocsLabel');
+
+        if (targetConsultant) {
+            if (drawerTitle) drawerTitle.textContent = isSuper ? `Resumen Operativo // ${targetConsultant}` : `Mi Resumen Operativo // ${localAuthor}`;
+            if (sectionTitle) sectionTitle.textContent = isSuper ? `Rendimiento de ${targetConsultant}` : 'Mi Rendimiento & Carga de Trabajo';
+            if (telemetryBadge) telemetryBadge.textContent = '● RESUMEN PERSONAL';
+            if (globalTitle) globalTitle.textContent = isSuper ? `Avance de ${targetConsultant}` : 'Mi Avance Ponderado Personal';
+            if (totalUnit) totalUnit.textContent = 'MIS PROY';
+            if (slaLbl) slaLbl.textContent = 'Mi SLA en Plazo';
+            if (riskLbl) riskLbl.textContent = 'Mis Proyectos ≤ 72h';
+            if (overLbl) overLbl.textContent = 'Mis Vencidos';
+            if (docsLbl) docsLbl.textContent = 'Mis Docs Validados';
+        } else {
+            if (drawerTitle) drawerTitle.textContent = 'Centro de Control // SICOM';
+            if (sectionTitle) sectionTitle.textContent = 'Métricas Ejecutivas & KPIs';
+            if (telemetryBadge) telemetryBadge.textContent = '● LIVE TELEMETRY';
+            if (globalTitle) globalTitle.textContent = 'Avance Ponderado Global';
+            if (totalUnit) totalUnit.textContent = 'PROY';
+            if (slaLbl) slaLbl.textContent = 'SLA en Plazo';
+            if (riskLbl) riskLbl.textContent = 'Riesgo ≤ 72h';
+            if (overLbl) overLbl.textContent = 'Vencidos';
+            if (docsLbl) docsLbl.textContent = 'Docs Normativos';
+        }
+
         let t = 0, c = 0, p = 0, pend = 0, noIni = 0, o = 0, totalProg = 0;
         let withDeadline = 0;
         let riskCount = 0;
         let totalDocsRequired = 0, totalDocsChecked = 0;
         let consStats = {};
         let moduleStats = [];
+        let myProjects = [];
+        let myTasks = [];
 
         const now = new Date();
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -5624,7 +5828,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         };
 
-        const tally = (proj) => { 
+        const tally = (proj) => {
+            const projCons = getProjectConsultants(proj);
+            const isAssignedToTarget = targetConsultant ? projCons.includes(targetConsultant) : true;
+            
+            if (targetConsultant && !isAssignedToTarget) return;
+
             t++; 
             totalProg += (proj.progress || 0); 
             if (proj.deadline) withDeadline++;
@@ -5641,46 +5850,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             countDocs(proj);
 
-            const projCons = getProjectConsultants(proj);
-            projCons.forEach(cons => { 
-                if (!consStats[cons]) {
-                    consStats[cons] = { completed: 0, inProgress: 0, overdue: 0 };
+            if (targetConsultant) {
+                myProjects.push(proj);
+                if (Array.isArray(proj.tasks)) {
+                    proj.tasks.forEach(task => {
+                        if (!task.done && (task.assignee === targetConsultant || (!task.assignee && projCons.includes(targetConsultant)))) {
+                            myTasks.push({ proj, task });
+                        }
+                    });
                 }
-                if (proj.status === 'Completado') {
-                    consStats[cons].completed++;
-                } else if (over) {
-                    consStats[cons].overdue++;
-                } else {
-                    consStats[cons].inProgress++;
-                }
-            }); 
+            } else {
+                projCons.forEach(cons => { 
+                    if (!consStats[cons]) {
+                        consStats[cons] = { completed: 0, inProgress: 0, overdue: 0 };
+                    }
+                    if (proj.status === 'Completado') {
+                        consStats[cons].completed++;
+                    } else if (over) {
+                        consStats[cons].overdue++;
+                    } else {
+                        consStats[cons].inProgress++;
+                    }
+                }); 
+            }
         };
 
-        (appData.directProjects || []).forEach(tally); 
-        (appData.modules || []).forEach(m => (m.projects || []).forEach(tally));
-
-        // Estadísticas por módulo
-        if (appData.directProjects && appData.directProjects.length > 0) {
-            const mProg = appData.directProjects.reduce((acc, x) => acc + (x.progress || 0), 0);
-            moduleStats.push({
-                name: appData.directHub.name || 'Proyectos Directos',
-                count: appData.directProjects.length,
-                avg: Math.round(mProg / appData.directProjects.length),
-                color: appData.directHub.color || '#35aee8'
-            });
-        }
-        (appData.modules || []).forEach(m => {
-            const projs = m.projects || [];
-            if (projs.length > 0) {
-                const mProg = projs.reduce((acc, x) => acc + (x.progress || 0), 0);
-                moduleStats.push({
-                    name: m.name,
-                    count: projs.length,
-                    avg: Math.round(mProg / projs.length),
-                    color: m.color || '#0071e3'
-                });
-            }
-        });
+        (appData.directProjects || []).forEach(proj => { proj.pType = 'direct-project'; proj.parentName = appData.directHub ? appData.directHub.name : 'Directos'; tally(proj); }); 
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(proj => { proj.pType = 'project'; proj.parentName = m.name; tally(proj); }));
 
         // 1. KPI Cálculos
         const slaRate = withDeadline > 0 ? Math.max(0, Math.round(((withDeadline - o) / withDeadline) * 100)) : 100;
@@ -5703,7 +5899,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         const elRiskCount = document.getElementById('dashRiskCount'); if (elRiskCount) elRiskCount.textContent = riskCount;
-        const elRiskSub = document.getElementById('dashRiskSub'); if (elRiskSub) elRiskSub.textContent = riskCount === 1 ? '1 proyecto en riesgo' : `${riskCount} proyectos en riesgo`;
+        const elRiskSub = document.getElementById('dashRiskSub'); if (elRiskSub) elRiskSub.textContent = riskCount === 1 ? '1 en riesgo' : `${riskCount} en riesgo`;
 
         const elDocsRate = document.getElementById('dashDocsRate'); if (elDocsRate) elDocsRate.textContent = `${docsRate}%`;
         const elDocsSub = document.getElementById('dashDocsSub'); if (elDocsSub) elDocsSub.textContent = `${totalDocsChecked} de ${totalDocsRequired} validados`;
@@ -5711,110 +5907,207 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const elGlobalBar = document.getElementById('dashGlobalBar'); if (elGlobalBar) elGlobalBar.style.width = `${avgGlobal}%`;
         const elGlobalText = document.getElementById('dashGlobalText'); if (elGlobalText) elGlobalText.textContent = `${avgGlobal}%`;
 
-        // 3. Gráfica 1: Balance de Carga por Consultor (Stacked Bar)
-        const ctxCons = document.getElementById('consultantChart')?.getContext('2d');
-        if (ctxCons) {
-            if (window.consultantChartInstance) window.consultantChartInstance.destroy();
-            
-            const cLabels = Object.keys(consStats).sort((a, b) => {
-                const totalA = consStats[a].completed + consStats[a].inProgress + consStats[a].overdue;
-                const totalB = consStats[b].completed + consStats[b].inProgress + consStats[b].overdue;
-                return totalB - totalA;
-            });
+        const chartsCont = document.getElementById('dashChartsContainer');
+        const consCont = document.getElementById('dashConsultantContainer');
 
-            const dataDone = cLabels.map(l => consStats[l].completed);
-            const dataProg = cLabels.map(l => consStats[l].inProgress);
-            const dataOver = cLabels.map(l => consStats[l].overdue);
+        if (targetConsultant) {
+            if (chartsCont) chartsCont.classList.add('hidden');
+            if (consCont) consCont.classList.remove('hidden');
 
-            window.consultantChartInstance = new Chart(ctxCons, {
-                type: 'bar',
-                data: {
-                    labels: cLabels,
-                    datasets: [
-                        { label: 'Completados', data: dataDone, backgroundColor: '#a0ca92', borderRadius: 2, stack: 'carga' },
-                        { label: 'En Tiempo', data: dataProg, backgroundColor: '#eeeeee', borderRadius: 2, stack: 'carga' },
-                        { label: 'Vencidos', data: dataOver, backgroundColor: '#ee6018', borderRadius: 2, stack: 'carga' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
-                    },
-                    scales: {
-                        x: { stacked: true, ticks: { color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } }
-                    }
+            // Renderizar Mis Proyectos
+            const pList = document.getElementById('dashMyProjectsList');
+            const pBadge = document.getElementById('dashMyProjectsBadge');
+            if (pBadge) pBadge.textContent = `${myProjects.length} PROYECTO${myProjects.length === 1 ? '' : 'S'}`;
+            if (pList) {
+                if (myProjects.length === 0) {
+                    pList.innerHTML = `<div class="p-4 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#8a8380] uppercase">No hay proyectos asignados</div>`;
+                } else {
+                    myProjects.sort((a, b) => {
+                        const aOver = isOver(a) ? 1 : 0;
+                        const bOver = isOver(b) ? 1 : 0;
+                        if (bOver !== aOver) return bOver - aOver;
+                        return (a.progress || 0) - (b.progress || 0);
+                    });
+                    pList.innerHTML = myProjects.map(proj => {
+                        const over = isOver(proj);
+                        const statusCol = proj.status === 'Completado' ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
+                        const sIco = proj.status === 'Completado' ? '✅' : (proj.status === 'En Progreso' ? '🚀' : (proj.status === 'No Iniciado' ? '⏸️' : '⏳'));
+                        return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-3 transition flex items-center justify-between gap-3 cursor-pointer group" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
+                                    <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
+                                </div>
+                                <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380]">
+                                    <span>📦 ${escapeHtml(proj.parentName || 'Directo')}</span>
+                                    <span>•</span>
+                                    <span>${sIco} ${proj.status || 'Pendiente'} (${proj.progress || 0}%)</span>
+                                    ${proj.deadline ? `<span>•</span><span class="${over ? 'text-[#ee6018]' : ''}">📅 ${proj.deadline}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="shrink-0 flex items-center gap-2">
+                                <span class="font-mono text-xs text-[#eeeeee]">${proj.progress || 0}%</span>
+                                <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#eeeeee] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5l7 7-7 7"/></svg>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            // Renderizar Mis Tareas
+            const tList = document.getElementById('dashMyTasksList');
+            const tBadge = document.getElementById('dashMyTasksBadge');
+            if (tBadge) tBadge.textContent = `${myTasks.length} PENDIENTE${myTasks.length === 1 ? '' : 'S'}`;
+            if (tList) {
+                if (myTasks.length === 0) {
+                    tList.innerHTML = `<div class="p-4 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#a0ca92] uppercase">✓ Todas tus tareas están al día</div>`;
+                } else {
+                    tList.innerHTML = myTasks.map(({ proj, task }) => {
+                        return `<div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[8px] p-2.5 flex items-start gap-2.5">
+                            <input type="checkbox" onchange="window.toggleTaskFromDashboard('${proj.pType}', '${proj.id}', '${task.id}')" class="mt-0.5 rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#a0ca92] focus:ring-[#a0ca92] h-3.5 w-3.5 cursor-pointer shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-[#eeeeee] leading-tight">${escapeHtml(task.text)}</p>
+                                <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380] mt-1">
+                                    <span class="truncate cursor-pointer hover:text-[#eeeeee]" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">📁 ${escapeHtml(proj.name)}</span>
+                                    ${task.deadline ? `<span>•</span><span>📅 ${task.deadline}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+        } else {
+            if (chartsCont) chartsCont.classList.remove('hidden');
+            if (consCont) consCont.classList.add('hidden');
+
+            // Estadísticas por módulo
+            if (appData.directProjects && appData.directProjects.length > 0) {
+                const mProg = appData.directProjects.reduce((acc, x) => acc + (x.progress || 0), 0);
+                moduleStats.push({
+                    name: appData.directHub.name || 'Proyectos Directos',
+                    count: appData.directProjects.length,
+                    avg: Math.round(mProg / appData.directProjects.length),
+                    color: appData.directHub.color || '#35aee8'
+                });
+            }
+            (appData.modules || []).forEach(m => {
+                const projs = m.projects || [];
+                if (projs.length > 0) {
+                    const mProg = projs.reduce((acc, x) => acc + (x.progress || 0), 0);
+                    moduleStats.push({
+                        name: m.name,
+                        count: projs.length,
+                        avg: Math.round(mProg / projs.length),
+                        color: m.color || '#0071e3'
+                    });
                 }
             });
-        }
 
-        // 4. Gráfica 2: Rendimiento por Módulo de Negocio (Horizontal Bar)
-        const ctxMod = document.getElementById('moduleChart')?.getContext('2d');
-        if (ctxMod) {
-            if (window.moduleChartInstance) window.moduleChartInstance.destroy();
-            
-            moduleStats.sort((a, b) => b.avg - a.avg);
-            const mLabels = moduleStats.map(m => m.name.length > 24 ? m.name.substring(0, 22) + '…' : m.name);
-            const mData = moduleStats.map(m => m.avg);
-            const mColors = moduleStats.map(m => m.color || '#ee6018');
+            // 3. Gráfica 1: Balance de Carga por Consultor (Stacked Bar)
+            const ctxCons = document.getElementById('consultantChart')?.getContext('2d');
+            if (ctxCons) {
+                if (window.consultantChartInstance) window.consultantChartInstance.destroy();
+                
+                const cLabels = Object.keys(consStats).sort((a, b) => {
+                    const totalA = consStats[a].completed + consStats[a].inProgress + consStats[a].overdue;
+                    const totalB = consStats[b].completed + consStats[b].inProgress + consStats[b].overdue;
+                    return totalB - totalA;
+                });
 
-            window.moduleChartInstance = new Chart(ctxMod, {
-                type: 'bar',
-                data: {
-                    labels: mLabels,
-                    datasets: [{
-                        label: 'Avance %',
-                        data: mData,
-                        backgroundColor: mColors,
-                        borderRadius: 2
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ` Avance: ${ctx.parsed.x}% (${moduleStats[ctx.dataIndex]?.count || 0} proyectos)`
-                            }
+                const dataDone = cLabels.map(l => consStats[l].completed);
+                const dataProg = cLabels.map(l => consStats[l].inProgress);
+                const dataOver = cLabels.map(l => consStats[l].overdue);
+
+                window.consultantChartInstance = new Chart(ctxCons, {
+                    type: 'bar',
+                    data: {
+                        labels: cLabels,
+                        datasets: [
+                            { label: 'Completados', data: dataDone, backgroundColor: '#a0ca92', borderRadius: 2, stack: 'carga' },
+                            { label: 'En Tiempo', data: dataProg, backgroundColor: '#eeeeee', borderRadius: 2, stack: 'carga' },
+                            { label: 'Vencidos', data: dataOver, backgroundColor: '#ee6018', borderRadius: 2, stack: 'carga' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
+                        },
+                        scales: {
+                            x: { stacked: true, ticks: { color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } }
                         }
-                    },
-                    scales: {
-                        x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } },
-                        y: { ticks: { color: '#eeeeee', font: { size: 9.5, family: "'Geist Mono', monospace" } }, grid: { display: false } }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        // 5. Gráfica 3: Estado General del Portafolio (Doughnut)
-        const ctxStatus = document.getElementById('statusChart')?.getContext('2d');
-        if (ctxStatus) {
-            if (window.statusChartInstance) window.statusChartInstance.destroy();
-            window.statusChartInstance = new Chart(ctxStatus, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados', 'Vencidos'],
-                    datasets: [{
-                        data: [c, p, pend, noIni, o],
-                        backgroundColor: ['#a0ca92', '#eeeeee', '#8a8380', '#4d4947', '#ee6018'],
-                        borderWidth: 0,
-                        hoverOffset: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
+            // 4. Gráfica 2: Rendimiento por Módulo de Negocio (Horizontal Bar)
+            const ctxMod = document.getElementById('moduleChart')?.getContext('2d');
+            if (ctxMod) {
+                if (window.moduleChartInstance) window.moduleChartInstance.destroy();
+                
+                moduleStats.sort((a, b) => b.avg - a.avg);
+                const mLabels = moduleStats.map(m => m.name.length > 24 ? m.name.substring(0, 22) + '…' : m.name);
+                const mData = moduleStats.map(m => m.avg);
+                const mColors = moduleStats.map(m => m.color || '#ee6018');
+
+                window.moduleChartInstance = new Chart(ctxMod, {
+                    type: 'bar',
+                    data: {
+                        labels: mLabels,
+                        datasets: [{
+                            label: 'Avance %',
+                            data: mData,
+                            backgroundColor: mColors,
+                            borderRadius: 2
+                        }]
                     },
-                    cutout: '74%'
-                }
-            });
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => ` Avance: ${ctx.parsed.x}% (${moduleStats[ctx.dataIndex]?.count || 0} proyectos)`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } },
+                            y: { ticks: { color: '#eeeeee', font: { size: 9.5, family: "'Geist Mono', monospace" } }, grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // 5. Gráfica 3: Estado General del Portafolio (Doughnut)
+            const ctxStatus = document.getElementById('statusChart')?.getContext('2d');
+            if (ctxStatus) {
+                if (window.statusChartInstance) window.statusChartInstance.destroy();
+                window.statusChartInstance = new Chart(ctxStatus, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados', 'Vencidos'],
+                        datasets: [{
+                            data: [c, p, pend, noIni, o],
+                            backgroundColor: ['#a0ca92', '#eeeeee', '#8a8380', '#4d4947', '#ee6018'],
+                            borderWidth: 0,
+                            hoverOffset: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
+                        },
+                        cutout: '74%'
+                    }
+                });
+            }
         }
     };
 
@@ -5887,6 +6180,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 window.toggleDailyDrawer = function() {
         const btnDaily = document.getElementById('btnDailyTasks');
         const btnManual = document.getElementById('btnManual');
+        const btnZoom = document.getElementById('canvasZoomWidget');
 
         if(isDailyDrawerOpen) {
             document.getElementById('dailyDrawer').classList.add('-translate-x-full');
@@ -5895,6 +6189,7 @@ window.toggleDailyDrawer = function() {
             // Restaurar botones al cerrar
             if (btnDaily) btnDaily.classList.remove('hidden');
             if (btnManual) btnManual.classList.remove('hidden');
+            if (btnZoom) btnZoom.classList.remove('hidden');
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
@@ -5905,6 +6200,7 @@ window.toggleDailyDrawer = function() {
             // Ocultar botones para limpiar la interfaz
             if (btnDaily) btnDaily.classList.add('hidden');
             if (btnManual) btnManual.classList.add('hidden');
+            if (btnZoom) btnZoom.classList.add('hidden');
 
             window.populateDailyAssignee();
             window.renderDailyTasks();
@@ -5945,6 +6241,8 @@ window.toggleDailyDrawer = function() {
             done: false 
         });
         input.value = ''; 
+        const formDetails = document.getElementById('dailyTaskFormDetails');
+        if (formDetails) formDetails.open = false;
         logActivity('daily', 'Actividades Diarias', `Asignó tarea diaria a ${assignee}: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(false);
     };
@@ -6048,20 +6346,41 @@ window.setNotifTab = function(tabName) {
 };
 
 window.updateNotifTabsUI = function() {
+    const formSection = document.getElementById('dailyTaskFormSection');
+    if (formSection) {
+        // Solo mostrar la sección de creación rápida en la pestaña de pendientes y si no es rol Lector
+        if (currentNotifTab === 'pending' && currentUserRole !== 'Lector') {
+            formSection.classList.remove('hidden');
+        } else {
+            formSection.classList.add('hidden');
+        }
+    }
+
     const activeThemes = {
-        alerts: 'bg-[#101010] border-[#ee6018] text-[#eeeeee]',
-        pending: 'bg-[#101010] border-[#eeeeee] text-[#eeeeee]',
-        validation: 'bg-[#101010] border-[#ee6018] text-[#eeeeee]',
-        completed: 'bg-[#101010] border-[#a0ca92] text-[#eeeeee]'
+        alerts: 'bg-[#ee6018]/15 border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
+        pending: 'bg-[#eeeeee] border-[#eeeeee] text-[#101010] font-medium shadow-none',
+        validation: 'bg-[#ee6018]/15 border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
+        completed: 'bg-[#a0ca92]/15 border-[#a0ca92] text-[#eeeeee] font-medium shadow-none'
     };
-    const inactiveTheme = 'bg-[#1d1a18] border-[#3d3a39] text-[#8a8380] hover:border-[#4d4947] hover:text-[#eeeeee]';
-    const baseClasses = 'p-2.5 rounded-[3px] transition-colors duration-150 flex items-center justify-between text-left border cursor-pointer';
+    const activeBadgeThemes = {
+        alerts: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
+        pending: 'bg-[#101010] text-[#eeeeee] border-[#101010]',
+        validation: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
+        completed: 'bg-[#a0ca92] text-[#101010] border-[#a0ca92]'
+    };
+    const inactiveTheme = 'bg-transparent border-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18]';
+    const inactiveBadgeTheme = 'bg-[#101010] text-[#8a8380] border-[#3d3a39]';
+    const baseClasses = 'py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition border cursor-pointer';
 
     ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
         const btn = document.getElementById(`notifTabBtn-${t}`);
+        const badgeEl = document.getElementById(`notifTabCount-${t}`);
         if (!btn) return;
-        const theme = (t === currentNotifTab) ? activeThemes[t] : inactiveTheme;
-        btn.className = `${baseClasses} ${theme}`;
+        const isActive = (t === currentNotifTab);
+        btn.className = `${baseClasses} ${isActive ? activeThemes[t] : inactiveTheme}`;
+        if (badgeEl) {
+            badgeEl.className = `text-[9px] font-mono px-1 py-0.2 rounded-[2px] border ${isActive ? activeBadgeThemes[t] : inactiveBadgeTheme}`;
+        }
     });
 };
 
@@ -6491,12 +6810,100 @@ window.renderDailyTasks = function() {
         setTimeout(() => window.focusFilteredMindMap(), 40);
     };
 
+    // === CÁLCULO EN CASCADA DE PROYECTOS CORRELACIONADOS EN FILTROS AVANZADOS ===
+    window.getFilteredProjectsScope = function(excludeCategory = null) {
+        const allProjs = (appData.directProjects || []).concat((appData.modules || []).flatMap(m => m.projects || []));
+        
+        const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+        const selectedNormMods = new Set(activeFilterModules.filter(x => x !== 'ALL').map(normModId));
+        
+        const isConsAll = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+        const isCompAll = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+        const isStatusAll = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+        
+        const q = (activeSearchQuery || '').toLowerCase().trim();
+        
+        return allProjs.filter(p => {
+            if (!p) return false;
+            
+            // 1. Filtro de Módulos
+            if (excludeCategory !== 'module' && !isModAll) {
+                const pContainerMod = normModId(p._modId);
+                const pSecs = (Array.isArray(p.secondaryModules) ? p.secondaryModules : []).map(normModId);
+                const matchesMod = selectedNormMods.has(pContainerMod) || pSecs.some(sm => selectedNormMods.has(sm));
+                if (!matchesMod) return false;
+            }
+            
+            // 2. Filtro de Consultores
+            if (excludeCategory !== 'consultant' && !isConsAll) {
+                const pCons = getProjectConsultants(p);
+                if (consultantFilterMode === 'ALL_SELECTED' && activeFilterConsultants.length >= 2) {
+                    if (!activeFilterConsultants.every(c => pCons.includes(c))) return false;
+                } else {
+                    if (!pCons.some(c => activeFilterConsultants.includes(c))) return false;
+                }
+            }
+            
+            // 3. Filtro de Empresas
+            if (excludeCategory !== 'company' && !isCompAll) {
+                const pComps = window.getProjectCompanies(p);
+                if (!pComps.some(c => activeFilterCompanies.includes(c))) return false;
+            }
+            
+            // 4. Filtro de Estatus
+            if (excludeCategory !== 'status' && !isStatusAll) {
+                if (!activeFilterStatuses.includes(p.status)) return false;
+            }
+            
+            // 5. Filtros complementarios
+            if (activeFilterUrgency !== 'ALL') {
+                if (p.status === 'Completado') return false;
+                let isOver = false, isSoon = false, is30 = false;
+                if (p.deadline) {
+                    const [y,m,d] = p.deadline.split('-');
+                    const diff = Math.ceil((new Date(y, m-1, d) - new Date(new Date().setHours(0,0,0,0))) / 86400000);
+                    if (diff < 0) isOver = true; if (diff >= 0 && diff <= 7) isSoon = true; if (diff >= 0 && diff <= 30) is30 = true;
+                }
+                if (activeFilterUrgency === 'OVERDUE' && !isOver) return false;
+                if (activeFilterUrgency === 'WEEK' && !isSoon) return false;
+                if (activeFilterUrgency === 'MONTH' && !is30) return false;
+                if (activeFilterUrgency === 'NONE' && p.deadline) return false;
+            }
+
+            if (activeFilterPriority !== 'ALL') {
+                const prio = parseFloat(p.priority || 1);
+                if (activeFilterPriority === 'HIGH' && prio > 3) return false;
+                if (activeFilterPriority === 'MED' && (prio < 4 || prio > 6)) return false;
+                if (activeFilterPriority === 'LOW' && prio < 7) return false;
+            }
+
+            if (activeFilterBottleneck !== 'ALL') {
+                if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || p.status === 'Completado')) return false;
+                if (activeFilterBottleneck === 'VALIDATION' && !(p.tasks||[]).some(t => t.done === 'pending')) return false;
+                if (activeFilterBottleneck === 'NA') {
+                    let unv = false; if(p.docs) Object.keys(p.docs).forEach(k => { if(p.docs[k].na && !p.docs[k].naValidated) unv = true; });
+                    if(!unv) return false;
+                }
+            }
+
+            if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q)) && !window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q))) return false;
+            
+            return true;
+        });
+    };
+
     // === CHIPS DE MULTISELECCIÓN EN FILTROS AVANZADOS ===
     window.renderFilterChips = function() {
+        const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+        const isConsAll = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+        const isCompAll = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+        const isStatusAll = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+
         // 0. Módulos / Agrupadores (Multiselección + Correlación)
         const modContainer = document.getElementById('advFilterModuleChips');
         if (modContainer) {
-            const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+            const projsForMod = window.getFilteredProjectsScope('module');
+            const hasNonModFilters = (!isConsAll || !isCompAll || !isStatusAll || activeFilterUrgency !== 'ALL' || activeFilterPriority !== 'ALL' || activeFilterBottleneck !== 'ALL');
             let html = '';
 
             // Selector de modo cuando hay 2 o más módulos seleccionados
@@ -6512,22 +6919,33 @@ window.renderDailyTasks = function() {
                 </div>`;
             }
 
-            html += `<button type="button" onclick="toggleFilterChip('module', 'ALL')" class="filter-chip ${isModAll ? 'active' : ''}">📦 Todos</button>`;
+            html += `<button type="button" onclick="toggleFilterChip('module', 'ALL', false)" class="filter-chip ${isModAll ? 'active' : ''}">
+                📦 Todos <span class="chip-count">${projsForMod.length}</span>
+            </button>`;
 
             const directColor = (appData.directHub && appData.directHub.color) ? appData.directHub.color : '#ee6018';
             const directName = (appData.directHub && appData.directHub.name) ? appData.directHub.name : 'Proyectos Directos';
             const isDirectAct = !isModAll && activeFilterModules.includes('direct-hub');
-            html += `<button type="button" onclick="toggleFilterChip('module', 'direct-hub')" class="filter-chip ${isDirectAct ? 'active' : ''}">
+            const dirCnt = projsForMod.filter(p => normModId(p._modId) === 'hub-direct' || (p.secondaryModules || []).map(normModId).includes('hub-direct')).length;
+            const isDirBlocked = hasNonModFilters && dirCnt === 0;
+
+            html += `<button type="button" onclick="toggleFilterChip('module', 'direct-hub', ${isDirBlocked})" class="filter-chip ${isDirectAct ? 'active' : ''} ${isDirBlocked ? 'blocked' : ''}" title="${isDirBlocked ? 'Sin proyectos en esta selección' : ''}">
                 <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${directColor};"></span>
                 <span>⚡ ${escapeHtml(directName)}</span>
+                <span class="chip-count">${dirCnt}</span>
             </button>`;
 
             (appData.modules || []).forEach(m => {
                 const isAct = !isModAll && activeFilterModules.includes(m.id);
                 const mColor = m.color || '#0071e3';
-                html += `<button type="button" onclick="toggleFilterChip('module', '${jsArg(m.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                const mNorm = normModId(m.id);
+                const mCnt = projsForMod.filter(p => normModId(p._modId) === mNorm || (p.secondaryModules || []).map(normModId).includes(mNorm)).length;
+                const isBlocked = hasNonModFilters && mCnt === 0;
+
+                html += `<button type="button" onclick="toggleFilterChip('module', '${jsArg(m.id)}', ${isBlocked})" class="filter-chip ${isAct ? 'active' : ''} ${isBlocked ? 'blocked' : ''}" title="${isBlocked ? 'Sin proyectos en esta selección' : ''}">
                     <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${mColor};"></span>
                     <span>${escapeHtml(m.name)}</span>
+                    <span class="chip-count">${mCnt}</span>
                 </button>`;
             });
             modContainer.innerHTML = html;
@@ -6538,6 +6956,8 @@ window.renderDailyTasks = function() {
         if (consContainer) {
             const allC = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
             const isAllSelected = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+            const projsForCons = window.getFilteredProjectsScope('consultant');
+            const hasNonConsFilters = (!isModAll || !isCompAll || !isStatusAll || activeFilterUrgency !== 'ALL' || activeFilterPriority !== 'ALL' || activeFilterBottleneck !== 'ALL');
             
             let html = '';
 
@@ -6554,14 +6974,18 @@ window.renderDailyTasks = function() {
                 </div>`;
             }
 
-            html += `<button type="button" onclick="toggleFilterChip('consultant', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">👥 Todos</button>`;
+            html += `<button type="button" onclick="toggleFilterChip('consultant', 'ALL', false)" class="filter-chip ${isAllSelected ? 'active' : ''}">👥 Todos <span class="chip-count">${projsForCons.length}</span></button>`;
             
             allC.forEach(name => {
                 const isAct = !isAllSelected && activeFilterConsultants.includes(name);
                 const cColor = consultants[name]?.color || '#ee6018';
-                html += `<button type="button" onclick="toggleFilterChip('consultant', '${jsArg(name)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                const cCnt = projsForCons.filter(p => getProjectConsultants(p).includes(name)).length;
+                const isBlocked = hasNonConsFilters && cCnt === 0;
+
+                html += `<button type="button" onclick="toggleFilterChip('consultant', '${jsArg(name)}', ${isBlocked})" class="filter-chip ${isAct ? 'active' : ''} ${isBlocked ? 'blocked' : ''}" title="${isBlocked ? 'Sin proyectos en esta selección' : ''}">
                     <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${cColor};"></span>
                     <span>${escapeHtml(name)}</span>
+                    <span class="chip-count">${cCnt}</span>
                 </button>`;
             });
             consContainer.innerHTML = html;
@@ -6572,13 +6996,19 @@ window.renderDailyTasks = function() {
         if (compContainer) {
             const allComps = window.getAllKnownCompanies ? window.getAllKnownCompanies() : ['AFR', 'AVM', 'TEO', 'TNO', 'ZIN', 'GENERAL'];
             const isAllSelected = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+            const projsForComp = window.getFilteredProjectsScope('company');
+            const hasNonCompFilters = (!isModAll || !isConsAll || !isStatusAll || activeFilterUrgency !== 'ALL' || activeFilterPriority !== 'ALL' || activeFilterBottleneck !== 'ALL');
 
-            let html = `<button type="button" onclick="toggleFilterChip('company', 'ALL')" class="filter-chip ${isAllSelected ? 'active' : ''}">🏢 Todas</button>`;
+            let html = `<button type="button" onclick="toggleFilterChip('company', 'ALL', false)" class="filter-chip ${isAllSelected ? 'active' : ''}">🏢 Todas <span class="chip-count">${projsForComp.length}</span></button>`;
 
             allComps.forEach(comp => {
                 const isAct = !isAllSelected && activeFilterCompanies.includes(comp);
-                html += `<button type="button" onclick="toggleFilterChip('company', '${jsArg(comp)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                const compCnt = projsForComp.filter(p => window.getProjectCompanies(p).includes(comp)).length;
+                const isBlocked = hasNonCompFilters && compCnt === 0;
+
+                html += `<button type="button" onclick="toggleFilterChip('company', '${jsArg(comp)}', ${isBlocked})" class="filter-chip ${isAct ? 'active' : ''} ${isBlocked ? 'blocked' : ''}" title="${isBlocked ? 'Sin proyectos en esta selección' : ''}">
                     <span>${escapeHtml(comp)}</span>
+                    <span class="chip-count">${compCnt}</span>
                 </button>`;
             });
             compContainer.innerHTML = html;
@@ -6595,19 +7025,30 @@ window.renderDailyTasks = function() {
                 { id: 'Completado', label: '✅ Completado' }
             ];
             const isAllSelected = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+            const projsForStatus = window.getFilteredProjectsScope('status');
+            const hasNonStatusFilters = (!isModAll || !isConsAll || !isCompAll || activeFilterUrgency !== 'ALL' || activeFilterPriority !== 'ALL' || activeFilterBottleneck !== 'ALL');
 
             let html = '';
             statuses.forEach(st => {
                 const isAct = (st.id === 'ALL' && isAllSelected) || (!isAllSelected && activeFilterStatuses.includes(st.id));
-                html += `<button type="button" onclick="toggleFilterChip('status', '${jsArg(st.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                const sCnt = st.id === 'ALL' ? projsForStatus.length : projsForStatus.filter(p => p.status === st.id).length;
+                const isBlocked = st.id !== 'ALL' && hasNonStatusFilters && sCnt === 0;
+
+                html += `<button type="button" onclick="toggleFilterChip('status', '${jsArg(st.id)}', ${isBlocked})" class="filter-chip ${isAct ? 'active' : ''} ${isBlocked ? 'blocked' : ''}" title="${isBlocked ? 'Sin proyectos en esta selección' : ''}">
                     <span>${escapeHtml(st.label)}</span>
+                    <span class="chip-count">${sCnt}</span>
                 </button>`;
             });
             statusContainer.innerHTML = html;
         }
     };
 
-    window.toggleFilterChip = function(type, val) {
+    window.toggleFilterChip = function(type, val, isBlocked) {
+        if (isBlocked && val !== 'ALL') {
+            const labels = { module: 'módulo', consultant: 'consultor', company: 'empresa', status: 'estatus' };
+            window.showToast(`⚠️ Este ${labels[type] || 'elemento'} no tiene proyectos con los filtros actuales`, true);
+            return;
+        }
         if (type === 'module') {
             if (val === 'ALL') {
                 activeFilterModules = ['ALL'];
@@ -6621,6 +7062,17 @@ window.renderDailyTasks = function() {
                 }
             }
             activeFilterModule = activeFilterModules[0] || 'ALL';
+            
+            // Autolimpiar consultores y empresas si ya no tienen proyectos bajo la nueva selección de módulos
+            if (!activeFilterModules.includes('ALL')) {
+                const projsForCons = window.getFilteredProjectsScope('consultant');
+                activeFilterConsultants = activeFilterConsultants.filter(c => c === 'ALL' || projsForCons.some(p => getProjectConsultants(p).includes(c)));
+                if (activeFilterConsultants.length === 0) activeFilterConsultants = ['ALL'];
+                
+                const projsForComp = window.getFilteredProjectsScope('company');
+                activeFilterCompanies = activeFilterCompanies.filter(comp => comp === 'ALL' || projsForComp.some(p => window.getProjectCompanies(p).includes(comp)));
+                if (activeFilterCompanies.length === 0) activeFilterCompanies = ['ALL'];
+            }
         } else if (type === 'consultant') {
             if (val === 'ALL') {
                 activeFilterConsultants = ['ALL'];
@@ -6784,6 +7236,9 @@ window.renderDailyTasks = function() {
         allModIds.forEach(id => collapsedModules.add(id));
         window.updateCollapseAllButtonState();
         window.renderMindMap();
+        setTimeout(() => {
+            window.recenterCanvas(480);
+        }, 50);
         window.showToast('Módulos colapsados para vista panorámica');
     };
 
@@ -6791,6 +7246,9 @@ window.renderDailyTasks = function() {
         collapsedModules.clear();
         window.updateCollapseAllButtonState();
         window.renderMindMap();
+        setTimeout(() => {
+            window.recenterCanvas(520);
+        }, 50);
         window.showToast('Todos los módulos expandidos');
     };
 
