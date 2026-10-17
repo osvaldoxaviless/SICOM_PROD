@@ -13,15 +13,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let isDrawerOpen = false, isPriorityDrawerOpen = false, isAlertsDrawerOpen = false, isDailyDrawerOpen = false, isFilterDrawerOpen = false;
     let activeSearchQuery = '';
     let activeFilterModule = 'ALL', activeFilterConsultant = 'ALL', activeFilterStatus = 'ALL', activeFilterCompany = 'ALL';
-    let activeFilterConsultants = ['ALL'], activeFilterStatuses = ['ALL'], activeFilterCompanies = ['ALL'];
+    let activeFilterModules = ['ALL'], activeFilterConsultants = ['ALL'], activeFilterStatuses = ['ALL'], activeFilterCompanies = ['ALL'];
     let activeFilterUrgency = 'ALL', activeFilterPriority = 'ALL', activeFilterBottleneck = 'ALL', isFocusMode = false, showAllSecondaryLinks = false;
     let collapsedModules = new Set();
+    let knownModuleIds = new Set();
     let initialCollapseApplied = false;
+    let initialCloudCollapseApplied = false;
     let cameraAnimId = null;
     let lastExpandedModuleId = null;
     let prevModulePositions = new Map();
     let prevCorePaths = new Map();
     let consultantFilterMode = 'ANY';
+    let moduleFilterMode = 'ANY'; // 'ANY' | 'CORRELATED'
+    const normModId = (id) => (id === 'direct-hub' || id === 'DIRECT' || id === 'hub-direct') ? 'hub-direct' : String(id || '');
     let currentSelection = { type: null, id: null };
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
@@ -220,13 +224,36 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         }
                         globalDocs = data.globalDocs || []; ensureDataStructure();
                         
+                        if (!initialCloudCollapseApplied) {
+                            initialCloudCollapseApplied = true;
+                            collapsedModules.add('hub-direct');
+                            knownModuleIds.add('hub-direct');
+                            (appData.modules || []).forEach(m => {
+                                if (m && m.id) {
+                                    collapsedModules.add(m.id);
+                                    knownModuleIds.add(m.id);
+                                }
+                            });
+                            if (typeof window.updateCollapseAllButtonState === 'function') {
+                                window.updateCollapseAllButtonState();
+                            }
+                        }
+
                         if(localAuthor && consultants[localAuthor]) {
                             currentUserRole = consultants[localAuthor].role;
                             localStorage.setItem('sicom_role', currentUserRole);
                             window.applyRolePermissions();
                         }
                         
-                        if(localAuthor) refreshUI(); else window.populateLoginDropdown(); 
+                        if(localAuthor) {
+                            refreshUI();
+                            if (!window._initialCloudRecentered) {
+                                window._initialCloudRecentered = true;
+                                setTimeout(() => { try { window.recenterCanvas(); } catch (e) {} }, 80);
+                            }
+                        } else {
+                            window.populateLoginDropdown(); 
+                        }
                     } else {
                         loadLocalFallback(); 
                         setDoc(docRef, { appData, consultants, globalDocs }, { merge: true });
@@ -2291,7 +2318,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         allProjs.sort((a,b) => a.localeCompare(b)); dl.innerHTML = allProjs.map(n => `<option value="${escapeHtml(n)}">`).join('');
     }
 
-    window.handleSearch = function() { activeSearchQuery = document.getElementById('searchInput').value.trim(); window.renderMindMap(); }
+    window.handleSearch = function() { activeSearchQuery = document.getElementById('searchInput').value.trim(); window.renderMindMap(); setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40); }
     window.handleFilterChange = function() { const fc = document.getElementById('consultantFilter'), fs = document.getElementById('statusFilter'); if (fc) activeFilterConsultant = fc.value; if (fs) activeFilterStatus = fs.value; window.renderMindMap(); window.closeInfoCardSafe(); if(isPriorityDrawerOpen) window.renderPriorityDrawer(); }
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
@@ -4109,14 +4136,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const all = (!activeFilterConsultants.includes('ALL') && activeFilterConsultants.length > 0) ? activeFilterConsultants : Object.keys(consultants);
         const statusMatches = (p) => (activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0 || activeFilterStatuses.includes(p.status));
         const companyMatches = (p) => (activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0 || window.getProjectCompanies(p).some(comp => activeFilterCompanies.includes(comp)));
+        const isModAllPrio = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+        const selModsPrio = new Set(activeFilterModules.filter(x => x !== 'ALL').map(normModId));
+        const moduleMatches = (p, modId) => {
+            if (isModAllPrio) return true;
+            const pPrim = normModId(modId);
+            const pSecs = (Array.isArray(p.secondaryModules) ? p.secondaryModules : []).map(normModId);
+            const allMods = new Set([pPrim, ...pSecs].filter(Boolean));
+            if (moduleFilterMode === 'CORRELATED' && selModsPrio.size >= 2) {
+                return [...allMods].filter(m => selModsPrio.has(m)).length >= 2;
+            }
+            return selModsPrio.has(pPrim);
+        };
 
         const groups = [];
         all.forEach(cons => {
             const cData = consultants[cons];
             if (!cData) return;
             let projs = [];
-            appData.directProjects.forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({ ...p, parentName: appData.directHub.name, pType: 'direct-project' }); });
-            appData.modules.forEach(m => { (m.projects || []).forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p)) projs.push({ ...p, parentName: m.name, pType: 'project' }); }); });
+            appData.directProjects.forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p) && moduleMatches(p, 'hub-direct')) projs.push({ ...p, parentName: appData.directHub.name, pType: 'direct-project' }); });
+            appData.modules.forEach(m => { (m.projects || []).forEach(p => { if (getProjectConsultants(p).includes(cons) && statusMatches(p) && companyMatches(p) && moduleMatches(p, m.id)) projs.push({ ...p, parentName: m.name, pType: 'project' }); }); });
             if (projs.length === 0) return;
             projs.sort((a, b) => parseFloat(a.priority || 0) - parseFloat(b.priority || 0));
             groups.push({ cons, cData, projs });
@@ -4208,6 +4247,62 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       canvasGroup.appendChild(dynamicDefs);
       const q = activeSearchQuery.toLowerCase();
       const isLight = document.body.classList.contains('theme-light');
+
+      ensureDataStructure();
+      if (!initialCollapseApplied) {
+          collapsedModules.add('hub-direct');
+          knownModuleIds.add('hub-direct');
+          (appData.modules || []).forEach(m => {
+              if (m && m.id) {
+                  collapsedModules.add(m.id);
+                  knownModuleIds.add(m.id);
+              }
+          });
+          initialCollapseApplied = true;
+          window.updateCollapseAllButtonState();
+      } else {
+          // Cualquier módulo que llegue por primera vez (ej. desde Firebase o recién creado) inicia colapsado
+          if (!knownModuleIds.has('hub-direct')) {
+              collapsedModules.add('hub-direct');
+              knownModuleIds.add('hub-direct');
+          }
+          (appData.modules || []).forEach(m => {
+              if (m && m.id && !knownModuleIds.has(m.id)) {
+                  collapsedModules.add(m.id);
+                  knownModuleIds.add(m.id);
+              }
+          });
+      }
+
+      // Garantizar que todos los proyectos tengan su _modId primario antes de evaluar filtros
+      (appData.directProjects || []).forEach(p => {
+          if (p) { p._modId = 'hub-direct'; p._renderData = null; }
+      });
+      (appData.modules || []).forEach(m => {
+          if (!m) return;
+          (m.projects || []).forEach(p => {
+              if (p) { p._modId = m.id; p._renderData = null; }
+          });
+      });
+
+      const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+      const selectedNormMods = new Set(activeFilterModules.filter(x => x !== 'ALL').map(normModId));
+      const isMultiModSelected = !isModAll && selectedNormMods.size >= 2;
+
+      const getProjectAllNormMods = (p) => {
+          const orig = p._origProj || p;
+          const prim = normModId(orig._modId || p._modId);
+          const secs = (Array.isArray(orig.secondaryModules) ? orig.secondaryModules : []).map(normModId);
+          return new Set([prim, ...secs].filter(Boolean));
+      };
+
+      const isProjectModCorrelated = (p) => {
+          if (!isMultiModSelected) return false;
+          const pMods = getProjectAllNormMods(p);
+          let matchCount = 0;
+          pMods.forEach(mId => { if (selectedNormMods.has(mId)) matchCount++; });
+          return matchCount >= 2;
+      };
       
       const isFiltered = (p) => {
           if (isFocusMode) {
@@ -4222,14 +4317,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               return isOverdue || isSoon || hasVal;
           }
 
-          if (activeFilterModule !== 'ALL') {
-              const isPrim = (p._modId === activeFilterModule) || (activeFilterModule === 'direct-hub' && p._modId === 'direct-hub');
-              const isSec = Array.isArray(p.secondaryModules) && (
-                  p.secondaryModules.includes(activeFilterModule) ||
-                  (activeFilterModule === 'direct-hub' && p.secondaryModules.includes('DIRECT')) ||
-                  (activeFilterModule === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
-              );
-              if (!isPrim && !isSec) return false;
+          if (!isModAll) {
+              const pContainerMod = normModId(p._modId);
+              const origPrim = normModId((p._origProj || p)._modId || p._modId);
+              const pAllMods = getProjectAllNormMods(p);
+
+              if (!selectedNormMods.has(pContainerMod)) return false;
+
+              if (selectedNormMods.size === 1) {
+                  // Selección de 1 solo módulo: enfocar exclusivamente los proyectos de ese módulo sin expandir otros
+                  if (!pAllMods.has(pContainerMod)) return false;
+              } else {
+                  // Multiselección de módulos (2 o más)
+                  // Evitar duplicar una copia vinculada si su módulo primario ya está entre los seleccionados
+                  if (p._isLinkedCopy && selectedNormMods.has(origPrim)) return false;
+                  if (p._isLinkedCopy && !selectedNormMods.has(origPrim)) {
+                      const firstSelectedSec = [...selectedNormMods].find(sm => pAllMods.has(sm));
+                      if (pContainerMod !== firstSelectedSec) return false;
+                  }
+                  if (moduleFilterMode === 'CORRELATED') {
+                      if (!isProjectModCorrelated(p)) return false;
+                  }
+              }
           }
           if (activeFilterStatuses.length > 0 && !activeFilterStatuses.includes('ALL')) {
               if (!activeFilterStatuses.includes(p.status)) return false;
@@ -4286,7 +4395,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const isCompAll = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
 
       const isDefaultState = !isFocusMode &&
-          activeFilterModule === 'ALL' &&
+          isModAll &&
           isStatusAll &&
           isConsAll &&
           isCompAll &&
@@ -4296,23 +4405,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           !q;
 
       function isModuleCollapsed(modId, n) {
-          if (!collapsedModules.has(modId)) return false;
-          // Si hay una búsqueda o filtro activo, auto-expandir si el módulo contiene proyectos coincidentes
+          const nMod = normModId(modId);
           if (!isDefaultState) {
-              const hasMatchingProj = (n.projects || []).some(p => isFiltered(p));
-              if (hasMatchingProj) return false;
+              if (!isModAll && !selectedNormMods.has(nMod)) {
+                  return true;
+              }
+              return (n.projects || []).length === 0;
           }
-          return true;
-      }
-
-      ensureDataStructure();
-      if (!initialCollapseApplied && collapsedModules.size === 0) {
-          collapsedModules.add('hub-direct');
-          (appData.modules || []).forEach(m => {
-              if (m && m.id) collapsedModules.add(m.id);
-          });
-          initialCollapseApplied = true;
-          window.updateCollapseAllButtonState();
+          return collapsedModules.has(modId);
       }
 
       const directHubItem = appData.directHub || (appData.directHub = { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' });
@@ -4327,6 +4427,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       linked.push(Object.assign(Object.create(p), {
                           _isLinkedCopy: true,
                           _origProj: p,
+                          _modId: modId,
                           _strictType: 'direct-project',
                           _renderData: null
                       }));
@@ -4345,6 +4446,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       linked.push(Object.assign(Object.create(p), {
                           _isLinkedCopy: true,
                           _origProj: p,
+                          _modId: modId,
                           _strictType: 'project',
                           _renderData: null
                       }));
@@ -4352,6 +4454,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               });
           });
           return linked;
+      };
+
+      const buildModuleProjectsList = (modId, ownP, linkedP) => {
+          let rawList = ownP.length > 0 ? ownP : linkedP;
+          // Si hay filtro de módulos activo y este módulo está seleccionado, incluir vinculados cuyo primario no esté seleccionado
+          if (!isModAll && selectedNormMods.has(normModId(modId)) && ownP.length > 0 && linkedP.length > 0) {
+              const extraLinked = linkedP.filter(lp => {
+                  const origMod = normModId((lp._origProj || lp)._modId);
+                  return !selectedNormMods.has(origMod);
+              });
+              if (extraLinked.length > 0) rawList = ownP.concat(extraLinked);
+          }
+          return isDefaultState ? rawList : rawList.filter(p => isFiltered(p));
       };
 
       const dirLinked = getLinkedProjectsForModule('hub-direct');
@@ -4362,7 +4477,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               item: directHubItem,
               ownProjects: visDir,
               linkedProjects: dirLinked,
-              projects: visDir.length > 0 ? visDir : dirLinked
+              projects: buildModuleProjectsList('hub-direct', visDir, dirLinked)
           }
       ];
       
@@ -4377,11 +4492,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               item: m,
               ownProjects: ownP,
               linkedProjects: linkedP,
-              projects: ownP.length > 0 ? ownP : linkedP
+              projects: buildModuleProjectsList(m.id, ownP, linkedP)
           });
       });
 
-      allNodes.sort((a, b) => (b.projects || []).length - (a.projects || []).length);
+      allNodes.sort((a, b) => ((b.ownProjects || []).length || (b.linkedProjects || []).length) - ((a.ownProjects || []).length || (a.linkedProjects || []).length));
 
       // Simetría izquierda (Oeste) y derecha (Este), con los más pesados al centro (y ≈ 0) y los ligeros hacia Norte y Sur
       const leftRaw = [], rightRaw = [];
@@ -4403,6 +4518,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const lNodes = arrangeFromCenterOutward(leftRaw);
       const rNodes = arrangeFromCenterOutward(rightRaw);
 
+      // Helper para saber si un módulo está activo bajo el filtro actual
+      const isModuleMatchedByFilter = (modId, n) => {
+          if (isDefaultState) return true;
+          const nMod = normModId(modId);
+          const nItemName = n.item ? (n.item.name || '') : '';
+          if (!isModAll) {
+              if (!selectedNormMods.has(nMod)) return false;
+              if (isMultiModSelected && moduleFilterMode === 'CORRELATED') {
+                  if ((n.projects || []).length > 0) return true;
+                  // También iluminar si es el módulo destino de un proyecto correlacionado en otro módulo seleccionado
+                  const allVisibleCorrelated = [...lNodes, ...rNodes].flatMap(node => node.projects || []);
+                  return allVisibleCorrelated.some(p => getProjectAllNormMods(p).has(nMod));
+              }
+              return true;
+          }
+          return (n.projects || []).length > 0 || (q !== '' && nItemName.toLowerCase().includes(q));
+      };
+
       const slotH = 75, mOffX = 400, pOffX = 900;
       function procSide(nodes, isLeft) {
           const mx = isLeft ? -mOffX : mOffX, px = isLeft ? -pOffX : pOffX;
@@ -4421,7 +4554,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
               const nItemId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
               const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
-              const nItemName = n.item ? (n.item.name || '') : '';
               const isCollapsed = isModuleCollapsed(modId, n);
               const weight = isCollapsed ? 1 : Math.max(1, pCount);
               
@@ -4435,9 +4567,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       const cN = getProjectConsultants(p);
                       const col = generateJointGradient(cN);
                       const strictType = p._strictType || (n.type === 'direct-hub' ? 'direct-project' : 'project');
-                      p._modId = n.type === 'direct-hub' ? 'direct-hub' : (n.item ? n.item.id : 'mod');
+                      p._modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
                       const py = sy + idx * slotH;
-                      p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id }; 
+                      p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id, parentModColor: nItemColor }; 
                       if (p._isLinkedCopy && p._origProj && !p._origProj._renderData) {
                           p._origProj._renderData = p._renderData;
                       }
@@ -4449,19 +4581,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               n._renderData = { x: mx, y: my, isLeft };
               if (n.item) n.item._renderData = n._renderData;
 
-              // PARCHE: Evaluación estricta de módulos y ghosting de líneas
-              const hasSecMatches = (appData.directProjects || []).concat(
-                  (appData.modules || []).flatMap(m => m.projects || [])
-              ).some(p => {
-                  const isSec = Array.isArray(p.secondaryModules) && (
-                      p.secondaryModules.includes(nItemId) ||
-                      (nItemId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
-                      (nItemId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
-                  );
-                  return isSec && isFiltered(p);
-              });
-              const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || hasSecMatches || (q !== '' && nItemName && nItemName.toLowerCase().includes(q));
-              const lineOpacity = modMatches ? '1' : '0.15';
+              const modMatches = isModuleMatchedByFilter(modId, n);
+              const lineOpacity = modMatches ? '1' : '0.12';
 
               const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
               pC.classList.add('mindmap-connector');
@@ -4470,7 +4591,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               let coreStartX, coreStartY, cp1CoreX, cp1CoreY, cp2CoreX, cp2CoreY;
 
               if (my < -70) {
-                  // Zona Norte: nace en (0, -60) con control vertical
                   coreStartX = 0;
                   coreStartY = -60;
                   cp1CoreX = 0;
@@ -4478,7 +4598,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   cp2CoreX = isLeft ? modEndX + 75 : modEndX - 75;
                   cp2CoreY = modEndY;
               } else if (my > 70) {
-                  // Zona Sur: nace en (0, 60) con control vertical
                   coreStartX = 0;
                   coreStartY = 60;
                   cp1CoreX = 0;
@@ -4486,7 +4605,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   cp2CoreX = isLeft ? modEndX + 75 : modEndX - 75;
                   cp2CoreY = modEndY;
               } else if (isLeft) {
-                  // Zona Oeste (Izquierda): nace en (-60, 0) con control horizontal
                   coreStartX = -60;
                   coreStartY = 0;
                   cp1CoreX = -125;
@@ -4494,7 +4612,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   cp2CoreX = modEndX + 65;
                   cp2CoreY = modEndY;
               } else {
-                  // Zona Este (Derecha): nace en (60, 0) con control horizontal
                   coreStartX = 60;
                   coreStartY = 0;
                   cp1CoreX = 125;
@@ -4565,6 +4682,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   if (!p._renderData) return;
                   const pMatches = isDefaultState || isFiltered(p);
                   const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
+                  const isModCorrMatch = isProjectModCorrelated(p);
                   let isOver = false;
                   if(p.deadline && p.status !== 'Completado') {
                       const [dy, dm, dd] = p.deadline.split('-');
@@ -4577,7 +4695,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   pP.setAttribute('data-parent-mod', String(modId));
                   pP.style.setProperty('--target-opacity', pMatches ? '1' : '0.12');
                   const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : (isLight ? '#64748b' : '#48484a');
-                  const endCol = isOver ? '#ff453a' : solidColor;
+                  const endCol = isOver ? '#ee6018' : solidColor;
 
                   // Conexión limpia y fluida que nace exactamente en el botón de colapso
                   const startX = isLeft ? (mx - 165 - 11) : (mx + 165 + 11);
@@ -4615,16 +4733,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
                   dynamicDefs.appendChild(pGrad);
 
-                  if (isSynergyMatch) {
+                  if (isSynergyMatch || isModCorrMatch) {
                       pP.removeAttribute('pathLength');
                       pP.classList.add('synergy-connector-line');
-                      pP.setAttribute('stroke', generateJointGradient(activeFilterConsultants));
+                      pP.setAttribute('stroke', isSynergyMatch ? generateJointGradient(activeFilterConsultants) : `url(#${pGradId})`);
                   } else {
                       pP.setAttribute('stroke', `url(#${pGradId})`);
                   }
                   pP.setAttribute('stroke-width', isLight ? '2' : '1.5'); 
                   pP.setAttribute('opacity', pMatches ? '1' : '0.12'); 
-                  if (lastExpandedModuleId === modId && !isSynergyMatch) {
+                  if (lastExpandedModuleId === modId && !isSynergyMatch && !isModCorrMatch) {
                       pP.classList.add('connector-animate-in');
                       pP.style.animationDelay = `${idx * 15}ms`;
                   }
@@ -4644,26 +4762,43 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       // Conectores Secundarios Multimódulo (Fibras ópticas de dependencias cruzadas)
       [...lNodes, ...rNodes].forEach(n => {
+          const containerModId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : '');
+          const containerModColor = (n.item && n.item.color) ? n.item.color : '#ee6018';
           (n.projects || []).forEach(p => {
-              if (p._isLinkedCopy) return;
-              if (!Array.isArray(p.secondaryModules) || p.secondaryModules.length === 0) return;
               if (!p._renderData) return;
+              const origProj = p._origProj || p;
+              const allRelatedMods = [
+                  normModId(origProj._modId || containerModId),
+                  ...((Array.isArray(origProj.secondaryModules) ? origProj.secondaryModules : []).map(normModId))
+              ].filter((mId, idx, arr) => mId && mId !== normModId(containerModId) && arr.indexOf(mId) === idx);
+
+              if (allRelatedMods.length === 0) return;
 
               const pData = p._renderData;
               const pMatches = isDefaultState || isFiltered(p);
               const isProjectSel = currentSelection.id === p.id;
 
-              p.secondaryModules.forEach(secId => {
-                  const secNode = moduleNodeMap.get(secId) || (secId === 'DIRECT' ? moduleNodeMap.get('hub-direct') : null);
+              allRelatedMods.forEach(secId => {
+                  const secNode = moduleNodeMap.get(secId) || (secId === 'DIRECT' || secId === 'hub-direct' ? moduleNodeMap.get('hub-direct') : null);
                   if (!secNode || !secNode._renderData) return;
 
                   const secData = secNode._renderData;
                   const secMx = secData.x;
                   const secMy = secData.y;
                   const secIsLeft = secData.isLeft;
-                  const secColor = (secNode.item && secNode.item.color) ? secNode.item.color : '#0071e3';
+                  const secColor = (secNode.item && secNode.item.color) ? secNode.item.color : '#ee6018';
                   const secNodeId = secNode.item ? secNode.item.id : (secNode.type === 'direct-hub' ? 'hub-direct' : '');
                   const isSecModSel = currentSelection.id === secNodeId;
+                  const normSecId = normModId(secNodeId);
+                  const normContainerId = normModId(containerModId);
+
+                  // Regla clave de ruido cero:
+                  // - Si hay 1 solo módulo filtrado, NO encender líneas cruzadas automáticamente
+                  // - Si hay 2+ módulos filtrados (multiselección), encender SOLO las líneas que correlacionan los módulos seleccionados entre sí
+                  const isMultiModCorrelationLink = isMultiModSelected && pMatches && selectedNormMods.has(normContainerId) && selectedNormMods.has(normSecId);
+                  if (!isModAll && !isMultiModCorrelationLink && !isProjectSel && !showAllSecondaryLinks) {
+                      return; // Omitir conectores secundarios hacia módulos no seleccionados para eliminar ruido visual
+                  }
 
                   const pX = pData.x;
                   const pY = pData.y;
@@ -4699,10 +4834,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   pSec.setAttribute('d', `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`);
                   pSec.setAttribute('fill', 'none');
                   pSec.setAttribute('data-source-proj', String(p.id));
-                  pSec.setAttribute('data-target-mod', String(secId));
+                  pSec.setAttribute('data-target-mod', String(secNodeId));
 
                   const pIdClean = String(p.id).replace(/[^a-zA-Z0-9_-]/g, '');
-                  const secIdClean = String(secId).replace(/[^a-zA-Z0-9_-]/g, '');
+                  const secIdClean = String(secNodeId).replace(/[^a-zA-Z0-9_-]/g, '');
                   const secGradId = `grad-sec-${pIdClean}-${secIdClean}`;
 
                   const sGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
@@ -4716,29 +4851,25 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop1.setAttribute('offset', '0%');
                   stop1.setAttribute('stop-color', secColor);
-                  stop1.setAttribute('stop-opacity', isLight ? '0.60' : '0.75');
+                  stop1.setAttribute('stop-opacity', isLight ? '0.75' : '0.88');
                   sGrad.appendChild(stop1);
 
                   const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
                   stop2.setAttribute('offset', '100%');
-                  stop2.setAttribute('stop-color', isLight ? '#0071e3' : '#60a5fa');
-                  stop2.setAttribute('stop-opacity', isLight ? '0.75' : '0.90');
+                  stop2.setAttribute('stop-color', containerModColor);
+                  stop2.setAttribute('stop-opacity', isLight ? '0.80' : '0.92');
                   sGrad.appendChild(stop2);
 
                   dynamicDefs.appendChild(sGrad);
 
                   pSec.setAttribute('stroke', `url(#${secGradId})`);
-                  pSec.setAttribute('stroke-width', '1.6');
+                  pSec.setAttribute('stroke-width', '1.8');
 
                   if (!pMatches) {
                       pSec.classList.add('sec-connector-dimmed');
-                  } else if (isProjectSel || isSecModSel) {
+                  } else if (isProjectSel || (isSecModSel && isModAll) || isMultiModCorrelationLink) {
                       pSec.classList.add('sec-connector-selected');
-                      pSec.setAttribute('stroke-width', '2.5');
-                      pSec.setAttribute('filter', 'url(#glow)');
-                  } else if (activeFilterModule === secId || (secId === 'DIRECT' && activeFilterModule === 'direct-hub')) {
-                      pSec.classList.add('sec-connector-selected');
-                      pSec.setAttribute('stroke-width', '2.2');
+                      pSec.setAttribute('stroke-width', isMultiModCorrelationLink ? '2.4' : '2.2');
                   }
                   canvasGroup.appendChild(pSec);
               });
@@ -4840,6 +4971,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
 
           const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
+          const isModCorrMatch = isProjectModCorrelated(p);
           const isFlashlit = false;
           const projStrokeColor = isOver ? '#ee6018' : (isSynergyMatch ? generateJointGradient(activeFilterConsultants) : (color || '#ee6018'));
           if (isSel) {
@@ -4861,10 +4993,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           r.setAttribute('width', '320'); r.setAttribute('height', '56'); r.setAttribute('rx', '10'); 
           r.setAttribute('fill', isLight ? '#ffffff' : '#1d1a18'); 
           r.setAttribute('stroke', projStrokeColor); 
-          r.setAttribute('stroke-width', isSel ? '2.2' : (isOver ? '1.6' : (isSynergyMatch ? '2' : '1.2'))); 
+          r.setAttribute('stroke-width', isSel ? '2.2' : (isOver ? '1.6' : ((isSynergyMatch || isModCorrMatch) ? '2' : '1.2'))); 
           r.style.pointerEvents = 'none';
           if (isOver) r.classList.add('overdue-capsule');
-          if (isSynergyMatch) r.classList.add('synergy-capsule-glow');
+          if (isSynergyMatch || isModCorrMatch) r.classList.add('synergy-capsule-glow');
           g.appendChild(r);
 
           const rSheen = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -4925,7 +5057,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           let fullText = (isOver ? "⚠️ " : "") + p.name;
           let fontSize = fullText.length > 35 ? 9.5 : (fullText.length > 25 ? 10.5 : 12);
           nT.setAttribute('style', `font-size: ${fontSize}px; font-weight: 400; pointer-events: none;`);
-          const maxNameLen = (hasSecBadge || isSynergyMatch) ? (compBadgeOffset ? 22 : 28) : (compBadgeOffset ? 35 : 55);
+          const maxNameLen = (hasSecBadge || isSynergyMatch || isModCorrMatch) ? (compBadgeOffset ? 22 : 28) : (compBadgeOffset ? 35 : 55);
           nT.textContent = fullText.length > maxNameLen ? fullText.substring(0, maxNameLen - 3)+'...' : fullText;
           g.appendChild(nT);
 
@@ -4950,8 +5082,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               mPill.setAttribute('width', '38');
               mPill.setAttribute('height', '14');
               mPill.setAttribute('rx', '3');
-              mPill.setAttribute('fill', isFlashlit ? '#101010' : '#101010');
-              mPill.setAttribute('stroke', isFlashlit ? '#101010' : '#3d3a39');
+              mPill.setAttribute('fill', isModCorrMatch ? 'rgba(238, 96, 24, 0.22)' : '#101010');
+              mPill.setAttribute('stroke', isModCorrMatch ? '#ee6018' : '#3d3a39');
               mPill.setAttribute('stroke-width', '1');
               multiG.appendChild(mPill);
 
@@ -4967,8 +5099,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               g.appendChild(multiG);
           }
 
-          // Micro-badge destacado de Sinergia (🤝 JUNTOS)
-          if (isSynergyMatch) {
+          // Micro-badge destacado de Sinergia (🤝 JUNTOS) o Correlación de Módulos (🔗 CORREL)
+          if (isSynergyMatch || isModCorrMatch) {
               const synG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
               const synX = hasSecBadge ? 192 : 248;
               synG.setAttribute('transform', `translate(${synX}, 9)`);
@@ -4978,7 +5110,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               synBg.setAttribute('width', '54');
               synBg.setAttribute('height', '14');
               synBg.setAttribute('rx', '3');
-              synBg.setAttribute('fill', isFlashlit ? '#101010' : 'rgba(238, 96, 24, 0.18)');
+              synBg.setAttribute('fill', 'rgba(238, 96, 24, 0.18)');
               synBg.setAttribute('stroke', '#ee6018');
               synBg.setAttribute('stroke-width', '1');
               synG.appendChild(synBg);
@@ -4989,7 +5121,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               synTxt.setAttribute('text-anchor', 'middle');
               synTxt.setAttribute('fill', '#eeeeee');
               synTxt.setAttribute('style', "font-size: 7.5px; font-weight: 500; font-family: 'Geist Mono', monospace;");
-              synTxt.textContent = '🤝 JUNTOS';
+              synTxt.textContent = isSynergyMatch ? '🤝 JUNTOS' : '🔗 CORREL';
               synG.appendChild(synTxt);
 
               g.appendChild(synG);
@@ -5150,17 +5282,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         // Evaluación estricta de módulos y ghosting de bloques
         const modName = n.item ? (n.item.name || '') : '';
         const modCol = (n.item && n.item.color) ? n.item.color : '#ee6018';
-        const hasSecMatchesMod = (appData.directProjects || []).concat(
-            (appData.modules || []).flatMap(m => m.projects || [])
-        ).some(p => {
-            const isSec = Array.isArray(p.secondaryModules) && (
-                p.secondaryModules.includes(modId) ||
-                (modId === 'hub-direct' && p.secondaryModules.includes('DIRECT')) ||
-                (modId === 'DIRECT' && p.secondaryModules.includes('hub-direct'))
-            );
-            return isSec && isFiltered(p);
-        });
-        const modMatches = isDefaultState || (n.projects || []).some(p => isFiltered(p)) || hasSecMatchesMod || (q !== '' && modName && modName.toLowerCase().includes(q));
+        const modMatches = isModuleMatchedByFilter(modId, n);
         const { x, y } = n._renderData || { x: 0, y: 0 };
         const isSel = currentSelection.id === modId;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -5521,6 +5643,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           sucomG.appendChild(sucomHit);
 
           canvasGroup.appendChild(sucomG);
+      }
+
+      // Calcular caja delimitadora exacta de los módulos y proyectos filtrados para auto-enfoque de cámara
+      if (!isDefaultState) {
+          let fMinX = Infinity, fMaxX = -Infinity, fMinY = Infinity, fMaxY = -Infinity, fCount = 0;
+          [...lNodes, ...rNodes].forEach(n => {
+              const modId = n.item ? n.item.id : (n.type === 'direct-hub' ? 'hub-direct' : 'mod');
+              if (isModuleMatchedByFilter(modId, n) && n._renderData) {
+                  fMinX = Math.min(fMinX, n._renderData.x - 180);
+                  fMaxX = Math.max(fMaxX, n._renderData.x + 180);
+                  fMinY = Math.min(fMinY, n._renderData.y - 40);
+                  fMaxY = Math.max(fMaxY, n._renderData.y + 40);
+                  fCount++;
+                  (n.projects || []).forEach(p => {
+                      if (p._renderData) {
+                          fMinX = Math.min(fMinX, p._renderData.x - 175);
+                          fMaxX = Math.max(fMaxX, p._renderData.x + 175);
+                          fMinY = Math.min(fMinY, p._renderData.y - 40);
+                          fMaxY = Math.max(fMaxY, p._renderData.y + 40);
+                          fCount++;
+                      }
+                  });
+              }
+          });
+          window._lastFilteredBounds = fCount > 0 ? { minX: fMinX, maxX: fMaxX, minY: fMinY, maxY: fMaxY, count: fCount } : null;
+      } else {
+          window._lastFilteredBounds = null;
       }
 
       lastExpandedModuleId = null;
@@ -6529,10 +6678,43 @@ window.renderDailyTasks = function() {
 
 
 // === LÓGICA DE FILTROS AVANZADOS Y MODO ENFOQUE ===
+    window.focusFilteredMindMap = function() {
+        if (!svgElem || !canvasGroup) return;
+        const b = window._lastFilteredBounds;
+        if (!b || b.count === 0) {
+            window.recenterCanvas();
+            return;
+        }
+        const rect = svgElem.getBoundingClientRect();
+        const isDesktop = window.innerWidth >= 768;
+        const isSmallScreen = window.innerWidth < 640 || window.innerHeight < 520;
+        let availW = rect.width;
+        let availH = rect.height;
+        if (isDesktop && isFilterDrawerOpen) {
+            availW = Math.max(320, rect.width - 400);
+        }
+        const padX = isSmallScreen ? 28 : 80;
+        const padY = isSmallScreen ? 36 : 90;
+        const bW = Math.max(320, b.maxX - b.minX);
+        const bH = Math.max(240, b.maxY - b.minY);
+        const sX = (availW - padX * 2) / bW;
+        const sY = (availH - padY * 2) / bH;
+        const minAllowed = window.getMinZoomLimit ? window.getMinZoomLimit() : 0.18;
+        const targetScale = Math.max(minAllowed, Math.min(1.05, Math.min(sX, sY)));
+        const centerX = (b.minX + b.maxX) / 2;
+        const centerY = (b.minY + b.maxY) / 2;
+        const targetTx = (availW / 2) - (centerX * targetScale);
+        const targetTy = (availH / 2) - (centerY * targetScale);
+        window.animateCameraTo(targetTx, targetTy, targetScale, 520);
+    };
+
     window.toggleFilterDrawer = function() {
         if(isFilterDrawerOpen) {
             document.getElementById('filterDrawer').classList.add('translate-x-full');
             isFilterDrawerOpen = false;
+            if (window._lastFilteredBounds) {
+                setTimeout(() => window.focusFilteredMindMap(), 60);
+            }
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
@@ -6540,7 +6722,18 @@ window.renderDailyTasks = function() {
             document.getElementById('filterDrawer').classList.remove('translate-x-full');
             isFilterDrawerOpen = true;
             window.populateAdvFilters();
+            if (window._lastFilteredBounds) {
+                setTimeout(() => window.focusFilteredMindMap(), 60);
+            }
         }
+    };
+
+    window.setModuleFilterMode = function(mode) {
+        moduleFilterMode = mode;
+        window.renderFilterChips();
+        window.renderMindMap();
+        if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+        setTimeout(() => window.focusFilteredMindMap(), 40);
     };
 
     window.setConsultantFilterMode = function(mode) {
@@ -6548,10 +6741,51 @@ window.renderDailyTasks = function() {
         window.renderFilterChips();
         window.renderMindMap();
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+        setTimeout(() => window.focusFilteredMindMap(), 40);
     };
 
     // === CHIPS DE MULTISELECCIÓN EN FILTROS AVANZADOS ===
     window.renderFilterChips = function() {
+        // 0. Módulos / Agrupadores (Multiselección + Correlación)
+        const modContainer = document.getElementById('advFilterModuleChips');
+        if (modContainer) {
+            const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+            let html = '';
+
+            // Selector de modo cuando hay 2 o más módulos seleccionados
+            if (!isModAll && activeFilterModules.length >= 2) {
+                html += `
+                <div class="w-full flex items-center gap-1.5 p-1 bg-[#101010] border border-[#3d3a39] rounded-[10px] mb-2">
+                    <button type="button" onclick="setModuleFilterMode('ANY')" class="flex-1 py-1.5 px-2 rounded-[3px] font-mono uppercase text-[9px] transition text-center ${moduleFilterMode === 'ANY' ? 'bg-[#eeeeee] text-[#101010]' : 'text-[#8a8380] hover:text-[#eeeeee]'}">
+                        🔗 Todos y su correlación
+                    </button>
+                    <button type="button" onclick="setModuleFilterMode('CORRELATED')" class="flex-1 py-1.5 px-2 rounded-[3px] font-mono uppercase text-[9px] transition text-center ${moduleFilterMode === 'CORRELATED' ? 'bg-[#ee6018] text-[#fafafa]' : 'text-[#8a8380] hover:text-[#eeeeee]'}">
+                        🤝 Solo correlacionados entre sí
+                    </button>
+                </div>`;
+            }
+
+            html += `<button type="button" onclick="toggleFilterChip('module', 'ALL')" class="filter-chip ${isModAll ? 'active' : ''}">📦 Todos</button>`;
+
+            const directColor = (appData.directHub && appData.directHub.color) ? appData.directHub.color : '#ee6018';
+            const directName = (appData.directHub && appData.directHub.name) ? appData.directHub.name : 'Proyectos Directos';
+            const isDirectAct = !isModAll && activeFilterModules.includes('direct-hub');
+            html += `<button type="button" onclick="toggleFilterChip('module', 'direct-hub')" class="filter-chip ${isDirectAct ? 'active' : ''}">
+                <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${directColor};"></span>
+                <span>⚡ ${escapeHtml(directName)}</span>
+            </button>`;
+
+            (appData.modules || []).forEach(m => {
+                const isAct = !isModAll && activeFilterModules.includes(m.id);
+                const mColor = m.color || '#0071e3';
+                html += `<button type="button" onclick="toggleFilterChip('module', '${jsArg(m.id)}')" class="filter-chip ${isAct ? 'active' : ''}">
+                    <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${mColor};"></span>
+                    <span>${escapeHtml(m.name)}</span>
+                </button>`;
+            });
+            modContainer.innerHTML = html;
+        }
+
         // 1. Consultores
         const consContainer = document.getElementById('advFilterConsultantChips');
         if (consContainer) {
@@ -6627,7 +6861,20 @@ window.renderDailyTasks = function() {
     };
 
     window.toggleFilterChip = function(type, val) {
-        if (type === 'consultant') {
+        if (type === 'module') {
+            if (val === 'ALL') {
+                activeFilterModules = ['ALL'];
+            } else {
+                activeFilterModules = activeFilterModules.filter(x => x !== 'ALL');
+                if (activeFilterModules.includes(val)) {
+                    activeFilterModules = activeFilterModules.filter(x => x !== val);
+                    if (activeFilterModules.length === 0) activeFilterModules = ['ALL'];
+                } else {
+                    activeFilterModules.push(val);
+                }
+            }
+            activeFilterModule = activeFilterModules[0] || 'ALL';
+        } else if (type === 'consultant') {
             if (val === 'ALL') {
                 activeFilterConsultants = ['ALL'];
             } else {
@@ -6691,7 +6938,10 @@ window.renderDailyTasks = function() {
 
     window.handleAdvFilter = function() {
         const modSel = document.getElementById('advFilterModule');
-        if (modSel) activeFilterModule = modSel.value;
+        if (modSel) {
+            activeFilterModule = modSel.value;
+            activeFilterModules = activeFilterModule === 'ALL' ? ['ALL'] : [activeFilterModule];
+        }
         const urgSel = document.getElementById('advFilterUrgency');
         if (urgSel) activeFilterUrgency = urgSel.value;
         const prioSel = document.getElementById('advFilterPriority');
@@ -6700,7 +6950,7 @@ window.renderDailyTasks = function() {
         if (botSel) activeFilterBottleneck = botSel.value;
         
         let c = 0;
-        if (activeFilterModule !== 'ALL') c++;
+        if (!activeFilterModules.includes('ALL') && activeFilterModules.length > 0) c += activeFilterModules.length;
         if (!activeFilterConsultants.includes('ALL') && activeFilterConsultants.length > 0) c += activeFilterConsultants.length;
         if (!activeFilterStatuses.includes('ALL') && activeFilterStatuses.length > 0) c += activeFilterStatuses.length;
         if (!activeFilterCompanies.includes('ALL') && activeFilterCompanies.length > 0) c += activeFilterCompanies.length;
@@ -6717,10 +6967,13 @@ window.renderDailyTasks = function() {
         if (isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
         else window.renderMindMap();
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+        setTimeout(() => window.focusFilteredMindMap(), 40);
     };
 
     window.resetAdvFilters = function() {
         activeFilterModule = 'ALL';
+        activeFilterModules = ['ALL'];
+        moduleFilterMode = 'ANY';
         activeFilterConsultants = ['ALL'];
         activeFilterStatuses = ['ALL'];
         activeFilterCompanies = ['ALL'];
@@ -6740,14 +6993,15 @@ window.renderDailyTasks = function() {
             isFocusMode = false;
             const btn = document.getElementById('btnFocusMode');
             if (btn) {
-                btn.classList.remove('bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
-                btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+                btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]', 'bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+                btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
             }
         }
         
         window.populateAdvFilters(); 
         window.renderMindMap();
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
+        setTimeout(() => window.recenterCanvas(), 40);
     };
 
     // === GESTIÓN DE COLAPSO Y EXPANSIÓN INTELIGENTE DE MÓDULOS ===
@@ -6830,6 +7084,7 @@ window.renderDailyTasks = function() {
             btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
         }
         window.renderMindMap();
+        setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
     };
 
     window.toggleSecondaryLinks = function() {
