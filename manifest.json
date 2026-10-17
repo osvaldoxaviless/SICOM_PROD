@@ -1,0 +1,18 @@
+{
+  "name": "SICOM — Terminal de Operaciones & Portafolio",
+  "short_name": "SICOM",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101010",
+  "theme_color": "#101010",
+  "description": "Terminal de Operaciones, Portafolio y Centro de Control STGT",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
