@@ -645,9 +645,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 dInp.focus();
                 dInp.select();
             } else if (typeof window.toggleSearch === 'function') {
-                const mInp = document.getElementById('searchInput');
-                if (mInp && mInp.classList.contains('opacity-0')) window.toggleSearch();
-                else if (mInp) mInp.focus();
+                if (!window.isMobileSearchOpen || !window.isMobileSearchOpen()) window.toggleSearch();
+                else {
+                    const mInp = document.getElementById('searchInput');
+                    if (mInp) mInp.focus();
+                }
             }
         }
     });
@@ -2273,28 +2275,77 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
        else { btnM.classList.add('bg-[#eeeeee]','text-[#101010]'); btnM.classList.remove('bg-white/10','text-white','text-gray-400','text-[#8a8380]','border-transparent'); btnP.classList.remove('bg-[#eeeeee]','text-[#101010]','bg-white/10','text-white'); btnP.classList.add('text-[#8a8380]','border-transparent'); formM.classList.remove('hidden'); formP.classList.add('hidden'); }
     }
     
-    window.toggleSearch = function() {
-        const inp = document.getElementById('searchInput');
+    window.isMobileSearchOpen = function() {
+        const drawer = document.getElementById('mobileSearchDrawer');
+        return drawer && drawer.classList.contains('search-open');
+    };
+
+    window.openMobileSearch = function() {
+        const drawer = document.getElementById('mobileSearchDrawer');
         const btn = document.getElementById('searchBtnIcon');
-        if (!inp || !btn) return;
-        
-        if (inp.classList.contains('opacity-0')) {
-            inp.classList.remove('opacity-0', 'w-0', 'pointer-events-none');
-            inp.classList.add('opacity-100', 'w-44', 'sm:w-56', 'pointer-events-auto');
-            btn.classList.add('bg-[#101010]', 'border-[#ee6018]'); 
+        const inp = document.getElementById('searchInput');
+        if (!drawer) return;
+
+        drawer.classList.remove('search-closed');
+        drawer.classList.add('search-open');
+        if (btn) {
+            btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
             btn.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
-            inp.focus();
-        } else {
-            inp.classList.add('opacity-0', 'w-0', 'pointer-events-none');
-            inp.classList.remove('opacity-100', 'w-44', 'sm:w-56', 'pointer-events-auto');
-            btn.classList.remove('bg-[#101010]', 'border-[#ee6018]'); 
+        }
+        if (inp) {
+            setTimeout(() => {
+                inp.focus();
+                const clearBtn = document.getElementById('btnMobileSearchClear');
+                if (clearBtn) {
+                    if (inp.value.trim()) clearBtn.classList.remove('hidden');
+                    else clearBtn.classList.add('hidden');
+                }
+            }, 60);
+        }
+    };
+
+    window.closeMobileSearch = function(keepQuery = true) {
+        const drawer = document.getElementById('mobileSearchDrawer');
+        const btn = document.getElementById('searchBtnIcon');
+        const inp = document.getElementById('searchInput');
+        if (!drawer) return;
+
+        drawer.classList.remove('search-open');
+        drawer.classList.add('search-closed');
+        if (btn) {
+            btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
             btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
+        }
+
+        if (!keepQuery && inp) {
             inp.value = '';
             const deskInp = document.getElementById('desktopSearchInput');
             if (deskInp) deskInp.value = '';
+            const clearBtn = document.getElementById('btnMobileSearchClear');
+            if (clearBtn) clearBtn.classList.add('hidden');
             window.handleSearch();
-            window.recenterCanvas();
+            if (typeof window.recenterCanvas === 'function') window.recenterCanvas();
         }
+    };
+
+    window.toggleSearch = function() {
+        if (window.isMobileSearchOpen && window.isMobileSearchOpen()) {
+            window.closeMobileSearch(false);
+        } else {
+            window.openMobileSearch();
+        }
+    };
+
+    window.clearMobileSearchInput = function() {
+        const inp = document.getElementById('searchInput');
+        if (inp) {
+            inp.value = '';
+            inp.focus();
+        }
+        const clearBtn = document.getElementById('btnMobileSearchClear');
+        if (clearBtn) clearBtn.classList.add('hidden');
+        window.handleSearch();
+        if (typeof window.recenterCanvas === 'function') window.recenterCanvas();
     };
     
     window.handleDesktopSearch = function(val) {
@@ -2319,11 +2370,39 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const val = inp ? inp.value : '';
         const deskInp = document.getElementById('desktopSearchInput');
         if (deskInp && deskInp.value !== val) deskInp.value = val;
+        
+        const clearBtn = document.getElementById('btnMobileSearchClear');
+        if (clearBtn) {
+            if (val.trim()) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+
         activeSearchQuery = val.trim();
         window.renderMindMap();
         setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
         if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
     };
+
+    // Listener para cerrar búsqueda móvil al tocar cualquier otra parte de la pantalla
+    document.addEventListener('pointerdown', function(e) {
+        const drawer = document.getElementById('mobileSearchDrawer');
+        const btn = document.getElementById('searchBtnIcon');
+        if (!drawer || !drawer.classList.contains('search-open')) return;
+        
+        // Si el click/touch es fuera del drawer y del botón de la lupa
+        if (!drawer.contains(e.target) && (!btn || !btn.contains(e.target))) {
+            window.closeMobileSearch(true);
+        }
+    });
+
+    // Listener para cerrar búsqueda móvil al presionar Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (window.isMobileSearchOpen && window.isMobileSearchOpen()) {
+                window.closeMobileSearch(false);
+            }
+        }
+    });
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
     let infoCardHideTimer = null;

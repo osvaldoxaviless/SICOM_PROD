@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v829">
+  <link rel="stylesheet" href="styles.css?v=20261017_v830">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -396,13 +396,10 @@
 
     <!-- CONTROLES Y FILTROS DERECHA -->
     <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end shrink-0">
-      <!-- BUSCADOR MÓVIL (ICONO DESPLEGABLE) -->
-      <div class="relative flex items-center md:hidden shrink-0">
-          <button id="searchBtnIcon" onclick="toggleSearch()" class="shrink-0 p-2 text-[#b8b3b0] hover:text-[#eeeeee] transition-colors bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] z-10 relative" title="Buscar">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </button>
-          <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." class="absolute right-0 opacity-0 w-0 pointer-events-none bg-[#101010] border border-[#eeeeee] rounded-[3px] py-1.5 px-3 font-mono text-xs text-[#eeeeee] focus:outline-none transition-all duration-200 z-30 shadow-lg">
-      </div>
+      <!-- BOTÓN BÚSQUEDA MÓVIL (md:hidden) -->
+      <button id="searchBtnIcon" onclick="toggleSearch()" class="shrink-0 p-2 text-[#b8b3b0] hover:text-[#eeeeee] transition-all bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] md:hidden flex items-center justify-center" title="Buscar proyecto">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </button>
       <datalist id="projectsDatalist"></datalist>
 
       <!-- MODO ENFOQUE -->
@@ -460,6 +457,18 @@
               Cerrar Sesión
           </button>
       </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA MÓVIL DESPLEGABLE HACIA ABAJO (md:hidden) -->
+    <div id="mobileSearchDrawer" class="md:hidden absolute top-full left-0 right-0 w-full bg-[#161413] border-b border-[#3d3a39] px-3 py-2.5 z-40 search-closed flex items-center gap-2">
+      <div class="relative flex-1 flex items-center">
+        <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." autocomplete="off" class="w-full bg-[#101010] border border-[#3d3a39] focus:border-[#ee6018] rounded-[4px] py-2 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+        <button type="button" id="btnMobileSearchClear" onclick="clearMobileSearchInput()" class="hidden absolute right-2.5 p-1 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar texto">✕</button>
+      </div>
+      <button type="button" onclick="closeMobileSearch(false)" class="shrink-0 p-2 text-[#8a8380] hover:text-[#ee6018] hover:bg-[#1d1a18] rounded-[3px] border border-transparent hover:border-[#3d3a39] flex items-center justify-center transition" title="Cerrar búsqueda">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
     </div>
   </header>
 
@@ -1669,7 +1678,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v829"></script>
+  <script type="module" src="app.js?v=20261017_v830"></script>
 
 </body>
 </html>
