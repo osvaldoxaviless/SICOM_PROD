@@ -475,6 +475,15 @@
       <g id="canvasGroup" class="pointer-events-auto"></g>
     </svg>
 
+    <!-- PASTILLA FLOTANTE DE FILTRO ACTIVO EN EL CANVAS (FACTORY UI) -->
+    <div id="activeFilterPill" class="hidden pointer-events-auto absolute top-4 left-4 sm:left-6 z-[35] flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#1d1a18]/95 backdrop-blur-md border border-[#ee6018]/60 text-[#eeeeee] shadow-lg shadow-black/50 font-mono text-[11px] transition-all">
+      <span class="w-2 h-2 rounded-full bg-[#ee6018] inline-block animate-pulse shrink-0"></span>
+      <span id="activeFilterPillText" class="text-[#fafafa] font-medium tracking-[-0.2px]">Filtro Activo</span>
+      <button type="button" onclick="window.clearActiveFilterPill()" class="ml-1 px-1.5 py-0.5 rounded-[2px] bg-[#3d3a39]/70 hover:bg-[#ee6018] text-[#eeeeee] hover:text-[#101010] transition text-[9px] uppercase tracking-wider font-mono flex items-center gap-1 cursor-pointer" title="Restablecer a vista completa">
+        <span>Restablecer</span> <span class="text-[11px] leading-none">✕</span>
+      </button>
+    </div>
+
     <!-- INFOCARD: FACTORY HYBRID TACTICAL DISPATCH (#eeeeee HEADER ON #101010 CONTROL PANEL) -->
     <div id="infoCard" class="absolute bottom-4 left-4 right-4 md:left-auto md:bottom-8 md:right-8 md:w-[410px] liquid-glass rounded-[10px] p-4 sm:p-5 hidden opacity-0 transition-opacity duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
       

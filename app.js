@@ -6265,6 +6265,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       window._currentMapBounds = { minX: totalMinX, maxX: totalMaxX, minY: totalMinY, maxY: totalMaxY };
 
       lastExpandedModuleId = null;
+      if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
     };
 
     let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
@@ -7875,6 +7876,7 @@ window.renderDailyTasks = function() {
         else window.renderMindMap();
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
         setTimeout(() => window.focusFilteredMindMap(), 40);
+        if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
     };
 
     window.resetAdvFilters = function() {
@@ -7912,6 +7914,60 @@ window.renderDailyTasks = function() {
         window.renderMindMap();
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
         setTimeout(() => window.recenterCanvas(), 40);
+        if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+    };
+
+    // === PASTILLA FLOTANTE DE FILTRO ACTIVO EN EL CANVAS (FACTORY UI) ===
+    window.updateActiveFilterPill = function() {
+        const pill = document.getElementById('activeFilterPill');
+        const textSpan = document.getElementById('activeFilterPillText');
+        if (!pill || !textSpan) return;
+
+        const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
+        const isConsAll = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
+        const isCompAll = activeFilterCompanies.includes('ALL') || activeFilterCompanies.length === 0;
+        const isStatusAll = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
+        const hasOtherFilters = (activeFilterUrgency !== 'ALL' || activeFilterPriority !== 'ALL' || activeFilterBottleneck !== 'ALL' || !!activeSearchQuery || isFocusMode);
+
+        const hasActiveFilter = !isModAll || !isConsAll || !isCompAll || !isStatusAll || hasOtherFilters;
+
+        if (!hasActiveFilter) {
+            pill.classList.add('hidden');
+            return;
+        }
+
+        // Caso 1: Un solo consultor aislado (ej. desde filterConsultant)
+        if (!isConsAll && activeFilterConsultants.length === 1 && isModAll && isCompAll && isStatusAll && !hasOtherFilters) {
+            const consName = activeFilterConsultants[0];
+            let pCount = 0;
+            const countProjects = (p) => { if (getProjectConsultants(p).includes(consName)) pCount++; };
+            (appData.directProjects || []).forEach(countProjects);
+            (appData.modules || []).forEach(m => { (m.projects || []).forEach(countProjects); });
+            textSpan.textContent = `👤 ${consName} (${pCount} proyectos)`;
+        } else if (!isConsAll && activeFilterConsultants.length > 1 && isModAll && isCompAll && isStatusAll && !hasOtherFilters) {
+            textSpan.textContent = `👥 ${activeFilterConsultants.length} Consultores seleccionados`;
+        } else if (!isModAll && isConsAll && isCompAll && isStatusAll && !hasOtherFilters) {
+            textSpan.textContent = `📦 ${activeFilterModules.length} Módulo(s) en visualización`;
+        } else if (isFocusMode) {
+            textSpan.textContent = `🎯 Modo Enfoque (Urgentes y en Validación)`;
+        } else if (activeSearchQuery) {
+            textSpan.textContent = `🔍 Búsqueda: "${activeSearchQuery}"`;
+        } else {
+            textSpan.textContent = `🎯 Filtro múltiple activo en mapa`;
+        }
+
+        pill.classList.remove('hidden');
+    };
+
+    window.clearActiveFilterPill = function() {
+        if (activeSearchQuery) {
+            activeSearchQuery = '';
+            const sInp = document.getElementById('searchInput');
+            if (sInp) sInp.value = '';
+        }
+        window.resetAdvFilters();
+        if (typeof window.recenterCanvas === 'function') window.recenterCanvas();
+        window.showToast("🗺️ Filtro restablecido: Mostrando todos los proyectos");
     };
 
     // === GESTIÓN DE COLAPSO Y EXPANSIÓN INTELIGENTE DE MÓDULOS ===
