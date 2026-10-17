@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v822">
+  <link rel="stylesheet" href="styles.css?v=20261017_v828">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -1127,19 +1127,23 @@
             </div>
             
             <div id="editProjectFields" class="space-y-5 hidden">
-              <div class="space-y-2">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulo Principal / Ubicación Base</label>
-                <select id="editProjectLocation" class="w-full liquid-input rounded-[3px] p-3.5 text-sm appearance-none text-[#eeeeee]"></select>
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulo Principal / Ubicación Base</label>
+                  <span id="editProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+                </div>
+                <div id="editProjLocationChips" class="flex flex-wrap gap-1.5 p-2 bg-[#161413] border border-[#3d3a39] rounded-[6px]"></div>
+                <select id="editProjectLocation" class="hidden"></select>
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulos Vinculados / Dependencias</label>
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulos Vinculados / Sinergias</label>
                   <span class="font-mono text-[9px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🔗 Multimódulo</span>
                 </div>
-                <div id="editProjSecondaryModulesContainer" class="p-3 bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
-                  <div id="editProjSecondaryModulesList" class="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin"></div>
-                  <p class="text-[11px] text-[#8a8380] mt-2">Marca los módulos adicionales de los que depende o con los que se vincula este proyecto.</p>
+                <div id="editProjSecondaryModulesContainer" class="p-2.5 bg-[#161413] border border-[#3d3a39] rounded-[6px]">
+                  <div id="editProjSecondaryModulesList" class="flex flex-wrap gap-1.5"></div>
+                  <p class="font-mono text-[9px] text-[#8a8380] mt-1.5 tracking-tight">Toca los módulos adicionales con los que interactúa o genera sinergia este proyecto.</p>
                 </div>
               </div>
 
@@ -1296,17 +1300,21 @@
           
           <div id="createProjectForm" class="space-y-4">
             <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulo Principal / Ubicación Base</label>
-                <select id="newProjLocation" class="w-full liquid-input rounded-[3px] p-3 text-sm appearance-none text-[#eeeeee]"></select>
+                <div class="flex items-center justify-between">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulo Principal / Ubicación Base</label>
+                  <span id="newProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+                </div>
+                <div id="newProjLocationChips" class="flex flex-wrap gap-1.5 p-2 bg-[#161413] border border-[#3d3a39] rounded-[6px]"></div>
+                <select id="newProjLocation" class="hidden"></select>
             </div>
             <div class="space-y-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulos Vinculados / Dependencias</label>
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Módulos Vinculados / Sinergias</label>
                   <span class="font-mono text-[9px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">🔗 Multimódulo</span>
                 </div>
-                <div id="newProjSecondaryModulesContainer" class="p-3 bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
-                  <div id="newProjSecondaryModulesList" class="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin"></div>
-                  <p class="text-[11px] text-[#8a8380] mt-2">Marca los módulos adicionales de los que depende o con los que se vincula este proyecto.</p>
+                <div id="newProjSecondaryModulesContainer" class="p-2.5 bg-[#161413] border border-[#3d3a39] rounded-[6px]">
+                  <div id="newProjSecondaryModulesList" class="flex flex-wrap gap-1.5"></div>
+                  <p class="font-mono text-[9px] text-[#8a8380] mt-1.5 tracking-tight">Toca los módulos adicionales con los que interactúa o genera sinergia este proyecto.</p>
                 </div>
             </div>
             <div class="space-y-1.5">
@@ -1633,7 +1641,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v827"></script>
+  <script type="module" src="app.js?v=20261017_v828"></script>
 
 </body>
 </html>

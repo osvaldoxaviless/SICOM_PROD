@@ -1186,3 +1186,22 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 .author-pill:hover {
     border-color: #ee6018 !important;
 }
+
+/* ==========================================================================
+   CHIPS DE UBICACIÓN BASE Y MÓDULOS VINCULADOS (CREAR / EDITAR)
+   ========================================================================== */
+.loc-chip {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+.loc-chip:hover {
+    border-color: #ee6018 !important;
+}
+.sec-mod-toggle-chip {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+.sec-mod-toggle-chip:hover {
+    border-color: #ee6018 !important;
+}
+

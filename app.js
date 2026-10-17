@@ -4549,20 +4549,83 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       });
 
       if (options.length === 0) {
-        container.innerHTML = '<div class="text-[11px] text-gray-500 italic py-2 px-1">No hay otros módulos disponibles para vincular.</div>';
+        container.innerHTML = '<div class="text-[10px] font-mono text-[#8a8380] italic py-1 px-0.5">No hay otros módulos disponibles para vincular.</div>';
         return;
       }
 
       container.innerHTML = options.map(opt => {
         const isChecked = selSet.has(opt.id) || (opt.id === 'DIRECT' && selSet.has('hub-direct'));
         return `
-          <label class="flex items-center gap-2.5 text-xs font-medium text-gray-300 cursor-pointer p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition select-none">
-            <input type="checkbox" value="${escapeHtml(opt.id)}" class="${prefix}SecMod-chk rounded border-white/20 bg-black/40 text-brand-accent focus:ring-brand-accent h-4 w-4" ${isChecked ? 'checked' : ''}>
-            <span class="w-3 h-3 rounded-full shrink-0 border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.2)]" style="background-color: ${opt.color}"></span>
-            <span class="truncate text-white/90">${opt.icon} ${escapeHtml(opt.name)}</span>
+          <label class="sec-mod-toggle-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium shadow-sm' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" style="${isChecked ? `border-color: ${opt.color || '#ee6018'};` : ''}">
+            <input type="checkbox" value="${escapeHtml(opt.id)}" class="${prefix}SecMod-chk sr-only" ${isChecked ? 'checked' : ''} onchange="window.handleSecondaryModuleCheckboxChange('${prefix}')">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${opt.color}"></span>
+            <span>${opt.icon} ${escapeHtml(opt.name)}</span>
+            ${isChecked ? `<span class="text-[8px] px-1 py-0.2 rounded bg-[#ee6018]/25 text-[#ee6018] font-bold">✓</span>` : ''}
           </label>
         `;
       }).join('');
+    };
+
+    window.handleSecondaryModuleCheckboxChange = function(prefix) {
+      const selectId = (prefix === 'editProj') ? 'editProjectLocation' : 'newProjLocation';
+      const locSel = document.getElementById(selectId);
+      const primaryId = locSel ? locSel.value : 'DIRECT';
+      const checked = Array.from(document.querySelectorAll(`.${prefix}SecMod-chk:checked`)).map(cb => cb.value);
+      window.populateSecondaryModulesChecklist(prefix, primaryId, checked);
+    };
+
+    window.renderLocationChips = function(prefix, selectedLocId) {
+      const chipsCont = document.getElementById(`${prefix}LocationChips`);
+      const badge = document.getElementById(`${prefix}LocActiveBadge`);
+      if (!chipsCont) return;
+
+      const options = [
+        {
+          id: 'DIRECT',
+          name: appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM',
+          color: (appData.directHub && appData.directHub.color) || '#f59e0b',
+          icon: '⚡'
+        }
+      ];
+
+      (appData.modules || []).forEach(m => {
+        options.push({
+          id: m.id,
+          name: m.name,
+          color: m.color || '#0071e3',
+          icon: '📦'
+        });
+      });
+
+      const current = selectedLocId || 'DIRECT';
+      const activeOpt = options.find(o => o.id === current) || options[0];
+
+      if (badge && activeOpt) {
+        badge.textContent = activeOpt.name;
+        badge.style.borderColor = activeOpt.color;
+      }
+
+      chipsCont.innerHTML = options.map(opt => {
+        const isSel = (opt.id === current);
+        return `
+          <button type="button" onclick="window.selectProjectBaseLocation('${prefix}', '${opt.id}')" class="loc-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] transition border ${isSel ? 'bg-[#eeeeee] text-[#101010] font-semibold border-[#eeeeee] shadow-sm' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" title="Asignar como módulo base">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${opt.color}"></span>
+            <span>${opt.icon} ${escapeHtml(opt.name)}</span>
+            ${isSel ? `<span class="text-[8px] px-1 py-0.2 rounded bg-[#101010]/20 text-[#101010] font-bold">BASE</span>` : ''}
+          </button>
+        `;
+      }).join('');
+    };
+
+    window.selectProjectBaseLocation = function(prefix, locId) {
+      const selectId = (prefix === 'editProj') ? 'editProjectLocation' : 'newProjLocation';
+      const s = document.getElementById(selectId);
+      if (s) {
+        s.value = locId;
+        const checkedSec = Array.from(document.querySelectorAll(`.${prefix}SecMod-chk:checked`)).map(cb => cb.value);
+        window.populateSecondaryModulesChecklist(prefix, locId, checkedSec);
+      }
+      window.renderLocationChips(prefix, locId);
     };
 
     window.populateCompanyChecklist = function(prefix, selectedCompanies = []) {
@@ -4577,16 +4640,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
       container.innerHTML = allComps.map(comp => {
         const isChecked = selSet.has(comp);
-        const style = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#0071e3', bg: 'rgba(0,113,227,0.15)' };
+        const style = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)' };
         return `
-          <label class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer transition select-none border shadow-sm ${isChecked ? 'ring-1 ring-white/20' : 'opacity-70 hover:opacity-100'}"
-                 style="background-color: ${isChecked ? style.bg : 'rgba(255,255,255,0.04)'};
-                        border-color: ${isChecked ? style.color : 'rgba(255,255,255,0.1)'};
-                        color: ${isChecked ? '#ffffff' : '#94a3b8'};">
+          <label class="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border shadow-sm ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}">
             <input type="checkbox" value="${escapeHtml(comp)}" class="${prefix}Comp-chk sr-only" ${isChecked ? 'checked' : ''} onchange="window.handleCompanyCheckboxChange('${prefix}')">
-            <span class="w-2 h-2 rounded-full shrink-0 shadow-[0_0_5px_rgba(255,255,255,0.3)]" style="background-color: ${style.color}"></span>
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${style.color || '#ee6018'}"></span>
             <span>${escapeHtml(comp)}</span>
-            ${isChecked ? `<svg class="w-3.5 h-3.5 text-white ml-0.5" fill="none" stroke="${style.color}" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` : ''}
+            ${isChecked ? `<span class="text-[8px] px-1 py-0.2 rounded bg-[#ee6018]/25 text-[#ee6018] font-bold">✓</span>` : ''}
           </label>
         `;
       }).join('');
@@ -4614,32 +4674,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.populateEditProjectLocationSelect = function(currentLoc) { 
       const s = document.getElementById('editProjectLocation'); 
       if (!s) return; 
-      s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
-      if (currentLoc) s.value = currentLoc;
-      if (!s._hasSecModListener) {
-        s._hasSecModListener = true;
-        s.addEventListener('change', function() {
-          const checked = Array.from(document.querySelectorAll('.editProjSecMod-chk:checked')).map(cb => cb.value);
-          window.populateSecondaryModulesChecklist('editProj', this.value, checked);
-        });
-      }
+      s.innerHTML = `<option value="DIRECT">⚡ Directo</option>` + (appData.modules || []).map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join(''); 
+      const chosen = currentLoc || s.value || 'DIRECT';
+      s.value = chosen;
+      window.renderLocationChips('editProj', chosen);
     };
     
     window.populateNewProjectLocationSelect = function(preselectedId) { 
       const s = document.getElementById('newProjLocation'); 
       if (!s) return; 
-      const prevVal = preselectedId || s.value;
-      s.innerHTML = `<option value="DIRECT" class="bg-black text-white">⚡ Directo (${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')})</option>` + (appData.modules || []).map(m => `<option value="${m.id}" class="bg-black text-white">📦 Módulo: ${escapeHtml(m.name)}</option>`).join(''); 
+      const prevVal = preselectedId || s.value || 'DIRECT';
+      s.innerHTML = `<option value="DIRECT">⚡ Directo</option>` + (appData.modules || []).map(m => `<option value="${m.id}">📦 ${escapeHtml(m.name)}</option>`).join(''); 
       if (prevVal && Array.from(s.options).some(o => o.value === prevVal)) {
         s.value = prevVal;
       }
-      if (!s._hasSecModListener) {
-        s._hasSecModListener = true;
-        s.addEventListener('change', function() {
-          const checked = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value);
-          window.populateSecondaryModulesChecklist('newProj', this.value, checked);
-        });
-      }
+      window.renderLocationChips('newProj', s.value);
       const checked = Array.from(document.querySelectorAll('.newProjSecMod-chk:checked')).map(cb => cb.value);
       window.populateSecondaryModulesChecklist('newProj', s.value, checked);
       const checkedComps = Array.from(document.querySelectorAll('.newProjComp-chk:checked')).map(cb => cb.value);
