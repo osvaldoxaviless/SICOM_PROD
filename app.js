@@ -224,7 +224,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!appData.modules) appData.modules = [];
         if(!appData.dailyTasks) appData.dailyTasks = [];
         if(!appData.globalTasks) appData.globalTasks = [];
-        if(!appData.announcementConfig) appData.announcementConfig = { autoBiweeklyEnabled: true, autoMonthEndEnabled: true };
+        if(!appData.announcementConfig) appData.announcementConfig = { autoBiweeklyEnabled: true, autoMonthEndEnabled: true, forceBiweeklyActive: false, forceMonthEndActive: false };
+        if(appData.announcementConfig.forceBiweeklyActive === undefined) appData.announcementConfig.forceBiweeklyActive = false;
+        if(appData.announcementConfig.forceMonthEndActive === undefined) appData.announcementConfig.forceMonthEndActive = false;
         if(!Array.isArray(appData.announcements)) {
             appData.announcements = [
                 {
@@ -8776,53 +8778,43 @@ window.renderDailyTasks = function() {
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
         // 1. Regla Quincenal (días 10 a 15 de cada mes)
-        if (appData.announcementConfig && appData.announcementConfig.autoBiweeklyEnabled !== false) {
-            if (day >= 10 && day <= 15) {
-                list.push({
-                    id: 'auto_biweekly',
-                    isAuto: true,
-                    type: 'reminder',
-                    tag: 'QUINCENA (10-15)',
-                    text: 'Favor de enviar sus formatos de vacaciones válidos en tiempo y forma a Administración.'
-                });
-            }
+        const biweeklyCalendarActive = (appData.announcementConfig && appData.announcementConfig.autoBiweeklyEnabled !== false) && (day >= 10 && day <= 15);
+        const biweeklyForced = Boolean(appData.announcementConfig && appData.announcementConfig.forceBiweeklyActive);
+        const biweeklyPreview = (window._tempPreviewRule === 'biweekly');
+
+        if (biweeklyPreview || biweeklyForced || biweeklyCalendarActive) {
+            let tag = 'QUINCENA (10-15)';
+            if (biweeklyPreview) tag = 'PRUEBA QUINCENA';
+            else if (biweeklyForced && !biweeklyCalendarActive) tag = 'AVISO QUINCENAL';
+
+            list.push({
+                id: 'auto_biweekly',
+                isAuto: true,
+                type: 'reminder',
+                tag: tag,
+                text: 'Favor de enviar sus formatos de vacaciones válidos en tiempo y forma a Administración.'
+            });
         }
 
         // 2. Regla Cierre de Mes (días 25 al último día del mes)
-        if (appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false) {
-            if (day >= 25 && day <= lastDay) {
-                list.push({
-                    id: 'auto_monthend',
-                    isAuto: true,
-                    type: 'urgent',
-                    tag: 'CIERRE MENSUAL',
-                    text: 'Favor de enviar formatos de vacaciones y actualizar avances de proyectos para la realización de indicadores.'
-                });
-            }
+        const monthEndCalendarActive = (appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false) && (day >= 25 && day <= lastDay);
+        const monthEndForced = Boolean(appData.announcementConfig && appData.announcementConfig.forceMonthEndActive);
+        const monthEndPreview = (window._tempPreviewRule === 'monthend');
+
+        if (monthEndPreview || monthEndForced || monthEndCalendarActive) {
+            let tag = 'CIERRE MENSUAL';
+            if (monthEndPreview) tag = 'PRUEBA CIERRE';
+
+            list.push({
+                id: 'auto_monthend',
+                isAuto: true,
+                type: 'urgent',
+                tag: tag,
+                text: 'Favor de enviar formatos de vacaciones y actualizar proyectos para la realización de indicadores.'
+            });
         }
 
-        // 3. Simulación temporal manual para supervisión
-        if (window._tempPreviewRule) {
-            if (window._tempPreviewRule === 'biweekly') {
-                list.unshift({
-                    id: 'preview_biweekly',
-                    isAuto: true,
-                    type: 'reminder',
-                    tag: 'VISTA PREVIA QUINCENA',
-                    text: 'Favor de enviar sus formatos de vacaciones válidos en tiempo y forma a Administración.'
-                });
-            } else if (window._tempPreviewRule === 'monthend') {
-                list.unshift({
-                    id: 'preview_monthend',
-                    isAuto: true,
-                    type: 'urgent',
-                    tag: 'VISTA PREVIA CIERRE',
-                    text: 'Favor de enviar formatos de vacaciones y actualizar avances de proyectos para la realización de indicadores.'
-                });
-            }
-        }
-
-        // 4. Anuncios personalizados manuales
+        // 3. Anuncios personalizados manuales
         const todayStr = now.toISOString().slice(0, 10);
         (appData.announcements || []).forEach(a => {
             if (!a || !a.active || !a.text) return;
@@ -8839,17 +8831,13 @@ window.renderDailyTasks = function() {
         const track = document.getElementById('tickerTrack');
         if (!bar || !track) return;
 
-        if (sessionStorage.getItem('sicom_ticker_dismissed') === 'true') {
-            bar.classList.add('hidden');
-            return;
-        }
-
         const items = window.getActiveAnnouncements();
         if (!items || items.length === 0) {
             bar.classList.add('hidden');
             return;
         }
 
+        // El panel de avisos NUNCA se oculta si hay anuncios activos (no eliminable por consultores)
         bar.classList.remove('hidden');
 
         const itemsHtml = items.map(ann => {
@@ -8900,52 +8888,81 @@ window.renderDailyTasks = function() {
         }
     };
 
-    window.dismissTickerSession = function() {
-        sessionStorage.setItem('sicom_ticker_dismissed', 'true');
-        const bar = document.getElementById('announcementTickerBar');
-        if (bar) bar.classList.add('hidden');
-        window.showToast("Marquesina minimizada durante esta sesión. Puedes reabrirla desde el Centro de Control.", false);
-    };
-
     window.openAnnouncementManager = function() {
         window.openConfigDrawer();
         window.switchTab('announcements');
     };
 
     window.testPreviewTicker = function() {
-        sessionStorage.removeItem('sicom_ticker_dismissed');
         window.renderAnnouncementsTicker();
-        window.showToast("Marquesina visible y actualizada en tiempo real", false);
+        window.showToast("Marquesina actualizada con avisos activos", false);
+    };
+
+    window.togglePreviewAutoRule = function(ruleType) {
+        if (window._tempPreviewRule === ruleType) {
+            window._tempPreviewRule = null;
+            window.showToast(`Prueba de ${ruleType === 'biweekly' ? 'Aviso Quincenal' : 'Cierre Mensual'} desactivada`, false);
+        } else {
+            window._tempPreviewRule = ruleType;
+            window.showToast(`Simulando en marquesina: ${ruleType === 'biweekly' ? 'Aviso Quincenal' : 'Cierre Mensual'}`);
+        }
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
     };
 
     window.previewAutoRule = function(ruleType) {
-        window._tempPreviewRule = ruleType;
-        sessionStorage.removeItem('sicom_ticker_dismissed');
+        window.togglePreviewAutoRule(ruleType);
+    };
+
+    window.clearPreviewRules = function() {
+        window._tempPreviewRule = null;
         window.renderAnnouncementsTicker();
         window.renderAnnouncementsManager();
-        window.showToast(`Simulando en marquesina: ${ruleType === 'biweekly' ? 'Aviso Quincenal' : 'Cierre Mensual'}`);
+        window.showToast("Pruebas removidas de la marquesina", false);
     };
 
     window.toggleAutoBiweeklyRule = function(enabled) {
         if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
         ensureDataStructure();
         appData.announcementConfig.autoBiweeklyEnabled = enabled;
-        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} aviso quincenal automático (días 10-15)`, localAuthor);
+        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} calendario quincenal automático (días 10-15)`, localAuthor);
         window.saveData(false);
         window.renderAnnouncementsTicker();
         window.renderAnnouncementsManager();
-        window.showToast(enabled ? "Aviso quincenal activado" : "Aviso quincenal desactivado");
+        window.showToast(enabled ? "Aviso quincenal automático activado por calendario" : "Aviso quincenal automático desactivado");
     };
 
     window.toggleAutoMonthEndRule = function(enabled) {
         if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
         ensureDataStructure();
         appData.announcementConfig.autoMonthEndEnabled = enabled;
-        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} aviso fin de mes automático (días 25-fin)`, localAuthor);
+        logActivity('announcement', 'Reglas Automáticas', `${enabled ? 'Activó' : 'Desactivó'} calendario fin de mes automático (días 25-fin)`, localAuthor);
         window.saveData(false);
         window.renderAnnouncementsTicker();
         window.renderAnnouncementsManager();
-        window.showToast(enabled ? "Aviso de fin de mes activado" : "Aviso de fin de mes desactivado");
+        window.showToast(enabled ? "Aviso de fin de mes automático activado por calendario" : "Aviso de fin de mes automático desactivado");
+    };
+
+    window.toggleForceBiweeklyRule = function(enabled) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        appData.announcementConfig.forceBiweeklyActive = enabled;
+        logActivity('announcement', 'Emisión Inmediata', `${enabled ? 'Activó' : 'Desactivó'} emisión forzada de aviso quincenal`, localAuthor);
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(enabled ? "Aviso quincenal emitiéndose en marquesina" : "Aviso quincenal retirado de marquesina");
+    };
+
+    window.toggleForceMonthEndRule = function(enabled) {
+        if (currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') return;
+        ensureDataStructure();
+        appData.announcementConfig.forceMonthEndActive = enabled;
+        logActivity('announcement', 'Emisión Inmediata', `${enabled ? 'Activó' : 'Desactivó'} emisión forzada de cierre mensual`, localAuthor);
+        window.saveData(false);
+        window.renderAnnouncementsTicker();
+        window.renderAnnouncementsManager();
+        window.showToast(enabled ? "Aviso de fin de mes emitiéndose en marquesina" : "Aviso de fin de mes retirado de marquesina");
     };
 
     window.createCustomAnnouncement = function() {
@@ -8981,7 +8998,6 @@ window.renderDailyTasks = function() {
         appData.announcements.unshift(newAnn);
         logActivity('announcement', 'Nuevo Comunicado', `Publicó anuncio: "${text.slice(0, 40)}${text.length > 40 ? '...' : ''}"`, localAuthor);
         
-        sessionStorage.removeItem('sicom_ticker_dismissed');
         window.saveData(false);
 
         if (textInp) textInp.value = '';
@@ -9001,7 +9017,6 @@ window.renderDailyTasks = function() {
         if (!ann) return;
         ann.active = !ann.active;
         logActivity('announcement', 'Estado Comunicado', `${ann.active ? 'Reactivó' : 'Pausó'} anuncio: "${ann.text.slice(0, 30)}..."`, localAuthor);
-        sessionStorage.removeItem('sicom_ticker_dismissed');
         window.saveData(false);
         window.renderAnnouncementsTicker();
         window.renderAnnouncementsManager();
@@ -9028,39 +9043,99 @@ window.renderDailyTasks = function() {
         const day = now.getDate();
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
-        // 1. Actualizar switches automáticos
+        // 1. Actualizar banner de prueba
+        const testBanner = document.getElementById('testModeBanner');
+        const testBannerText = document.getElementById('testModeBannerText');
+        const headerClearBtn = document.getElementById('btnHeaderClearTests');
+
+        if (window._tempPreviewRule) {
+            if (testBanner) testBanner.classList.remove('hidden');
+            if (headerClearBtn) headerClearBtn.classList.remove('hidden');
+            if (testBannerText) {
+                testBannerText.textContent = `SIMULANDO PRUEBA: ${window._tempPreviewRule === 'biweekly' ? 'Aviso Quincenal' : 'Cierre Mensual'}`;
+            }
+        } else {
+            if (testBanner) testBanner.classList.add('hidden');
+            if (headerClearBtn) headerClearBtn.classList.add('hidden');
+        }
+
+        // 2. Actualizar controles Quincena
         const chkBiweekly = document.getElementById('chkAutoBiweekly');
-        const chkMonthEnd = document.getElementById('chkAutoMonthEnd');
+        const chkForceBiweekly = document.getElementById('chkForceBiweekly');
         const statusBiweekly = document.getElementById('statusAutoBiweekly');
-        const statusMonthEnd = document.getElementById('statusAutoMonthEnd');
+        const btnPrevBiweekly = document.getElementById('btnPreviewBiweekly');
+        const btnPrevBiweeklyText = document.getElementById('btnPreviewBiweeklyText');
 
         const isBiweeklyOn = appData.announcementConfig && appData.announcementConfig.autoBiweeklyEnabled !== false;
-        const isMonthEndOn = appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false;
+        const isBiweeklyForced = Boolean(appData.announcementConfig && appData.announcementConfig.forceBiweeklyActive);
+        const isBiweeklyPreviewing = (window._tempPreviewRule === 'biweekly');
 
         if (chkBiweekly) chkBiweekly.checked = isBiweeklyOn;
-        if (chkMonthEnd) chkMonthEnd.checked = isMonthEndOn;
+        if (chkForceBiweekly) chkForceBiweekly.checked = isBiweeklyForced;
 
         if (statusBiweekly) {
-            if (!isBiweeklyOn) {
+            if (isBiweeklyPreviewing) {
+                statusBiweekly.innerHTML = '<span class="text-[#ff9f0a] font-bold">● En modo prueba</span>';
+            } else if (isBiweeklyForced) {
+                statusBiweekly.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa (Forzada)</span>';
+            } else if (!isBiweeklyOn) {
                 statusBiweekly.innerHTML = '<span class="text-[#8a8380]">○ Regla desactivada</span>';
             } else if (day >= 10 && day <= 15) {
-                statusBiweekly.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa hoy (Día 10-15)</span>';
+                statusBiweekly.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión hoy (Día 10-15)</span>';
             } else {
-                statusBiweekly.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próxima emisión: día 10)</span>`;
+                statusBiweekly.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próximo día 10)</span>`;
             }
         }
+
+        if (btnPrevBiweekly && btnPrevBiweeklyText) {
+            if (isBiweeklyPreviewing) {
+                btnPrevBiweeklyText.textContent = '✕ Quitar prueba';
+                btnPrevBiweekly.className = 'px-2 py-0.5 rounded-[3px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/40 font-bold hover:bg-[#ff453a]/30 transition text-[10px]';
+            } else {
+                btnPrevBiweeklyText.textContent = 'Probar en marquesina';
+                btnPrevBiweekly.className = 'text-[#ee6018] hover:underline flex items-center gap-1 font-medium transition text-[10px]';
+            }
+        }
+
+        // 3. Actualizar controles Fin de Mes
+        const chkMonthEnd = document.getElementById('chkAutoMonthEnd');
+        const chkForceMonthEnd = document.getElementById('chkForceMonthEnd');
+        const statusMonthEnd = document.getElementById('statusAutoMonthEnd');
+        const btnPrevMonthEnd = document.getElementById('btnPreviewMonthEnd');
+        const btnPrevMonthEndText = document.getElementById('btnPreviewMonthEndText');
+
+        const isMonthEndOn = appData.announcementConfig && appData.announcementConfig.autoMonthEndEnabled !== false;
+        const isMonthEndForced = Boolean(appData.announcementConfig && appData.announcementConfig.forceMonthEndActive);
+        const isMonthEndPreviewing = (window._tempPreviewRule === 'monthend');
+
+        if (chkMonthEnd) chkMonthEnd.checked = isMonthEndOn;
+        if (chkForceMonthEnd) chkForceMonthEnd.checked = isMonthEndForced;
 
         if (statusMonthEnd) {
-            if (!isMonthEndOn) {
+            if (isMonthEndPreviewing) {
+                statusMonthEnd.innerHTML = '<span class="text-[#ff9f0a] font-bold">● En modo prueba</span>';
+            } else if (isMonthEndForced) {
+                statusMonthEnd.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa (Forzada)</span>';
+            } else if (!isMonthEndOn) {
                 statusMonthEnd.innerHTML = '<span class="text-[#8a8380]">○ Regla desactivada</span>';
             } else if (day >= 25 && day <= lastDay) {
-                statusMonthEnd.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión activa hoy (Fin de mes)</span>';
+                statusMonthEnd.innerHTML = '<span class="text-[#30d158] font-bold">● En emisión hoy (Fin de mes)</span>';
             } else {
-                statusMonthEnd.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próxima emisión: día 25)</span>`;
+                statusMonthEnd.innerHTML = `<span class="text-[#8a8380]">○ Programado (Próximo día 25)</span>`;
             }
         }
 
-        // 2. Renderizar lista de comunicados personalizados
+        if (btnPrevMonthEnd && btnPrevMonthEndText) {
+            if (isMonthEndPreviewing) {
+                btnPrevMonthEndText.textContent = '✕ Quitar prueba';
+                btnPrevMonthEnd.className = 'px-2 py-0.5 rounded-[3px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/40 font-bold hover:bg-[#ff453a]/30 transition text-[10px]';
+            } else {
+                btnPrevMonthEndText.textContent = 'Probar en marquesina';
+                btnPrevMonthEnd.className = 'text-[#ee6018] hover:underline flex items-center gap-1 font-medium transition text-[10px]';
+            }
+        }
+
+        // 4. Renderizar lista de comunicados personalizados
         const container = document.getElementById('announcementsListContainer');
         const emptyState = document.getElementById('announcementsEmptyState');
         const countBadge = document.getElementById('announcementsCountBadge');
