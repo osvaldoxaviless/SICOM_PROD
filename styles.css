@@ -1176,3 +1176,13 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     border-color: #ee6018 !important;
     background-color: rgba(238, 96, 24, 0.12) !important;
 }
+
+/* ==========================================================================
+   HISTORIAL: FILTRO POR PERSONA / OPERADOR
+   ========================================================================== */
+.author-pill {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.author-pill:hover {
+    border-color: #ee6018 !important;
+}

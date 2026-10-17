@@ -1371,6 +1371,15 @@
                     </div>
                 </div>
 
+                <!-- FILTRO POR PERSONA / OPERADOR -->
+                <div class="pt-2 border-t border-[#3d3a39]">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase">Filtrar por Persona / Operador</label>
+                        <span id="histAuthorActiveBadge" class="hidden font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">1 Activo</span>
+                    </div>
+                    <div id="historyAuthorsPillsList" class="flex gap-1.5 overflow-x-auto scrollbar-thin pb-1"></div>
+                </div>
+
                 <div class="flex gap-1.5 overflow-x-auto scrollbar-thin pt-2 border-t border-[#3d3a39]">
                     <button onclick="setHistoryCategoryFilter('all')" id="histCatBtn-all" class="hist-cat-btn px-2.5 py-1 rounded-[3px] text-[10px] uppercase bg-white/15 text-white border border-white/20">Todos</button>
                     <button onclick="setHistoryCategoryFilter('validaciones')" id="histCatBtn-validaciones" class="hist-cat-btn px-2.5 py-1 rounded-[3px] text-[10px] uppercase text-gray-400 hover:text-white bg-white/5 border border-transparent">Validaciones</button>
@@ -1584,7 +1593,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v825"></script>
+  <script type="module" src="app.js?v=20261017_v826"></script>
 
 </body>
 </html>

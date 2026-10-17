@@ -6414,6 +6414,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
+    let currentHistoryAuthor = 'all'; // 'all' | author name
+
+    window.setHistoryAuthorFilter = function(author) {
+        if (!author || author === 'all' || (currentHistoryAuthor && currentHistoryAuthor.toUpperCase() === author.toUpperCase())) {
+            currentHistoryAuthor = 'all';
+        } else {
+            currentHistoryAuthor = author;
+        }
+        window.renderHistory();
+        const histContainer = document.getElementById('historyListContainer');
+        if (histContainer && typeof histContainer.scrollIntoView === 'function') {
+            histContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    };
 
     window.setHistoryCategoryFilter = function(cat) {
         currentHistoryCategory = cat;
@@ -6446,6 +6460,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const searchInput = document.getElementById('historySearchInput');
         if (searchInput) searchInput.value = '';
         currentHistoryCategory = 'all';
+        currentHistoryAuthor = 'all';
         ['all', 'validaciones', 'tareas', 'proyectos'].forEach(c => {
             const btn = document.getElementById(`histCatBtn-${c}`);
             if (btn) {
@@ -6473,7 +6488,52 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (emptyMsg) emptyMsg.textContent = 'Aún no hay actividades registradas en la bitácora.';
             if (countBadge) countBadge.textContent = '0 registros';
             if (filterLabel) filterLabel.textContent = 'Historial vacío';
+            const pillsCont = document.getElementById('historyAuthorsPillsList');
+            if (pillsCont) pillsCont.innerHTML = '';
             return; 
+        }
+
+        // 1. Renderizado de las Píldoras de Autores / Operadores con contadores
+        const authorCounts = {};
+        appData.history.forEach(log => {
+            if (!log || !log.by) return;
+            const aName = log.by.trim();
+            if (!aName) return;
+            authorCounts[aName] = (authorCounts[aName] || 0) + 1;
+        });
+        const sortedAuthors = Object.keys(authorCounts).sort((a, b) => authorCounts[b] - authorCounts[a]);
+
+        const authorBadge = document.getElementById('histAuthorActiveBadge');
+        if (authorBadge) {
+            if (currentHistoryAuthor && currentHistoryAuthor !== 'all') {
+                authorBadge.textContent = `Filtro: ${currentHistoryAuthor}`;
+                authorBadge.classList.remove('hidden');
+            } else {
+                authorBadge.classList.add('hidden');
+            }
+        }
+
+        const authorPillsCont = document.getElementById('historyAuthorsPillsList');
+        if (authorPillsCont) {
+            const isAll = (!currentHistoryAuthor || currentHistoryAuthor === 'all');
+            let pillsHtml = `
+              <button type="button" onclick="window.setHistoryAuthorFilter('all')" class="author-pill px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase shrink-0 transition ${isAll ? 'bg-[#eeeeee] text-[#101010] font-semibold border border-[#eeeeee]' : 'text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]'}" title="Ver todos los operadores">
+                TODOS (${appData.history.length})
+              </button>
+            `;
+            sortedAuthors.forEach(a => {
+                const cData = consultants[a] || Object.values(consultants).find(c => (c.name || '').toUpperCase() === a.toUpperCase()) || {};
+                const col = cData.color || '#8a8380';
+                const isSel = (!isAll && currentHistoryAuthor.toUpperCase() === a.toUpperCase());
+                pillsHtml += `
+                  <button type="button" onclick="window.setHistoryAuthorFilter('${escapeHtml(a)}')" class="author-pill px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase shrink-0 transition flex items-center gap-1.5 ${isSel ? 'bg-[#ee6018]/20 text-[#fafafa] font-semibold border border-[#ee6018]' : 'text-[#8a8380] hover:text-[#eeeeee] bg-[#101010] border border-[#3d3a39]'}" title="Filtrar actividad de ${escapeHtml(a)}">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>
+                    <span>${escapeHtml(a)}</span>
+                    <span class="text-[9px] ${isSel ? 'text-[#ee6018]' : 'text-[#8a8380]'} font-normal">(${authorCounts[a]})</span>
+                  </button>
+                `;
+            });
+            authorPillsCont.innerHTML = pillsHtml;
         }
         
         const dateInput = document.getElementById('historyDateFilter');
@@ -6483,6 +6543,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         let filtered = appData.history.filter(log => {
             if (!log.timestamp) return false;
+
+            // Filtro por persona / autor
+            if (currentHistoryAuthor && currentHistoryAuthor !== 'all') {
+                if ((log.by || '').toUpperCase() !== currentHistoryAuthor.toUpperCase()) return false;
+            }
             
             // 1. Filtro por fecha si hay fecha seleccionada
             if (selectedDateStr) {
@@ -6531,6 +6596,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const [y, m, d] = selectedDateStr.split('-');
                 labelParts.push(`Fecha: ${d}/${m}/${y}`);
             }
+            if (currentHistoryAuthor && currentHistoryAuthor !== 'all') {
+                labelParts.push(`Persona: ${currentHistoryAuthor}`);
+            }
             if (currentHistoryCategory !== 'all') {
                 labelParts.push(`Categoría: ${currentHistoryCategory}`);
             }
@@ -6543,7 +6611,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (filtered.length === 0) { 
             c.innerHTML = ''; 
             if (e) e.classList.remove('hidden'); 
-            if (emptyMsg) emptyMsg.textContent = (selectedDateStr || q || currentHistoryCategory !== 'all') ? 'No hay registros que coincidan con los filtros aplicados.' : 'No hay registros en la bitácora.';
+            const hasFilters = selectedDateStr || q || currentHistoryCategory !== 'all' || (currentHistoryAuthor && currentHistoryAuthor !== 'all');
+            if (emptyMsg) emptyMsg.textContent = hasFilters ? 'No hay registros que coincidan con los filtros aplicados.' : 'No hay registros en la bitácora.';
             return; 
         }
         
@@ -6564,7 +6633,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="text-[10px] text-[#8a8380] font-mono pl-1.5">${log.timestamp}</span>
                     <div class="flex items-center gap-1.5">
                         ${tagBadge}
-                        <span class="font-mono text-[9px] px-2 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] uppercase flex items-center gap-1 text-[#eeeeee]"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>${escapeHtml(log.by)}</span>
+                        <button type="button" onclick="window.setHistoryAuthorFilter('${escapeHtml(log.by)}')" class="font-mono text-[9px] px-2 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018] uppercase flex items-center gap-1 text-[#eeeeee] transition cursor-pointer" title="Clic para filtrar únicamente la actividad de ${escapeHtml(log.by)}">
+                            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>
+                            <span>${escapeHtml(log.by)}</span>
+                        </button>
                     </div>
                 </div>
                 <p class="text-xs font-normal text-[#eeeeee] mb-1 leading-tight pl-1.5">${escapeHtml(log.projectName)}</p>
