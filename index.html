@@ -373,9 +373,9 @@
   </div>
 
   <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER) -->
-  <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-4 sm:px-6 z-20 relative">
+  <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-3 sm:px-6 z-20 relative gap-2 sm:gap-4">
     <!-- PASTILLA TÁCTIL DE PERFIL E INICIALES (FACTORY USER PILL) -->
-    <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0" title="Abrir Panel de Control y Perfil">
+    <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0" title="Perfil y Configuración">
       <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
       <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">STGT</span>
       <span class="w-px h-3 bg-[#3d3a39]"></span>
@@ -388,56 +388,50 @@
       <svg class="w-3 h-3 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
     </button>
     
-    <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end flex-1 pl-2 sm:pl-4">
-      <div class="relative flex items-center group shrink-0">
+    <!-- BUSCADOR INTEGRADO EN ESCRITORIO (md:flex, oculto en móvil) -->
+    <div class="hidden md:flex items-center relative flex-1 max-w-xs xl:max-w-sm">
+      <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR PROYECTO... (Ctrl+K)" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-8 pr-3 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+    </div>
+
+    <!-- CONTROLES Y FILTROS DERECHA -->
+    <div class="flex items-center gap-1.5 sm:gap-2 relative justify-end shrink-0">
+      <!-- BUSCADOR MÓVIL (ICONO DESPLEGABLE) -->
+      <div class="relative flex items-center md:hidden shrink-0">
           <button id="searchBtnIcon" onclick="toggleSearch()" class="shrink-0 p-2 text-[#b8b3b0] hover:text-[#eeeeee] transition-colors bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] z-10 relative" title="Buscar">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </button>
-          <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." class="absolute right-0 opacity-0 w-0 pointer-events-none bg-[#101010] border border-[#eeeeee] rounded-[3px] py-1.5 px-3 font-mono text-xs text-[#eeeeee] focus:outline-none transition-all duration-200">
-          <datalist id="projectsDatalist"></datalist>
+          <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." class="absolute right-0 opacity-0 w-0 pointer-events-none bg-[#101010] border border-[#eeeeee] rounded-[3px] py-1.5 px-3 font-mono text-xs text-[#eeeeee] focus:outline-none transition-all duration-200 z-30 shadow-lg">
       </div>
+      <datalist id="projectsDatalist"></datalist>
 
       <!-- MODO ENFOQUE -->
-      <button id="btnFocusMode" onclick="toggleFocusMode()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]">
+      <button id="btnFocusMode" onclick="toggleFocusMode()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2.5 sm:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Modo Enfoque: Ver proyectos en riesgo">
           <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
           <span class="hidden sm:inline">Enfoque</span>
       </button>
 
       <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS -->
-      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Alternar entre vista compacta y vista completa">
+      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2.5 sm:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Alternar entre vista compacta y vista completa">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
           <span id="textCollapseAll" class="hidden sm:inline">Colapsar</span>
       </button>
       
-      <!-- BOTÓN FILTROS AVANZADOS -->
-      <button onclick="toggleFilterDrawer()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px]">
-          <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-          <span class="hidden sm:inline">Filtros</span>
-          <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5">1</span>
+      <!-- BOTÓN FILTROS AVANZADOS (PROTAGONISTA) -->
+      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2.5 sm:px-3.5 py-1.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Filtros Operativos">
+          <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+          <span class="hidden sm:inline font-medium">Filtros</span>
+          <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5 font-semibold">1</span>
       </button>
 
-      <div class="hidden md:flex items-center gap-1.5">
-        <!-- GHOST BUTTON FACTORY: PRIORIDADES -->
-        <button onclick="togglePriorityDrawer()" class="pill-btn shrink-0 p-1.5 sm:px-3.5 sm:py-1.5 bg-transparent border border-[#3d3a39] text-[#eeeeee] hover:border-[#fafafa] font-mono uppercase flex items-center gap-1.5 ml-1 text-[11px] tracking-[-0.24px]">
+      <!-- BOTÓN PRIORIDADES (VISIBLE EN MD+) -->
+      <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden md:flex shrink-0 items-center gap-1.5 bg-transparent border border-[#3d3a39] hover:border-[#fafafa] text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Panel de Prioridades y Cuellos de Botella">
           <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-          <span class="hidden md:inline">Prioridades</span>
-        </button>
+          <span>Prioridades</span>
+      </button>
 
-        <!-- LIGHT FILLED BUTTON FACTORY (HIGH-EMPHASIS TRIGGER): PANEL -->
-        <button onclick="toggleConfigDrawer()" class="pill-btn shrink-0 p-1.5 sm:px-3.5 sm:py-1.5 bg-[#fafafa] text-[#101010] hover:bg-[#eeeeee] font-mono uppercase flex items-center gap-1.5 ml-1 border border-[#fafafa] text-[11px] tracking-[-0.24px]">
-          <svg class="w-3.5 h-3.5 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span class="hidden md:inline">Panel</span>
-        </button>
-
-        <div class="h-4 w-px bg-[#3d3a39] mx-1 hidden sm:block"></div>
-
-        <button onclick="logout()" class="pill-btn shrink-0 p-1.5 sm:px-2 sm:py-1.5 bg-transparent border border-transparent hover:border-[#ee6018] text-[#8a8380] hover:text-[#ee6018] flex items-center gap-1.5 transition ml-0.5" title="Cerrar Sesión">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        </button>
-      </div>
-
-      <!-- BOTÓN 3 PUNTOS MÓVIL -->
-      <button id="mobileMenuBtn" onclick="toggleMobileMenu(event)" class="shrink-0 pill-btn p-2 bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] transition md:hidden flex items-center justify-center ml-1 border border-[#3d3a39] rounded-[3px]" title="Menú">
+      <!-- BOTÓN 3 PUNTOS MÓVIL (MD:HIDDEN) -->
+      <button id="mobileMenuBtn" onclick="toggleMobileMenu(event)" class="shrink-0 p-2 bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] transition md:hidden flex items-center justify-center border border-[#3d3a39] rounded-[3px]" title="Más opciones">
           <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
       </button>
 
@@ -456,9 +450,9 @@
               <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
           </button>
-          <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] bg-[#fafafa] text-[#101010] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              Panel de Control
+          <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              Configuración y Perfil
           </button>
           <div class="h-px w-full bg-[#3d3a39] my-1"></div>
           <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3">
@@ -1584,7 +1578,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v822"></script>
+  <script type="module" src="app.js?v=20261017_v823"></script>
 
 </body>
 </html>

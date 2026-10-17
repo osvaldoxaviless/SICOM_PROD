@@ -1148,4 +1148,20 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-
+/* ==========================================================================
+   TOPBAR FILTER & SEARCH REFINEMENTS (FACTORY UI)
+   ========================================================================== */
+#btnTopFilterDrawer.has-active-filters {
+    border-color: #ee6018 !important;
+    background-color: rgba(238, 96, 24, 0.12) !important;
+    color: #fafafa !important;
+}
+#btnTopFilterDrawer.has-active-filters svg {
+    color: #ee6018 !important;
+}
+#activeFiltersBadge {
+    box-shadow: 0 0 6px rgba(238, 96, 24, 0.45);
+}
+#desktopSearchInput:focus {
+    box-shadow: 0 0 0 1px #ee6018;
+}

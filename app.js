@@ -625,6 +625,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     document.addEventListener('click', handleCloseMobileMenuOutside);
     document.addEventListener('touchend', handleCloseMobileMenuOutside, { passive: true });
 
+    // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K)
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            const dInp = document.getElementById('desktopSearchInput');
+            if (dInp && window.innerWidth >= 768) {
+                dInp.focus();
+                dInp.select();
+            } else if (typeof window.toggleSearch === 'function') {
+                const mInp = document.getElementById('searchInput');
+                if (mInp && mInp.classList.contains('opacity-0')) window.toggleSearch();
+                else if (mInp) mInp.focus();
+            }
+        }
+    });
+
     window.logout = function() { document.getElementById('cloudLoader').style.display = 'flex'; document.getElementById('cloudLoader').style.opacity = '1'; setTimeout(() => { localStorage.removeItem('sicom_author'); localStorage.removeItem('sicom_role'); location.reload(); }, 500); }
 
     // --- SISTEMA DE CIERRE DE SESIÓN POR INACTIVIDAD (10 MIN) ---
@@ -2249,26 +2265,54 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.toggleSearch = function() {
         const inp = document.getElementById('searchInput');
         const btn = document.getElementById('searchBtnIcon');
+        if (!inp || !btn) return;
         
         if (inp.classList.contains('opacity-0')) {
-            inp.classList.remove('opacity-0', 'w-0', 'pointer-events-none'); inp.classList.add('opacity-100', 'w-48', 'sm:w-64'); btn.classList.add('bg-white/10'); 
-            btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
+            inp.classList.remove('opacity-0', 'w-0', 'pointer-events-none');
+            inp.classList.add('opacity-100', 'w-44', 'sm:w-56', 'pointer-events-auto');
+            btn.classList.add('bg-[#101010]', 'border-[#ee6018]'); 
+            btn.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
             inp.focus();
         } else {
-            inp.classList.add('opacity-0', 'w-0', 'pointer-events-none'); inp.classList.remove('opacity-100', 'w-48', 'sm:w-64'); btn.classList.remove('bg-white/10'); 
-            btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
-            inp.value = ''; window.handleSearch();
+            inp.classList.add('opacity-0', 'w-0', 'pointer-events-none');
+            inp.classList.remove('opacity-100', 'w-44', 'sm:w-56', 'pointer-events-auto');
+            btn.classList.remove('bg-[#101010]', 'border-[#ee6018]'); 
+            btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
+            inp.value = '';
+            const deskInp = document.getElementById('desktopSearchInput');
+            if (deskInp) deskInp.value = '';
+            window.handleSearch();
             window.recenterCanvas();
         }
-    }
+    };
     
+    window.handleDesktopSearch = function(val) {
+        const deskInp = document.getElementById('desktopSearchInput');
+        if (deskInp && deskInp.value !== val) deskInp.value = val;
+        const inp = document.getElementById('searchInput');
+        if (inp && inp.value !== val) inp.value = val;
+        activeSearchQuery = (val || '').trim();
+        window.renderMindMap();
+        setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
+        if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+    };
+
     window.updateDatalist = function() {
         const dl = document.getElementById('projectsDatalist'); if(!dl) return; let allProjs = [];
         appData.directProjects.forEach(p => allProjs.push(p.name)); appData.modules.forEach(m => (m.projects||[]).forEach(p => allProjs.push(p.name)));
         allProjs.sort((a,b) => a.localeCompare(b)); dl.innerHTML = allProjs.map(n => `<option value="${escapeHtml(n)}">`).join('');
-    }
+    };
 
-    window.handleSearch = function() { activeSearchQuery = document.getElementById('searchInput').value.trim(); window.renderMindMap(); setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40); }
+    window.handleSearch = function() {
+        const inp = document.getElementById('searchInput');
+        const val = inp ? inp.value : '';
+        const deskInp = document.getElementById('desktopSearchInput');
+        if (deskInp && deskInp.value !== val) deskInp.value = val;
+        activeSearchQuery = val.trim();
+        window.renderMindMap();
+        setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
+        if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+    };
 
     function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
     let infoCardHideTimer = null;
@@ -7923,6 +7967,11 @@ window.renderDailyTasks = function() {
             if (c > 0) { badge.textContent = c; badge.classList.remove('hidden'); }
             else { badge.classList.add('hidden'); }
         }
+        const topFilterBtn = document.getElementById('btnTopFilterDrawer');
+        if (topFilterBtn) {
+            if (c > 0) topFilterBtn.classList.add('has-active-filters');
+            else topFilterBtn.classList.remove('has-active-filters');
+        }
         
         if (isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
         else window.renderMindMap();
@@ -7951,6 +8000,13 @@ window.renderDailyTasks = function() {
         
         const badge = document.getElementById('activeFiltersBadge');
         if (badge) badge.classList.add('hidden');
+        const topFilterBtn = document.getElementById('btnTopFilterDrawer');
+        if (topFilterBtn) topFilterBtn.classList.remove('has-active-filters');
+        const deskInp = document.getElementById('desktopSearchInput');
+        if (deskInp) deskInp.value = '';
+        const searchInp = document.getElementById('searchInput');
+        if (searchInp) searchInp.value = '';
+        activeSearchQuery = '';
         
         // Apaga el Modo Enfoque si estaba encendido al limpiar filtros
         if (isFocusMode) {
@@ -8016,6 +8072,8 @@ window.renderDailyTasks = function() {
             activeSearchQuery = '';
             const sInp = document.getElementById('searchInput');
             if (sInp) sInp.value = '';
+            const dsInp = document.getElementById('desktopSearchInput');
+            if (dsInp) dsInp.value = '';
         }
         window.resetAdvFilters();
         if (typeof window.recenterCanvas === 'function') window.recenterCanvas();
