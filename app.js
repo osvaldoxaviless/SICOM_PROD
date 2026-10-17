@@ -3395,6 +3395,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         compContainer.innerHTML = '';
         compContainer.classList.add('hidden');
       }
+      const ctxRow = document.getElementById('infoContextRow');
+      if (ctxRow) ctxRow.classList.add('hidden');
+      const baseModCont = document.getElementById('infoBaseModuleContainer');
+      if (baseModCont) {
+        baseModCont.innerHTML = '';
+        baseModCont.classList.add('hidden');
+      }
+      const secModCont = document.getElementById('infoSecondaryModulesContainer');
+      if (secModCont) {
+        secModCont.innerHTML = '';
+        secModCont.classList.add('hidden');
+      }
       
       if (type === 'core') {
         item = appData.core;
@@ -3476,7 +3488,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
         document.getElementById('infoType').textContent = 'PROYECTO';
 
-        // Renderizado de Empresa(s) Destino (AFR, AVM, TEO, TNO, ZIN, GENERAL...)
+        if (ctxRow) ctxRow.classList.remove('hidden');
+
+        // 1. Renderizado de Empresa(s) Destino (en la misma fila de contexto junto al módulo base)
         if (compContainer) {
           const comps = window.getProjectCompanies(item);
           if (comps.length > 0) {
@@ -3485,77 +3499,57 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             comps.forEach(c => {
               const st = window.getCompanyStyle ? window.getCompanyStyle(c) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)', icon: '🏢' };
               const pill = document.createElement('span');
-              pill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1 rounded-[3px] border";
+              pill.className = "inline-flex items-center gap-1 font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] border font-medium";
               pill.style.backgroundColor = st.bg;
               pill.style.borderColor = st.border;
               pill.style.color = st.color;
               pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${st.color}"></span>${st.icon} ${escapeHtml(c)}`;
               compContainer.appendChild(pill);
             });
+          } else {
+            compContainer.classList.add('hidden');
           }
         }
 
-        // Renderizado de Módulos (Base y Secundarios)
-        if (modContainer) {
-          modContainer.innerHTML = '';
-          modContainer.classList.remove('hidden');
-          
-          let primMod = null;
-          let primType = 'module';
-          if (type === 'direct-project') {
+        // 2. Renderizado de Módulo Base (en la misma fila al lado de la Empresa)
+        let primMod = null;
+        let primType = 'module';
+        if (type === 'direct-project') {
+          primMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
+          primType = 'direct-hub';
+        } else {
+          primMod = appData.modules.find(m => (m.projects || []).some(p => p.id === id));
+          if (!primMod) {
             primMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
             primType = 'direct-hub';
-          } else {
-            primMod = appData.modules.find(m => (m.projects || []).some(p => p.id === id));
-            if (!primMod) {
-              primMod = appData.directHub || { id: 'hub-direct', name: 'PROYECTOS DIRECTOS SICOM', color: '#f59e0b' };
-              primType = 'direct-hub';
-            }
           }
-          
-          const secList = Array.isArray(item.secondaryModules) ? item.secondaryModules : [];
-          
-          if (secList.length === 0) {
-            const pPill = document.createElement('button');
-            pPill.type = 'button';
-            pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
-            pPill.style.borderColor = primMod.color || '#3d3a39';
-            pPill.title = "Módulo base donde reside el proyecto";
-            pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] font-normal uppercase">(Módulo Base)</span>`;
-            pPill.onclick = () => window.selectNode(primType, primMod.id);
-            modContainer.appendChild(pPill);
-          } else {
-            modContainer.className = "w-full mb-4 space-y-2.5";
+        }
 
-            // 1. MÓDULO BASE PRINCIPAL
-            const baseBlock = document.createElement('div');
-            baseBlock.innerHTML = `
-              <div class="font-mono text-[9px] uppercase text-[#8a8380] mb-1 tracking-wider flex items-center gap-1.5">
-                <span>MÓDULO BASE (ORIGEN)</span>
-              </div>
-            `;
-            const pPill = document.createElement('button');
-            pPill.type = 'button';
-            pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
-            pPill.style.borderColor = primMod.color || '#3d3a39';
-            pPill.title = "Módulo base principal";
-            pPill.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)}`;
-            pPill.onclick = () => window.selectNode(primType, primMod.id);
-            baseBlock.appendChild(pPill);
-            modContainer.appendChild(baseBlock);
+        if (baseModCont && primMod) {
+          baseModCont.innerHTML = '';
+          baseModCont.classList.remove('hidden');
+          const pPill = document.createElement('button');
+          pPill.type = 'button';
+          pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
+          pPill.style.borderColor = primMod.color || '#3d3a39';
+          pPill.title = "Módulo base donde se aloja el proyecto (clic para enfocar)";
+          pPill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] uppercase font-normal">(Base)</span>`;
+          pPill.onclick = () => window.selectNode(primType, primMod.id);
+          baseModCont.appendChild(pPill);
+        }
 
-            // 2. MÓDULOS EN CONJUNTO / IMPACTO (AFECTA A ESTOS MÓDULOS)
-            const secBlock = document.createElement('div');
-            secBlock.className = "p-2.5 rounded-[6px] bg-[#161413] border border-[#3d3a39]/80";
-            secBlock.innerHTML = `
-              <div class="flex items-center gap-1.5 font-mono text-[9px] text-[#ee6018] uppercase tracking-wider mb-2 font-medium">
-                <svg class="w-3.5 h-3.5 text-[#ee6018] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                <span>EN CONJUNTO / AFECTA A ESTOS MÓDULOS (${secList.length}):</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5" id="infoSecPillsGroup"></div>
-              <p class="font-mono text-[9px] text-[#8a8380] mt-2 tracking-tight">Este proyecto genera sinergia y tiene impacto directo en el flujo de estos módulos.</p>
-            `;
-            const secGroup = secBlock.querySelector('#infoSecPillsGroup');
+        // 3. Renderizado de Módulos En Conjunto / Impactados (Fila esbelta horizontal)
+        const secList = Array.isArray(item.secondaryModules) ? item.secondaryModules : [];
+        if (secModCont) {
+          secModCont.innerHTML = '';
+          if (secList.length > 0) {
+            secModCont.classList.remove('hidden');
+            secModCont.className = "flex flex-wrap items-center gap-1.5 mb-2.5 pt-1.5 border-t border-[#3d3a39]/40";
+
+            const tagSpan = document.createElement('span');
+            tagSpan.className = "font-mono text-[9px] uppercase tracking-wider text-[#ee6018] flex items-center gap-1 font-semibold shrink-0 mr-0.5";
+            tagSpan.innerHTML = `<svg class="w-3 h-3 text-[#ee6018] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>AFECTA A (${secList.length}):`;
+            secModCont.appendChild(tagSpan);
 
             secList.forEach(sId => {
               let sMod = null, sType = 'module';
@@ -3568,21 +3562,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               if (sMod) {
                 const sPill = document.createElement('button');
                 sPill.type = 'button';
-                sPill.className = "sec-module-pill inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#fafafa] bg-[#101010] hover:bg-[#1d1a18] border transition group";
+                sPill.className = "sec-module-pill inline-flex items-center gap-1 font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] text-[#fafafa] bg-[#101010] hover:bg-[#1d1a18] border transition";
                 sPill.style.borderColor = sMod.color || '#3d3a39';
-                sPill.title = "Clic para enfocar módulo";
-                sPill.innerHTML = `
-                  <span class="w-2 h-2 rounded-full" style="background-color: ${sMod.color || '#eeeeee'}"></span>
-                  <span class="text-[#ee6018] font-bold">🔗</span>
-                  <span>${escapeHtml(sMod.name)}</span>
-                  <span class="text-[8px] px-1 py-0.2 rounded bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/30 font-medium">AFECTA</span>
-                `;
+                sPill.title = `Módulo impactado: ${sMod.name} (clic para enfocar)`;
+                sPill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${sMod.color || '#eeeeee'}"></span>🔗 ${escapeHtml(sMod.name)}`;
                 sPill.onclick = () => window.selectNode(sType, sMod.id);
-                secGroup.appendChild(sPill);
+                secModCont.appendChild(sPill);
               }
             });
-
-            modContainer.appendChild(secBlock);
+          } else {
+            secModCont.classList.add('hidden');
           }
         }
 

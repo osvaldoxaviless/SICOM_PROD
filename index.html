@@ -496,8 +496,14 @@
         <h3 id="infoTitle" class="text-[20px] font-medium text-[#101010] tracking-[-0.03em] leading-[1.2] break-words">Nombre</h3>
       </div>
 
-      <div id="infoCompaniesContainer" class="flex flex-wrap items-center gap-1.5 mb-2.5 hidden"></div>
-      <div id="infoModulesContainer" class="flex flex-wrap items-center gap-1.5 mb-4 hidden"></div>
+      <!-- CONTEXTO: EMPRESA Y MÓDULO BASE EN LA MISMA LÍNEA -->
+      <div id="infoContextRow" class="flex flex-wrap items-center gap-1.5 mb-2 hidden">
+        <div id="infoCompaniesContainer" class="inline-flex flex-wrap items-center gap-1.5"></div>
+        <div id="infoBaseModuleContainer" class="inline-flex flex-wrap items-center gap-1.5"></div>
+      </div>
+      <!-- MÓDULOS EN CONJUNTO / IMPACTADOS (AFECTA A...) EN FILA COMPACTA -->
+      <div id="infoSecondaryModulesContainer" class="hidden flex flex-wrap items-center gap-1.5 mb-3"></div>
+      <div id="infoModulesContainer" class="hidden"></div>
       
       <div id="infoLinksContainer" class="hidden flex items-center gap-2 mb-3">
         <a id="infoDriveBtn" href="#" target="_blank" class="hidden flex-1 pill-btn py-2 px-3 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#eeeeee] hover:text-[#101010] font-mono uppercase text-[10px] border border-[#3d3a39] flex justify-center items-center gap-1.5 transition">
@@ -1578,7 +1584,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v824"></script>
+  <script type="module" src="app.js?v=20261017_v825"></script>
 
 </body>
 </html>
