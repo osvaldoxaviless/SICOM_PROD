@@ -7516,6 +7516,99 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     };
 
+    // === DRILL-DOWN INTERACTIVO DE KPIs DEL TABLERO ===
+    window._lastDrillDownIndex = window._lastDrillDownIndex || { overdue: 0, risk: 0 };
+
+    window.drillDownKpi = function(type) {
+        // 1. Cerrar el modal/drawer del tablero (Centro de Control)
+        if (typeof window.closeConfigDrawer === 'function') {
+            window.closeConfigDrawer();
+        }
+
+        // 2. Activar automáticamente el "Modo Enfoque" en el grafo
+        if (typeof window.toggleFocusMode === 'function') {
+            window.toggleFocusMode(true);
+        }
+
+        // 3. Determinar el alcance actual (consultor o global)
+        const dashScopeSelect = document.getElementById('dashScopeSelect');
+        const targetConsultant = (dashScopeSelect && dashScopeSelect.value !== 'GLOBAL') ? dashScopeSelect.value : null;
+
+        // 4. Recopilar todos los proyectos disponibles
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const in72Hours = new Date(todayMidnight.getTime() + (3 * 24 * 60 * 60 * 1000));
+
+        const allProjects = [];
+        (appData.directProjects || []).forEach(p => {
+            allProjects.push({ ...p, pType: 'direct-project', parentModId: 'hub-direct', parentName: 'Directos' });
+        });
+        (appData.modules || []).forEach(m => {
+            (m.projects || []).forEach(p => {
+                allProjects.push({ ...p, pType: 'project', parentModId: m.id, parentName: m.name });
+            });
+        });
+
+        // Filtrar según el consultor objetivo si hay perspectiva activa
+        const filteredProjects = targetConsultant ? allProjects.filter(p => {
+            const cons = getProjectConsultants(p);
+            return cons.includes(targetConsultant);
+        }) : allProjects;
+
+        let candidateList = [];
+        if (type === 'overdue') {
+            candidateList = filteredProjects.filter(p => {
+                if (!p.deadline || p.status === 'Completado') return false;
+                const [y, m, d] = p.deadline.split('-');
+                return new Date(y, m - 1, d) < todayMidnight;
+            });
+            candidateList.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
+        } else if (type === 'risk') {
+            candidateList = filteredProjects.filter(p => {
+                if (!p.deadline || p.status === 'Completado') return false;
+                const [y, m, d] = p.deadline.split('-');
+                const dDate = new Date(y, m - 1, d);
+                return dDate >= todayMidnight && dDate <= in72Hours && (p.progress || 0) < 80;
+            });
+            candidateList.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
+        }
+
+        if (candidateList.length === 0) {
+            const label = type === 'overdue' ? 'vencidos' : 'en riesgo ≤ 72h';
+            window.showToast(`Modo Enfoque: No hay proyectos ${label} actualmente`, false);
+            setTimeout(() => {
+                if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap();
+            }, 60);
+            return;
+        }
+
+        // Selección circular de proyectos candidatos
+        const idx = (window._lastDrillDownIndex[type] || 0) % candidateList.length;
+        window._lastDrillDownIndex[type] = idx + 1;
+        const targetProj = candidateList[idx];
+
+        // Asegurar que el módulo contenedor esté desplegado si estaba colapsado
+        if (targetProj.parentModId && targetProj.parentModId !== 'hub-direct') {
+            if (collapsedModules.has(targetProj.parentModId)) {
+                collapsedModules.delete(targetProj.parentModId);
+                lastExpandedModuleId = targetProj.parentModId;
+                window.updateCollapseAllButtonState();
+            }
+        }
+
+        // Renderizar mapa para actualizar posiciones bajo Modo Enfoque
+        window.renderMindMap();
+
+        // Seleccionar nodo y hacer foco/zoom directo sobre el proyecto correspondiente
+        setTimeout(() => {
+            window.selectNode(targetProj.pType, targetProj.id);
+            const total = candidateList.length;
+            const pos = idx + 1;
+            const label = type === 'overdue' ? 'Vencido' : 'Riesgo ≤ 72h';
+            window.showToast(`🎯 Modo Enfoque // ${label} [${pos}/${total}]: "${targetProj.name}"`, false);
+        }, 120);
+    };
+
     window.exportCSV = function() {
         let csv = "Tipo,Módulo,Empresas,Proyecto,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
         const addRow = (t, m, p) => { 
@@ -8745,19 +8838,34 @@ window.renderDailyTasks = function() {
         if (mTxt) mTxt.textContent = label;
     };
 
-    window.toggleFocusMode = function() {
-        isFocusMode = !isFocusMode;
-        const btn = document.getElementById('btnFocusMode');
-        if (isFocusMode) {
-            btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
-            btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
-            window.showToast("Modo Enfoque: Mostrando Riesgos", false);
+    window.toggleFocusMode = function(forceState) {
+        if (typeof forceState === 'boolean') {
+            if (isFocusMode === forceState) {
+                const btn = document.getElementById('btnFocusMode');
+                if (btn && isFocusMode) {
+                    btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
+                    btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
+                }
+                return;
+            }
+            isFocusMode = forceState;
         } else {
-            btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]', 'bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
-            btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
+            isFocusMode = !isFocusMode;
+        }
+        const btn = document.getElementById('btnFocusMode');
+        if (btn) {
+            if (isFocusMode) {
+                btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
+                btn.classList.remove('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]', 'bg-white/5', 'border-white/10', 'text-gray-400');
+                window.showToast("Modo Enfoque: Mostrando Riesgos", false);
+            } else {
+                btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]', 'bg-[#bf5af2]/20', 'border-[#bf5af2]/50', 'text-[#bf5af2]');
+                btn.classList.add('bg-[#1d1a18]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
+            }
         }
         window.renderMindMap();
         setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
+        if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
     };
 
     window.toggleSecondaryLinks = function() {

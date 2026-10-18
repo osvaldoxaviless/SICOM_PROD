@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v833">
+  <link rel="stylesheet" href="styles.css?v=20261017_v834">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -1003,26 +1003,38 @@
               </div>
 
               <!-- KPI 2: Riesgo Inminente (Preventivo) -->
-              <div class="p-5 border-b border-[#1d1a18] flex flex-col justify-between">
+              <div id="kpiCardRisk" onclick="drillDownKpi('risk')" class="p-5 border-b border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#181513] transition-all group select-none" title="Hacer clic para enfocar proyectos en riesgo en el mapa">
                   <div class="flex items-center justify-between">
-                     <p id="dashRiskLabel" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">Riesgo &le; 72h</p>
-                     <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                     <p id="dashRiskLabel" class="font-mono text-[11px] text-[#b8b3b0] group-hover:text-[#eeeeee] uppercase tracking-[-0.24px] transition-colors">Riesgo &le; 72h</p>
+                     <div class="flex items-center gap-1.5">
+                       <span class="text-[10px] text-[#8a8380] group-hover:text-[#eeeeee] transition-colors font-mono font-bold">↗</span>
+                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] group-hover:scale-125 transition-transform"></span>
+                     </div>
                   </div>
                   <div class="mt-3">
                      <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#eeeeee]" id="dashRiskCount">0</p>
-                     <p class="font-mono text-[10px] uppercase text-[#8a8380] mt-2 truncate" id="dashRiskSub">Próximos a vencer</p>
+                     <div class="flex items-center justify-between mt-2">
+                       <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#b8b3b0] truncate transition-colors" id="dashRiskSub">Próximos a vencer</p>
+                       <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">Ver ↗</span>
+                     </div>
                   </div>
               </div>
 
               <!-- KPI 3: Vencidos Actuales -->
-              <div class="p-5 border-r border-[#1d1a18] flex flex-col justify-between">
+              <div id="kpiCardOverdue" onclick="drillDownKpi('overdue')" class="p-5 border-r border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#201511] transition-all group select-none" title="Hacer clic para enfocar proyectos vencidos en el mapa">
                   <div class="flex items-center justify-between">
-                     <p id="dashOverdueLabel" class="font-mono text-[11px] text-[#ee6018] uppercase tracking-[-0.24px]">Vencidos</p>
-                     <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[2px]" id="dashOverdueBadge">0</span>
+                     <p id="dashOverdueLabel" class="font-mono text-[11px] text-[#ee6018] group-hover:text-[#ff7836] uppercase tracking-[-0.24px] transition-colors">Vencidos</p>
+                     <div class="flex items-center gap-1.5">
+                       <span class="text-[10px] text-[#ee6018] group-hover:text-white transition-colors font-mono font-bold">↗</span>
+                       <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[2px] group-hover:border-[#ee6018] group-hover:bg-[#ee6018] group-hover:text-white transition-colors" id="dashOverdueBadge">0</span>
+                     </div>
                   </div>
                   <div class="mt-3">
                      <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#ee6018]" id="dashOverdue">0</p>
-                     <p class="font-mono text-[10px] uppercase text-[#8a8380] mt-2 truncate">Requieren atención</p>
+                     <div class="flex items-center justify-between mt-2">
+                       <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#ee6018] truncate transition-colors">Requieren atención</p>
+                       <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">Ver ↗</span>
+                     </div>
                   </div>
               </div>
 
@@ -1899,7 +1911,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v833"></script>
+  <script type="module" src="app.js?v=20261017_v834"></script>
 
 </body>
 </html>
