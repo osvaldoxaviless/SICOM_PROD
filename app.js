@@ -3700,21 +3700,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const linkHref = invLink ? (invLink.startsWith('http') ? invLink : 'https://' + invLink) : '';
 
             cont.innerHTML = `
-            <div class="inline-flex items-center gap-1 font-mono text-[10px] font-bold rounded-[3px] bg-[#101010] text-[#fafafa] border border-[#3d3a39] px-2 py-0.5 shadow-sm max-w-[200px] group transition hover:border-[#ee6018]">
-                <span class="text-[#ee6018] font-bold text-[9px] uppercase tracking-wider shrink-0">TK</span>
-                <span class="text-[#fafafa] font-bold truncate select-all" title="Ticket: ${escapeHtml(ticketRaw)}">${escapeHtml(ticketDisplay)}</span>
-                ${linkHref ? `<a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-[#a0ca92] hover:text-[#30d158] font-bold ml-0.5 shrink-0 transition" title="Abrir ticket en Invgate ↗">↗</a>` : ''}
+            <div class="factory-ticket-pill inline-flex items-center gap-1.5 font-mono text-[10px] px-2 py-0.5 rounded-[3px] max-w-[210px] group cursor-pointer" onclick="event.stopPropagation(); ${!isLector ? 'window.promptEditTicket(event)' : (linkHref ? `window.open('${escapeHtml(linkHref)}', '_blank')` : '')}" title="${!isLector ? 'Clic para editar ticket' : (linkHref ? 'Abrir ticket en Invgate ↗' : 'Ticket oficial')}">
+                <span class="tk-tag shrink-0">TK</span>
+                <span class="tk-num truncate select-all" title="Ticket: ${escapeHtml(ticketRaw)}">${escapeHtml(ticketDisplay)}</span>
+                ${linkHref ? `<a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-[#ee6018] hover:text-[#d04f0f] font-bold ml-0.5 shrink-0 transition" title="Abrir ticket en Invgate ↗">↗</a>` : ''}
                 ${!isLector ? `
-                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#8a8380] hover:text-[#ee6018] ml-1 p-0.5 transition shrink-0" title="Editar número de ticket">
+                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#4d4947] hover:text-[#ee6018] ml-0.5 p-0.5 transition shrink-0" title="Editar número de ticket">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                 </button>` : ''}
             </div>`;
         } else {
             if (isLector) {
-                cont.innerHTML = `<span class="font-mono text-[9px] text-[#8a8380] uppercase">Sin ticket</span>`;
+                cont.innerHTML = `<span class="font-mono text-[9px] text-[#4d4947]/70 uppercase tracking-tight">Sin ticket</span>`;
             } else {
                 cont.innerHTML = `
-                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="inline-flex items-center gap-1 font-mono text-[9px] uppercase font-semibold rounded-[3px] bg-[#101010]/5 hover:bg-[#101010]/15 text-[#8a8380] hover:text-[#101010] border border-dashed border-[#8a8380]/40 hover:border-[#ee6018] px-2 py-0.5 transition cursor-pointer" title="Asignar número de ticket al proyecto">
+                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="factory-ticket-empty inline-flex items-center gap-1 font-mono text-[9px] uppercase font-semibold px-2 py-0.5 cursor-pointer" title="Asignar número de ticket al proyecto">
                     <span class="text-[#ee6018] font-bold">+</span>
                     <span>TICKET</span>
                 </button>`;
@@ -8631,8 +8631,8 @@ window.renderDailyTasks = function() {
     if (currentNotifTab === 'alerts') {
         if (alertsList.length === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
+                <div class="w-10 h-10 rounded-[3px] bg-[#252220] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
                 <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja de Alertas Limpia</h3>
                 <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes menciones nuevas en foros ni proyectos en situación crítica.</p>
             </div>`;
@@ -8643,9 +8643,9 @@ window.renderDailyTasks = function() {
         const otherAlerts = alertsList.filter(a => a.alertType !== 'mention');
 
         const style = { 
-            danger: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/60'], 
-            warning: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/40'], 
-            info: ['text-[#a0ca92]', 'bg-[#101010]', 'border-[#3d3a39]']
+            danger: ['text-[#ee6018]', 'bg-[#1d1a18]', 'border-[#ee6018]/50'], 
+            warning: ['text-[#ee6018]', 'bg-[#1d1a18]', 'border-[#ee6018]/30'], 
+            info: ['text-[#a0ca92]', 'bg-[#1d1a18]', 'border-[#3d3a39]']
         };
 
         let html = '<div class="space-y-4 pb-6">';
@@ -8663,7 +8663,7 @@ window.renderDailyTasks = function() {
                 </div>
                 ${mentionAlerts.map(a => {
                     return `
-                    <div class="bg-[#151210] border border-[#ee6018]/70 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-[0_4px_16px_rgba(238,96,24,0.15)] cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
+                    <div class="bg-[#1d1a18] border border-[#ee6018]/60 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-[0_4px_16px_rgba(238,96,24,0.12)] cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
                         <div class="flex items-start gap-2.5">
                             <span class="text-lg leading-none mt-0.5">💬</span>
                             <div class="flex-1 min-w-0">
@@ -8675,7 +8675,7 @@ window.renderDailyTasks = function() {
                                     <span>👤 Por: <b class="text-[#eeeeee]">${escapeHtml(a.author || (a.users && a.users[0]) || 'Consultor')}</b></span>
                                     ${a.date ? `<span>· ${escapeHtml(a.date)}</span>` : ''}
                                 </div>
-                                <div class="mt-2.5 p-2.5 rounded-[4px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
+                                <div class="mt-2.5 p-2.5 rounded-[4px] bg-[#141211] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
                                     "${escapeHtml(a.noteText || a.reason)}"
                                 </div>
                                 <div class="flex items-center gap-2 mt-3 pt-2 border-t border-[#1d1a18]">

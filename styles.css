@@ -265,6 +265,50 @@ select.bg-transparent.appearance-none {
     color: #4d4947 !important;
 }
 
+/* Badges de Ticket Factory en Tarjeta Bone (Armonía Táctica, cero fondo negro) */
+.factory-ticket-pill {
+    background-color: rgba(238, 96, 24, 0.10) !important;
+    border: 1px solid rgba(238, 96, 24, 0.32) !important;
+    color: #101010 !important;
+    border-radius: var(--radius-buttons) !important;
+    font-family: var(--font-geist-mono) !important;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none !important;
+}
+
+.factory-ticket-pill:hover {
+    background-color: rgba(238, 96, 24, 0.18) !important;
+    border-color: rgba(238, 96, 24, 0.65) !important;
+}
+
+.factory-ticket-pill .tk-tag {
+    color: var(--color-signal-orange) !important;
+    font-weight: 700 !important;
+    font-size: 9px !important;
+    letter-spacing: 0.05em;
+}
+
+.factory-ticket-pill .tk-num {
+    color: var(--color-obsidian-canvas) !important;
+    font-weight: 700 !important;
+}
+
+.factory-ticket-empty {
+    background-color: rgba(238, 96, 24, 0.06) !important;
+    border: 1px dashed rgba(238, 96, 24, 0.35) !important;
+    color: #4d4947 !important;
+    border-radius: var(--radius-buttons) !important;
+    font-family: var(--font-geist-mono) !important;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none !important;
+}
+
+.factory-ticket-empty:hover {
+    background-color: rgba(238, 96, 24, 0.15) !important;
+    border-color: var(--color-signal-orange) !important;
+    color: #101010 !important;
+}
+
 /* Inputs Técnicos en Superficies Oscuras */
 .liquid-input {
     background: var(--color-obsidian-canvas) !important;
