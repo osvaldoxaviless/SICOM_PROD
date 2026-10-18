@@ -1,4 +1,8 @@
 {
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/push", "destination": "/api/push.js" }
+  ],
   "headers": [
     {
       "source": "/sw.js",
