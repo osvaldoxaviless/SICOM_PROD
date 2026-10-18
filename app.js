@@ -399,6 +399,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             };
         }
+        if (!appData.attendanceLocks) appData.attendanceLocks = {};
 
         // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
         const idsVistos = new Set();
@@ -10244,35 +10245,200 @@ window.renderDailyTasks = function() {
     // ==========================================================================
     // MÓDULO INTEGRAL: ROL DE ASISTENCIA, COMISIONES Y PRENÓMINA (STGT RH)
     // FOPR-RHU-02-02 (Prenómina) & FOPR-RHU-02-03 (Solicitud de Permiso o Vacaciones)
-    // SEGURIDAD: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar
+    // SEGURIDAD & AUDITORÍA: Cierre de quincena por Osvaldo Avilés y auto-registro de consultores
     // ==========================================================================
 
     let activeAttendanceTeamFilter = 'ALL';
     let currentCellConsultant = null;
     let currentCellDate = null;
 
-    // Validación estricta de permisos para modificar el rol de asistencia y prenómina
-    window.canModifyAttendance = function() {
+    // Validación de Administrador Maestro de Prenómina (Osvaldo Avilés / "yo")
+    window.isAttendanceMasterAdmin = function() {
         const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const cur = norm(localAuthor);
-        const isMe = cur.includes('osvaldo') || cur.includes('sanchez aviles') || cur.includes('aviles');
-        const isBarbosa = cur.includes('barbosa') || cur.includes('miguel barbosa');
-        const isRafael = cur.includes('rafael') || cur.includes('romero');
-        return isMe || isBarbosa || isRafael || currentUserRole === 'Supremo';
+        return cur.includes('osvaldo') || cur.includes('sanchez aviles') || cur.includes('aviles') || currentUserRole === 'Supremo';
     };
 
-    window.openAttendanceModal = function() {
-        const m = document.getElementById('attendanceModal');
-        if (!m) return;
-        
-        if (!document.getElementById('attSelMonth').value) document.getElementById('attSelMonth').value = "10";
-        if (!document.getElementById('attSelYear').value) document.getElementById('attSelYear').value = "2026";
-        if (!document.getElementById('attSelQuincena').value) document.getElementById('attSelQuincena').value = "Q1";
+    // Validación de Jefatura y Coordinación (Miguel Barbosa, Rafael Romero, Osvaldo Avilés)
+    window.isAttendanceLead = function() {
+        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const cur = norm(localAuthor);
+        return window.isAttendanceMasterAdmin() || cur.includes('barbosa') || cur.includes('rafael') || cur.includes('romero');
+    };
 
-        const canEdit = window.canModifyAttendance();
+    // Verifica si una quincena específica está cerrada y validada
+    window.isPeriodLocked = function(periodKey) {
+        if (!appData.attendanceLocks) return false;
+        const lock = appData.attendanceLocks[periodKey];
+        return !!(lock && lock.locked);
+    };
+
+    // Verifica si una quincena corresponde al pasado (anterior a la fecha actual)
+    window.isPastQuincena = function(y, m, q) {
+        const today = new Date();
+        const curY = today.getFullYear();
+        const curM = today.getMonth() + 1;
+        const curQ = today.getDate() <= 15 ? 'Q1' : 'Q2';
+
+        if (y < curY) return true;
+        if (y > curY) return false;
+        if (m < curM) return true;
+        if (m > curM) return false;
+        return (curQ === 'Q2' && q === 'Q1');
+    };
+
+    // Validación granular: define si el usuario en sesión puede modificar una celda en particular
+    window.canUserEditAttendanceCell = function(consultantName, dateStr, periodKey) {
+        // 1. Osvaldo Avilés (Admin) siempre tiene control total para auditar y modificar cualquier celda
+        if (window.isAttendanceMasterAdmin()) return { allowed: true };
+
+        // 2. Si la quincena está cerrada y validada por Osvaldo, nadie más puede modificarla
+        if (window.isPeriodLocked(periodKey)) {
+            const lock = appData.attendanceLocks[periodKey];
+            const lockedBy = lock?.lockedBy || 'Osvaldo Avilés';
+            return {
+                allowed: false,
+                reason: `🔒 Quincena cerrada y validada por ${lockedBy}. Solo el administrador puede modificarla.`
+            };
+        }
+
+        const parts = periodKey.split('-');
+        const y = parseInt(parts[0]);
+        const m = parseInt(parts[1]);
+        const q = parts[2];
+
+        // 3. Jefatura (Miguel Barbosa / Rafael Romero) puede editar en quincenas abiertas
+        if (window.isAttendanceLead()) {
+            return { allowed: true };
+        }
+
+        // 4. Consultores regulares:
+        // A. Solo pueden editar su propia línea de asistencia
+        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (norm(consultantName) !== norm(localAuthor)) {
+            return {
+                allowed: false,
+                reason: `🔒 Solo puedes modificar tu propia fila ("${localAuthor || 'Usuario'}"). No puedes alterar los registros de ${consultantName}.`
+            };
+        }
+
+        // B. No pueden modificar quincenas pasadas ya transcurridas
+        if (window.isPastQuincena(y, m, q)) {
+            return {
+                allowed: false,
+                reason: `🔒 Las quincenas pasadas están cerradas para colaboradores. Si requieres un ajuste, solicítalo a Osvaldo Avilés.`
+            };
+        }
+
+        // C. Quincena en curso, propia fila y quincena abierta -> PERMITIDO
+        return { allowed: true };
+    };
+
+    // Función exclusiva de Osvaldo Avilés: Validar y cerrar / Reabrir quincena
+    window.toggleValidateQuincena = function() {
+        if (!window.isAttendanceMasterAdmin()) {
+            window.showToast("🔒 Solo Osvaldo Avilés puede validar y cerrar quincenas.", true);
+            return;
+        }
+
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        if (!appData.attendanceLocks) appData.attendanceLocks = {};
+        const isLocked = window.isPeriodLocked(periodKey);
+
+        if (!isLocked) {
+            // Cerrar y validar quincena
+            appData.attendanceLocks[periodKey] = {
+                locked: true,
+                lockedBy: localAuthor || 'Osvaldo Avilés',
+                lockedAt: new Date().toISOString()
+            };
+            window.triggerCelebration();
+            window.showToast(`🔒 Quincena ${periodKey} validada y cerrada. Solo tú puedes modificarla.`, false);
+        } else {
+            // Reabrir quincena
+            appData.attendanceLocks[periodKey].locked = false;
+            appData.attendanceLocks[periodKey].unlockedAt = new Date().toISOString();
+            window.showToast(`🔓 Quincena ${periodKey} reabierta para edición.`, false);
+        }
+
+        window.saveData(false);
+        window.updateAttendanceHeaderControls();
+        window.renderAttendanceTable();
+    };
+
+    // Actualiza los estados, botones de cierre y avisos en la barra superior de la prenómina
+    window.updateAttendanceHeaderControls = function() {
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const isLocked = window.isPeriodLocked(periodKey);
+        const isPast = window.isPastQuincena(y, m, q);
+        const isMaster = window.isAttendanceMasterAdmin();
+        const isLead = window.isAttendanceLead();
+
+        // 1. Badge de Estado de Quincena (Factory Live Data Pulse)
+        const badgeCont = document.getElementById('attQuincenaStatusBadge');
+        if (badgeCont) {
+            if (isLocked) {
+                const lockInfo = appData.attendanceLocks[periodKey];
+                const lockAuthor = lockInfo?.lockedBy || 'Osvaldo Avilés';
+                badgeCont.innerHTML = `
+                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Validada y cerrada por ${escapeHtml(lockAuthor)}">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
+                        VALIDADA & CERRADA
+                    </span>
+                `;
+            } else if (isPast) {
+                badgeCont.innerHTML = `
+                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena transcurrida (solo editable por Osvaldo Avilés)">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                        QUINCENA PASADA
+                    </span>
+                `;
+            } else {
+                badgeCont.innerHTML = `
+                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena en curso abierta para registro">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span>
+                        QUINCENA EN CURSO
+                    </span>
+                `;
+            }
+        }
+
+        // 2. Botón de Validación / Cierre de Quincena (Exclusivo de Osvaldo Avilés)
+        const btnCont = document.getElementById('attValidationButtonContainer');
+        if (btnCont) {
+            if (isMaster) {
+                if (!isLocked) {
+                    btnCont.innerHTML = `
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
+                            <svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span>Validar y Cerrar</span>
+                        </button>
+                    `;
+                } else {
+                    btnCont.innerHTML = `
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Reabrir quincena para permitir modificaciones">
+                            <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                            <span>Reabrir Quincena</span>
+                        </button>
+                    `;
+                }
+            } else {
+                btnCont.innerHTML = '';
+            }
+        }
+
+        // 3. Sub-barra: Acciones de llenado automático
         const editorActs = document.getElementById('attEditorActions');
         if (editorActs) {
-            if (canEdit) {
+            if (isMaster || (isLead && !isLocked)) {
                 editorActs.innerHTML = `
                     <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con A Distancia">
                         ⚡ Auto: A distancia
@@ -10280,6 +10446,16 @@ window.renderDailyTasks = function() {
                     <span class="text-[#3d3a39]">|</span>
                     <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con Oficina STGT">
                         ⚡ Auto: Oficina STGT
+                    </button>
+                `;
+            } else if (!isLocked && !isPast) {
+                editorActs.innerHTML = `
+                    <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar tus días vacíos con A Distancia">
+                        ⚡ Mi fila: A distancia
+                    </button>
+                    <span class="text-[#3d3a39]">|</span>
+                    <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar tus días vacíos con Oficina STGT">
+                        ⚡ Mi fila: Oficina STGT
                     </button>
                 `;
             } else {
@@ -10292,18 +10468,35 @@ window.renderDailyTasks = function() {
             }
         }
 
+        // 4. Texto informativo al pie
         const noticeEl = document.getElementById('attPermNotice');
         if (noticeEl) {
-            if (canEdit) {
-                noticeEl.innerHTML = `💡 Haz clic en cualquier celda para editar. Operador activo: <span class="text-[#eeeeee] font-mono">${escapeHtml(localAuthor || 'Administrador')}</span>`;
+            if (isMaster) {
+                noticeEl.innerHTML = `👑 Administrador (<span class="text-[#eeeeee] font-mono">${escapeHtml(localAuthor || 'Osvaldo Avilés')}</span>). Tienes control total de auditoría y cierre sobre cualquier registro.`;
+            } else if (isLocked) {
+                noticeEl.innerHTML = `🔒 Quincena cerrada y validada por Osvaldo Avilés. Solo él puede modificarla.`;
+            } else if (isLead) {
+                noticeEl.innerHTML = `⭐ Jefatura (<span class="text-[#eeeeee] font-mono">${escapeHtml(localAuthor || 'Líder')}</span>). Puedes revisar y registrar comisiones en quincenas abiertas.`;
+            } else if (isPast) {
+                noticeEl.innerHTML = `🔒 Quincena pasada en modo solo lectura. Para cualquier cambio, contacta a Osvaldo Avilés.`;
             } else {
-                noticeEl.innerHTML = `🔒 Modo consulta. Solo <strong class="text-[#eeeeee]">Miguel Barbosa, Rafael Romero y Osvaldo Avilés</strong> pueden modificar la prenómina.`;
+                noticeEl.innerHTML = `👤 Colaborador activo: <strong class="text-[#eeeeee] font-mono">${escapeHtml(localAuthor || 'Consultor')}</strong>. Puedes registrar tus comisiones en tu propia fila.`;
             }
         }
+    };
+
+    window.openAttendanceModal = function() {
+        const m = document.getElementById('attendanceModal');
+        if (!m) return;
+        
+        if (!document.getElementById('attSelMonth').value) document.getElementById('attSelMonth').value = "10";
+        if (!document.getElementById('attSelYear').value) document.getElementById('attSelYear').value = "2026";
+        if (!document.getElementById('attSelQuincena').value) document.getElementById('attSelQuincena').value = "Q1";
 
         m.classList.remove('hidden');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
 
+        window.updateAttendanceHeaderControls();
         window.renderAttendanceTable();
     };
 
@@ -10316,6 +10509,7 @@ window.renderDailyTasks = function() {
     };
 
     window.changeAttendancePeriod = function() {
+        window.updateAttendanceHeaderControls();
         window.renderAttendanceTable();
     };
 
@@ -10329,6 +10523,7 @@ window.renderDailyTasks = function() {
         document.getElementById('attSelYear').value = String(curY);
         document.getElementById('attSelQuincena').value = curQ;
 
+        window.updateAttendanceHeaderControls();
         window.renderAttendanceTable();
     };
 
@@ -10353,8 +10548,15 @@ window.renderDailyTasks = function() {
 
     window.openCellStatusPopover = function(e, consultantName, dateStr) {
         e.stopPropagation();
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Solo lectura: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para modificar la prenómina.", true);
+        
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const check = window.canUserEditAttendanceCell(consultantName, dateStr, periodKey);
+        if (!check.allowed) {
+            window.showToast(check.reason, true);
             return;
         }
 
@@ -10382,15 +10584,18 @@ window.renderDailyTasks = function() {
     };
 
     window.selectCellStatus = function(status) {
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar el rol de asistencia.", true);
-            return;
-        }
         if (!currentCellConsultant || !currentCellDate) return;
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
         const q = document.getElementById('attSelQuincena')?.value || 'Q1';
         const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const check = window.canUserEditAttendanceCell(currentCellConsultant, currentCellDate, periodKey);
+        if (!check.allowed) {
+            window.showToast(check.reason, true);
+            window.closeCellStatusPopover();
+            return;
+        }
 
         if (!appData.attendance) appData.attendance = {};
         if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
@@ -10417,14 +10622,20 @@ window.renderDailyTasks = function() {
     };
 
     window.quickFillAttendanceWorkdays = function(defaultStatus) {
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar el rol de asistencia.", true);
-            return;
-        }
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
         const q = document.getElementById('attSelQuincena')?.value || 'Q1';
         const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const isMaster = window.isAttendanceMasterAdmin();
+        const isLead = window.isAttendanceLead();
+        const isLocked = window.isPeriodLocked(periodKey);
+        const isPast = window.isPastQuincena(y, m, q);
+
+        if (!isMaster && (isLocked || isPast)) {
+            window.showToast("🔒 Esta quincena está cerrada para modificaciones.", true);
+            return;
+        }
 
         const startDay = q === 'Q1' ? 1 : 16;
         const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
@@ -10432,7 +10643,11 @@ window.renderDailyTasks = function() {
         if (!appData.attendance) appData.attendance = {};
         if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
 
-        const activeList = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa');
+        // Si es Osvaldo o Jefatura llena a todos; si es consultor regular solo llena su propia fila
+        const activeList = (isMaster || isLead)
+            ? Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa')
+            : [localAuthor].filter(Boolean);
+
         let filledCount = 0;
 
         activeList.forEach(cName => {
@@ -10440,7 +10655,7 @@ window.renderDailyTasks = function() {
             for (let d = startDay; d <= endDay; d++) {
                 const dt = new Date(y, m - 1, d);
                 const dow = dt.getDay();
-                if (dow !== 0 && dow !== 6) { // Mon-Fri
+                if (dow !== 0 && dow !== 6) { // Lunes a Viernes
                     const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     if (!appData.attendance[periodKey][cName][dateStr]) {
                         appData.attendance[periodKey][cName][dateStr] = { status: defaultStatus };
@@ -10459,11 +10674,12 @@ window.renderDailyTasks = function() {
         const container = document.getElementById('attendanceTableContainer');
         if (!container) return;
 
-        const canEdit = window.canModifyAttendance();
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
         const q = document.getElementById('attSelQuincena')?.value || 'Q1';
         const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        window.updateAttendanceHeaderControls();
 
         const monthNames = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const monthName = monthNames[m] || 'Octubre';
@@ -10584,11 +10800,13 @@ window.renderDailyTasks = function() {
                     label = 'Falta (FA)';
                 }
 
-                const clickAction = canEdit 
+                // Verificación de permiso granular para esta celda
+                const editCheck = window.canUserEditAttendanceCell(cName, wd.dateStr, periodKey);
+                const clickAction = editCheck.allowed
                     ? `openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')`
-                    : `window.showToast('🔒 Solo lectura: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar la prenómina.', true)`;
-                const cursorStyle = canEdit ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default opacity-85';
-                const cellTitle = canEdit ? `${escapeHtml(status)} (Clic para cambiar)` : `${escapeHtml(status)} (Solo lectura)`;
+                    : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
+                const cursorStyle = editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default opacity-85';
+                const cellTitle = editCheck.allowed ? `${escapeHtml(status)} (Clic para cambiar)` : `${escapeHtml(status)} (${escapeHtml(editCheck.reason)})`;
 
                 cellsHtml += `
                     <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
@@ -10648,19 +10866,25 @@ window.renderDailyTasks = function() {
 
     // --- MODAL DE COMISIONES RÁPIDAS ---
     window.openCommissionModal = function(defaultConsultant, defaultDate) {
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para registrar comisiones en la prenómina.", true);
-            return;
-        }
-
         const m = document.getElementById('commissionModal');
         if (!m) return;
 
+        const isMaster = window.isAttendanceMasterAdmin();
+        const isLead = window.isAttendanceLead();
+
         const sel = document.getElementById('commConsultant');
         if (sel) {
-            sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
-                <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
-            `).join('');
+            if (isMaster || isLead) {
+                sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
+                    <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+                `).join('');
+                sel.disabled = false;
+            } else {
+                // Consultor regular: restringido estrictamente a sí mismo
+                const me = localAuthor || 'Consultor';
+                sel.innerHTML = `<option value="${escapeHtml(me)}" selected>${escapeHtml(me)} (Personal)</option>`;
+                sel.disabled = true;
+            }
         }
 
         const todayStr = defaultDate || new Date().toISOString().slice(0, 10);
@@ -10690,12 +10914,7 @@ window.renderDailyTasks = function() {
     };
 
     window.saveCommission = function() {
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para autorizar y registrar comisiones en la prenómina.", true);
-            return;
-        }
-
-        const consultant = document.getElementById('commConsultant')?.value;
+        const consultant = document.getElementById('commConsultant')?.value || localAuthor;
         const client = document.getElementById('commClient')?.value;
         const startDate = document.getElementById('commStartDate')?.value;
         const endDate = document.getElementById('commEndDate')?.value;
@@ -10711,6 +10930,27 @@ window.renderDailyTasks = function() {
         if (endDt < startDt) {
             window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
             return;
+        }
+
+        // Validación previa de todos los días en el rango para asegurar permisos
+        let testCur = new Date(startDt);
+        while (testCur <= endDt) {
+            const dow = testCur.getDay();
+            if (dow !== 0 && dow !== 6) {
+                const y = testCur.getFullYear();
+                const m = testCur.getMonth() + 1;
+                const d = testCur.getDate();
+                const q = d <= 15 ? 'Q1' : 'Q2';
+                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                const check = window.canUserEditAttendanceCell(consultant, dateStr, periodKey);
+                if (!check.allowed) {
+                    window.showToast(check.reason, true);
+                    return;
+                }
+            }
+            testCur.setDate(testCur.getDate() + 1);
         }
 
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
@@ -10771,11 +11011,21 @@ window.renderDailyTasks = function() {
         const m = document.getElementById('vacationModal');
         if (!m) return;
 
+        const isMaster = window.isAttendanceMasterAdmin();
+        const isLead = window.isAttendanceLead();
+
         const sel = document.getElementById('vacConsultant');
         if (sel) {
-            sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
-                <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
-            `).join('');
+            if (isMaster || isLead) {
+                sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
+                    <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+                `).join('');
+                sel.disabled = false;
+            } else {
+                const me = localAuthor || 'Consultor';
+                sel.innerHTML = `<option value="${escapeHtml(me)}" selected>${escapeHtml(me)} (Personal)</option>`;
+                sel.disabled = true;
+            }
         }
 
         const todayStr = new Date().toISOString().slice(0, 10);
@@ -10797,7 +11047,7 @@ window.renderDailyTasks = function() {
     };
 
     window.updateVacationConsultantInfo = function() {
-        const cName = document.getElementById('vacConsultant')?.value || '';
+        const cName = document.getElementById('vacConsultant')?.value || localAuthor || '';
         const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
         
         document.getElementById('vacEmployeeNo').value = meta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25950064';
@@ -10844,12 +11094,7 @@ window.renderDailyTasks = function() {
     };
 
     window.saveVacation = function() {
-        if (!window.canModifyAttendance()) {
-            window.showToast("🔒 Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden autorizar y registrar vacaciones en la prenómina.", true);
-            return;
-        }
-
-        const consultant = document.getElementById('vacConsultant')?.value;
+        const consultant = document.getElementById('vacConsultant')?.value || localAuthor;
         const startDate = document.getElementById('vacStartDate')?.value;
         const endDate = document.getElementById('vacEndDate')?.value;
         const returnDate = document.getElementById('vacReturnDate')?.value;
@@ -10864,6 +11109,27 @@ window.renderDailyTasks = function() {
         if (endDt < startDt) {
             window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
             return;
+        }
+
+        // Validación previa de permisos para todos los días
+        let testCur = new Date(startDt);
+        while (testCur <= endDt) {
+            const dow = testCur.getDay();
+            if (dow !== 0 && dow !== 6) {
+                const y = testCur.getFullYear();
+                const m = testCur.getMonth() + 1;
+                const d = testCur.getDate();
+                const q = d <= 15 ? 'Q1' : 'Q2';
+                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                const check = window.canUserEditAttendanceCell(consultant, dateStr, periodKey);
+                if (!check.allowed) {
+                    window.showToast(check.reason, true);
+                    return;
+                }
+            }
+            testCur.setDate(testCur.getDate() + 1);
         }
 
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
