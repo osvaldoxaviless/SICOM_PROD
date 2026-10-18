@@ -925,6 +925,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.initPushNotificationSystem === 'function') {
             window.initPushNotificationSystem();
         }
+        if (typeof window.handleDeepLinkFromUrl === 'function') {
+            window.handleDeepLinkFromUrl();
+        }
     }
 
     window.applyRolePermissions = function() {
@@ -1061,8 +1064,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             pType,
                             parentName: pParent,
                             alertType: 'mention',
-                            icon: '🔔',
-                            reason: `@${localAuthor}: ${n.by || 'Un consultor'} te mencionó en el foro: "${(n.text || '').length > 55 ? (n.text || '').substring(0, 52) + '...' : (n.text || '')}"`,
+                            icon: '💬',
+                            reason: `Te mencionó en el foro: "${(n.text || '').length > 70 ? (n.text || '').substring(0, 67) + '...' : (n.text || '')}"`,
+                            author: n.by || 'Consultor',
+                            date: n.date || '',
+                            noteId: n.id,
+                            noteText: n.text || '',
                             users: [n.by || 'Consultor'],
                             noteInfo: n
                         });
@@ -1312,23 +1319,42 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.currentNoteTagEdit = 'comentario';
 
     // Helpers de Menciones con @ y Reglas de Involucramiento (Señal vs Ruido)
+    function stripAccents(str) {
+        return (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    window.isUserMentionedInText = function(text, userName) {
+        if (!text || !userName) return false;
+        const cleanText = stripAccents(text);
+        const cleanUser = stripAccents(userName);
+
+        // 1. Mención con nombre completo: @Osvaldo Avilés o @Osvaldo Aviles
+        const escapedFull = cleanUser.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp(`@${escapedFull}\\b`, 'i').test(cleanText)) return true;
+
+        // 2. Mención con primer nombre: @Osvaldo (si tiene al menos 3 letras)
+        const firstName = cleanUser.split(/\s+/)[0];
+        if (firstName && firstName.length >= 3) {
+            const escapedFirst = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (new RegExp(`@${escapedFirst}\\b`, 'i').test(cleanText)) return true;
+        }
+
+        // 3. Mención colectiva: @todos, @equipo, @all
+        if (/@(todos|equipo|all)\b/i.test(cleanText)) return true;
+
+        return false;
+    };
+
     window.extractMentionsFromText = function(text) {
         if (!text) return [];
         const allCons = Object.keys(consultants || {});
         const found = [];
         allCons.forEach(c => {
-            const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`@${escaped}\\b`, 'i');
-            if (regex.test(text)) found.push(c);
+            if (window.isUserMentionedInText(text, c)) {
+                found.push(c);
+            }
         });
         return found;
-    };
-
-    window.isUserMentionedInText = function(text, userName) {
-        if (!text || !userName) return false;
-        const escaped = userName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`@${escaped}\\b`, 'i');
-        return regex.test(text);
     };
 
     window.isUserInvolvedInProject = function(proj, userName) {
@@ -1561,12 +1587,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             // Notificación push y externa para el foro (menciones directas o equipo asignado)
             try {
                 if (typeof window.sendExternalAlert === 'function') {
+                    const isDirect = (currentSelection && currentSelection.type === 'direct-project') || (appData.directProjects || []).some(p => p.id === item.id);
                     window.sendExternalAlert('FORUM_COMMENT', {
                         project: item.name,
+                        projectId: item.id,
+                        projectType: isDirect ? 'direct-project' : 'project',
+                        noteId: newNoteId,
                         note: noteText,
                         author: localAuthor,
                         tagLabel: tagLabel,
-                        assignedUser: (mentions && mentions.length) ? mentions[0] : (item.consultants && item.consultants[0] ? item.consultants[0] : null)
+                        assignedUser: (mentions && mentions.length) ? mentions[0] : (item.consultants && item.consultants[0] ? item.consultants[0] : null),
+                        mentions: mentions
                     });
                 }
             } catch (errAlert) {}
@@ -1825,7 +1856,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 : 'border-[#3d3a39] hover:border-[#4d4947] bg-[#101010]';
 
             return `
-                <div class="flex flex-col gap-2 p-3 rounded-[10px] border ${unreadCardClasses} transition group">
+                <div id="note-${n.id}" data-note-id="${n.id}" class="flex flex-col gap-2 p-3 rounded-[10px] border ${unreadCardClasses} transition group">
                     <div class="flex items-center gap-2">
                         <div class="w-5 h-5 rounded-[3px] flex items-center justify-center font-mono text-[10px] text-[#fafafa] shrink-0" style="background-color: ${col};">
                             ${initial}
@@ -2790,34 +2821,50 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 let pushBody = '';
                 let targetUser = null;
 
+                let pushUrl = '/';
+                const pId = payload.projectId;
+                const pType = payload.projectType || 'project';
+
                 if (type === 'ASSIGNMENT') {
                     pushTitle = '📋 NUEVA TAREA ASIGNADA';
                     pushBody = `${payload.project || 'General'}: "${payload.task || ''}" (Por: ${payload.author || localAuthor || 'Sistema'})`;
                     targetUser = payload.assignee || payload.assignedUser;
+                    if (pId) pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}`;
                 } else if (type === 'VALIDATION_SUBMITTED') {
                     pushTitle = '⏳ TAREA ENVIADA A VALIDACIÓN';
                     pushBody = `${payload.project || 'General'}: "${payload.task || ''}" por ${payload.consultant || 'Consultor'}`;
                     targetUser = null; // Alertar a supervisores y supremo
+                    if (pId) pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}`;
                 } else if (type === 'TASK_VALIDATED') {
                     pushTitle = '✅ TAREA VALIDADA Y APROBADA';
                     pushBody = `¡Aprobada! ${payload.project || 'General'}: "${payload.task || ''}"`;
                     targetUser = payload.consultant || payload.assignedUser;
+                    if (pId) pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}`;
                 } else if (type === 'PROJECT_CREATED') {
                     pushTitle = '🚀 NUEVO PROYECTO REGISTRADO';
                     pushBody = `${payload.project || ''} en módulo ${payload.module || 'Directo'}`;
                     targetUser = null;
+                    if (pId) pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}`;
                 } else if (type === 'FORUM_COMMENT') {
-                    pushTitle = '💬 COMENTARIO EN PROYECTO';
-                    pushBody = `${payload.author || 'Usuario'} en ${payload.project || 'Proyecto'}: "${(payload.note || '').substring(0, 75)}"`;
-                    targetUser = payload.assignedUser || null;
+                    const isMention = payload.mentions && payload.mentions.length > 0;
+                    pushTitle = isMention ? '💬 TE MENCIONARON EN EL FORO' : '💬 COMENTARIO EN EL FORO';
+                    pushBody = `${payload.author || 'Usuario'} en ${payload.project || 'Proyecto'}: "${(payload.note || '').substring(0, 80)}"`;
+                    targetUser = (payload.mentions && payload.mentions.length > 0) ? payload.mentions : (payload.assignedUser || null);
+                    if (pId) {
+                        pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}&action=forum&noteId=${encodeURIComponent(payload.noteId || '')}`;
+                    } else {
+                        pushUrl = '/?openNotif=1&tab=alerts';
+                    }
                 } else if (type === 'MORNING_DIGEST') {
                     pushTitle = '☀️ RESUMEN MATUTINO SICOM';
                     pushBody = 'Hay proyectos y entregas prioritarias programadas para hoy.';
                     targetUser = null;
+                    pushUrl = '/?openNotif=1&tab=alerts';
                 } else {
                     pushTitle = '🔔 ALERTA SICOM';
                     pushBody = (payload.message || '').substring(0, 100);
                     targetUser = payload.assignedUser || null;
+                    pushUrl = '/?openNotif=1&tab=alerts';
                 }
 
                 // Notificación local inmediata si la pestaña de Chrome está en segundo plano pero abierta
@@ -2826,7 +2873,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         new Notification(pushTitle, {
                             body: pushBody,
                             icon: '/icon.svg',
-                            tag: type.toLowerCase()
+                            tag: type.toLowerCase(),
+                            data: { url: pushUrl }
                         });
                     } catch (eLocal) {}
                 }
@@ -2839,7 +2887,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         body: JSON.stringify({
                             title: pushTitle,
                             body: pushBody,
-                            targetUser: targetUser,
+                            url: pushUrl,
+                            targetUser: Array.isArray(targetUser) ? null : targetUser,
+                            targetUsers: Array.isArray(targetUser) ? targetUser : null,
                             subscriptions: appData.pushSubscriptions,
                             tag: type.toLowerCase()
                         })
@@ -8026,8 +8076,118 @@ window.toggleDailyDrawer = function() {
             if (btnManual) btnManual.classList.add('hidden');
             if (btnZoom) btnZoom.classList.add('hidden');
 
+            // Si hay menciones activas sin leer, abrir directamente la pestaña de Alertas & Menciones
+            if (window.__lastAlerts && window.__lastAlerts.some(a => a.alertType === 'mention')) {
+                currentNotifTab = 'alerts';
+            }
+
             window.populateDailyAssignee();
             window.renderDailyTasks();
+        }
+    };
+
+    window.goToProjectForum = function(type, id, noteId) {
+        if (isDailyDrawerOpen) window.toggleDailyDrawer();
+        window.selectNode(type, id);
+
+        setTimeout(() => {
+            const acc = document.getElementById('acc-notes-details');
+            if (acc) acc.open = true;
+            const notesCont = document.getElementById('infoNotes');
+            if (notesCont) {
+                notesCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            if (noteId) {
+                const noteEl = document.getElementById(`note-${noteId}`) || document.querySelector(`[data-note-id="${noteId}"]`);
+                if (noteEl) {
+                    noteEl.classList.add('ring-2', 'ring-[#ee6018]');
+                    setTimeout(() => noteEl.classList.remove('ring-2', 'ring-[#ee6018]'), 3000);
+                }
+            }
+            const input = document.getElementById('infoNoteInput');
+            if (input) input.focus();
+            window.showToast("💬 Has sido llevado a la mención en el foro", false);
+        }, 450);
+    };
+
+    window.confirmNoteReadDirect = function(projectId, noteId) {
+        if (!localAuthor) return;
+        let proj = null;
+        (appData.directProjects || []).forEach(p => { if (p.id === projectId) proj = p; });
+        if (!proj && appData.modules) {
+            appData.modules.forEach(m => {
+                (m.projects || []).forEach(p => { if (p.id === projectId) proj = p; });
+            });
+        }
+        if (proj && Array.isArray(proj.notes)) {
+            const n = proj.notes.find(x => x.id === noteId);
+            if (n) {
+                if (!Array.isArray(n.readBy)) {
+                    n.readBy = n.by ? [{ user: n.by, at: n.date || '' }] : [];
+                }
+                const already = n.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
+                if (!already) {
+                    const nowStr = new Date().toLocaleString('es-MX', { hour12: false });
+                    n.readBy.push({ user: localAuthor, at: nowStr });
+                    window.saveData(false);
+                    window.renderAlerts();
+                    window.renderDailyTasks();
+                    window.renderMindMap();
+                    window.showToast("✓ Mención marcada como vista");
+                }
+            }
+        }
+    };
+
+    window.handleDeepLinkFromUrl = function() {
+        try {
+            if (typeof window === 'undefined' || !window.location || !window.location.search) return;
+            const params = new URLSearchParams(window.location.search);
+            const openProject = params.get('openProject');
+            const projectType = params.get('projectType') || 'project';
+            const action = params.get('action');
+            const noteId = params.get('noteId');
+            const openNotif = params.get('openNotif');
+
+            // Limpiar los parámetros de la URL visible en la barra del navegador sin recargar
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            if (openNotif === '1') {
+                setTimeout(() => {
+                    currentNotifTab = 'alerts';
+                    if (!isDailyDrawerOpen) window.toggleDailyDrawer();
+                }, 600);
+                return;
+            }
+
+            if (openProject) {
+                setTimeout(() => {
+                    window.selectNode(projectType, openProject);
+                    
+                    if (action === 'forum') {
+                        setTimeout(() => {
+                            const acc = document.getElementById('acc-notes-details');
+                            if (acc) acc.open = true;
+                            const notesCont = document.getElementById('infoNotes');
+                            if (notesCont) {
+                                notesCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            if (noteId) {
+                                const noteEl = document.getElementById(`note-${noteId}`) || document.querySelector(`[data-note-id="${noteId}"]`);
+                                if (noteEl) {
+                                    noteEl.classList.add('ring-2', 'ring-[#ee6018]');
+                                    setTimeout(() => noteEl.classList.remove('ring-2', 'ring-[#ee6018]'), 3000);
+                                }
+                            }
+                            const noteInput = document.getElementById('infoNoteInput');
+                            if (noteInput) noteInput.focus();
+                            window.showToast("💬 Has sido llevado a la mención en el foro", false);
+                        }, 400);
+                    }
+                }, 700);
+            }
+        } catch (e) {
+            console.warn('⚠️ [SICOM DeepLink] Error al procesar enlace directo:', e);
         }
     };
 
@@ -8313,52 +8473,106 @@ window.renderDailyTasks = function() {
 
     // 6. RENDERIZADO DEL CONTENIDO DE LA PESTAÑA SELECCIONADA
 
-    // --- PESTAÑA A: ALERTAS IMPORTANTES ---
+    // --- PESTAÑA A: ALERTAS & MENCIONES ---
     if (currentNotifTab === 'alerts') {
         if (alertsList.length === 0) {
             container.innerHTML = `
             <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
                 <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
-                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sistema al día</h3>
-                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No hay proyectos vencidos ni alertas pendientes de atención.</p>
+                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja de Alertas Limpia</h3>
+                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes menciones nuevas en foros ni proyectos en situación crítica.</p>
             </div>`;
             return;
         }
 
+        const mentionAlerts = alertsList.filter(a => a.alertType === 'mention');
+        const otherAlerts = alertsList.filter(a => a.alertType !== 'mention');
+
         const style = { 
             danger: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/60'], 
             warning: ['text-[#ee6018]', 'bg-[#101010]', 'border-[#ee6018]/40'], 
-            info: ['text-[#a0ca92]', 'bg-[#101010]', 'border-[#3d3a39]'],
-            mention: ['text-[#eeeeee]', 'bg-[#101010]', 'border-[#eeeeee]/50']
+            info: ['text-[#a0ca92]', 'bg-[#101010]', 'border-[#3d3a39]']
         };
 
-        container.innerHTML = `
-        <div class="space-y-2.5 pb-6">
-            <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Alertamientos del Sistema (${alertsList.length})</p>
-            ${alertsList.map(a => {
-                const [txt, bg, br] = style[a.alertType] || style.info;
-                const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
-                const canOpen = a.pType && a.pType !== 'global';
-                const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
-                return `
-                <div class="${bg} border ${br} rounded-[10px] p-3.5 ${canOpen ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'} transition" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
-                    <div class="flex items-start gap-2.5">
-                        <span class="text-base leading-none mt-0.5">${a.icon}</span>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between gap-2">
-                                <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa ↗</span>` : ''}
-                            </div>
-                            <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
-                            <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
-                            <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-[#b8b3b0] font-mono">
-                                <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
+        let html = '<div class="space-y-4 pb-6">';
+
+        // 1. SECCIÓN PRINCIPAL: MENCIONES EN EL FORO
+        if (mentionAlerts.length > 0) {
+            html += `
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between px-1">
+                    <span class="font-mono text-[10px] text-[#ee6018] uppercase font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
+                        Menciones para ti en el Foro (${mentionAlerts.length})
+                    </span>
+                    <span class="font-mono text-[9px] text-[#8a8380] uppercase">Toca para responder</span>
+                </div>
+                ${mentionAlerts.map(a => {
+                    return `
+                    <div class="bg-[#151210] border border-[#ee6018]/70 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-[0_4px_16px_rgba(238,96,24,0.15)] cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-lg leading-none mt-0.5">💬</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-xs font-semibold text-[#fafafa] leading-tight truncate">${escapeHtml(a.name)}</h4>
+                                    <span class="font-mono text-[9px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 px-1.5 py-0.5 rounded-[2px] uppercase shrink-0 font-bold">@ Mención</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1 text-[9px] text-[#8a8380] font-mono">
+                                    <span>👤 Por: <b class="text-[#eeeeee]">${escapeHtml(a.author || (a.users && a.users[0]) || 'Consultor')}</b></span>
+                                    ${a.date ? `<span>· ${escapeHtml(a.date)}</span>` : ''}
+                                </div>
+                                <div class="mt-2.5 p-2.5 rounded-[4px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
+                                    "${escapeHtml(a.noteText || a.reason)}"
+                                </div>
+                                <div class="flex items-center gap-2 mt-3 pt-2 border-t border-[#1d1a18]">
+                                    <button type="button" onclick="event.stopPropagation(); window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-3 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[9px] font-semibold transition flex items-center gap-1.5">
+                                        <span>Ir al Foro & Responder</span>
+                                        <span>↗</span>
+                                    </button>
+                                    <button type="button" onclick="event.stopPropagation(); window.confirmNoteReadDirect('${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#252220] text-[#b8b3b0] hover:text-[#fafafa] border border-[#3d3a39] font-mono uppercase text-[9px] transition">
+                                        <span>✓ Marcar Visto</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>`;
-            }).join('')}
-        </div>`;
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+
+        // 2. SECCIÓN: ALERTAS OPERATIVAS (VENCIDOS, NO INICIADOS, ETC.)
+        if (otherAlerts.length > 0) {
+            html += `
+            <div class="space-y-2.5 ${mentionAlerts.length > 0 ? 'mt-4 pt-3 border-t border-[#1d1a18]' : ''}">
+                <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Alertas de Proyectos (${otherAlerts.length})</p>
+                ${otherAlerts.map(a => {
+                    const [txt, bg, br] = style[a.alertType] || style.info;
+                    const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
+                    const canOpen = a.pType && a.pType !== 'global';
+                    const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
+                    return `
+                    <div class="${bg} border ${br} rounded-[10px] p-3.5 ${canOpen ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'} transition" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-base leading-none mt-0.5">${a.icon}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
+                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa ↗</span>` : ''}
+                                </div>
+                                <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
+                                <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
+                                <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-[#b8b3b0] font-mono">
+                                    <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
         return;
     }
 

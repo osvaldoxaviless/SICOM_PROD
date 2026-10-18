@@ -56,13 +56,20 @@ module.exports = async function handler(req, res) {
       targetSubs = subscriptions;
     }
 
-    // Filtrar por destinatario si se especificó (ej: un consultor en particular)
-    if (targetUser && typeof targetUser === 'string' && targetUser.trim() && targetUser.toUpperCase() !== 'ALL' && targetUser.toUpperCase() !== 'GENERAL') {
-      const cleanTarget = targetUser.trim().toLowerCase();
+    // Filtrar por destinatario si se especificó (soporta string, array o lista)
+    const rawTargets = req.body.targetUsers || targetUser;
+    let targetsList = [];
+    if (Array.isArray(rawTargets)) {
+      targetsList = rawTargets.map(t => String(t || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase()).filter(Boolean);
+    } else if (typeof rawTargets === 'string' && rawTargets.trim() && rawTargets.toUpperCase() !== 'ALL' && rawTargets.toUpperCase() !== 'GENERAL') {
+      targetsList = rawTargets.split(',').map(t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase()).filter(Boolean);
+    }
+
+    if (targetsList.length > 0) {
       targetSubs = targetSubs.filter(item => {
         if (!item) return false;
-        const u = (item.user || '').trim().toLowerCase();
-        return u === cleanTarget || u.includes(cleanTarget) || cleanTarget.includes(u);
+        const u = String(item.user || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+        return targetsList.some(target => u === target || u.includes(target) || target.includes(u));
       });
     }
 
