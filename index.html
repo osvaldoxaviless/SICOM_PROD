@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v832">
+  <link rel="stylesheet" href="styles.css?v=20261017_v833">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -337,8 +337,11 @@
                       <select id="gtAssignee" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none focus:outline-none text-[#eeeeee] cursor-pointer"></select>
                   </div>
                   <div>
-                      <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">Límite</label>
-                      <input type="date" id="gtDate" class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none [color-scheme:dark]">
+                      <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase flex items-center justify-between">
+                        <span>Límite</span>
+                        <span class="text-[9px] text-[#8a8380] lowercase font-normal font-mono">(dd/mm/aaaa)</span>
+                      </label>
+                      <input type="date" id="gtDate" lang="es-MX" class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none [color-scheme:dark]">
                   </div>
               </div>
           </div>
@@ -480,7 +483,7 @@
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ee6018] opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2 w-2 bg-[#ee6018]"></span>
       </span>
-      <span id="tickerBadgeText" class="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#ee6018]">AVISOS</span>
+      <span id="tickerBadgeText" class="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#ee6018] shrink-0 whitespace-nowrap px-2" style="flex-shrink: 0; white-space: nowrap; padding: 2px 8px; width: auto;">AVISOS</span>
     </div>
 
     <!-- Contenedor de la marquesina interactiva con pausa al interactuar -->
@@ -595,13 +598,28 @@
                           </select>
                       </div>
                       <div>
-                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Límite</label>
-                          <input type="date" id="quickEditDeadline" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]">
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase flex items-center justify-between">
+                            <span>Límite</span>
+                            <span class="text-[8px] text-[#8a8380] lowercase font-normal font-mono">(dd/mm/aaaa)</span>
+                          </label>
+                          <input type="date" id="quickEditDeadline" lang="es-MX" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]">
                       </div>
                   </div>
                   <div class="grid grid-cols-2 gap-2.5">
-                      <div><label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase leading-tight">Envío Propuesta</label><input type="date" id="quickEditDeliveryDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]"></div>
-                      <div><label class="block font-mono text-[10px] text-[#a0ca92] mb-1 uppercase leading-tight">Autorización</label><input type="date" id="quickEditReturnDate" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]"></div>
+                      <div>
+                        <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase leading-tight flex items-center justify-between">
+                          <span>Envío Propuesta</span>
+                          <span class="text-[8px] text-[#8a8380] lowercase font-normal font-mono">(dd/mm/aaaa)</span>
+                        </label>
+                        <input type="date" id="quickEditDeliveryDate" lang="es-MX" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]">
+                      </div>
+                      <div>
+                        <label class="block font-mono text-[10px] text-[#a0ca92] mb-1 uppercase leading-tight flex items-center justify-between">
+                          <span>Autorización</span>
+                          <span class="text-[8px] text-[#8a8380] lowercase font-normal font-mono">(dd/mm/aaaa)</span>
+                        </label>
+                        <input type="date" id="quickEditReturnDate" lang="es-MX" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]">
+                      </div>
                   </div>
 
                   <!-- SECCIÓN DE ENLACES INTEGRADA (Solo visible para Supremo / Supervisor) -->
@@ -659,8 +677,11 @@
                               </select>
                           </div>
                           <div>
-                              <label class="block font-mono text-[9px] text-[#8a8380] mb-1 uppercase">Fecha Límite</label>
-                              <input type="date" id="newQuickTaskDate" title="Fecha límite opcional" class="w-full liquid-input rounded-[3px] px-2.5 py-2 text-xs text-[#eeeeee] focus:outline-none [color-scheme:dark] cursor-pointer">
+                              <label class="block font-mono text-[9px] text-[#8a8380] mb-1 uppercase flex items-center justify-between">
+                                <span>Fecha Límite</span>
+                                <span class="text-[8px] text-[#8a8380] lowercase font-normal font-mono">(dd/mm/aaaa)</span>
+                              </label>
+                              <input type="date" id="newQuickTaskDate" lang="es-MX" title="Fecha límite opcional (dd/mm/aaaa)" class="w-full liquid-input rounded-[3px] px-2.5 py-2 text-xs text-[#eeeeee] focus:outline-none [color-scheme:dark] cursor-pointer">
                           </div>
                       </div>
 
@@ -1239,18 +1260,18 @@
                       </select>
                   </div>
                   <div class="space-y-1.5">
-                      <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Fecha Entrega</label>
-                      <input type="date" id="editDeadline" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
+                      <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Fecha Entrega <span class="text-[#8a8380] text-[9px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                      <input type="date" id="editDeadline" lang="es-MX" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
                   </div>
                   
                   <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mt-1 border-t border-[#3d3a39] pt-3 sm:col-span-2">
                       <div class="flex-1">
-                          <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase leading-tight">Envío Propuesta</label>
-                          <input type="date" id="editDeliveryDate" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
+                          <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase leading-tight">Envío Propuesta <span class="text-[#8a8380] text-[8px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                          <input type="date" id="editDeliveryDate" lang="es-MX" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
                       </div>
                       <div class="flex-1">
-                          <label class="block font-mono text-[9px] text-[#a0ca92] mb-1 uppercase leading-tight">Autorización</label>
-                          <input type="date" id="editReturnDate" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
+                          <label class="block font-mono text-[9px] text-[#a0ca92] mb-1 uppercase leading-tight">Autorización <span class="text-[#8a8380] text-[8px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                          <input type="date" id="editReturnDate" lang="es-MX" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
                       </div>
                   </div>
 
@@ -1410,8 +1431,8 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="space-y-1.5">
-                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Fecha Límite</label>
-                    <input type="date" id="newProjDeadline" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Fecha Límite <span class="text-[#8a8380] text-[9px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                    <input type="date" id="newProjDeadline" lang="es-MX" max="2099-12-31" class="w-full liquid-input rounded-[3px] p-2.5 text-xs [color-scheme:dark]">
                 </div>
                 <div class="space-y-1.5">
                     <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Estado Inicial</label>
@@ -1482,8 +1503,8 @@
 
                 <div class="flex flex-wrap items-end justify-between gap-3 pt-1">
                     <div class="flex-1 min-w-[150px]">
-                        <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase mb-1.5">Filtrar por Fecha</label>
-                        <input type="date" id="historyDateFilter" onchange="renderHistory()" class="liquid-input w-full rounded-[3px] p-2 text-xs text-[#eeeeee] [color-scheme:dark]">
+                        <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase mb-1.5">Filtrar por Fecha <span class="text-[#8a8380] text-[9px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                        <input type="date" id="historyDateFilter" lang="es-MX" onchange="renderHistory()" class="liquid-input w-full rounded-[3px] p-2 text-xs text-[#eeeeee] [color-scheme:dark]">
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="setHistoryFilterToday()" class="pill-btn px-3 py-2 bg-[#101010] hover:border-[#eeeeee] text-[#eeeeee] font-mono uppercase text-[10px] transition border border-[#3d3a39]" title="Mostrar registros de hoy">Hoy</button>
@@ -1659,8 +1680,8 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase mb-1">Vigencia Hasta (Opcional)</label>
-                  <input type="date" id="newAnnouncementValidTo" class="liquid-input w-full rounded-[3px] p-2 text-xs text-[#eeeeee]">
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase mb-1">Vigencia Hasta (Opcional) <span class="text-[#8a8380] text-[9px] lowercase font-normal">(dd/mm/aaaa)</span></label>
+                  <input type="date" id="newAnnouncementValidTo" lang="es-MX" class="liquid-input w-full rounded-[3px] p-2 text-xs text-[#eeeeee] [color-scheme:dark]">
                 </div>
               </div>
               <button type="button" onclick="createCustomAnnouncement()" class="w-full py-2.5 rounded-[3px] bg-[#ee6018] hover:bg-[#d04f0f] text-white font-mono uppercase text-[11px] font-semibold transition tracking-wider flex items-center justify-center gap-2 shadow-md">
@@ -1878,7 +1899,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v832"></script>
+  <script type="module" src="app.js?v=20261017_v833"></script>
 
 </body>
 </html>

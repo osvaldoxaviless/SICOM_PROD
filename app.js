@@ -29,8 +29,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let currentCreateType = 'project';
     let itemToDelete = { category: null, id: null };
     
-    let localAuthor = localStorage.getItem('sicom_author') || '';
-    let currentUserRole = localStorage.getItem('sicom_role') || 'Consultor';
+    let activeUserJson = localStorage.getItem('sicom_active_user');
+    let activeUser = null;
+    try { if (activeUserJson) activeUser = JSON.parse(activeUserJson); } catch (_) {}
+
+    let localAuthor = (activeUser && activeUser.operator) ? activeUser.operator : (localStorage.getItem('sicom_author') || '');
+    let currentUserRole = (activeUser && activeUser.role) ? activeUser.role : (localStorage.getItem('sicom_role') || 'Consultor');
 
     const fallbackConsultants = {
       "Emmanuel Sánchez": {"color": "#f97316", "role": "Consultor"}, 
@@ -99,8 +103,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     async function initData() {
         window.populateLoginDropdown();
 
-        // Arranque instantáneo de interfaz (Cero tiempo de espera)
+        // Verificación de sesión persistente (sicom_active_user)
+        let activeUserJson = localStorage.getItem('sicom_active_user');
+        let activeUser = null;
+        try { if (activeUserJson) activeUser = JSON.parse(activeUserJson); } catch (_) {}
+        if (activeUser && activeUser.operator) {
+            localAuthor = activeUser.operator;
+            currentUserRole = activeUser.role || currentUserRole;
+        }
+
+        // Arranque instantáneo de interfaz (salta modal de login si existe sesión activa)
         if (localAuthor) { 
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay) overlay.classList.add('hidden');
+            const loader = document.getElementById('cloudLoader');
+            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 400); }
             finishInit(); 
         } else { 
             showLoginScreen(); 
@@ -478,6 +495,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         localAuthor = val;
         localStorage.setItem('sicom_author', val); 
         localStorage.setItem('sicom_role', currentUserRole);
+        localStorage.setItem('sicom_active_user', JSON.stringify({ operator: val, role: userRole, timestamp: Date.now() }));
         
         if (userRole === 'Lector') {
             logActivity('login', 'Control de Accesos', `Acceso de lectura por: ${viewerName}`, val);
@@ -677,7 +695,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
-    window.logout = function() { document.getElementById('cloudLoader').style.display = 'flex'; document.getElementById('cloudLoader').style.opacity = '1'; setTimeout(() => { localStorage.removeItem('sicom_author'); localStorage.removeItem('sicom_role'); location.reload(); }, 500); }
+    window.logout = function() { 
+        document.getElementById('cloudLoader').style.display = 'flex'; 
+        document.getElementById('cloudLoader').style.opacity = '1'; 
+        localStorage.removeItem('sicom_active_user');
+        localStorage.removeItem('sicom_author'); 
+        localStorage.removeItem('sicom_role'); 
+        setTimeout(() => { location.reload(); }, 500); 
+    };
 
     // --- SISTEMA DE CIERRE DE SESIÓN POR INACTIVIDAD (10 MIN) ---
     let inactivityTimeout;
@@ -8852,7 +8877,7 @@ window.renderDailyTasks = function() {
             }
 
             return `<span class="inline-flex items-center gap-2 mx-6 shrink-0">
-                <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${escapeHtml(tagLabel)}</span>
+                <span class="shrink-0 whitespace-nowrap px-2 py-0.5 w-auto rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border inline-block" style="flex-shrink: 0; white-space: nowrap; padding: 2px 8px; width: auto;">${escapeHtml(tagLabel)}</span>
                 <span class="text-[#f5f5f4]">${escapeHtml(ann.text)}</span>
                 <span class="text-[#55504c] font-light select-none ml-2">//</span>
             </span>`;
