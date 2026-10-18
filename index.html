@@ -13,6 +13,7 @@
   <title>SICOM — Terminal Control Surface</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -136,6 +137,18 @@
       
       <div class="sd-items flex flex-col-reverse items-end gap-2 pb-2.5" role="menu" aria-label="Crear">
           
+          <!-- REGISTRAR COMISIÓN (Todos) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openCommissionModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
+              Registrar comisión
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#f59e0b] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+          </button>
+
+          <!-- SOLICITAR VACACIONES (Todos) -->
+          <button type="button" role="menuitem" onclick="closeSpeedDial(); openVacationModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
+              Solicitar vacaciones
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#38bdf8] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+          </button>
+
           <!-- NUEVA TAREA DIARIA (Todos menos lector) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastDailyTaskModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Nueva tarea diaria
@@ -256,56 +269,93 @@
 
   <!-- MODAL EDITAR PERFIL COMPLETO CONSULTOR -->
   <div id="editConsultantModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
-      <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
+      <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-              <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">PERFIL DE OPERADOR</span>
+              <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">PERFIL ORGANIZACIONAL Y NÓMINA</span>
           </div>
           <h3 class="text-xl font-normal text-[#eeeeee] leading-tight mb-1" id="editConsModalTitle">Editar Operador</h3>
-          <p class="text-xs text-[#8a8380] mb-4">Personaliza la identidad técnica, cargo y nivel de acceso.</p>
+          <p class="text-xs text-[#8a8380] mb-4">Configura datos de nómina, jerarquía de equipo, jefe inmediato y acceso.</p>
           <input type="hidden" id="editConsOldName">
           
           <div class="space-y-3.5 mb-5">
-              <div>
-                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nombre Completo</label>
-                  <input type="text" id="editConsName" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Nombre del consultor...">
-              </div>
-              <div>
-                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Cargo / Especialidad Técnica</label>
-                  <input type="text" id="editConsTitle" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. Consultor Funcional ERP, Líder Técnico...">
-              </div>
-              <div>
-                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nivel de Permisos (Rol)</label>
-                  <select id="editConsRole" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
-                      <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
-                      <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
-                      <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
-                      <option value="Lector">Lector (Solo vista - Para jefatura)</option>
-                  </select>
-              </div>
-              <div>
-                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Color Identificador</label>
-                  <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
-                          <input type="color" id="editConsColor" onchange="document.getElementById('editConsColorHex').value=this.value" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer border-0 p-0">
-                      </div>
-                      <input type="text" id="editConsColorHex" class="flex-1 liquid-input rounded-[3px] p-2 text-xs font-mono uppercase" readonly>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nombre Completo</label>
+                      <input type="text" id="editConsName" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Nombre del consultor...">
                   </div>
-                  <!-- Pastillas de Colores Factory -->
-                  <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                      <button type="button" onclick="setEditConsultantColor('#ee6018')" class="w-4 h-4 rounded-[2px] bg-[#ee6018] border border-[#3d3a39] hover:scale-115 transition" title="Naranja Industrial"></button>
-                      <button type="button" onclick="setEditConsultantColor('#0071e3')" class="w-4 h-4 rounded-[2px] bg-[#0071e3] border border-[#3d3a39] hover:scale-115 transition" title="Azul Cobalto"></button>
-                      <button type="button" onclick="setEditConsultantColor('#30d158')" class="w-4 h-4 rounded-[2px] bg-[#30d158] border border-[#3d3a39] hover:scale-115 transition" title="Verde Esmeralda"></button>
-                      <button type="button" onclick="setEditConsultantColor('#ffd60a')" class="w-4 h-4 rounded-[2px] bg-[#ffd60a] border border-[#3d3a39] hover:scale-115 transition" title="Amarillo Táctico"></button>
-                      <button type="button" onclick="setEditConsultantColor('#bf5af2')" class="w-4 h-4 rounded-[2px] bg-[#bf5af2] border border-[#3d3a39] hover:scale-115 transition" title="Púrpura Neón"></button>
-                      <button type="button" onclick="setEditConsultantColor('#ff375f')" class="w-4 h-4 rounded-[2px] bg-[#ff375f] border border-[#3d3a39] hover:scale-115 transition" title="Magenta"></button>
-                      <button type="button" onclick="setEditConsultantColor('#ff9f0a')" class="w-4 h-4 rounded-[2px] bg-[#ff9f0a] border border-[#3d3a39] hover:scale-115 transition" title="Ámbar"></button>
-                      <button type="button" onclick="setEditConsultantColor('#5ac8fa')" class="w-4 h-4 rounded-[2px] bg-[#5ac8fa] border border-[#3d3a39] hover:scale-115 transition" title="Cian Eléctrico"></button>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">No. de Empleado (RH)</label>
+                      <input type="text" id="editConsEmployeeNo" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="Ej. 25950064">
+                  </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Cargo Oficial (RH)</label>
+                      <input type="text" id="editConsTitle" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. Consultor de Equipamiento Tecnológico">
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Horario Laboral</label>
+                      <input type="text" id="editConsSchedule" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="Ej. 09:00 a 18:30">
+                  </div>
+              </div>
+
+              <!-- JERARQUÍA Y EQUIPO -->
+              <div class="p-3 bg-[#141211] border border-[#3d3a39] rounded-[4px] space-y-3">
+                  <div class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
+                      <span class="font-mono text-[10px] uppercase text-[#10b981] font-medium">Jerarquía y Célula de Trabajo</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                          <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase">Jefe Inmediato (Firma & Alertas)</label>
+                          <select id="editConsLead" class="w-full liquid-input rounded-[3px] p-2 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                              <!-- Se puebla dinámicamente con los consultores -->
+                          </select>
+                      </div>
+                      <div>
+                          <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase">Equipo / Célula</label>
+                          <input type="text" id="editConsTeam" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee]" placeholder="Ej. Equipo Carlos Islas">
+                      </div>
+                  </div>
+              </div>
+
+              <!-- VACACIONES Y ANTIGÜEDAD -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Saldo Vacaciones (Días)</label>
+                      <input type="number" id="editConsPendingVacations" min="0" step="1" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="4">
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Ingreso</label>
+                      <input type="text" id="editConsHireDate" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="Ej. 01-dic-12">
+                  </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nivel de Permisos (Rol)</label>
+                      <select id="editConsRole" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                          <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
+                          <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
+                          <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
+                          <option value="Lector">Lector (Solo vista - Para jefatura)</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Color Identificador</label>
+                      <div class="flex items-center gap-2">
+                          <div class="w-8 h-8 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
+                              <input type="color" id="editConsColor" onchange="document.getElementById('editConsColorHex').value=this.value" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0">
+                          </div>
+                          <input type="text" id="editConsColorHex" class="flex-1 liquid-input rounded-[3px] p-2 text-xs font-mono uppercase" readonly>
+                      </div>
                   </div>
               </div>
           </div>
 
-          <div class="flex gap-2.5">
+          <div class="flex gap-2.5 pt-2 border-t border-[#1d1a18]">
               <button onclick="closeEditConsultantModal()" class="flex-1 py-2.5 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
               <button onclick="confirmEditConsultant()" class="flex-1 py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] uppercase rounded-[3px] transition">Guardar Perfil</button>
           </div>
@@ -375,6 +425,337 @@
       </div>
   </div>
 
+  <!-- ==========================================================================
+       MÓDULO: ROL DE ASISTENCIA & PRENÓMINA (FOPR-RHU-02-02 & FOPR-RHU-02-03)
+       ========================================================================== -->
+
+  <!-- MODAL PRINCIPAL: ROL DE ASISTENCIA & PRENÓMINA QUINCENAL -->
+  <div id="attendanceModal" class="fixed inset-0 z-[99990] bg-[#101010]/90 backdrop-blur-md hidden flex items-center justify-center opacity-0 transition-opacity duration-200 p-2 sm:p-4">
+      <div class="liquid-glass rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl">
+          <!-- HEADER DE LA TORRE DE ASISTENCIA -->
+          <div class="p-4 sm:p-5 border-b border-[#3d3a39] bg-[#141211] flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-[3px] bg-[#10b981]/15 border border-[#10b981]/40 text-[#10b981] flex items-center justify-center">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <div>
+                      <div class="flex items-center gap-2">
+                          <h2 class="font-mono text-sm sm:text-base font-semibold text-[#eeeeee] uppercase tracking-[-0.24px]">Rol de Asistencia & Prenómina</h2>
+                          <span class="px-1.5 py-0.5 rounded-[2px] bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40 font-mono text-[9px] uppercase font-bold">FOPR-RHU-02-02 Ver. 4</span>
+                      </div>
+                      <p class="text-xs text-[#8a8380]">Control quincenal de comisiones (PT), vacaciones (VA), oficina y home office</p>
+                  </div>
+              </div>
+
+              <!-- SELECTOR DE QUINCENA / PERIODO -->
+              <div class="flex items-center gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] p-1 text-xs">
+                      <select id="attSelMonth" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-xs px-2 py-1 outline-none cursor-pointer">
+                          <option value="1">Enero</option>
+                          <option value="2">Febrero</option>
+                          <option value="3">Marzo</option>
+                          <option value="4">Abril</option>
+                          <option value="5">Mayo</option>
+                          <option value="6">Junio</option>
+                          <option value="7">Julio</option>
+                          <option value="8">Agosto</option>
+                          <option value="9">Septiembre</option>
+                          <option value="10" selected>Octubre</option>
+                          <option value="11">Noviembre</option>
+                          <option value="12">Diciembre</option>
+                      </select>
+                      <select id="attSelYear" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-xs px-2 py-1 outline-none cursor-pointer">
+                          <option value="2025">2025</option>
+                          <option value="2026" selected>2026</option>
+                          <option value="2027">2027</option>
+                      </select>
+                      <select id="attSelQuincena" onchange="changeAttendancePeriod()" class="bg-transparent text-[#ee6018] font-mono font-bold text-xs px-2 py-1 outline-none cursor-pointer">
+                          <option value="Q1" selected>1ª Quincena (1 - 15)</option>
+                          <option value="Q2">2ª Quincena (16 - Fin)</option>
+                      </select>
+                  </div>
+
+                  <button type="button" onclick="setAttendanceCurrentPeriod()" class="p-1.5 px-2 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition" title="Ir a la quincena actual de hoy">
+                      Hoy
+                  </button>
+
+                  <!-- BOTONES ACCIÓN PRINCIPALES -->
+                  <button type="button" onclick="openCommissionModal()" class="pill-btn px-3 py-1.5 bg-[#f59e0b] hover:bg-[#d97706] text-[#101010] font-mono font-semibold uppercase text-[11px] flex items-center gap-1.5 transition">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <span>+ Comisión</span>
+                  </button>
+
+                  <button type="button" onclick="openVacationModal()" class="pill-btn px-3 py-1.5 bg-[#0071e3] hover:bg-[#005bb5] text-white font-mono font-semibold uppercase text-[11px] flex items-center gap-1.5 transition">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      <span>+ Vacaciones</span>
+                  </button>
+
+                  <button type="button" onclick="exportPrenominaXLSX()" class="pill-btn px-3.5 py-1.5 bg-[#10b981] hover:bg-[#059669] text-white font-mono font-bold uppercase text-[11px] flex items-center gap-1.5 transition shadow-sm" title="Descargar archivo Excel oficial FOPR-RHU-02-02 con fórmulas y códigos">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      <span>Descargar Prenómina (.xlsx)</span>
+                  </button>
+
+                  <button type="button" onclick="closeAttendanceModal()" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] rounded-[3px] transition" title="Cerrar ventana">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+              </div>
+          </div>
+
+          <!-- SUB-BARRA: FILTROS POR EQUIPO Y ACCIONES RÁPIDAS -->
+          <div class="px-4 sm:px-5 py-2.5 bg-[#101010] border-b border-[#252220] flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+              <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-thin py-0.5">
+                  <span class="font-mono text-[10px] text-[#8a8380] uppercase mr-1">Equipo:</span>
+                  <button type="button" onclick="setAttendanceTeamFilter('ALL')" id="attTeamBtn-ALL" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition bg-white/15 text-white border border-white/20">Todos</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Manuel Gutiérrez')" id="attTeamBtn-Manuel" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#141211] border border-[#3d3a39]">Eq. Manuel G.</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Carlos Islas')" id="attTeamBtn-Carlos" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#141211] border border-[#3d3a39]">Eq. Carlos I.</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Coordinación')" id="attTeamBtn-Coord" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#141211] border border-[#3d3a39]">Eq. Coordinación</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Gerencia')" id="attTeamBtn-Gerencia" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#141211] border border-[#3d3a39]">Eq. Gerencia</button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                  <span id="attPeriodLabel" class="font-mono text-[11px] text-[#b8b3b0]">Periodo: Del 1 al 15 de Octubre de 2026</span>
+                  <span class="w-px h-3 bg-[#3d3a39]"></span>
+                  <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con A Distancia">
+                      ⚡ Auto: A distancia
+                  </button>
+                  <span class="text-[#3d3a39]">|</span>
+                  <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con Oficina STGT">
+                      ⚡ Auto: Oficina STGT
+                  </button>
+              </div>
+          </div>
+
+          <!-- CUERPO PRINCIPAL: TABLA DE ASISTENCIA / ROL (SCROLLABLE) -->
+          <div class="flex-1 overflow-auto p-4 sm:p-5 bg-[#0d0c0b]" id="attendanceTableContainer">
+              <!-- Renderizado dinámico desde app.js -->
+          </div>
+
+          <!-- FOOTER / LEYENDA DE CÓDIGOS OFICIALES RH -->
+          <div class="p-3 px-4 sm:px-5 border-t border-[#252220] bg-[#141211] flex flex-wrap items-center justify-between gap-2 text-[10.5px] font-mono shrink-0">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                  <span class="text-[#8a8380] uppercase text-[9.5px]">Leyenda:</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#e0dedc] border border-[#3d3a39]"><span class="w-2 h-2 rounded-full bg-[#8a8380]"></span> A distancia</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#fef08a]/20 text-[#fef08a] border border-[#fef08a]/30"><span class="w-2 h-2 rounded-full bg-[#facc15]"></span> Oficina STGT</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#ffedd5]/20 text-[#fed7aa] border border-[#ffedd5]/30"><span class="w-2 h-2 rounded-full bg-[#f97316]"></span> En comisión (PT)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#dcfce7]/20 text-[#bbf7d0] border border-[#dcfce7]/30"><span class="w-2 h-2 rounded-full bg-[#22c55e]"></span> Oficina AFR / ODM (PT)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1e3a8a]/40 text-[#93c5fd] border border-[#1e3a8a]"><span class="w-2 h-2 rounded-full bg-[#3b82f6]"></span> Vacaciones (VA)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#f43f5e]/20 text-[#fecdd3] border border-[#f43f5e]/30"><span class="w-2 h-2 rounded-full bg-[#f43f5e]"></span> Permiso Médico (PM)</span>
+              </div>
+              <div class="text-[#8a8380] text-[10px]">
+                  💡 Haz clic en cualquier celda para alternar o cambiar su estado directamente.
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR COMISIÓN RÁPIDA -->
+  <div id="commissionModal" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+      <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-md w-full mx-4 transform scale-95 transition-transform duration-200 border border-[#3d3a39]">
+          <div class="flex items-center gap-2 mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+              <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">TRABAJO FUERA DE OFICINA // CÓDIGO PT</span>
+          </div>
+          <h3 class="text-xl font-normal text-[#eeeeee] leading-tight mb-1">Registrar Comisión a Cliente</h3>
+          <p class="text-xs text-[#8a8380] mb-4">Registra la visita a cliente con motivo y notifica a su jefe inmediato.</p>
+
+          <div class="space-y-3.5 mb-5 text-xs">
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Consultor / Colaborador</label>
+                  <select id="commConsultant" onchange="updateCommissionLeadPreview()" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                      <!-- Dinámico -->
+                  </select>
+              </div>
+
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Empresa / Cliente Destino</label>
+                  <select id="commClient" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                      <option value="Autobuses Flecha Roja (AFR)">Autobuses Flecha Roja (AFR)</option>
+                      <option value="Ómnibus de México (ODM)">Ómnibus de México (ODM)</option>
+                      <option value="ABM">ABM</option>
+                      <option value="AVM">AVM</option>
+                      <option value="ATN">ATN</option>
+                      <option value="TEO">TEO</option>
+                      <option value="Comisión General">Comisión General / Otro Sitio</option>
+                  </select>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Inicio</label>
+                      <input type="date" id="commStartDate" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] [color-scheme:dark]">
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Fin</label>
+                      <input type="date" id="commEndDate" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] [color-scheme:dark]">
+                  </div>
+              </div>
+
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Motivo / Justificación de la Comisión</label>
+                  <textarea id="commReason" rows="2" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. Pruebas de cobro y validación de versión en terminal..."></textarea>
+              </div>
+
+              <!-- PREVISUALIZACIÓN DE ENRUTAMIENTO DE ALERTA -->
+              <div class="p-3 bg-[#141211] border border-[#3d3a39] rounded-[4px] space-y-1.5 font-mono text-[10px]">
+                  <div class="flex items-center gap-1.5 text-[#10b981]">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                      <span class="uppercase font-semibold">Enrutamiento de Notificaciones:</span>
+                  </div>
+                  <p class="text-[#b8b3b0] leading-tight">
+                      Jefe Inmediato: <span id="commLeadPreview" class="text-[#eeeeee] font-bold">Manuel Gutiérrez</span>
+                  </p>
+                  <p class="text-[#8a8380] text-[9.5px]">
+                      Con copia global a: Osvaldo Avilés (Admin), Miguel Barbosa (Gerente) y Rafael Romero (Coordinador).
+                  </p>
+              </div>
+          </div>
+
+          <div class="flex gap-2.5 pt-2 border-t border-[#1d1a18]">
+              <button onclick="closeCommissionModal()" class="flex-1 py-2.5 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
+              <button onclick="saveCommission()" class="flex-1 py-2.5 bg-[#f59e0b] hover:bg-[#d97706] text-[#101010] font-mono font-bold text-[10px] uppercase rounded-[3px] transition">Registrar Comisión →</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL: SOLICITUD DE VACACIONES (FOPR-RHU-02-03) -->
+  <div id="vacationModal" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+      <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-200 border border-[#3d3a39] max-h-[92vh] overflow-y-auto">
+          <div class="flex items-center gap-2 mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#0071e3]"></span>
+              <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">SOLICITUD DE VACACIONES // CÓDIGO VA</span>
+          </div>
+          <h3 class="text-xl font-normal text-[#eeeeee] leading-tight mb-1">Solicitud de Vacaciones</h3>
+          <p class="text-xs text-[#8a8380] mb-4">Calcula días hábiles, saldo restante y genera el formato oficial firmado.</p>
+
+          <div class="space-y-3.5 mb-5 text-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Colaborador</label>
+                      <select id="vacConsultant" onchange="updateVacationConsultantInfo()" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
+                          <!-- Dinámico -->
+                      </select>
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">No. de Empleado (RH)</label>
+                      <input type="text" id="vacEmployeeNo" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#8a8380] font-mono" readonly>
+                  </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Puesto Registrado</label>
+                      <input type="text" id="vacJobTitle" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#8a8380]" readonly>
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Jefe Inmediato (Firma)</label>
+                      <input type="text" id="vacLeadName" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#10b981] font-medium" readonly>
+                  </div>
+              </div>
+
+              <!-- CÁLCULO DE DÍAS Y FECHAS -->
+              <div class="p-3 bg-[#141211] border border-[#3d3a39] rounded-[4px] space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Desde el día</label>
+                          <input type="date" id="vacStartDate" onchange="calculateVacationDays()" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] [color-scheme:dark]">
+                      </div>
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Hasta el día</label>
+                          <input type="date" id="vacEndDate" onchange="calculateVacationDays()" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] [color-scheme:dark]">
+                      </div>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-2 text-center pt-1 font-mono">
+                      <div class="p-2 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
+                          <span class="text-[9px] uppercase text-[#8a8380] block">Días Pendientes</span>
+                          <span id="vacPendingDaysBadge" class="text-sm font-bold text-[#eeeeee]">4</span>
+                      </div>
+                      <div class="p-2 bg-[#101010] border border-[#0071e3]/40 rounded-[3px]">
+                          <span class="text-[9px] uppercase text-[#0071e3] block">Solicitados</span>
+                          <span id="vacRequestedDaysBadge" class="text-sm font-bold text-[#0071e3]">1</span>
+                      </div>
+                      <div class="p-2 bg-[#101010] border border-[#10b981]/40 rounded-[3px]">
+                          <span class="text-[9px] uppercase text-[#10b981] block">Saldo Restante</span>
+                          <span id="vacBalanceBadge" class="text-sm font-bold text-[#10b981]">3</span>
+                      </div>
+                  </div>
+
+                  <div>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Reincorporarme a labores el día:</label>
+                      <input type="date" id="vacReturnDate" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] [color-scheme:dark]">
+                  </div>
+              </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-[#1d1a18]">
+              <button onclick="closeVacationModal()" class="py-2.5 px-4 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
+              <button onclick="previewVacationDocument()" class="flex-1 py-2.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#0071e3] text-[#0071e3] hover:text-white font-mono font-semibold text-[10px] uppercase rounded-[3px] transition flex items-center justify-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <span>Vista Previa / Formato RH</span>
+              </button>
+              <button onclick="saveVacation()" class="flex-1 py-2.5 bg-[#0071e3] hover:bg-[#005bb5] text-white font-mono font-bold text-[10px] uppercase rounded-[3px] transition">Guardar en Rol →</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL: VISOR / IMPRESIÓN DEL FORMATO OFICIAL RH (FOPR-RHU-02-03) -->
+  <div id="vacationPrintModal" class="fixed inset-0 z-[99998] bg-[#101010]/90 backdrop-blur-sm hidden flex items-center justify-center opacity-0 transition-opacity duration-200 p-2 sm:p-4">
+      <div class="liquid-glass rounded-[10px] w-full max-w-3xl max-h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl">
+          <div class="p-3.5 px-5 border-b border-[#3d3a39] bg-[#141211] flex items-center justify-between shrink-0">
+              <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+                  <span class="font-mono text-xs uppercase text-[#eeeeee] font-semibold">Documento Oficial: Solicitud de Permiso o Vacaciones</span>
+              </div>
+              <div class="flex items-center gap-2">
+                  <button type="button" onclick="printOfficialVacationSheet()" class="pill-btn px-3.5 py-1.5 bg-[#10b981] hover:bg-[#059669] text-white font-mono uppercase text-[10px] font-bold flex items-center gap-1.5 transition">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                      <span>Imprimir / Guardar PDF</span>
+                  </button>
+                  <button type="button" onclick="closeVacationPrintModal()" class="p-1 text-[#8a8380] hover:text-[#eeeeee]">✕</button>
+              </div>
+          </div>
+
+          <!-- DOCUMENTO IMPRIMIBLE (FONDO BLANCO INSTITUCIONAL EXACTO AL FORMATO DE RH) -->
+          <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1e1d1b]">
+              <div id="vacationPrintSheet" class="bg-white text-black p-8 rounded shadow max-w-[760px] mx-auto text-[11px] font-sans leading-tight border border-gray-300">
+                  <!-- Se genera dinámicamente en app.js con el diseño exacto del PDF de Recursos Humanos -->
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- POPOVER FLOTANTE: SELECTOR RÁPIDO DE ESTADO DE ASISTENCIA EN CELDA -->
+  <div id="cellStatusPopover" class="fixed z-[99999] hidden bg-[#161413] border border-[#3d3a39] rounded-[6px] shadow-2xl p-2 w-56 flex flex-col gap-1 text-xs select-none">
+      <div class="px-2 py-1 border-b border-[#2d2a29] font-mono text-[9px] uppercase text-[#8a8380] flex justify-between items-center">
+          <span id="popoverCellTitle">Cambiar Estado</span>
+          <button onclick="closeCellStatusPopover()" class="hover:text-white">✕</button>
+      </div>
+      <button onclick="selectCellStatus('A distancia')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#eeeeee]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#8a8380]"></span> A distancia
+      </button>
+      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#fef08a]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#facc15]"></span> Asiste a oficina STGT
+      </button>
+      <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#fed7aa]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#f97316]"></span> En comisión (PT)
+      </button>
+      <button onclick="selectCellStatus('Asiste a oficina AFR')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#bbf7d0]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e]"></span> Asiste a oficina AFR (Flecha Roja)
+      </button>
+      <button onclick="selectCellStatus('Asiste a oficina ODM')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#99f6e4]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#0d9488]"></span> Asiste a oficina ODM
+      </button>
+      <button onclick="selectCellStatus('Vacaciones')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#93c5fd]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span> Vacaciones (VA)
+      </button>
+      <button onclick="selectCellStatus('Permiso médico')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#fecdd3]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#f43f5e]"></span> Permiso Médico (PM)
+      </button>
+      <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded hover:bg-[#252220] flex items-center gap-2 font-mono text-[10.5px] text-[#ef4444]">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#dc2626]"></span> Falta (FA)
+      </button>
+  </div>
+
   <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER) -->
   <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-3 sm:px-6 z-20 relative gap-2 sm:gap-4">
     <!-- PASTILLA TÁCTIL DE PERFIL E INICIALES (FACTORY USER PILL) -->
@@ -430,6 +811,12 @@
           <span>Prioridades</span>
       </button>
 
+      <!-- BOTÓN ROL Y PRENÓMINA -->
+      <button id="btnTopAttendanceModal" onclick="openAttendanceModal()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#10b981] text-[#eeeeee] transition-all rounded-[3px] px-2.5 sm:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Rol de Asistencia Quincenal y Prenómina (FOPR-RHU-02-02)">
+          <svg class="w-3.5 h-3.5 text-[#10b981] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span class="hidden sm:inline font-medium">Rol & Prenómina</span>
+      </button>
+
       <!-- BOTÓN 3 PUNTOS MÓVIL (MD:HIDDEN) -->
       <button id="mobileMenuBtn" onclick="toggleMobileMenu(event)" class="shrink-0 p-2 bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] transition md:hidden flex items-center justify-center border border-[#3d3a39] rounded-[3px]" title="Más opciones">
           <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
@@ -446,6 +833,10 @@
               <span id="mobileToggleCollapseText">Colapsar Módulos</span>
           </button>
           <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+          <button onclick="openAttendanceModal(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Rol & Prenómina
+          </button>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
               <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades

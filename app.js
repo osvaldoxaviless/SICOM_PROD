@@ -36,19 +36,34 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let localAuthor = (activeUser && activeUser.operator) ? activeUser.operator : (localStorage.getItem('sicom_author') || '');
     let currentUserRole = (activeUser && activeUser.role) ? activeUser.role : (localStorage.getItem('sicom_role') || 'Consultor');
 
+    const defaultConsultantMetadata = {
+      "Emmanuel Sánchez": { employeeNo: "25053773", jobTitle: "Consultor", schedule: "09:00 a 18:30", lead: "Miguel Barbosa", team: "Equipo Gerencia", pendingVacations: 7, hireDate: "2017-01-20" },
+      "Osvaldo Avilés": { employeeNo: "25950322", jobTitle: "Consultor", schedule: "08:00 a 17:30", lead: "Rafael Romero", team: "Equipo Coordinación", pendingVacations: 6, hireDate: "2020-09-01" },
+      "Óscar González": { employeeNo: "25950064", jobTitle: "Consultor de Equipamiento Tecnológico", schedule: "09:00 a 18:30", lead: "Manuel Gutierrez", team: "Equipo Manuel Gutiérrez", pendingVacations: 4, hireDate: "2012-12-01" },
+      "Rafael Romero": { employeeNo: "25950052", jobTitle: "Coordinador", schedule: "08:00 a 17:30", lead: "Miguel Barbosa", team: "Equipo Coordinación", pendingVacations: 5, hireDate: "2014-02-10" },
+      "Carlos Islas": { employeeNo: "25950053", jobTitle: "Coordinador", schedule: "09:00 a 18:30", lead: "Miguel Barbosa", team: "Equipo Carlos Islas", pendingVacations: 8, hireDate: "2016-08-01" },
+      "Ricardo Lira": { employeeNo: "25950239", jobTitle: "Consultor", schedule: "08:00 a 17:30", lead: "Rafael Romero", team: "Consultoría", pendingVacations: 5, hireDate: "2019-06-15" },
+      "Manuel Gutierrez": { employeeNo: "25950054", jobTitle: "Coordinador", schedule: "09:00 a 18:30", lead: "Miguel Barbosa", team: "Equipo Manuel Gutiérrez", pendingVacations: 6, hireDate: "2015-04-15" },
+      "Miguel Muñoz": { employeeNo: "25950056", jobTitle: "Consultor", schedule: "09:00 a 18:30", lead: "Rafael Romero", team: "Consultoría", pendingVacations: 6, hireDate: "2018-03-01" },
+      "Diego Cristobal": { employeeNo: "25950271", jobTitle: "Consultor", schedule: "08:00 a 17:30", lead: "Carlos Islas", team: "Equipo Carlos Islas", pendingVacations: 5, hireDate: "2019-11-01" },
+      "Sue Oyuqui": { employeeNo: "25950327", jobTitle: "Tester", schedule: "09:00 a 18:30", lead: "Carlos Islas", team: "Equipo Carlos Islas", pendingVacations: 6, hireDate: "2021-05-10" },
+      "Miguel Barbosa": { employeeNo: "25950001", jobTitle: "Gerente General", schedule: "09:00 a 18:30", lead: "Dirección", team: "Dirección General", pendingVacations: 10, hireDate: "2010-01-15" },
+      "Lector (Jefatura)": { employeeNo: "", jobTitle: "Jefatura", schedule: "", lead: "", team: "Jefatura", pendingVacations: 0, hireDate: "" }
+    };
+
     const fallbackConsultants = {
-      "Emmanuel Sánchez": {"color": "#f97316", "role": "Consultor"}, 
-      "Osvaldo Avilés": {"color": "#0071e3", "role": "Supremo"}, 
-      "Óscar González": {"color": "#10b981", "role": "Consultor"}, 
-      "Rafael Romero": {"color": "#a855f7", "role": "Supervisor"}, 
-      "Carlos Islas": {"color": "#ff453a", "role": "Consultor"}, 
-      "Ricardo Lira": {"color": "#ff375f", "role": "Consultor"}, 
-      "Manuel Gutierrez": {"color": "#5ac8fa", "role": "Consultor"}, 
-      "Miguel Muñoz": {"color": "#ff9f0a", "role": "Consultor"}, 
-      "Diego Cristobal": {"color": "#ffd60a", "role": "Consultor"}, 
-      "Sue Oyuqui": {"color": "#ff6482", "role": "Consultor"},
-      "Miguel Barbosa": {"color": "#30d158", "role": "Supervisor"},
-      "Lector (Jefatura)": {"color": "#8e8e93", "role": "Lector"}
+      "Emmanuel Sánchez": {"color": "#f97316", "role": "Consultor", ...defaultConsultantMetadata["Emmanuel Sánchez"]}, 
+      "Osvaldo Avilés": {"color": "#0071e3", "role": "Supremo", ...defaultConsultantMetadata["Osvaldo Avilés"]}, 
+      "Óscar González": {"color": "#10b981", "role": "Consultor", ...defaultConsultantMetadata["Óscar González"]}, 
+      "Rafael Romero": {"color": "#a855f7", "role": "Supervisor", ...defaultConsultantMetadata["Rafael Romero"]}, 
+      "Carlos Islas": {"color": "#ff453a", "role": "Consultor", ...defaultConsultantMetadata["Carlos Islas"]}, 
+      "Ricardo Lira": {"color": "#ff375f", "role": "Consultor", ...defaultConsultantMetadata["Ricardo Lira"]}, 
+      "Manuel Gutierrez": {"color": "#5ac8fa", "role": "Consultor", ...defaultConsultantMetadata["Manuel Gutierrez"]}, 
+      "Miguel Muñoz": {"color": "#ff9f0a", "role": "Consultor", ...defaultConsultantMetadata["Miguel Muñoz"]}, 
+      "Diego Cristobal": {"color": "#ffd60a", "role": "Consultor", ...defaultConsultantMetadata["Diego Cristobal"]}, 
+      "Sue Oyuqui": {"color": "#ff6482", "role": "Consultor", ...defaultConsultantMetadata["Sue Oyuqui"]},
+      "Miguel Barbosa": {"color": "#30d158", "role": "Supervisor", ...defaultConsultantMetadata["Miguel Barbosa"]},
+      "Lector (Jefatura)": {"color": "#8e8e93", "role": "Lector", ...defaultConsultantMetadata["Lector (Jefatura)"]}
     };
 
     const defaultTestingData = {"directHub":{"id":"hub-direct","name":"PROYECTOS DIRECTOS SICOM","color":"#f59e0b"},"directProjects":[{"deadline":"2026-10-13","driveLink":"","notes":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193015065":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"checked":true,"obs":"","na":false,"naValidated":false}},"clientReturnDate":"2026-10-06","id":"dp1","_renderData":{"x":-840,"y":-412.5,"color":"#f97316","type":"direct-project"},"priority":3,"invgateLink":"","name":"Implementación ATN","clientDeliveryDate":"2026-10-21","progress":33,"status":"No Iniciado","consultants":["Emmanuel Sánchez"]},{"progress":0,"notes":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193027382":{"checked":false,"naValidated":false,"na":false,"obs":""},"doc_1791192995498":{"naValidated":false,"obs":"","na":false,"checked":false}},"id":"dp2","_renderData":{"x":-840,"y":-337.5,"color":"#f97316","type":"direct-project"},"clientDeliveryDate":"","status":"No Iniciado","consultants":["Emmanuel Sánchez"],"clientReturnDate":"","deadline":"","name":"Boletos por SMS","priority":8}],"history":[],"core":{"id":"sicom","name":"SICOM"},"modules":[{"name":"COM","id":"m1","projects":[{"consultants":["Óscar González"],"docs":{},"status":"Pendiente","progress":0,"tasks":[],"priority":1,"deadline":"","_renderData":{"x":-840,"y":-262.5,"color":"#10b981","type":"project"},"name":"Flechamigo","id":"p1"},{"clientDeliveryDate":"2026-10-13","docs":{"doc_1791193015065":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"obs":"","na":false,"checked":false,"naValidated":false}},"notes":"seguimiento","tasks":[],"deadline":"2026-10-14","consultants":["Óscar González"],"driveLink":"","progress":0,"id":"p2","_renderData":{"x":-840,"y":-187.5,"color":"#10b981","type":"project"},"priority":3,"name":"Versión Paytech","invgateLink":"","clientReturnDate":"2026-10-08","status":"En Progreso"},{"id":"p3","deadline":"","name":"Versión CPU","consultants":["Óscar González"],"priority":3,"_renderData":{"x":-840,"y":-112.5,"color":"#10b981","type":"project"},"status":"Pendiente","docs":{},"tasks":[],"progress":0},{"progress":0,"name":"OV Dinámica","_renderData":{"x":-840,"y":-37.5,"color":"#10b981","type":"project"},"id":"p4","consultants":["Óscar González"],"docs":{},"tasks":[],"status":"Pendiente","deadline":"","priority":3},{"status":"Pendiente","id":"p5","consultants":["Óscar González"],"progress":0,"name":"Separación Destinos Fav.","_renderData":{"x":-840,"y":37.5,"color":"#10b981","type":"project"},"deadline":"","priority":4,"docs":{},"tasks":[]}],"color":"#0071e3"},{"name":"CONTROLES VOLUMÉTRICOS","id":"m2","projects":[{"clientReturnDate":"","consultants":["Osvaldo Avilés"],"progress":0,"id":"p6","name":"Gestión Web / Competencia","priority":1,"deadline":"2027-01-01","clientDeliveryDate":"","status":"En Progreso","tasks":[],"docs":{"doc_1791193027382":{"naValidated":false,"na":false,"obs":"","checked":false},"doc_1791192995498":{"na":false,"obs":"","checked":false,"naValidated":false},"doc_1791193015065":{"na":false,"naValidated":false,"checked":false,"obs":""}},"_renderData":{"x":840,"y":-412.5,"color":"#7eaefb","type":"project"}},{"id":"p7","notes":"","clientReturnDate":"","deadline":"","clientDeliveryDate":"","tasks":[],"docs":{"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false},"doc_1791193027382":{"obs":"","checked":false,"naValidated":false,"na":false},"doc_1791192995498":{"naValidated":false,"checked":false,"na":false,"obs":""}},"driveLink":"","_renderData":{"x":840,"y":-337.5,"color":"url(#grad-5ac8fa-a855f7-7eaefb)","type":"project"},"invgateLink":"","name":"Pantallas Volumétricos","priority":1,"progress":0,"status":"Pendiente","consultants":["Manuel Gutierrez","Rafael Romero","Osvaldo Avilés"]},{"_renderData":{"x":840,"y":-262.5,"color":"#7eaefb","type":"project"},"id":"p8","status":"Pendiente","progress":0,"docs":{},"tasks":[],"deadline":"","priority":2,"consultants":["Osvaldo Avilés"],"name":"Carta Porte"},{"docs":{},"tasks":[],"deadline":"","priority":3,"_renderData":{"x":840,"y":-187.5,"color":"#7eaefb","type":"project"},"name":"Versión .NET","status":"Pendiente","consultants":["Osvaldo Avilés"],"id":"p9","progress":0},{"progress":0,"name":"Reporte P.H.","_renderData":{"x":840,"y":-112.5,"color":"#7eaefb","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","consultants":["Osvaldo Avilés"],"deadline":"","id":"p10","priority":4},{"progress":0,"id":"p11","_renderData":{"x":840,"y":-37.5,"color":"#7eaefb","type":"project"},"name":"Tabla Int.","status":"Pendiente","priority":5,"docs":{},"tasks":[],"consultants":["Osvaldo Avilés"],"deadline":""}],"color":"#30d158"},{"color":"#bf5af2","projects":[{"consultants":["Emmanuel Sánchez"],"name":"Correcciones Panel","deadline":"","priority":1,"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":-840,"y":112.5,"color":"#f97316","type":"project"},"id":"p12"},{"status":"Pendiente","name":"Contador Pasajeros COP COM","notes":"","deadline":"","clientReturnDate":"","id":"p13","consultants":["Emmanuel Sánchez"],"progress":0,"driveLink":"","tasks":[],"docs":{"doc_1791192995498":{"checked":false,"obs":"","na":false,"naValidated":false},"doc_1791193027382":{"naValidated":false,"checked":false,"na":false,"obs":""},"doc_1791193015065":{"checked":false,"naValidated":false,"obs":"","na":false}},"_renderData":{"x":-840,"y":187.5,"color":"#f97316","type":"project"},"invgateLink":"","priority":2,"clientDeliveryDate":""},{"id":"p14","consultants":["Emmanuel Sánchez"],"name":"Fase 2 ATR","progress":0,"_renderData":{"x":-840,"y":262.5,"color":"#f97316","type":"project"},"status":"Pendiente","deadline":"","priority":5,"docs":{},"tasks":[]},{"priority":6,"deadline":"","name":"Implementación AVM","_renderData":{"x":-840,"y":337.5,"color":"#f97316","type":"project"},"docs":{},"tasks":[],"status":"Pendiente","progress":0,"consultants":["Emmanuel Sánchez"],"id":"p15"},{"priority":9,"deadline":"","id":"p16","docs":{},"tasks":[],"status":"Pendiente","consultants":["Emmanuel Sánchez"],"_renderData":{"x":-840,"y":412.5,"color":"#f97316","type":"project"},"name":"Requerimientos TEO","progress":0}],"id":"m3","name":"PORTAL OPERATIVO"},{"name":"PANTALLAS EN TERMINAL","id":"m4","color":"#ff453a","projects":[{"consultants":["Emmanuel Sánchez"],"docs":{},"tasks":[],"id":"p17","progress":0,"deadline":"","status":"Pendiente","priority":4,"_renderData":{"x":840,"y":37.5,"color":"#f97316","type":"project"},"name":"Pantalla a Público"},{"consultants":["Emmanuel Sánchez"],"progress":0,"docs":{},"tasks":[],"status":"Pendiente","_renderData":{"x":840,"y":112.5,"color":"#f97316","type":"project"},"priority":4,"deadline":"","name":"Pantalla p. Jefes Op.","id":"p18"}]},{"projects":[{"status":"Pendiente","_renderData":{"x":840,"y":187.5,"color":"#f97316","type":"project"},"name":"Reportes / Vistas BI","progress":0,"deadline":"","priority":7,"docs":{},"tasks":[],"id":"p19","consultants":["Emmanuel Sánchez"]}],"name":"BI","color":"#ff9f0a","id":"m5"},{"projects":[{"priority":3,"consultants":["Óscar González"],"deadline":"","status":"Pendiente","name":"Despacho Centralizado","_renderData":{"x":840,"y":262.5,"color":"#10b981","type":"project"},"docs":{},"tasks":[],"progress":0,"id":"p20"}],"id":"m6","name":"DESPACHO CENTRALIZADO","color":"#5ac8fa"},{"id":"m7","color":"#ffd60a","projects":[{"name":"Reportes Ciberseguridad","clientReturnDate":"","consultants":["Osvaldo Avilés"],"clientDeliveryDate":"","priority":6,"deadline":"","tasks":[],"docs":{"doc_1791192995498":{"naValidated":false,"na":false,"checked":false,"obs":""},"doc_1791193027382":{"checked":false,"na":false,"obs":"","naValidated":false},"doc_1791193015065":{"obs":"","na":false,"naValidated":false,"checked":false}},"progress":0,"id":"p21","status":"En Progreso","_renderData":{"x":-840,"y":487.5,"color":"#7eaefb","type":"project"}}],"name":"PLATAFORMA ÚNICA DE IDENTIDAD"},{"projects":[],"id":"m_1791193338595","name":"Módulo de Planeación y Servicios (MPS)","color":"#00ffff"},{"id":"m_1791193355710","color":"#00ffff","projects":[],"name":"Módulo Comercial (MC)"},{"name":"Módulo de Liquidación a Conductores (MLC)","id":"m_1791193408237","projects":[],"color":"#00ffff"}],"globalTasks":[],"dailyTasks":[]};
@@ -169,7 +184,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
                             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
                             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
-                            Object.keys(consultants).forEach(k => { if(!consultants[k].role) consultants[k].role = "Consultor"; });
+                            Object.keys(consultants).forEach(k => { 
+                                if(!consultants[k].role) consultants[k].role = "Consultor"; 
+                                if (defaultConsultantMetadata[k]) {
+                                    const meta = defaultConsultantMetadata[k];
+                                    if (!consultants[k].employeeNo && meta.employeeNo) consultants[k].employeeNo = meta.employeeNo;
+                                    if (!consultants[k].jobTitle && meta.jobTitle) consultants[k].jobTitle = meta.jobTitle;
+                                    if (!consultants[k].schedule && meta.schedule) consultants[k].schedule = meta.schedule;
+                                    if (!consultants[k].lead && meta.lead) consultants[k].lead = meta.lead;
+                                    if (!consultants[k].team && meta.team) consultants[k].team = meta.team;
+                                    if (consultants[k].pendingVacations === undefined && meta.pendingVacations !== undefined) consultants[k].pendingVacations = meta.pendingVacations;
+                                    if (!consultants[k].hireDate && meta.hireDate) consultants[k].hireDate = meta.hireDate;
+                                }
+                            });
                         }
                         globalDocs = data.globalDocs || []; ensureDataStructure();
                         
@@ -255,6 +282,122 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     createdAt: new Date().toLocaleDateString('es-MX')
                 }
             ];
+        }
+
+        if (!appData.attendance) appData.attendance = {};
+        if (!appData.attendance["2026-10-Q1"]) {
+            appData.attendance["2026-10-Q1"] = {
+                "Manuel Gutierrez": {
+                    "2026-10-05": { status: "Asiste a oficina STGT" },
+                    "2026-10-06": { status: "A distancia" },
+                    "2026-10-07": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-08": { status: "A distancia" },
+                    "2026-10-09": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-12": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-13": { status: "A distancia" },
+                    "2026-10-14": { status: "Asiste a oficina STGT" },
+                    "2026-10-15": { status: "A distancia" }
+                },
+                "Carlos Islas": {
+                    "2026-10-05": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-06": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-07": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-09": { status: "Vacaciones", code: "VA", note: "1 día de vacaciones" },
+                    "2026-10-12": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-13": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-14": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-15": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" }
+                },
+                "Rafael Romero": {
+                    "2026-10-05": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-06": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-07": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-13": { status: "A distancia" },
+                    "2026-10-14": { status: "Asiste a oficina STGT" },
+                    "2026-10-15": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" }
+                },
+                "Miguel Muñoz": {
+                    "2026-10-05": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-06": { status: "A distancia" },
+                    "2026-10-07": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-08": { status: "A distancia" },
+                    "2026-10-09": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-12": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-13": { status: "A distancia" },
+                    "2026-10-14": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-15": { status: "A distancia" }
+                },
+                "Óscar González": {
+                    "2026-10-05": { status: "A distancia" },
+                    "2026-10-06": { status: "Vacaciones", code: "VA", note: "1 día de vacaciones (FOPR-RHU-02-03)" },
+                    "2026-10-07": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "A distancia" },
+                    "2026-10-13": { status: "Asiste a oficina STGT" },
+                    "2026-10-14": { status: "Asiste a oficina STGT" },
+                    "2026-10-15": { status: "Asiste a oficina STGT" }
+                },
+                "Ricardo Lira": {
+                    "2026-10-05": { status: "Vacaciones", code: "VA", note: "1 día de vacaciones" },
+                    "2026-10-06": { status: "A distancia" },
+                    "2026-10-07": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "Asiste a oficina STGT" },
+                    "2026-10-13": { status: "A distancia" },
+                    "2026-10-14": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-15": { status: "Asiste a oficina STGT" }
+                },
+                "Emmanuel Sánchez": {
+                    "2026-10-05": { status: "A distancia" },
+                    "2026-10-06": { status: "Asiste a oficina STGT" },
+                    "2026-10-07": { status: "A distancia" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "Asiste a oficina STGT" },
+                    "2026-10-12": { status: "A distancia" },
+                    "2026-10-13": { status: "Asiste a oficina STGT" },
+                    "2026-10-14": { status: "A distancia" },
+                    "2026-10-15": { status: "Asiste a oficina STGT" }
+                },
+                "Osvaldo Avilés": {
+                    "2026-10-05": { status: "A distancia" },
+                    "2026-10-06": { status: "Asiste a oficina STGT" },
+                    "2026-10-07": { status: "Asiste a oficina STGT" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "A distancia" },
+                    "2026-10-13": { status: "Asiste a oficina STGT" },
+                    "2026-10-14": { status: "Asiste a oficina STGT" },
+                    "2026-10-15": { status: "Asiste a oficina STGT" }
+                },
+                "Diego Cristobal": {
+                    "2026-10-05": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-06": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-07": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-13": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-14": { status: "A distancia" },
+                    "2026-10-15": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" }
+                },
+                "Sue Oyuqui": {
+                    "2026-10-05": { status: "A distancia" },
+                    "2026-10-06": { status: "Asiste a oficina STGT" },
+                    "2026-10-07": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-08": { status: "Asiste a oficina STGT" },
+                    "2026-10-09": { status: "A distancia" },
+                    "2026-10-12": { status: "A distancia" },
+                    "2026-10-13": { status: "Asiste a oficina STGT" },
+                    "2026-10-14": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-15": { status: "Asiste a oficina STGT" }
+                }
+            };
         }
 
         // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
@@ -2792,15 +2935,32 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                            `📅 *Fecha Límite:* ${payload.deadline || 'Vencida'}\n` +
                            `⚠️ *Detalle:* ${payload.message || payload.task || 'Fecha límite de entrega rebasada'}\n` +
                            `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
+            } else if (type === 'COMMISSION_LOGGED') {
+                chatText = `🚗 *NUEVA COMISIÓN REGISTRADA (TRABAJO EN CLIENTE)*\n` +
+                           `👤 *Consultor:* ${payload.consultant || 'Consultor'}\n` +
+                           `🏢 *Cliente:* ${payload.client || 'Cliente'}\n` +
+                           `📅 *Periodo:* ${payload.startDate || ''} al ${payload.endDate || ''} (${payload.days || 1} día(s))\n` +
+                           `📝 *Motivo:* "${payload.reason || 'Sin motivo especificado'}"\n` +
+                           `👔 *Jefe Inmediato:* ${payload.lead || 'Coordinación'}\n` +
+                           `👥 *Copia:* Osvaldo Avilés (Admin), Miguel Barbosa (Gerente), Rafael Romero (Coordinador)\n` +
+                           `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
+            } else if (type === 'VACATION_REQUESTED') {
+                chatText = `🏖️ *NUEVA SOLICITUD DE VACACIONES (FOPR-RHU-02-03)*\n` +
+                           `👤 *Colaborador:* ${payload.consultant || 'Colaborador'}\n` +
+                           `📅 *Periodo:* ${payload.startDate || ''} al ${payload.endDate || ''}\n` +
+                           `📆 *Días Solicitados:* ${payload.days || 1} día(s) (Saldo restante: ${payload.balance !== undefined ? payload.balance : '-'})\n` +
+                           `🔄 *Reincorporación:* ${payload.returnDate || 'Siguiente día hábil'}\n` +
+                           `👔 *Jefe Inmediato:* ${payload.lead || 'Coordinación'}\n` +
+                           `👥 *Copia:* Osvaldo Avilés (Admin), Miguel Barbosa (Gerente), Rafael Romero (Coordinador)\n` +
+                           `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
             } else {
                 chatText = payload.message || `🔔 *ALERTA SICOM*\n👤 *Para:* ${payload.assignedUser || 'General'}\n📋 *Detalle:* ${payload.message || ''}`;
             }
 
             console.log('🔔 [SICOM External Alert] Procesando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
 
-            // Filtro estricto para Google Chat: Solo Atrasos, Informe Diario y Asignaciones de trabajo
-            // EXCLUIDO ESTRICTAMENTE: Menciones de foros y comentarios de notas
-            const googleChatAllowedTypes = ['ASSIGNMENT', 'MORNING_DIGEST', 'DAILY_REPORT', 'OVERDUE', 'PROJECT_OVERDUE', 'TASK_OVERDUE'];
+            // Filtro estricto para Google Chat: Atrasos, Informe Diario, Asignaciones, Comisiones y Vacaciones
+            const googleChatAllowedTypes = ['ASSIGNMENT', 'MORNING_DIGEST', 'DAILY_REPORT', 'OVERDUE', 'PROJECT_OVERDUE', 'TASK_OVERDUE', 'COMMISSION_LOGGED', 'VACATION_REQUESTED'];
             const isGoogleChatPermitted = googleChatAllowedTypes.includes(type);
 
             // 1. Envío al Webhook nativo de Google Chat
@@ -4868,11 +5028,37 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const cData = consultants[name];
         document.getElementById('editConsOldName').value = name;
         document.getElementById('editConsName').value = name;
-        document.getElementById('editConsTitle').value = cData.title || '';
+        document.getElementById('editConsTitle').value = cData.jobTitle || cData.title || '';
         document.getElementById('editConsRole').value = cData.role || 'Consultor';
         document.getElementById('editConsColor').value = cData.color || '#ee6018';
         document.getElementById('editConsColorHex').value = (cData.color || '#ee6018').toUpperCase();
         document.getElementById('editConsModalTitle').textContent = `Perfil: ${name}`;
+
+        if (document.getElementById('editConsEmployeeNo')) {
+            document.getElementById('editConsEmployeeNo').value = cData.employeeNo || defaultConsultantMetadata[name]?.employeeNo || '';
+        }
+        if (document.getElementById('editConsSchedule')) {
+            document.getElementById('editConsSchedule').value = cData.schedule || defaultConsultantMetadata[name]?.schedule || '09:00 a 18:30';
+        }
+        if (document.getElementById('editConsTeam')) {
+            document.getElementById('editConsTeam').value = cData.team || defaultConsultantMetadata[name]?.team || '';
+        }
+        if (document.getElementById('editConsPendingVacations')) {
+            document.getElementById('editConsPendingVacations').value = cData.pendingVacations !== undefined ? cData.pendingVacations : (defaultConsultantMetadata[name]?.pendingVacations || 4);
+        }
+        if (document.getElementById('editConsHireDate')) {
+            document.getElementById('editConsHireDate').value = cData.hireDate || defaultConsultantMetadata[name]?.hireDate || '';
+        }
+
+        const leadSel = document.getElementById('editConsLead');
+        if (leadSel) {
+            const currentLead = cData.lead || defaultConsultantMetadata[name]?.lead || '';
+            leadSel.innerHTML = '<option value="">-- Sin jefe inmediato (Dirección) --</option>' +
+                Object.keys(consultants).filter(k => k !== name && k !== 'Lector (Jefatura)').map(k => {
+                    const kRole = consultants[k]?.role || '';
+                    return `<option value="${escapeHtml(k)}" ${k === currentLead ? 'selected' : ''}>${escapeHtml(k)} (${kRole})</option>`;
+                }).join('');
+        }
         
         const m = document.getElementById('editConsultantModal');
         if (m) {
@@ -4931,8 +5117,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const targetName = (newName !== oldName) ? newName : oldName;
         consultants[targetName].title = newTitle;
+        consultants[targetName].jobTitle = newTitle;
         consultants[targetName].role = newRole;
         consultants[targetName].color = newColor;
+
+        if (document.getElementById('editConsEmployeeNo')) {
+            consultants[targetName].employeeNo = document.getElementById('editConsEmployeeNo').value.trim();
+        }
+        if (document.getElementById('editConsSchedule')) {
+            consultants[targetName].schedule = document.getElementById('editConsSchedule').value.trim();
+        }
+        if (document.getElementById('editConsLead')) {
+            consultants[targetName].lead = document.getElementById('editConsLead').value;
+        }
+        if (document.getElementById('editConsTeam')) {
+            consultants[targetName].team = document.getElementById('editConsTeam').value.trim();
+        }
+        if (document.getElementById('editConsPendingVacations')) {
+            consultants[targetName].pendingVacations = parseInt(document.getElementById('editConsPendingVacations').value) || 0;
+        }
+        if (document.getElementById('editConsHireDate')) {
+            consultants[targetName].hireDate = document.getElementById('editConsHireDate').value.trim();
+        }
 
         window.saveData(false);
         window.populateConsultantSelects();
@@ -5606,8 +5812,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] border ${roleBadgeStyle}">
                                 ${roleIcon} ${escapeHtml(cData.role || 'Consultor')}
                             </span>
+                            ${cData.lead ? `<span class="font-mono text-[9px] text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/30 px-1.5 py-0.2 rounded-[2px]">Jefe: ${escapeHtml(cData.lead)}</span>` : ''}
+                            ${cData.employeeNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#101010] border border-[#3d3a39] px-1 py-0.2 rounded-[2px]">No. ${escapeHtml(cData.employeeNo)}</span>` : ''}
                         </div>
-                        <p class="text-[10px] text-[#8a8380] truncate mt-0.5 font-normal">${escapeHtml(displayTitle)}</p>
+                        <p class="text-[10px] text-[#8a8380] truncate mt-0.5 font-normal">${escapeHtml(displayTitle)} ${cData.team ? `• ${escapeHtml(cData.team)}` : ''} ${cData.schedule ? `[${escapeHtml(cData.schedule)}]` : ''}</p>
                     </div>
 
                     <div class="flex items-center gap-1 shrink-0">
@@ -10032,6 +10240,925 @@ window.renderDailyTasks = function() {
             </div>`;
         }).join('');
     };
+
+    // ==========================================================================
+    // MÓDULO INTEGRAL: ROL DE ASISTENCIA, COMISIONES Y PRENÓMINA (STGT RH)
+    // FOPR-RHU-02-02 (Prenómina) & FOPR-RHU-02-03 (Solicitud de Permiso o Vacaciones)
+    // ==========================================================================
+
+    let activeAttendanceTeamFilter = 'ALL';
+    let currentCellConsultant = null;
+    let currentCellDate = null;
+
+    window.openAttendanceModal = function() {
+        const m = document.getElementById('attendanceModal');
+        if (!m) return;
+        
+        if (!document.getElementById('attSelMonth').value) document.getElementById('attSelMonth').value = "10";
+        if (!document.getElementById('attSelYear').value) document.getElementById('attSelYear').value = "2026";
+        if (!document.getElementById('attSelQuincena').value) document.getElementById('attSelQuincena').value = "Q1";
+
+        m.classList.remove('hidden');
+        setTimeout(() => m.classList.remove('opacity-0'), 10);
+
+        window.renderAttendanceTable();
+    };
+
+    window.closeAttendanceModal = function() {
+        const m = document.getElementById('attendanceModal');
+        if (!m) return;
+        m.classList.add('opacity-0');
+        setTimeout(() => m.classList.add('hidden'), 200);
+        window.closeCellStatusPopover();
+    };
+
+    window.changeAttendancePeriod = function() {
+        window.renderAttendanceTable();
+    };
+
+    window.setAttendanceCurrentPeriod = function() {
+        const today = new Date();
+        const curM = today.getMonth() + 1;
+        const curY = today.getFullYear();
+        const curQ = today.getDate() <= 15 ? 'Q1' : 'Q2';
+
+        document.getElementById('attSelMonth').value = String(curM);
+        document.getElementById('attSelYear').value = String(curY);
+        document.getElementById('attSelQuincena').value = curQ;
+
+        window.renderAttendanceTable();
+    };
+
+    window.setAttendanceTeamFilter = function(team) {
+        activeAttendanceTeamFilter = team;
+        document.querySelectorAll('.att-team-pill').forEach(btn => {
+            btn.classList.remove('bg-white/15', 'text-white', 'border-white/20');
+            btn.classList.add('text-[#8a8380]', 'bg-[#141211]', 'border-[#3d3a39]');
+        });
+        
+        const activeBtn = (team === 'ALL') ? document.getElementById('attTeamBtn-ALL') :
+                          (team.includes('Manuel') ? document.getElementById('attTeamBtn-Manuel') :
+                          (team.includes('Carlos') ? document.getElementById('attTeamBtn-Carlos') :
+                          (team.includes('Coordinación') ? document.getElementById('attTeamBtn-Coord') :
+                          (team.includes('Gerencia') ? document.getElementById('attTeamBtn-Gerencia') : null))));
+        if (activeBtn) {
+            activeBtn.classList.remove('text-[#8a8380]', 'bg-[#141211]', 'border-[#3d3a39]');
+            activeBtn.classList.add('bg-white/15', 'text-white', 'border-white/20');
+        }
+        window.renderAttendanceTable();
+    };
+
+    window.openCellStatusPopover = function(e, consultantName, dateStr) {
+        e.stopPropagation();
+        currentCellConsultant = consultantName;
+        currentCellDate = dateStr;
+
+        const popover = document.getElementById('cellStatusPopover');
+        if (!popover) return;
+
+        const titleEl = document.getElementById('popoverCellTitle');
+        if (titleEl) titleEl.textContent = `${consultantName} // ${dateStr}`;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const top = Math.min(window.innerHeight - 280, rect.bottom + 4);
+        const left = Math.min(window.innerWidth - 240, Math.max(10, rect.left - 40));
+
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
+        popover.classList.remove('hidden');
+    };
+
+    window.closeCellStatusPopover = function() {
+        const popover = document.getElementById('cellStatusPopover');
+        if (popover) popover.classList.add('hidden');
+    };
+
+    window.selectCellStatus = function(status) {
+        if (!currentCellConsultant || !currentCellDate) return;
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        if (!appData.attendance) appData.attendance = {};
+        if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+        if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
+
+        let code = '';
+        const st = status.toLowerCase();
+        if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm')) code = 'PT';
+        else if (st.includes('vacaci')) code = 'VA';
+        else if (st.includes('médico')) code = 'PM';
+        else if (st.includes('falta')) code = 'FA';
+
+        appData.attendance[periodKey][currentCellConsultant][currentCellDate] = {
+            status: status,
+            code: code,
+            updatedBy: localAuthor || 'Sistema',
+            updatedAt: new Date().toISOString()
+        };
+
+        window.saveData(false);
+        window.closeCellStatusPopover();
+        window.renderAttendanceTable();
+        window.showToast(`Estado actualizado: "${status}" para ${currentCellConsultant}`, false);
+    };
+
+    window.quickFillAttendanceWorkdays = function(defaultStatus) {
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const startDay = q === 'Q1' ? 1 : 16;
+        const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
+
+        if (!appData.attendance) appData.attendance = {};
+        if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+
+        const activeList = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa');
+        let filledCount = 0;
+
+        activeList.forEach(cName => {
+            if (!appData.attendance[periodKey][cName]) appData.attendance[periodKey][cName] = {};
+            for (let d = startDay; d <= endDay; d++) {
+                const dt = new Date(y, m - 1, d);
+                const dow = dt.getDay();
+                if (dow !== 0 && dow !== 6) { // Mon-Fri
+                    const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    if (!appData.attendance[periodKey][cName][dateStr]) {
+                        appData.attendance[periodKey][cName][dateStr] = { status: defaultStatus };
+                        filledCount++;
+                    }
+                }
+            }
+        });
+
+        window.saveData(false);
+        window.renderAttendanceTable();
+        window.showToast(`⚡ ${filledCount} días hábiles completados con "${defaultStatus}"`, false);
+    };
+
+    window.renderAttendanceTable = function() {
+        const container = document.getElementById('attendanceTableContainer');
+        if (!container) return;
+
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const monthNames = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthName = monthNames[m] || 'Octubre';
+
+        const startDay = q === 'Q1' ? 1 : 16;
+        const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
+
+        const lbl = document.getElementById('attPeriodLabel');
+        if (lbl) {
+            lbl.textContent = `Periodo: Del ${startDay} al ${endDay} de ${monthName} de ${y}`;
+        }
+
+        // Días hábiles a mostrar (Lunes a Viernes)
+        const workDays = [];
+        for (let d = startDay; d <= endDay; d++) {
+            const dt = new Date(y, m - 1, d);
+            const dow = dt.getDay();
+            if (dow !== 0 && dow !== 6) {
+                const dowNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                workDays.push({
+                    dayNum: d,
+                    dowName: dowNames[dow],
+                    dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+                });
+            }
+        }
+
+        let list = [
+            "Manuel Gutierrez", "Carlos Islas", "Rafael Romero", "Miguel Muñoz",
+            "Óscar González", "Ricardo Lira", "Emmanuel Sánchez", "Osvaldo Avilés",
+            "Diego Cristobal", "Sue Oyuqui"
+        ];
+        Object.keys(consultants).forEach(k => {
+            if (!list.includes(k) && k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa') {
+                list.push(k);
+            }
+        });
+
+        // Filtrar por equipo
+        if (activeAttendanceTeamFilter !== 'ALL') {
+            list = list.filter(cName => {
+                const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+                const team = meta.team || '';
+                const lead = meta.lead || '';
+                if (activeAttendanceTeamFilter.includes('Manuel') && (team.includes('Manuel') || lead.includes('Manuel') || cName.includes('Manuel'))) return true;
+                if (activeAttendanceTeamFilter.includes('Carlos') && (team.includes('Carlos') || lead.includes('Carlos') || cName.includes('Carlos'))) return true;
+                if (activeAttendanceTeamFilter.includes('Coordinación') && (team.includes('Coordinación') || lead.includes('Rafael') || cName.includes('Rafael') || cName.includes('Osvaldo') || cName.includes('Ricardo') || cName.includes('Muñoz'))) return true;
+                if (activeAttendanceTeamFilter.includes('Gerencia') && (team.includes('Gerencia') || lead.includes('Barbosa') || cName.includes('Emmanuel'))) return true;
+                return team === activeAttendanceTeamFilter;
+            });
+        }
+
+        const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
+
+        let html = `
+        <div class="overflow-x-auto rounded-[6px] border border-[#252220]">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-[#141211] border-b border-[#252220] font-mono text-[10px] text-[#8a8380] uppercase">
+                        <th class="p-3 sticky left-0 bg-[#141211] z-20 min-w-[200px] border-r border-[#252220]">Colaborador & Equipo</th>
+                        <th class="p-3 min-w-[100px] border-r border-[#252220] text-center">Horario</th>
+                        ${workDays.map(wd => `
+                            <th class="p-2 text-center min-w-[125px] border-r border-[#252220] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
+                                <div class="font-bold text-[#eeeeee]">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                                <div class="text-[9px] text-[#8a8380] lowercase font-normal">${monthName.substring(0, 3)}</div>
+                            </th>
+                        `).join('')}
+                        <th class="p-3 min-w-[140px] text-center text-[#eeeeee]">Resumen Quincena</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#1d1a18]">
+        `;
+
+        list.forEach(cName => {
+            const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+            const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '';
+            const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
+            const schedule = cMeta.schedule || defaultConsultantMetadata[cName]?.schedule || '09:00 a 18:30';
+            const lead = cMeta.lead || defaultConsultantMetadata[cName]?.lead || 'Coordinación';
+            const color = cMeta.color || '#ee6018';
+
+            const cAtt = periodData[cName] || {};
+
+            let ptCount = 0;
+            let vaCount = 0;
+
+            let cellsHtml = '';
+            workDays.forEach(wd => {
+                const dayRecord = cAtt[wd.dateStr];
+                let status = (dayRecord && dayRecord.status) ? dayRecord.status : 'A distancia';
+                let chipClass = 'att-chip-distancia';
+                let label = status;
+
+                const st = status.toLowerCase();
+                if (st.includes('vacaci')) {
+                    chipClass = 'att-chip-vacaciones';
+                    vaCount++;
+                    label = 'Vacaciones';
+                } else if (st.includes('afr')) {
+                    chipClass = 'att-chip-afr';
+                    ptCount++;
+                    label = 'Oficina AFR';
+                } else if (st.includes('odm')) {
+                    chipClass = 'att-chip-odm';
+                    ptCount++;
+                    label = 'Oficina ODM';
+                } else if (st.includes('comisi')) {
+                    chipClass = 'att-chip-comision';
+                    ptCount++;
+                    label = 'En comisión';
+                } else if (st.includes('stgt') || st.includes('oficina')) {
+                    chipClass = 'att-chip-stgt';
+                    label = 'Oficina STGT';
+                } else if (st.includes('médico')) {
+                    chipClass = 'att-chip-medico';
+                    label = 'Permiso Médico';
+                } else if (st.includes('falta')) {
+                    chipClass = 'att-chip-falta';
+                    label = 'Falta (FA)';
+                }
+
+                cellsHtml += `
+                    <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#252220]' : ''}">
+                        <button type="button" onclick="openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${chipClass}" title="${escapeHtml(status)} (Clic para cambiar)">
+                            <span class="truncate">${escapeHtml(label)}</span>
+                        </button>
+                    </td>
+                `;
+            });
+
+            let summaryHtml = '';
+            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30 font-mono text-[9.5px] font-bold">${ptCount} día${ptCount > 1 ? 's' : ''} comisión</span> `;
+            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#3b82f6]/20 text-[#93c5fd] border border-[#3b82f6]/30 font-mono text-[9.5px] font-bold">${vaCount} día vacación</span>`;
+            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px]">Sin incidencias</span>`;
+
+            html += `
+                <tr class="hover:bg-[#161413]/70 transition">
+                    <td class="p-3 sticky left-0 bg-[#121110] z-10 border-r border-[#252220]">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-full bg-[#1d1a18] flex items-center justify-center font-mono text-[10px] font-bold text-white shrink-0" style="border: 2px solid ${color};">
+                                ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-medium text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
+                                    ${empNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#1d1a18] px-1 rounded-[2px]">${empNo}</span>` : ''}
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] text-[#8a8380] truncate mt-0.5">
+                                    <span>${escapeHtml(jobTitle)}</span>
+                                    <span class="text-[#3d3a39]">•</span>
+                                    <span class="text-[#10b981] font-mono text-[9px]">Jefe: ${escapeHtml(lead)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-2 border-r border-[#252220] text-center font-mono text-[10px] text-[#b8b3b0]">
+                        ${escapeHtml(schedule)}
+                    </td>
+                    ${cellsHtml}
+                    <td class="p-2.5 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            ${summaryHtml}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        </div>
+        `;
+
+        container.innerHTML = html;
+    };
+
+    // --- MODAL DE COMISIONES RÁPIDAS ---
+    window.openCommissionModal = function(defaultConsultant, defaultDate) {
+        const m = document.getElementById('commissionModal');
+        if (!m) return;
+
+        const sel = document.getElementById('commConsultant');
+        if (sel) {
+            sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
+                <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+            `).join('');
+        }
+
+        const todayStr = defaultDate || new Date().toISOString().slice(0, 10);
+        document.getElementById('commStartDate').value = todayStr;
+        document.getElementById('commEndDate').value = todayStr;
+        document.getElementById('commReason').value = '';
+
+        window.updateCommissionLeadPreview();
+
+        m.classList.remove('hidden');
+        setTimeout(() => m.classList.remove('opacity-0'), 10);
+    };
+
+    window.closeCommissionModal = function() {
+        const m = document.getElementById('commissionModal');
+        if (!m) return;
+        m.classList.add('opacity-0');
+        setTimeout(() => m.classList.add('hidden'), 200);
+    };
+
+    window.updateCommissionLeadPreview = function() {
+        const cName = document.getElementById('commConsultant')?.value || '';
+        const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+        const lead = meta.lead || defaultConsultantMetadata[cName]?.lead || 'Coordinación';
+        const previewEl = document.getElementById('commLeadPreview');
+        if (previewEl) previewEl.textContent = lead;
+    };
+
+    window.saveCommission = function() {
+        const consultant = document.getElementById('commConsultant')?.value;
+        const client = document.getElementById('commClient')?.value;
+        const startDate = document.getElementById('commStartDate')?.value;
+        const endDate = document.getElementById('commEndDate')?.value;
+        const reason = (document.getElementById('commReason')?.value || '').trim();
+
+        if (!consultant || !startDate || !endDate) {
+            window.showToast("⚠️ Selecciona el consultor y el rango de fechas", true);
+            return;
+        }
+
+        const startDt = new Date(startDate);
+        const endDt = new Date(endDate);
+        if (endDt < startDt) {
+            window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
+            return;
+        }
+
+        const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
+        const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
+
+        let cur = new Date(startDt);
+        let count = 0;
+
+        while (cur <= endDt) {
+            const dow = cur.getDay();
+            if (dow !== 0 && dow !== 6) { // Lunes a Viernes
+                const y = cur.getFullYear();
+                const m = cur.getMonth() + 1;
+                const d = cur.getDate();
+                const q = d <= 15 ? 'Q1' : 'Q2';
+                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                if (!appData.attendance) appData.attendance = {};
+                if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+                if (!appData.attendance[periodKey][consultant]) appData.attendance[periodKey][consultant] = {};
+
+                let statusName = 'En comisión';
+                if (client.includes('AFR') || client.includes('Flecha')) statusName = 'Asiste a oficina AFR';
+                else if (client.includes('ODM') || client.includes('Ómnibus')) statusName = 'Asiste a oficina ODM';
+
+                appData.attendance[periodKey][consultant][dateStr] = {
+                    status: statusName,
+                    client: client,
+                    reason: reason,
+                    code: 'PT',
+                    loggedBy: localAuthor || 'Sistema',
+                    loggedAt: new Date().toISOString()
+                };
+                count++;
+            }
+            cur.setDate(cur.getDate() + 1);
+        }
+
+        window.sendExternalAlert('COMMISSION_LOGGED', {
+            consultant: consultant,
+            client: client,
+            startDate: startDate,
+            endDate: endDate,
+            reason: reason,
+            lead: lead,
+            days: count
+        });
+
+        window.saveData(false);
+        window.closeCommissionModal();
+        window.renderAttendanceTable();
+        window.showToast(`🚗 Comisión a "${client}" registrada (${count} días). Notificado a ${lead}.`, false);
+    };
+
+    // --- MODAL DE VACACIONES (FOPR-RHU-02-03) ---
+    window.openVacationModal = function(defaultConsultant) {
+        const m = document.getElementById('vacationModal');
+        if (!m) return;
+
+        const sel = document.getElementById('vacConsultant');
+        if (sel) {
+            sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
+                <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+            `).join('');
+        }
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+        document.getElementById('vacStartDate').value = todayStr;
+        document.getElementById('vacEndDate').value = todayStr;
+
+        window.updateVacationConsultantInfo();
+        window.calculateVacationDays();
+
+        m.classList.remove('hidden');
+        setTimeout(() => m.classList.remove('opacity-0'), 10);
+    };
+
+    window.closeVacationModal = function() {
+        const m = document.getElementById('vacationModal');
+        if (!m) return;
+        m.classList.add('opacity-0');
+        setTimeout(() => m.classList.add('hidden'), 200);
+    };
+
+    window.updateVacationConsultantInfo = function() {
+        const cName = document.getElementById('vacConsultant')?.value || '';
+        const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+        
+        document.getElementById('vacEmployeeNo').value = meta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25950064';
+        document.getElementById('vacJobTitle').value = meta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || meta.title || 'Consultor';
+        document.getElementById('vacLeadName').value = meta.lead || defaultConsultantMetadata[cName]?.lead || 'Manuel Gutiérrez';
+        
+        const pending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[cName]?.pendingVacations || 4);
+        document.getElementById('vacPendingDaysBadge').textContent = pending;
+
+        window.calculateVacationDays();
+    };
+
+    window.calculateVacationDays = function() {
+        const startStr = document.getElementById('vacStartDate')?.value;
+        const endStr = document.getElementById('vacEndDate')?.value;
+        if (!startStr || !endStr) return;
+
+        const startDt = new Date(startStr);
+        const endDt = new Date(endStr);
+        if (endDt < startDt) return;
+
+        let requested = 0;
+        let cur = new Date(startDt);
+        while (cur <= endDt) {
+            const dow = cur.getDay();
+            if (dow !== 0 && dow !== 6) requested++;
+            cur.setDate(cur.getDate() + 1);
+        }
+
+        let ret = new Date(endDt);
+        ret.setDate(ret.getDate() + 1);
+        while (ret.getDay() === 0 || ret.getDay() === 6) {
+            ret.setDate(ret.getDate() + 1);
+        }
+        const retStr = ret.toISOString().slice(0, 10);
+        const retInput = document.getElementById('vacReturnDate');
+        if (retInput) retInput.value = retStr;
+
+        const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4');
+        const balance = Math.max(0, pending - requested);
+
+        document.getElementById('vacRequestedDaysBadge').textContent = requested;
+        document.getElementById('vacBalanceBadge').textContent = balance;
+    };
+
+    window.saveVacation = function() {
+        const consultant = document.getElementById('vacConsultant')?.value;
+        const startDate = document.getElementById('vacStartDate')?.value;
+        const endDate = document.getElementById('vacEndDate')?.value;
+        const returnDate = document.getElementById('vacReturnDate')?.value;
+
+        if (!consultant || !startDate || !endDate) {
+            window.showToast("⚠️ Selecciona el colaborador y las fechas de vacaciones", true);
+            return;
+        }
+
+        const startDt = new Date(startDate);
+        const endDt = new Date(endDate);
+        if (endDt < startDt) {
+            window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
+            return;
+        }
+
+        const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
+        const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
+
+        let cur = new Date(startDt);
+        let count = 0;
+
+        while (cur <= endDt) {
+            const dow = cur.getDay();
+            if (dow !== 0 && dow !== 6) {
+                const y = cur.getFullYear();
+                const m = cur.getMonth() + 1;
+                const d = cur.getDate();
+                const q = d <= 15 ? 'Q1' : 'Q2';
+                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                if (!appData.attendance) appData.attendance = {};
+                if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+                if (!appData.attendance[periodKey][consultant]) appData.attendance[periodKey][consultant] = {};
+
+                appData.attendance[periodKey][consultant][dateStr] = {
+                    status: 'Vacaciones',
+                    code: 'VA',
+                    returnDate: returnDate,
+                    loggedBy: localAuthor || 'Sistema',
+                    loggedAt: new Date().toISOString()
+                };
+                count++;
+            }
+            cur.setDate(cur.getDate() + 1);
+        }
+
+        const currentPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
+        const newBalance = Math.max(0, currentPending - count);
+        if (!consultants[consultant]) consultants[consultant] = {};
+        consultants[consultant].pendingVacations = newBalance;
+
+        window.sendExternalAlert('VACATION_REQUESTED', {
+            consultant: consultant,
+            startDate: startDate,
+            endDate: endDate,
+            days: count,
+            balance: newBalance,
+            returnDate: returnDate,
+            lead: lead
+        });
+
+        window.saveData(false);
+        window.closeVacationModal();
+        window.renderAttendanceTable();
+        window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} días). Saldo: ${newBalance} días.`, false);
+    };
+
+    window.previewVacationDocument = function() {
+        const cName = document.getElementById('vacConsultant')?.value || '';
+        if (!cName) return;
+        const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+        const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25950064';
+        const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
+        const lead = cMeta.lead || defaultConsultantMetadata[cName]?.lead || 'Manuel Gutiérrez';
+        const leadMeta = consultants[lead] || defaultConsultantMetadata[lead] || {};
+        const leadTitle = leadMeta.jobTitle || leadMeta.title || 'Coordinador';
+        const hireDate = cMeta.hireDate || defaultConsultantMetadata[cName]?.hireDate || '01-dic-12';
+        
+        const start = document.getElementById('vacStartDate')?.value || '';
+        const end = document.getElementById('vacEndDate')?.value || '';
+        const returnDt = document.getElementById('vacReturnDate')?.value || '';
+        const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4');
+        const requested = parseInt(document.getElementById('vacRequestedDaysBadge')?.textContent || '1');
+        const balance = parseInt(document.getElementById('vacBalanceBadge')?.textContent || '3');
+
+        const todayStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+
+        const sheetEl = document.getElementById('vacationPrintSheet');
+        if (!sheetEl) return;
+
+        sheetEl.innerHTML = `
+            <div class="border-b-2 border-gray-900 pb-3 mb-4 flex justify-between items-start">
+                <div class="flex items-center gap-3">
+                    <div class="font-extrabold text-2xl tracking-tighter text-blue-900">STGT</div>
+                    <div class="text-[10px] text-gray-600 border-l border-gray-400 pl-3">
+                        <p class="font-semibold text-gray-800 uppercase">Soluciones Tecnológicas</p>
+                        <p>Proceso de Negocio: Soporte o Apoyo</p>
+                        <p>Proceso: Gestión de Recursos Humanos</p>
+                        <p>Código: <span class="font-bold text-black">FOPR-RHU-02-03</span></p>
+                        <p>Fecha de última revisión: 28-may-2026 Ver.: 4</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="inline-block border border-gray-800 rounded px-4 py-2 text-center bg-gray-50">
+                        <h2 class="font-bold text-sm text-gray-900 uppercase">Solicitud de Permiso o Vacaciones</h2>
+                    </div>
+                    <p class="text-[10px] text-gray-600 mt-2 font-mono">Fecha de Solicitud: <strong class="text-black">${todayStr}</strong></p>
+                </div>
+            </div>
+
+            <!-- DATOS DEL COLABORADOR -->
+            <table class="w-full border-collapse mb-4 text-[10.5px]">
+                <tr class="bg-blue-900 text-white font-semibold">
+                    <th class="border border-blue-900 p-1.5 text-left w-1/4">No. de empleado:</th>
+                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-mono w-1/4">${escapeHtml(empNo)}</td>
+                    <th class="border border-blue-900 p-1.5 text-left w-1/4">Nombre:</th>
+                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-semibold w-1/4 uppercase">${escapeHtml(cName)}</td>
+                </tr>
+                <tr class="bg-blue-900 text-white font-semibold">
+                    <th class="border border-blue-900 p-1.5 text-left">Departamento:</th>
+                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 uppercase">CONSULTORIA DE APLICATIVOS</td>
+                    <th class="border border-blue-900 p-1.5 text-left">Puesto:</th>
+                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 uppercase">${escapeHtml(jobTitle)}</td>
+                </tr>
+                <tr class="bg-blue-900 text-white font-semibold">
+                    <th class="border border-blue-900 p-1.5 text-left">Fecha de ingreso:</th>
+                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-mono" colspan="3">${escapeHtml(hireDate)}</td>
+                </tr>
+            </table>
+
+            <!-- SECCIÓN VACACIONES -->
+            <div class="bg-blue-900 text-white font-bold text-center py-1 uppercase tracking-wider text-[11px] mb-2">
+                Vacaciones
+            </div>
+
+            <table class="w-full border-collapse mb-4 text-[10px]">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-800">
+                        <th class="border border-gray-400 p-1 text-center" colspan="3">Días pendientes por periodo</th>
+                        <th class="border border-gray-400 p-1 text-center">Total pendientes:</th>
+                        <td class="border border-gray-400 p-1 text-center font-bold font-mono bg-blue-50">${pending}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border border-gray-400 p-1 text-center font-mono">dic-2025</td>
+                        <td class="border border-gray-400 p-1 text-center">al</td>
+                        <td class="border border-gray-400 p-1 text-center font-mono">jun-2027</td>
+                        <th class="border border-gray-400 p-1 text-center bg-gray-50">Días solicitados:</th>
+                        <td class="border border-gray-400 p-1 text-center font-bold font-mono text-blue-900 bg-blue-50">${requested}</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-400 p-1 text-center font-mono">N/A</td>
+                        <td class="border border-gray-400 p-1 text-center">al</td>
+                        <td class="border border-gray-400 p-1 text-center font-mono">N/A</td>
+                        <th class="border border-gray-400 p-1 text-center bg-gray-50">Saldo días de vacaciones:</th>
+                        <td class="border border-gray-400 p-1 text-center font-bold font-mono text-green-700 bg-green-50">${balance}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="p-2.5 bg-gray-50 border border-gray-300 rounded mb-4 text-[10.5px]">
+                <p>Deseo disfrutar mis vacaciones los días del <strong class="underline">${start || '___'}</strong> al <strong class="underline">${end || '___'}</strong> reincorporándome a mis labores el día <strong class="underline">${returnDt || '___'}</strong>.</p>
+                <p class="text-[9px] text-gray-600 mt-2 italic text-justify leading-tight">
+                    Por este medio expreso mi voluntad de solicitar y gozar mis vacaciones de acuerdo con lo que establecen los artículos 76, 78 y 81 de la Ley Federal del Trabajo, considerando los días expresados en este apartado y firmando de conformidad en la parte inferior del documento.
+                </p>
+            </div>
+
+            <!-- FIRMAS DE CONFORMIDAD -->
+            <div class="bg-blue-900 text-white font-bold text-center py-1 uppercase tracking-wider text-[11px] mb-6">
+                Firmas de conformidad
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 text-center text-[10px] mt-8 pt-4">
+                <div class="flex flex-col justify-end">
+                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
+                        ${escapeHtml(cName)}
+                    </div>
+                    <p class="font-bold uppercase text-[9px]">Colaborador(a)</p>
+                    <p class="text-[8.5px] text-gray-600 uppercase">${escapeHtml(jobTitle)}</p>
+                </div>
+
+                <div class="flex flex-col justify-end">
+                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
+                        ${escapeHtml(lead)}
+                    </div>
+                    <p class="font-bold uppercase text-[9px]">Jefe Inmediato</p>
+                    <p class="text-[8.5px] text-gray-600 uppercase">${escapeHtml(leadTitle)}</p>
+                </div>
+
+                <div class="flex flex-col justify-end">
+                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
+                        Jose Luis Bautista Cuchillo
+                    </div>
+                    <p class="font-bold uppercase text-[9px]">Recibe por Recursos Humanos</p>
+                    <p class="text-[8.5px] text-gray-600 uppercase">Gerente de Recursos Humanos</p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-2 border-t border-gray-300 flex justify-between text-[8px] text-gray-500 font-mono">
+                <span>FOGUPR-DC-01-01-02</span>
+                <span>STGT</span>
+                <span>Página 1 de 1</span>
+            </div>
+        `;
+
+        const m = document.getElementById('vacationPrintModal');
+        if (m) {
+            m.classList.remove('hidden');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+    };
+
+    window.closeVacationPrintModal = function() {
+        const m = document.getElementById('vacationPrintModal');
+        if (m) {
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 200);
+        }
+    };
+
+    window.printOfficialVacationSheet = function() {
+        window.print();
+    };
+
+    // --- GENERADOR OFICIAL DE PRENÓMINA EXCEL (.XLSX) FOPR-RHU-02-02 ---
+    window.exportPrenominaXLSX = function() {
+        if (typeof XLSX === 'undefined') {
+            window.showToast("⚠️ Cargando librería SheetJS, intenta en unos segundos...", true);
+            return;
+        }
+
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        const monthNames = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthName = monthNames[m] || 'Octubre';
+
+        const startDay = q === 'Q1' ? 1 : 16;
+        const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
+        const periodDaysCount = endDay - startDay + 1;
+
+        const aoa = [];
+
+        // Encabezado institucional FOPR-RHU-02-02
+        aoa.push([]);
+        aoa.push(["", "", "", "", "", "Proceso de Negocio: Soporte o Apoyo"]);
+        aoa.push(["", "", "", "", "", "Proceso: Gestión de Recursos Humanos"]);
+        aoa.push(["", "", "", "", "", "Código: FOPR-RHU-02-02"]);
+        aoa.push(["", "", "", "", "", "Fecha de última revisión: 28-may-2026  Ver.: 4"]);
+        aoa.push([]);
+
+        const authorName = localAuthor || 'Emmanuel Osvaldo Sánchez Avilés';
+        aoa.push(["", "Elaboró:", authorName, "", "", "", "", "", "", "", "", "Periodo a reportar:", "", "", "", "Del", startDay, "al", endDay, "de", monthName, y]);
+        aoa.push([]);
+        aoa.push(["", "Área:", "Consultoría de Aplicaciones"]);
+        aoa.push([]);
+
+        // Encabezados de tabla
+        const rowHeader1 = ["", "No. de Empleado", "Colaborador", "", "", "Puesto", "", "", "", "Día"];
+        for (let i = 1; i < periodDaysCount; i++) rowHeader1.push("");
+        rowHeader1.push("Observaciones");
+        aoa.push(rowHeader1);
+
+        const rowHeader2 = ["", "", "", "", "", "", "", "", ""];
+        for (let d = startDay; d <= endDay; d++) {
+            rowHeader2.push(d);
+        }
+        rowHeader2.push("");
+        aoa.push(rowHeader2);
+
+        const priorityList = [
+            "Manuel Gutierrez", "Carlos Islas", "Rafael Romero", "Miguel Muñoz",
+            "Óscar González", "Ricardo Lira", "Emmanuel Sánchez", "Osvaldo Avilés",
+            "Diego Cristobal", "Sue Oyuqui"
+        ];
+        Object.keys(consultants).forEach(k => {
+            if (!priorityList.includes(k) && k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa') {
+                priorityList.push(k);
+            }
+        });
+
+        const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
+
+        priorityList.forEach(cName => {
+            const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+            const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '';
+            const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
+
+            const row = ["", empNo, cName, "", "", jobTitle, "", "", ""];
+
+            let ptCount = 0;
+            let vaCount = 0;
+            const cAtt = periodData[cName] || {};
+
+            for (let d = startDay; d <= endDay; d++) {
+                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayRecord = cAtt[dateStr];
+                let code = "";
+                if (dayRecord) {
+                    const st = (dayRecord.status || '').toLowerCase();
+                    if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm') || dayRecord.code === 'PT') {
+                        code = "PT";
+                        ptCount++;
+                    } else if (st.includes('vacaci') || dayRecord.code === 'VA') {
+                        code = "VA";
+                        vaCount++;
+                    } else if (st.includes('médico') || dayRecord.code === 'PM') {
+                        code = "PM";
+                    } else if (st.includes('falta') || dayRecord.code === 'FA') {
+                        code = "FA";
+                    } else if (st.includes('contingencia') || dayRecord.code === 'CG') {
+                        code = "CG";
+                    } else if (st.includes('festivo') || dayRecord.code === 'FT') {
+                        code = "FT";
+                    } else if (dayRecord.code) {
+                        code = dayRecord.code;
+                    }
+                }
+                row.push(code);
+            }
+
+            const obsParts = [];
+            if (vaCount > 0) obsParts.push(`${vaCount} día${vaCount > 1 ? 's' : ''} de vacaciones`);
+            if (ptCount > 0) obsParts.push(`${ptCount} día${ptCount > 1 ? 's' : ''} de comisión`);
+            const obsText = obsParts.join(' - ');
+            row.push(obsText);
+
+            aoa.push(row);
+        });
+
+        // Catálogo oficial al pie
+        aoa.push([]);
+        aoa.push([]);
+        aoa.push([]);
+
+        aoa.push(["", "Código", "Concepto", "", "", "Descripción"]);
+        const catalog = [
+            ["PD", "Prima dominical", "Trabajo realizado en día Domingo por jornada regular o por descanso semanal"],
+            ["CG", "Contingencia", "Evento, situación o riesgo imprevisto que puede ocurrir e impide acudir al trabajo"],
+            ["FT", "Festivo trabajado", "Trabajo realizado en día festivo, o día feriado que no es día laborable y se considera como descanso obligatorio"],
+            ["DT", "Descanso trabajado", "Prestación de servicios durante un día de descanso semanal"],
+            ["FA", "Falta", "Inasistencia de un trabajador a su puesto sin permiso, ni causa justificada"],
+            ["HE", "Horas Extra", "Tiempo laboral que un empleado labora de forma adicional a su jornada ordinaria establecida"],
+            ["VA", "Vacaciones", "Periodo de descanso al que se tiene derecho por cada año trabajado"],
+            ["PM", "Permiso médico", "Permiso otorgado por una afectación de salud que le impide al colaborador presentarse a laborar, y se concede para concurrir al médico."],
+            ["IG", "Incapacidad por enfermedad general", "Permiso de ausencia por una condición de salud que impide trabajar en un periodo temporal"],
+            ["IM", "Incapacidad por maternidad", "Permiso de ausencia que garantiza un descanso antes y después del parto"],
+            ["PP", "Permiso por paternidad", "Permiso de ausencia que se otorga por nacimiento o adopción de un menor"],
+            ["PL", "Permiso por lactancia", "Descansos extraordinarios por día, de media hora cada uno posteriores al nacimiento de un infante"],
+            ["PF", "Permiso por defunción", "Ausencia laboral por luto (defunción de un familiar directo en primer grado (cónyuge, padres, hijos o hermanos)"],
+            ["PH", "Permiso por actividad fuera de horario", "Ausencia al centro de trabajo por realizar actividades o tareas relacionadas a sus funciones fuera de la jornada laboral establecida"],
+            ["PC", "Permiso por curso de capacitación presencial", "Permiso otorgado para acudir a un curso presencial fueras de las instalaciones de la organización."],
+            ["PT", "Permiso por trabajo fuera de la oficina", "Ausencia al sitio de trabajo por desempeñar funciones en sitios distintos al principal del empleador"]
+        ];
+
+        catalog.forEach(item => {
+            aoa.push(["", item[0], item[1], "", "", item[2]]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+        const colWidths = [{ wch: 3 }, { wch: 16 }, { wch: 32 }, { wch: 4 }, { wch: 4 }, { wch: 36 }, { wch: 3 }, { wch: 3 }, { wch: 3 }];
+        for (let i = 0; i < periodDaysCount; i++) colWidths.push({ wch: 5 });
+        colWidths.push({ wch: 38 });
+        ws['!cols'] = colWidths;
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Prenomina_${monthName.substring(0,3)}_${q}`);
+
+        const fileName = `FOPR-RHU-02-02_Prenomina_${monthName}_${y}_${q}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        window.showToast(`📊 Prenómina oficial descargada: ${fileName}`, false);
+    };
+
+    // Cerrar popover de celda al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('cellStatusPopover');
+        if (pop && !pop.classList.contains('hidden') && !pop.contains(e.target) && !e.target.closest('.att-cell')) {
+            window.closeCellStatusPopover();
+        }
+    });
 
     // Fondo cósmico de la Nebulosa de Orión renderizado de forma ultraligera y nítida en el DOM
     initData();
