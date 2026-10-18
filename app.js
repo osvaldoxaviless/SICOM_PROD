@@ -268,12 +268,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (p.deadline && typeof p.deadline !== 'string') p.deadline = '';
             if (p.driveLink && typeof p.driveLink !== 'string') p.driveLink = '';
             if (p.invgateLink && typeof p.invgateLink !== 'string') p.invgateLink = '';
+            if (typeof p.ticket !== 'string') p.ticket = (p.ticket ? String(p.ticket) : '');
             return p;
         });
         appData.directProjects = repararProyectos(appData.directProjects);
         appData.modules = appData.modules.filter(m => m && typeof m === 'object');
         appData.modules.forEach(m => { m.projects = repararProyectos(m.projects); });
     }
+
+    function getProjectTicket(p) {
+        if (!p) return '';
+        if (p.ticket && typeof p.ticket === 'string' && p.ticket.trim()) {
+            return p.ticket.trim();
+        }
+        if (p.invgateLink && typeof p.invgateLink === 'string') {
+            const match = p.invgateLink.match(/(?:ticket|tickets|incident|request|id)[\/=](\d+)/i) || p.invgateLink.match(/\/(\d+)(?:[/?#]|$)/);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+        return '';
+    }
+    window.getProjectTicket = getProjectTicket;
 
     function loadLocalFallback() {
         const localD = localStorage.getItem('sicom_data'); const localC = localStorage.getItem('sicom_consultants'); const localDocs = localStorage.getItem('sicom_global_docs');
@@ -2467,9 +2483,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.updateDatalist = function() {
-        const dl = document.getElementById('projectsDatalist'); if(!dl) return; let allProjs = [];
-        appData.directProjects.forEach(p => allProjs.push(p.name)); appData.modules.forEach(m => (m.projects||[]).forEach(p => allProjs.push(p.name)));
-        allProjs.sort((a,b) => a.localeCompare(b)); dl.innerHTML = allProjs.map(n => `<option value="${escapeHtml(n)}">`).join('');
+        const dl = document.getElementById('projectsDatalist'); if(!dl) return;
+        const options = new Set();
+        const addP = (p) => {
+            if (!p || !p.name) return;
+            options.add(p.name);
+            const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim();
+            if (tk) {
+                options.add(`#${tk} - ${p.name}`);
+            }
+        };
+        (appData.directProjects || []).forEach(addP);
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(addP));
+        const sorted = Array.from(options).sort((a,b) => a.localeCompare(b));
+        dl.innerHTML = sorted.map(n => `<option value="${escapeHtml(n)}">`).join('');
     };
 
     window.handleSearch = function() {
@@ -2758,15 +2785,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                            `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
             } else if (type === 'MORNING_DIGEST') {
                 chatText = payload.message || (typeof window.generateMorningDigestText === 'function' ? window.generateMorningDigestText() : '');
+            } else if (type === 'OVERDUE' || type === 'PROJECT_OVERDUE' || type === 'TASK_OVERDUE') {
+                chatText = `🚨 *ALERTA DE ATRASO EN PROYECTO / TAREA*\n` +
+                           `📦 *Proyecto:* ${payload.project || 'General'}\n` +
+                           `👤 *Responsable(s):* ${payload.consultant || payload.assignedUser || 'Equipo'}\n` +
+                           `📅 *Fecha Límite:* ${payload.deadline || 'Vencida'}\n` +
+                           `⚠️ *Detalle:* ${payload.message || payload.task || 'Fecha límite de entrega rebasada'}\n` +
+                           `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
             } else {
                 chatText = payload.message || `🔔 *ALERTA SICOM*\n👤 *Para:* ${payload.assignedUser || 'General'}\n📋 *Detalle:* ${payload.message || ''}`;
             }
 
-            console.log('🔔 [SICOM External Alert] Despachando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
+            console.log('🔔 [SICOM External Alert] Procesando notificación:', { type, preview: (chatText || '').substring(0, 60) + '...' });
 
-            // Envío DIRECTO e INMEDIATO al Webhook de Google Chat (instantáneo, limpio y sin duplicados)
+            // Filtro estricto para Google Chat: Solo Atrasos, Informe Diario y Asignaciones de trabajo
+            // EXCLUIDO ESTRICTAMENTE: Menciones de foros y comentarios de notas
+            const googleChatAllowedTypes = ['ASSIGNMENT', 'MORNING_DIGEST', 'DAILY_REPORT', 'OVERDUE', 'PROJECT_OVERDUE', 'TASK_OVERDUE'];
+            const isGoogleChatPermitted = googleChatAllowedTypes.includes(type);
+
             // 1. Envío al Webhook nativo de Google Chat
-            if (GOOGLE_CHAT_WEBHOOK_URL) {
+            if (GOOGLE_CHAT_WEBHOOK_URL && isGoogleChatPermitted) {
                 fetch(GOOGLE_CHAT_WEBHOOK_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -2777,11 +2815,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }).catch(err => {
                     console.warn('⚠️ [SICOM Google Chat] Error en Webhook de Google Chat:', err);
                 });
+            } else if (!isGoogleChatPermitted) {
+                console.log('🔇 [SICOM Google Chat] Alerta excluida de Google Chat (solo atrasos, informe diario y asignaciones):', type);
             }
 
             // 2. Envío al Webhook personalizado (Slack, Teams, Discord o genérico)
             const customWebhook = (appData.config && appData.config.webhookUrl) || localStorage.getItem('sicom_custom_webhook');
-            if (customWebhook && customWebhook.trim().startsWith('http')) {
+            if (customWebhook && customWebhook.trim().startsWith('http') && isGoogleChatPermitted) {
                 const targetUrl = customWebhook.trim();
                 let customBody;
                 if (targetUrl.includes('discord.com')) {
@@ -3636,6 +3676,85 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         `}).join('');
     };
 
+    // Renderizado táctico del badge de Ticket en el encabezado de InfoCard (enfrente de "PROYECTO")
+    window.renderInfoCardTicket = function(item) {
+        const cont = document.getElementById('infoTicketContainer');
+        if (!cont) return;
+
+        if (!item || (currentSelection.type !== 'project' && currentSelection.type !== 'direct-project')) {
+            cont.innerHTML = '';
+            cont.classList.add('hidden');
+            cont.classList.remove('inline-flex');
+            return;
+        }
+
+        cont.classList.remove('hidden');
+        cont.classList.add('inline-flex');
+
+        const ticketRaw = (typeof getProjectTicket === 'function' ? getProjectTicket(item) : (item.ticket || '')).trim();
+        const invLink = (item.invgateLink || '').trim();
+        const isLector = (currentUserRole === 'Lector');
+
+        if (ticketRaw) {
+            const ticketDisplay = ticketRaw.startsWith('#') ? ticketRaw : `#${ticketRaw}`;
+            const linkHref = invLink ? (invLink.startsWith('http') ? invLink : 'https://' + invLink) : '';
+
+            cont.innerHTML = `
+            <div class="inline-flex items-center gap-1 font-mono text-[10px] font-bold rounded-[3px] bg-[#101010] text-[#fafafa] border border-[#3d3a39] px-2 py-0.5 shadow-sm max-w-[200px] group transition hover:border-[#ee6018]">
+                <span class="text-[#ee6018] font-bold text-[9px] uppercase tracking-wider shrink-0">TK</span>
+                <span class="text-[#fafafa] font-bold truncate select-all" title="Ticket: ${escapeHtml(ticketRaw)}">${escapeHtml(ticketDisplay)}</span>
+                ${linkHref ? `<a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-[#a0ca92] hover:text-[#30d158] font-bold ml-0.5 shrink-0 transition" title="Abrir ticket en Invgate ↗">↗</a>` : ''}
+                ${!isLector ? `
+                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#8a8380] hover:text-[#ee6018] ml-1 p-0.5 transition shrink-0" title="Editar número de ticket">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>` : ''}
+            </div>`;
+        } else {
+            if (isLector) {
+                cont.innerHTML = `<span class="font-mono text-[9px] text-[#8a8380] uppercase">Sin ticket</span>`;
+            } else {
+                cont.innerHTML = `
+                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="inline-flex items-center gap-1 font-mono text-[9px] uppercase font-semibold rounded-[3px] bg-[#101010]/5 hover:bg-[#101010]/15 text-[#8a8380] hover:text-[#101010] border border-dashed border-[#8a8380]/40 hover:border-[#ee6018] px-2 py-0.5 transition cursor-pointer" title="Asignar número de ticket al proyecto">
+                    <span class="text-[#ee6018] font-bold">+</span>
+                    <span>TICKET</span>
+                </button>`;
+            }
+        }
+    };
+
+    window.promptEditTicket = function(e) {
+        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (currentUserRole === 'Lector') {
+            window.showToast("Los lectores no tienen permisos para editar tickets", true);
+            return;
+        }
+        let item = getSelectedItem();
+        if (!item) return;
+
+        let defaultVal = (item.ticket || '').trim();
+        if (!defaultVal && typeof getProjectTicket === 'function') {
+            defaultVal = getProjectTicket(item);
+        }
+
+        const input = prompt(`Número de Ticket para "${item.name}":\n(Ej. 12345 o TK-890)`, defaultVal);
+        if (input === null) return;
+
+        const newTk = input.trim();
+        item.ticket = newTk;
+
+        const qTk = document.getElementById('quickEditTicket');
+        if (qTk) qTk.value = newTk;
+        const eTk = document.getElementById('editTicket');
+        if (eTk) eTk.value = newTk;
+
+        logActivity(item.id, item.name, newTk ? `Asignó ticket #${newTk} al proyecto` : 'Eliminó ticket del proyecto', localAuthor);
+        window.saveData(false);
+        window.renderInfoCardTicket(item);
+        window.updateDatalist();
+        window.renderMindMap();
+        window.showToast(newTk ? `✓ Ticket asignado: #${newTk}` : "Ticket removido");
+    };
+
     window.saveQuickLinks = function() {
         if (currentUserRole === 'Lector') return;
         if (!currentSelection.id) return;
@@ -3643,9 +3762,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (item) {
             const newDrive = window.sanitizeSafeUrl(document.getElementById('quickEditDriveLink').value);
             const newInvgate = window.sanitizeSafeUrl(document.getElementById('quickEditInvgateLink').value);
+            const tkEl = document.getElementById('quickEditTicket');
+            const newTicket = tkEl ? tkEl.value.trim() : (item.ticket || '');
+            
+            const oldTicket = item.ticket || '';
             item.driveLink = newDrive;
             item.invgateLink = newInvgate;
-            logActivity(item.id, item.name, 'Actualizó enlaces del proyecto', localAuthor);
+            item.ticket = newTicket;
+
+            let logMsg = 'Actualizó enlaces del proyecto';
+            if (oldTicket !== newTicket) {
+                logMsg += newTicket ? ` y asignó ticket #${newTicket}` : ' y removió ticket';
+            }
+            logActivity(item.id, item.name, logMsg, localAuthor);
             window.saveData(true);
             
             const btnDrive = document.getElementById('infoDriveBtn');
@@ -3664,7 +3793,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 if (item.driveLink || item.invgateLink) linksCont.classList.remove('hidden');
                 else linksCont.classList.add('hidden');
             }
-            window.showToast("Enlaces actualizados con éxito", false);
+            if (typeof window.renderInfoCardTicket === 'function') {
+                window.renderInfoCardTicket(item);
+            }
+            window.updateDatalist();
+            window.showToast("Datos y enlaces actualizados", false);
         }
     };
 
@@ -3803,6 +3936,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           item.priority = parseFloat(document.getElementById('editPriority').value || 1); 
           item.driveLink = document.getElementById('editDriveLink').value.trim(); 
           item.invgateLink = document.getElementById('editInvgateLink').value.trim(); 
+          const elEditTk = document.getElementById('editTicket');
+          if (elEditTk) item.ticket = elEditTk.value.trim();
           item.status = document.getElementById('editStatus').value; 
           item.deadline = document.getElementById('editDeadline').value; 
           item.clientDeliveryDate = document.getElementById('editDeliveryDate').value; 
@@ -3937,6 +4072,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (type === 'core') {
         item = appData.core;
         document.getElementById('infoType').textContent = 'NÚCLEO';
+        if (typeof window.renderInfoCardTicket === 'function') window.renderInfoCardTicket(null);
         const totalProjects = (appData.directProjects || []).length + (appData.modules || []).reduce((acc, m) => acc + (m.projects || []).length, 0);
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'MÓDULOS ACTIVOS';
         document.getElementById('infoConsultant').innerHTML = `<span class="font-mono text-[#eeeeee] font-medium text-sm">${appData.modules.length} MÓDULOS</span>`;
@@ -3945,6 +4081,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       } else if (type === 'direct-hub' || type === 'module') {
         item = type === 'module' ? appData.modules.find(m => m.id === id) : appData.directHub;
         document.getElementById('infoType').textContent = type==='module'?'MÓDULO':'AGRUPADOR';
+        if (typeof window.renderInfoCardTicket === 'function') window.renderInfoCardTicket(null);
         const projs = type === 'module' ? (item.projects || []) : (appData.directProjects || []);
         const avgProg = projs.length > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / projs.length) : 0;
         const leftLbl = document.getElementById('infoBoxLeftLabel'); if (leftLbl) leftLbl.textContent = 'PROYECTOS';
@@ -4013,6 +4150,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       } else {
         if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id); else appData.modules.forEach(m => { const p = (m.projects||[]).find(proj => proj.id === id); if(p) item = p; }); if(!item) return;
         document.getElementById('infoType').textContent = 'PROYECTO';
+        if (typeof window.renderInfoCardTicket === 'function') window.renderInfoCardTicket(item);
 
         if (ctxRow) ctxRow.classList.remove('hidden');
 
@@ -4162,6 +4300,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 qLinksCont.classList.remove('hidden');
                 document.getElementById('quickEditDriveLink').value = item.driveLink || '';
                 document.getElementById('quickEditInvgateLink').value = item.invgateLink || '';
+                const qTk = document.getElementById('quickEditTicket');
+                if (qTk) qTk.value = item.ticket || '';
             } else {
                 qLinksCont.classList.add('hidden');
             }
@@ -4320,6 +4460,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('editDeadline').value = item.deadline || '';
         document.getElementById('editDriveLink').value = item.driveLink || '';
         document.getElementById('editInvgateLink').value = item.invgateLink || '';
+        const elEditTk = document.getElementById('editTicket');
+        if (elEditTk) elEditTk.value = item.ticket || '';
         
         // Reubicación de proyecto
         let currentLoc = 'DIRECT';
@@ -4565,6 +4707,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const cons = Array.from(document.querySelectorAll('.newProjCons-chk:checked')).map(cb => cb.value);
       const driveLink = document.getElementById('newProjDrive').value.trim();
       const invgateLink = document.getElementById('newProjInvgate').value.trim();
+      const ticket = (document.getElementById('newProjTicket')?.value || '').trim();
       const deadline = document.getElementById('newProjDeadline')?.value || '';
       const status = document.getElementById('newProjStatus')?.value || 'No Iniciado';
       const progress = (status === 'Completado') ? 100 : 0;
@@ -4577,6 +4720,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         notes: '', 
         driveLink, 
         invgateLink, 
+        ticket,
         tasks: [], 
         status, 
         deadline, 
@@ -4606,6 +4750,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('newProjName').value = ''; 
       document.getElementById('newProjDrive').value = ''; 
       document.getElementById('newProjInvgate').value = ''; 
+      if (document.getElementById('newProjTicket')) document.getElementById('newProjTicket').value = '';
       if (document.getElementById('newProjDeadline')) document.getElementById('newProjDeadline').value = '';
       if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'No Iniciado';
       if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
@@ -5962,7 +6107,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               }
           }
 
-          if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q)) && !window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q))) return false;
+          if (q) {
+              const qClean = q.replace(/^#/, '');
+              const nameMatch = p.name.toLowerCase().includes(q);
+              const consMatch = getProjectConsultants(p).some(c => c.toLowerCase().includes(q));
+              const compMatch = window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q));
+              const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).toLowerCase();
+              const tkMatch = tk && (tk.includes(q) || tk.includes(qClean) || (`#${tk}`).includes(q));
+              if (!nameMatch && !consMatch && !compMatch && !tkMatch) return false;
+          }
           return true;
       };
 
@@ -7986,10 +8139,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.exportCSV = function() {
-        let csv = "Tipo,Módulo,Empresas,Proyecto,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
+        let csv = "Tipo,Módulo,Empresas,Proyecto,Ticket,Estado,Avance(%),Prioridad,Fecha Límite,Envío Propuesta,Autorización,Drive,Invgate,Consultores\n";
         const addRow = (t, m, p) => { 
             const comps = (window.getProjectCompanies(p) || []).join('; ');
-            csv += `"${t}","${m}","${comps}","${p.name}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; 
+            const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim();
+            csv += `"${t}","${m}","${comps}","${p.name}","${tk}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; 
         };
         appData.directProjects.forEach(p => addRow('Directo', appData.directHub.name, p)); appData.modules.forEach(m => (m.projects||[]).forEach(p => addRow('Módulo', m.name, p)));
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`; link.click();
@@ -8924,7 +9078,15 @@ window.renderDailyTasks = function() {
                 }
             }
 
-            if (q && !p.name.toLowerCase().includes(q) && !getProjectConsultants(p).some(c => c.toLowerCase().includes(q)) && !window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q))) return false;
+            if (q) {
+                const qClean = q.replace(/^#/, '');
+                const nameMatch = p.name.toLowerCase().includes(q);
+                const consMatch = getProjectConsultants(p).some(c => c.toLowerCase().includes(q));
+                const compMatch = window.getProjectCompanies(p).some(c => c.toLowerCase().includes(q));
+                const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).toLowerCase();
+                const tkMatch = tk && (tk.includes(q) || tk.includes(qClean) || (`#${tk}`).includes(q));
+                if (!nameMatch && !consMatch && !compMatch && !tkMatch) return false;
+            }
             
             return true;
         });

@@ -25,6 +25,17 @@ function doPost(e) {
 
     var payload = JSON.parse(e.postData.contents);
     var type = (payload.type || 'CHAT').toUpperCase();
+
+    // Filtro estricto: Google Chat SOLO recibe atrasos, informe diario y asignaciones de trabajo
+    var allowedChatTypes = ['ASSIGNMENT', 'MORNING_DIGEST', 'DAILY_REPORT', 'OVERDUE', 'PROJECT_OVERDUE', 'TASK_OVERDUE'];
+    if (allowedChatTypes.indexOf(type) === -1) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'ignored_for_chat',
+        type: type,
+        message: 'Evento ignorado para Google Chat: solo se envían atrasos, informe diario y asignaciones.'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var chatText = '';
 
     if (type === 'ASSIGNMENT') {
@@ -37,43 +48,21 @@ function doPost(e) {
                  "✍️ *Asignado por:* " + (payload.author || 'Sistema') + "\n" +
                  "🔗 " + PANEL_URL;
 
-    } else if (type === 'VALIDATION_SUBMITTED') {
-      // 2. Tarea enviada a validación con evidencia
-      chatText = "📤 *TAREA ENVIADA A VALIDACIÓN*\n" +
-                 "👤 *Consultor:* " + (payload.consultant || 'Consultor') + "\n" +
+    } else if (type === 'MORNING_DIGEST' || type === 'DAILY_REPORT') {
+      // 2. Solicitud directa de informe diario / resumen matutino
+      chatText = payload.message || generarTextoResumenMatutino();
+
+    } else if (type === 'OVERDUE' || type === 'PROJECT_OVERDUE' || type === 'TASK_OVERDUE') {
+      // 3. Alertas de proyectos o tareas atrasadas
+      chatText = "🚨 *ALERTA DE ATRASO EN PROYECTO / TAREA*\n" +
                  "📦 *Proyecto:* " + (payload.project || 'General') + "\n" +
-                 "📝 *Tarea:* \"" + (payload.task || '') + "\"\n" +
-                 "💬 *Evidencia:* \"" + (payload.feedback || 'Sin comentarios') + "\"\n" +
-                 "⚖️ *Acción Requerida:* Revisión por Supervisor / Supremo\n" +
+                 "👤 *Responsable(s):* " + (payload.consultant || payload.assignedUser || 'Equipo') + "\n" +
+                 "📅 *Fecha Límite:* " + (payload.deadline || 'Vencida') + "\n" +
+                 "⚠️ *Detalle:* " + (payload.message || payload.task || 'Fecha límite rebasada') + "\n" +
                  "🔗 " + PANEL_URL;
-
-    } else if (type === 'TASK_VALIDATED') {
-      // 3. Tarea aprobada / validada
-      chatText = "✅ *TAREA VALIDADA Y APROBADA*\n" +
-                 "👤 *Consultor:* " + (payload.consultant || 'Consultor') + "\n" +
-                 "📦 *Proyecto:* " + (payload.project || 'General') + "\n" +
-                 "📝 *Tarea:* \"" + (payload.task || '') + "\"\n" +
-                 "🎖️ *Validado por:* " + (payload.validatedBy || 'Supervisor');
-
-    } else if (type === 'PROJECT_CREATED') {
-      // 4. Nuevo proyecto registrado
-      chatText = "🚀 *NUEVO PROYECTO REGISTRADO*\n" +
-                 "📦 *Proyecto:* " + (payload.project || '') + "\n" +
-                 "📂 *Módulo:* " + (payload.module || 'Directo') + "\n" +
-                 "👥 *Equipo Asignado:* " + (payload.consultants || 'Por definir') + "\n" +
-                 "📅 *Fecha Límite:* " + (payload.deadline || 'Sin fecha') + "\n" +
-                 "✍️ *Registrado por:* " + (payload.author || 'Sistema') + "\n" +
-                 "🔗 " + PANEL_URL;
-
-    } else if (type === 'MORNING_DIGEST') {
-      // 5. Solicitud directa de resumen matutino
-      chatText = generarTextoResumenMatutino();
 
     } else {
-      // Mensaje genérico / fallback
-      chatText = "🔔 *ALERTA SICOM*\n" +
-                 "👤 *Para:* " + (payload.assignedUser || 'General') + "\n" +
-                 "📋 *Detalle:* " + (payload.message || '');
+      chatText = payload.message || '';
     }
 
     // Despachar al Webhook de Google Chat

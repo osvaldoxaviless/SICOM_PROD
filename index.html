@@ -530,9 +530,11 @@
       <!-- FLASHLIT DISPATCH HEADER (#eeeeee Bone Card) -->
       <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none">
         <div class="flex justify-between items-center mb-2.5">
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-            <span id="infoType" class="font-mono text-[11px] tracking-[-0.24px] uppercase text-[#4d4947] font-medium">TIPO</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] shrink-0"></span>
+            <span id="infoType" class="font-mono text-[11px] tracking-[-0.24px] uppercase text-[#4d4947] font-medium shrink-0">TIPO</span>
+            <!-- TICKET DEL PROYECTO ENFRENTE DE PROYECTO -->
+            <div id="infoTicketContainer" class="hidden items-center gap-1.5 min-w-0"></div>
           </div>
           <div class="flex items-center gap-2">
             <span id="infoProgressPill" class="font-mono text-[10px] text-[#101010] bg-[#101010]/10 px-2 py-0.5 rounded-[3px] font-medium">0%</span>
@@ -629,6 +631,13 @@
                           <span class="font-mono text-[9px] text-[#8a8380] uppercase tracking-[-0.2px]">Vínculos Técnicos (Drive / Invgate)</span>
                       </div>
                       <div class="space-y-2">
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#ee6018] mb-1 uppercase font-semibold">Número de Ticket / ID</label>
+                              <div class="flex gap-2">
+                                  <input type="text" id="quickEditTicket" class="flex-1 liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none" placeholder="Ej. 12345 o TK-102">
+                                  <button onclick="saveQuickLinks()" class="pill-btn px-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition shrink-0">Guardar</button>
+                              </div>
+                          </div>
                           <div>
                               <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase">Carpeta Drive (URL)</label>
                               <div class="flex gap-2">
@@ -1270,6 +1279,10 @@
               </details>
 
               <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider block font-semibold">Número de Ticket / ID</label>
+                  <input type="text" id="editTicket" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. 12345, TK-890...">
+              </div>
+              <div class="space-y-1.5 sm:col-span-2">
                   <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Carpeta Drive</label>
                   <div class="flex gap-2">
                       <input type="url" id="editDriveLink" class="flex-1 liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="https://drive.google.com/...">
@@ -1485,6 +1498,11 @@
                     <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Carpeta Drive</label>
                     <input type="url" id="newProjDrive" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="https://drive.google.com/...">
                 </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider font-semibold">Número de Ticket / ID</label>
+                <input type="text" id="newProjTicket" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]" placeholder="Ej. 12345 o TK-890...">
             </div>
 
             <div class="space-y-1.5">
@@ -1948,7 +1966,7 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v910"></script>
+  <script type="module" src="app.js?v=20261017_v920"></script>
 
 </body>
 </html>
