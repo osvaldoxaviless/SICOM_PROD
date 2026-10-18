@@ -104,6 +104,27 @@ function enviarAGoogleChat(texto) {
 }
 
 /**
+ * Función auxiliar para enviar Notificación Web Push a Teléfonos y Chrome vía Vercel API
+ */
+function enviarWebPush(titulo, cuerpo, targetUser, subscriptions) {
+  try {
+    UrlFetchApp.fetch(PANEL_URL + 'api/push', {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({
+        title: titulo || '🔔 Alerta SICOM',
+        body: cuerpo || '',
+        targetUser: targetUser || null,
+        subscriptions: subscriptions || []
+      }),
+      muteHttpExceptions: true
+    });
+  } catch (e) {
+    Logger.log('⚠️ Error enviando Web Push desde Apps Script: ' + e);
+  }
+}
+
+/**
  * TRIGGER AUTOMÁTICO: Resumen Matutino de la Torre de Control
  * Puedes programar esta función como activador por tiempo (Time-driven trigger) diario a las 9:00 AM.
  */

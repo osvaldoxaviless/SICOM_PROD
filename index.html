@@ -48,7 +48,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261017_v834">
+  <link rel="stylesheet" href="styles.css?v=20261017_v900">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -949,6 +949,26 @@
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         <span>Salir</span>
       </button>
+    </div>
+
+    <!-- CENTRO DE NOTIFICACIONES PUSH PARA ESTE DISPOSITIVO (CELULAR & CHROME) -->
+    <div class="px-6 py-2.5 bg-[#110f0e] border-b border-[#1d1a18] flex items-center justify-between gap-3 shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div id="devicePushIconBox" class="w-7 h-7 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center text-[#8a8380] shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 font-mono text-[10px] uppercase">
+            <span id="devicePushDot" class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span>
+            <span id="devicePushStatusText" class="text-[#eeeeee]">Alertas del Dispositivo</span>
+          </div>
+          <p id="devicePushSubText" class="font-mono text-[9px] text-[#8a8380] truncate mt-0.5">Celular & Chrome en segundo plano</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btnTestPushDevice" type="button" onclick="testCurrentDevicePush()" class="hidden pill-btn px-2 py-1 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[9px] transition" title="Enviar sonido y vibración de prueba">Probar</button>
+        <button id="btnTogglePushDevice" type="button" onclick="toggleDevicePushNotification()" class="pill-btn px-3 py-1 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[10px] transition font-medium">Activar</button>
+      </div>
     </div>
 
     <!-- Pestañas con Estética Terminal -->
@@ -1911,7 +1931,24 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261017_v834"></script>
+  <!-- BANNER PROACTIVO PUSH (INVITACIÓN INICIAL A ACTIVAR EN TELÉFONO O CHROME) -->
+  <div id="pushPromptBanner" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md w-[calc(100%-2rem)] liquid-glass rounded-[8px] p-3.5 border border-[#ee6018]/50 shadow-[0_10px_35px_rgba(0,0,0,0.85)] flex items-center justify-between gap-3 animate-fade-in">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <span class="w-8 h-8 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      </span>
+      <div class="min-w-0">
+        <h4 class="font-mono text-[11px] uppercase text-[#fafafa] font-semibold tracking-[-0.2px]">¿Activar Alertas Reales?</h4>
+        <p class="text-[11px] text-[#b8b3b0] leading-tight truncate">Recibe avisos en tu teléfono y Chrome aunque la app esté cerrada.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button type="button" onclick="dismissPushBanner()" class="text-[#8a8380] hover:text-[#eeeeee] p-1.5 font-mono text-[10px] uppercase">Ahora no</button>
+      <button type="button" onclick="toggleDevicePushNotification(true)" class="pill-btn px-3 py-1.5 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[10px] font-semibold">Activar</button>
+    </div>
+  </div>
+
+  <script type="module" src="app.js?v=20261017_v900"></script>
 
 </body>
 </html>

@@ -922,6 +922,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
         setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
+        if (typeof window.initPushNotificationSystem === 'function') {
+            window.initPushNotificationSystem();
+        }
     }
 
     window.applyRolePermissions = function() {
@@ -1554,6 +1557,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             window.renderNotesHistory(item.notes, 'editNotesHistory');
             window.renderNotesHistory(item.notes, 'infoNotes');
             window.renderMindMap(); // Refresca los badges de notificación del mapa mental
+
+            // Notificación push y externa para el foro (menciones directas o equipo asignado)
+            try {
+                if (typeof window.sendExternalAlert === 'function') {
+                    window.sendExternalAlert('FORUM_COMMENT', {
+                        project: item.name,
+                        note: noteText,
+                        author: localAuthor,
+                        tagLabel: tagLabel,
+                        assignedUser: (mentions && mentions.length) ? mentions[0] : (item.consultants && item.consultants[0] ? item.consultants[0] : null)
+                    });
+                }
+            } catch (errAlert) {}
         }
     };
 
@@ -2767,6 +2783,79 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     console.warn('⚠️ [SICOM Webhook] Error en webhook externo:', err);
                 });
             }
+
+            // 3. Envío Web Push Nativo a Teléfonos Móviles y Chrome (Segundo Plano y Pantalla Bloqueada)
+            try {
+                let pushTitle = '🔔 SICOM Operaciones';
+                let pushBody = '';
+                let targetUser = null;
+
+                if (type === 'ASSIGNMENT') {
+                    pushTitle = '📋 NUEVA TAREA ASIGNADA';
+                    pushBody = `${payload.project || 'General'}: "${payload.task || ''}" (Por: ${payload.author || localAuthor || 'Sistema'})`;
+                    targetUser = payload.assignee || payload.assignedUser;
+                } else if (type === 'VALIDATION_SUBMITTED') {
+                    pushTitle = '⏳ TAREA ENVIADA A VALIDACIÓN';
+                    pushBody = `${payload.project || 'General'}: "${payload.task || ''}" por ${payload.consultant || 'Consultor'}`;
+                    targetUser = null; // Alertar a supervisores y supremo
+                } else if (type === 'TASK_VALIDATED') {
+                    pushTitle = '✅ TAREA VALIDADA Y APROBADA';
+                    pushBody = `¡Aprobada! ${payload.project || 'General'}: "${payload.task || ''}"`;
+                    targetUser = payload.consultant || payload.assignedUser;
+                } else if (type === 'PROJECT_CREATED') {
+                    pushTitle = '🚀 NUEVO PROYECTO REGISTRADO';
+                    pushBody = `${payload.project || ''} en módulo ${payload.module || 'Directo'}`;
+                    targetUser = null;
+                } else if (type === 'FORUM_COMMENT') {
+                    pushTitle = '💬 COMENTARIO EN PROYECTO';
+                    pushBody = `${payload.author || 'Usuario'} en ${payload.project || 'Proyecto'}: "${(payload.note || '').substring(0, 75)}"`;
+                    targetUser = payload.assignedUser || null;
+                } else if (type === 'MORNING_DIGEST') {
+                    pushTitle = '☀️ RESUMEN MATUTINO SICOM';
+                    pushBody = 'Hay proyectos y entregas prioritarias programadas para hoy.';
+                    targetUser = null;
+                } else {
+                    pushTitle = '🔔 ALERTA SICOM';
+                    pushBody = (payload.message || '').substring(0, 100);
+                    targetUser = payload.assignedUser || null;
+                }
+
+                // Notificación local inmediata si la pestaña de Chrome está en segundo plano pero abierta
+                if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+                    try {
+                        new Notification(pushTitle, {
+                            body: pushBody,
+                            icon: '/icon.svg',
+                            tag: type.toLowerCase()
+                        });
+                    } catch (eLocal) {}
+                }
+
+                // Disparo al endpoint Push Serverless en Vercel
+                if (appData && Array.isArray(appData.pushSubscriptions) && appData.pushSubscriptions.length > 0) {
+                    fetch('/api/push', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: pushTitle,
+                            body: pushBody,
+                            targetUser: targetUser,
+                            subscriptions: appData.pushSubscriptions,
+                            tag: type.toLowerCase()
+                        })
+                    }).then(res => res.json()).then(resData => {
+                        if (resData && resData.expiredEndpoints && resData.expiredEndpoints.length > 0) {
+                            appData.pushSubscriptions = appData.pushSubscriptions.filter(s => s && s.subscription && !resData.expiredEndpoints.includes(s.subscription.endpoint));
+                            window.saveData(false);
+                        }
+                    }).catch(err => {
+                        console.warn('⚠️ [SICOM Web Push] Fallo en despacho push:', err);
+                    });
+                }
+            } catch (errPush) {
+                console.warn('⚠️ [SICOM Web Push] Excepción en despacho:', errPush);
+            }
+
         } catch (e) {
             console.warn('⚠️ [SICOM External Alert] Excepción silenciosa:', e);
         }
@@ -2795,6 +2884,243 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             consultant: localAuthor || 'Sistema'
         });
         window.showToast("✅ Notificación de prueba despachada");
+    };
+
+    // === SISTEMA DE NOTIFICACIONES PUSH REALES (CELULAR Y CHROME) ===
+    const VAPID_PUBLIC_KEY = 'BDOt-t96XqxTDKOMj7k8mJPjPTLw0mN5_H6OQCVyfw-n-Yg6FUV06OIMtWE_norqt9QaNHj2qf4ziMDz8lyX0iE';
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    window.initPushNotificationSystem = async function() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.log('ℹ️ [SICOM Push] Service Worker o PushManager no disponible en este entorno.');
+            window.updatePushUI('unsupported');
+            return;
+        }
+
+        try {
+            const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            console.log('✅ [SICOM Push] Service Worker registrado en scope:', reg.scope);
+            await navigator.serviceWorker.ready;
+
+            const currentSub = await reg.pushManager.getSubscription();
+            if (currentSub && Notification.permission === 'granted') {
+                window.updatePushUI('active');
+                window.syncCurrentSubscriptionWithUser(currentSub);
+            } else if (Notification.permission === 'denied') {
+                window.updatePushUI('denied');
+            } else {
+                window.updatePushUI('inactive');
+                // Mostrar banner proactivo si el usuario nunca ha decidido
+                setTimeout(() => {
+                    if (localStorage.getItem('sicom_push_prompt_dismissed') !== 'true' && Notification.permission === 'default') {
+                        const banner = document.getElementById('pushPromptBanner');
+                        if (banner) banner.classList.remove('hidden');
+                    }
+                }, 2500);
+            }
+        } catch (e) {
+            console.warn('⚠️ [SICOM Push] Error inicializando Service Worker:', e);
+        }
+    };
+
+    window.toggleDevicePushNotification = async function(fromBanner = false) {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            window.showToast("Tu navegador o dispositivo no soporta notificaciones Push", true);
+            return;
+        }
+
+        if (Notification.permission === 'denied') {
+            window.showToast("Las alertas están bloqueadas en tu navegador. Habilítalas en los permisos del sitio.", true);
+            return;
+        }
+
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const existingSub = await reg.pushManager.getSubscription();
+
+            if (existingSub && !fromBanner) {
+                // Desactivar en este dispositivo
+                const unsubscribed = await existingSub.unsubscribe();
+                if (unsubscribed) {
+                    if (appData && Array.isArray(appData.pushSubscriptions)) {
+                        appData.pushSubscriptions = appData.pushSubscriptions.filter(s => s && s.subscription && s.subscription.endpoint !== existingSub.endpoint);
+                        window.saveData(false);
+                    }
+                    window.updatePushUI('inactive');
+                    window.showToast("Notificaciones desactivadas en este equipo");
+                }
+                return;
+            }
+
+            // Solicitar permiso nativo al usuario
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                window.updatePushUI(perm === 'denied' ? 'denied' : 'inactive');
+                window.showToast("Permiso de alertas no concedido", true);
+                return;
+            }
+
+            // Suscribir usando la clave pública VAPID
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+
+            window.syncCurrentSubscriptionWithUser(sub);
+            window.updatePushUI('active');
+            window.dismissPushBanner();
+            window.showToast("✅ ¡Notificaciones reales activadas en este dispositivo!");
+
+            // Enviar prueba inmediata de confirmación
+            setTimeout(() => {
+                window.testCurrentDevicePush(sub);
+            }, 600);
+
+        } catch (err) {
+            console.error('Error al suscribir a notificaciones:', err);
+            window.showToast("Error activando alertas: " + (err.message || err), true);
+        }
+    };
+
+    window.syncCurrentSubscriptionWithUser = function(sub) {
+        if (!sub || !sub.endpoint) return;
+        if (!appData) return;
+        if (!Array.isArray(appData.pushSubscriptions)) appData.pushSubscriptions = [];
+
+        const ua = navigator.userAgent;
+        const deviceName = /iPhone|iPad|iPod/.test(ua) ? 'iPhone / iOS' 
+                         : (/Android/.test(ua) ? 'Teléfono Android' 
+                         : (/Windows/.test(ua) ? 'Windows PC' 
+                         : (/Macintosh|Mac OS/.test(ua) ? 'Mac' : 'Chrome Navegador')));
+
+        const subJson = JSON.parse(JSON.stringify(sub));
+        const idx = appData.pushSubscriptions.findIndex(s => s && s.subscription && s.subscription.endpoint === sub.endpoint);
+        const record = {
+            user: localAuthor || 'General',
+            role: currentUserRole || 'Consultor',
+            device: deviceName,
+            subscription: subJson,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (idx >= 0) {
+            appData.pushSubscriptions[idx] = record;
+        } else {
+            appData.pushSubscriptions.push(record);
+        }
+        window.saveData(false);
+    };
+
+    window.testCurrentDevicePush = async function(explicitSub = null) {
+        try {
+            let sub = explicitSub;
+            if (!sub && 'serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.ready;
+                sub = await reg.pushManager.getSubscription();
+            }
+
+            if (!sub) {
+                window.showToast("Activa primero las notificaciones en este equipo", true);
+                return;
+            }
+
+            window.showToast("Enviando alerta de prueba al dispositivo...");
+
+            // Llamar al despachador serverless
+            const res = await fetch('/api/push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: '⚡ SICOM Notificaciones',
+                    body: `¡Operador ${localAuthor || 'Activo'}! Tu dispositivo está enlazado y listo para recibir alertas.`,
+                    singleSubscription: JSON.parse(JSON.stringify(sub)),
+                    tag: 'test-push'
+                })
+            });
+
+            const data = await res.json();
+            if (data && data.success) {
+                window.showToast("🔔 Alerta recibida con éxito");
+            } else {
+                // Fallback directo a Service Worker local
+                if ('serviceWorker' in navigator) {
+                    const reg = await navigator.serviceWorker.ready;
+                    reg.showNotification('⚡ SICOM Alerta Activa', {
+                        body: `¡Excelente ${localAuthor || 'Operador'}! Enlace operativo verificado.`,
+                        icon: '/icon.svg',
+                        badge: '/icon.svg',
+                        vibrate: [200, 100, 200]
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('Fallback a notificación por Service Worker:', e);
+            if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.ready;
+                reg.showNotification('⚡ SICOM Alerta', {
+                    body: `Enlace verificado en ${localAuthor || 'este equipo'}.`,
+                    icon: '/icon.svg',
+                    badge: '/icon.svg'
+                });
+            }
+        }
+    };
+
+    window.updatePushUI = function(state) {
+        const dot = document.getElementById('devicePushDot');
+        const label = document.getElementById('devicePushStatusText');
+        const subText = document.getElementById('devicePushSubText');
+        const btnToggle = document.getElementById('btnTogglePushDevice');
+        const btnTest = document.getElementById('btnTestPushDevice');
+
+        if (!dot || !btnToggle) return;
+
+        if (state === 'active') {
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-[#30d158] shadow-[0_0_8px_rgba(48,209,88,0.5)]';
+            if (label) { label.textContent = 'Push Activas'; label.className = 'text-[#30d158] font-medium'; }
+            if (subText) subText.textContent = 'Este equipo recibe alertas reales';
+            btnToggle.textContent = 'Desactivar';
+            btnToggle.className = 'pill-btn px-2.5 py-1 bg-[#1d1a18] hover:bg-[#ff453a]/20 text-[#8a8380] hover:text-[#ff453a] border border-[#3d3a39] hover:border-[#ff453a]/40 font-mono uppercase text-[9px] transition';
+            if (btnTest) btnTest.classList.remove('hidden');
+        } else if (state === 'denied') {
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-[#ff453a]';
+            if (label) { label.textContent = 'Push Bloqueadas'; label.className = 'text-[#ff453a] font-medium'; }
+            if (subText) subText.textContent = 'Permiso denegado en el navegador';
+            btnToggle.textContent = 'Bloqueado';
+            btnToggle.className = 'pill-btn px-2.5 py-1 bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] font-mono uppercase text-[9px] cursor-not-allowed opacity-60';
+            if (btnTest) btnTest.classList.add('hidden');
+        } else if (state === 'unsupported') {
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8a8380]';
+            if (label) { label.textContent = 'Push No Disponible'; label.className = 'text-[#8a8380]'; }
+            if (subText) subText.textContent = 'Navegador no compatible';
+            btnToggle.classList.add('hidden');
+            if (btnTest) btnTest.classList.add('hidden');
+        } else {
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8a8380]';
+            if (label) { label.textContent = 'Alertas del Dispositivo'; label.className = 'text-[#eeeeee]'; }
+            if (subText) subText.textContent = 'Celular & Chrome en segundo plano';
+            btnToggle.textContent = 'Activar';
+            btnToggle.className = 'pill-btn px-3 py-1 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[10px] transition font-medium';
+            if (btnTest) btnTest.classList.add('hidden');
+        }
+    };
+
+    window.dismissPushBanner = function() {
+        const banner = document.getElementById('pushPromptBanner');
+        if (banner) banner.classList.add('hidden');
+        try { localStorage.setItem('sicom_push_prompt_dismissed', 'true'); } catch (e) {}
     };
 
     window.generateMorningDigestText = function() {
