@@ -10244,11 +10244,22 @@ window.renderDailyTasks = function() {
     // ==========================================================================
     // MÓDULO INTEGRAL: ROL DE ASISTENCIA, COMISIONES Y PRENÓMINA (STGT RH)
     // FOPR-RHU-02-02 (Prenómina) & FOPR-RHU-02-03 (Solicitud de Permiso o Vacaciones)
+    // SEGURIDAD: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar
     // ==========================================================================
 
     let activeAttendanceTeamFilter = 'ALL';
     let currentCellConsultant = null;
     let currentCellDate = null;
+
+    // Validación estricta de permisos para modificar el rol de asistencia y prenómina
+    window.canModifyAttendance = function() {
+        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const cur = norm(localAuthor);
+        const isMe = cur.includes('osvaldo') || cur.includes('sanchez aviles') || cur.includes('aviles');
+        const isBarbosa = cur.includes('barbosa') || cur.includes('miguel barbosa');
+        const isRafael = cur.includes('rafael') || cur.includes('romero');
+        return isMe || isBarbosa || isRafael || currentUserRole === 'Supremo';
+    };
 
     window.openAttendanceModal = function() {
         const m = document.getElementById('attendanceModal');
@@ -10257,6 +10268,38 @@ window.renderDailyTasks = function() {
         if (!document.getElementById('attSelMonth').value) document.getElementById('attSelMonth').value = "10";
         if (!document.getElementById('attSelYear').value) document.getElementById('attSelYear').value = "2026";
         if (!document.getElementById('attSelQuincena').value) document.getElementById('attSelQuincena').value = "Q1";
+
+        const canEdit = window.canModifyAttendance();
+        const editorActs = document.getElementById('attEditorActions');
+        if (editorActs) {
+            if (canEdit) {
+                editorActs.innerHTML = `
+                    <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con A Distancia">
+                        ⚡ Auto: A distancia
+                    </button>
+                    <span class="text-[#3d3a39]">|</span>
+                    <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con Oficina STGT">
+                        ⚡ Auto: Oficina STGT
+                    </button>
+                `;
+            } else {
+                editorActs.innerHTML = `
+                    <span class="text-[10px] font-mono text-[#8a8380] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                        SOLO LECTURA
+                    </span>
+                `;
+            }
+        }
+
+        const noticeEl = document.getElementById('attPermNotice');
+        if (noticeEl) {
+            if (canEdit) {
+                noticeEl.innerHTML = `💡 Haz clic en cualquier celda para editar. Operador activo: <span class="text-[#eeeeee] font-mono">${escapeHtml(localAuthor || 'Administrador')}</span>`;
+            } else {
+                noticeEl.innerHTML = `🔒 Modo consulta. Solo <strong class="text-[#eeeeee]">Miguel Barbosa, Rafael Romero y Osvaldo Avilés</strong> pueden modificar la prenómina.`;
+            }
+        }
 
         m.classList.remove('hidden');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
@@ -10292,8 +10335,8 @@ window.renderDailyTasks = function() {
     window.setAttendanceTeamFilter = function(team) {
         activeAttendanceTeamFilter = team;
         document.querySelectorAll('.att-team-pill').forEach(btn => {
-            btn.classList.remove('bg-white/15', 'text-white', 'border-white/20');
-            btn.classList.add('text-[#8a8380]', 'bg-[#141211]', 'border-[#3d3a39]');
+            btn.classList.remove('bg-[#fafafa]', 'text-[#101010]', 'border-[#fafafa]');
+            btn.classList.add('text-[#8a8380]', 'bg-[#161413]', 'border-[#3d3a39]');
         });
         
         const activeBtn = (team === 'ALL') ? document.getElementById('attTeamBtn-ALL') :
@@ -10302,14 +10345,19 @@ window.renderDailyTasks = function() {
                           (team.includes('Coordinación') ? document.getElementById('attTeamBtn-Coord') :
                           (team.includes('Gerencia') ? document.getElementById('attTeamBtn-Gerencia') : null))));
         if (activeBtn) {
-            activeBtn.classList.remove('text-[#8a8380]', 'bg-[#141211]', 'border-[#3d3a39]');
-            activeBtn.classList.add('bg-white/15', 'text-white', 'border-white/20');
+            activeBtn.classList.remove('text-[#8a8380]', 'bg-[#161413]', 'border-[#3d3a39]');
+            activeBtn.classList.add('bg-[#fafafa]', 'text-[#101010]', 'border-[#fafafa]');
         }
         window.renderAttendanceTable();
     };
 
     window.openCellStatusPopover = function(e, consultantName, dateStr) {
         e.stopPropagation();
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Solo lectura: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para modificar la prenómina.", true);
+            return;
+        }
+
         currentCellConsultant = consultantName;
         currentCellDate = dateStr;
 
@@ -10334,6 +10382,10 @@ window.renderDailyTasks = function() {
     };
 
     window.selectCellStatus = function(status) {
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar el rol de asistencia.", true);
+            return;
+        }
         if (!currentCellConsultant || !currentCellDate) return;
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
@@ -10365,6 +10417,10 @@ window.renderDailyTasks = function() {
     };
 
     window.quickFillAttendanceWorkdays = function(defaultStatus) {
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar el rol de asistencia.", true);
+            return;
+        }
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
         const q = document.getElementById('attSelQuincena')?.value || 'Q1';
@@ -10403,6 +10459,7 @@ window.renderDailyTasks = function() {
         const container = document.getElementById('attendanceTableContainer');
         if (!container) return;
 
+        const canEdit = window.canModifyAttendance();
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
         const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
         const q = document.getElementById('attSelQuincena')?.value || 'Q1';
@@ -10462,16 +10519,16 @@ window.renderDailyTasks = function() {
         const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
 
         let html = `
-        <div class="overflow-x-auto rounded-[6px] border border-[#252220]">
+        <div class="overflow-x-auto rounded-[3px] border border-[#3d3a39]">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="bg-[#141211] border-b border-[#252220] font-mono text-[10px] text-[#8a8380] uppercase">
-                        <th class="p-3 sticky left-0 bg-[#141211] z-20 min-w-[200px] border-r border-[#252220]">Colaborador & Equipo</th>
-                        <th class="p-3 min-w-[100px] border-r border-[#252220] text-center">Horario</th>
+                    <tr class="bg-[#161413] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
+                        <th class="p-3 sticky left-0 bg-[#161413] z-20 min-w-[210px] border-r border-[#3d3a39]">Colaborador & Equipo</th>
+                        <th class="p-3 min-w-[100px] border-r border-[#3d3a39] text-center">Horario</th>
                         ${workDays.map(wd => `
-                            <th class="p-2 text-center min-w-[125px] border-r border-[#252220] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
-                                <div class="font-bold text-[#eeeeee]">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
-                                <div class="text-[9px] text-[#8a8380] lowercase font-normal">${monthName.substring(0, 3)}</div>
+                            <th class="p-2 text-center min-w-[125px] border-r border-[#3d3a39] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
+                                <div class="font-normal text-[#eeeeee]">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                                <div class="text-[9px] text-[#8a8380] lowercase font-mono">${monthName.substring(0, 3)}</div>
                             </th>
                         `).join('')}
                         <th class="p-3 min-w-[140px] text-center text-[#eeeeee]">Resumen Quincena</th>
@@ -10486,7 +10543,6 @@ window.renderDailyTasks = function() {
             const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
             const schedule = cMeta.schedule || defaultConsultantMetadata[cName]?.schedule || '09:00 a 18:30';
             const lead = cMeta.lead || defaultConsultantMetadata[cName]?.lead || 'Coordinación';
-            const color = cMeta.color || '#ee6018';
 
             const cAtt = periodData[cName] || {};
 
@@ -10528,9 +10584,15 @@ window.renderDailyTasks = function() {
                     label = 'Falta (FA)';
                 }
 
+                const clickAction = canEdit 
+                    ? `openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')`
+                    : `window.showToast('🔒 Solo lectura: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden modificar la prenómina.', true)`;
+                const cursorStyle = canEdit ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default opacity-85';
+                const cellTitle = canEdit ? `${escapeHtml(status)} (Clic para cambiar)` : `${escapeHtml(status)} (Solo lectura)`;
+
                 cellsHtml += `
-                    <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#252220]' : ''}">
-                        <button type="button" onclick="openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${chipClass}" title="${escapeHtml(status)} (Clic para cambiar)">
+                    <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
+                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${chipClass} ${cursorStyle}" title="${cellTitle}">
                             <span class="truncate">${escapeHtml(label)}</span>
                         </button>
                     </td>
@@ -10538,31 +10600,31 @@ window.renderDailyTasks = function() {
             });
 
             let summaryHtml = '';
-            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/30 font-mono text-[9.5px] font-bold">${ptCount} día${ptCount > 1 ? 's' : ''} comisión</span> `;
-            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#3b82f6]/20 text-[#93c5fd] border border-[#3b82f6]/30 font-mono text-[9.5px] font-bold">${vaCount} día vacación</span>`;
-            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px]">Sin incidencias</span>`;
+            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d${ptCount > 1 ? 'ías' : 'ía'} com</span> `;
+            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d${vaCount > 1 ? 'ías' : 'ía'} vac</span>`;
+            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px] uppercase">Normal</span>`;
 
             html += `
-                <tr class="hover:bg-[#161413]/70 transition">
-                    <td class="p-3 sticky left-0 bg-[#121110] z-10 border-r border-[#252220]">
+                <tr class="hover:bg-[#141211] transition-colors border-b border-[#1d1a18]">
+                    <td class="p-3 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39]">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-full bg-[#1d1a18] flex items-center justify-center font-mono text-[10px] font-bold text-white shrink-0" style="border: 2px solid ${color};">
+                            <div class="w-6 h-6 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-medium text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
-                                    ${empNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#1d1a18] px-1 rounded-[2px]">${empNo}</span>` : ''}
+                                    <span class="font-normal text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
+                                    ${empNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#161413] border border-[#3d3a39] px-1 rounded-[2px]">${empNo}</span>` : ''}
                                 </div>
                                 <div class="flex items-center gap-2 text-[10px] text-[#8a8380] truncate mt-0.5">
                                     <span>${escapeHtml(jobTitle)}</span>
                                     <span class="text-[#3d3a39]">•</span>
-                                    <span class="text-[#10b981] font-mono text-[9px]">Jefe: ${escapeHtml(lead)}</span>
+                                    <span class="text-[#8a8380] font-mono text-[9px] uppercase">Líder: <b class="text-[#eeeeee] font-normal">${escapeHtml(lead)}</b></span>
                                 </div>
                             </div>
                         </div>
                     </td>
-                    <td class="p-2 border-r border-[#252220] text-center font-mono text-[10px] text-[#b8b3b0]">
+                    <td class="p-2 border-r border-[#3d3a39] text-center font-mono text-[10px] text-[#8a8380]">
                         ${escapeHtml(schedule)}
                     </td>
                     ${cellsHtml}
@@ -10586,6 +10648,11 @@ window.renderDailyTasks = function() {
 
     // --- MODAL DE COMISIONES RÁPIDAS ---
     window.openCommissionModal = function(defaultConsultant, defaultDate) {
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para registrar comisiones en la prenómina.", true);
+            return;
+        }
+
         const m = document.getElementById('commissionModal');
         if (!m) return;
 
@@ -10623,6 +10690,11 @@ window.renderDailyTasks = function() {
     };
 
     window.saveCommission = function() {
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Acceso denegado: Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés tienen permisos para autorizar y registrar comisiones en la prenómina.", true);
+            return;
+        }
+
         const consultant = document.getElementById('commConsultant')?.value;
         const client = document.getElementById('commClient')?.value;
         const startDate = document.getElementById('commStartDate')?.value;
@@ -10772,6 +10844,11 @@ window.renderDailyTasks = function() {
     };
 
     window.saveVacation = function() {
+        if (!window.canModifyAttendance()) {
+            window.showToast("🔒 Solo Miguel Barbosa, Rafael Romero y Osvaldo Avilés pueden autorizar y registrar vacaciones en la prenómina.", true);
+            return;
+        }
+
         const consultant = document.getElementById('vacConsultant')?.value;
         const startDate = document.getElementById('vacStartDate')?.value;
         const endDate = document.getElementById('vacEndDate')?.value;
