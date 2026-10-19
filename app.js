@@ -2551,7 +2551,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const drawer = document.getElementById('mobileSearchDrawer');
         const btn = document.getElementById('searchBtnIcon');
         const inp = document.getElementById('searchInput');
+        const ticker = document.getElementById('announcementTickerBar');
         if (!drawer) return;
+
+        // Ocultar temporalmente el cintillo de avisos para evitar cualquier solapamiento
+        if (ticker && !ticker.classList.contains('hidden')) {
+            ticker.dataset.wasVisible = 'true';
+            ticker.style.opacity = '0';
+            ticker.style.pointerEvents = 'none';
+        }
 
         drawer.classList.remove('search-closed');
         drawer.classList.add('search-open');
@@ -2575,6 +2583,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const drawer = document.getElementById('mobileSearchDrawer');
         const btn = document.getElementById('searchBtnIcon');
         const inp = document.getElementById('searchInput');
+        const ticker = document.getElementById('announcementTickerBar');
         if (!drawer) return;
 
         drawer.classList.remove('search-open');
@@ -2582,6 +2591,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (btn) {
             btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
             btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
+        }
+
+        // Restaurar el cintillo de avisos
+        if (ticker && ticker.dataset.wasVisible === 'true') {
+            ticker.style.opacity = '';
+            ticker.style.pointerEvents = '';
+            delete ticker.dataset.wasVisible;
         }
 
         if (!keepQuery && inp) {
@@ -10435,36 +10451,13 @@ window.renderDailyTasks = function() {
             }
         }
 
-        // 3. Sub-barra: Acciones de llenado automático
-        const editorActs = document.getElementById('attEditorActions');
-        if (editorActs) {
-            if (isMaster || (isLead && !isLocked)) {
-                editorActs.innerHTML = `
-                    <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con A Distancia">
-                        ⚡ Auto: A distancia
-                    </button>
-                    <span class="text-[#3d3a39]">|</span>
-                    <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar días hábiles vacíos con Oficina STGT">
-                        ⚡ Auto: Oficina STGT
-                    </button>
-                `;
-            } else if (!isLocked && !isPast) {
-                editorActs.innerHTML = `
-                    <button type="button" onclick="quickFillAttendanceWorkdays('A distancia')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar tus días vacíos con A Distancia">
-                        ⚡ Mi fila: A distancia
-                    </button>
-                    <span class="text-[#3d3a39]">|</span>
-                    <button type="button" onclick="quickFillAttendanceWorkdays('Asiste a oficina STGT')" class="text-[10px] font-mono text-[#8a8380] hover:text-[#eeeeee] transition" title="Llenar tus días vacíos con Oficina STGT">
-                        ⚡ Mi fila: Oficina STGT
-                    </button>
-                `;
+        // 3. Control de Visibilidad del Botón de Descarga de Prenómina (Exclusivo para Osvaldo Avilés)
+        const btnExport = document.getElementById('btnExportPrenomina');
+        if (btnExport) {
+            if (isMaster) {
+                btnExport.classList.remove('hidden');
             } else {
-                editorActs.innerHTML = `
-                    <span class="text-[10px] font-mono text-[#8a8380] flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-                        SOLO LECTURA
-                    </span>
-                `;
+                btnExport.classList.add('hidden');
             }
         }
 
@@ -10570,8 +10563,16 @@ window.renderDailyTasks = function() {
         if (titleEl) titleEl.textContent = `${consultantName} // ${dateStr}`;
 
         const rect = e.currentTarget.getBoundingClientRect();
-        const top = Math.min(window.innerHeight - 280, rect.bottom + 4);
-        const left = Math.min(window.innerWidth - 240, Math.max(10, rect.left - 40));
+        let top = rect.bottom + 4;
+        let left = rect.left - 20;
+
+        if (window.innerWidth < 480) {
+            left = Math.max(12, (window.innerWidth - 260) / 2);
+            top = Math.min(window.innerHeight - 310, Math.max(60, rect.bottom + 4));
+        } else {
+            top = Math.min(window.innerHeight - 280, Math.max(10, top));
+            left = Math.min(window.innerWidth - 250, Math.max(10, left));
+        }
 
         popover.style.top = `${top}px`;
         popover.style.left = `${left}px`;
@@ -10670,84 +10671,71 @@ window.renderDailyTasks = function() {
         window.showToast(`⚡ ${filledCount} días hábiles completados con "${defaultStatus}"`, false);
     };
 
-    window.renderAttendanceTable = function() {
-        const container = document.getElementById('attendanceTableContainer');
-        if (!container) return;
+    // --- GESTIÓN DE VISTAS (PESTAÑAS) DEL ROL DE ASISTENCIA ---
+    let activeAttendanceTab = (typeof window !== 'undefined' && window.innerWidth < 768) ? 'consultant' : 'matrix';
+    let activeAttendanceConsultant = '';
+    let activeAttendanceDailyDate = '';
 
-        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
-        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
-        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
-        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-
-        window.updateAttendanceHeaderControls();
-
-        const monthNames = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const monthName = monthNames[m] || 'Octubre';
-
-        const startDay = q === 'Q1' ? 1 : 16;
-        const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
-
-        const lbl = document.getElementById('attPeriodLabel');
-        if (lbl) {
-            lbl.textContent = `Periodo: Del ${startDay} al ${endDay} de ${monthName} de ${y}`;
-        }
-
-        // Días hábiles a mostrar (Lunes a Viernes)
-        const workDays = [];
-        for (let d = startDay; d <= endDay; d++) {
-            const dt = new Date(y, m - 1, d);
-            const dow = dt.getDay();
-            if (dow !== 0 && dow !== 6) {
-                const dowNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-                workDays.push({
-                    dayNum: d,
-                    dowName: dowNames[dow],
-                    dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-                });
-            }
-        }
-
-        let list = [
-            "Manuel Gutierrez", "Carlos Islas", "Rafael Romero", "Miguel Muñoz",
-            "Óscar González", "Ricardo Lira", "Emmanuel Sánchez", "Osvaldo Avilés",
-            "Diego Cristobal", "Sue Oyuqui"
-        ];
-        Object.keys(consultants).forEach(k => {
-            if (!list.includes(k) && k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa') {
-                list.push(k);
+    window.setAttendanceViewTab = function(tab) {
+        activeAttendanceTab = tab;
+        ['matrix', 'consultant', 'daily'].forEach(t => {
+            const btn = document.getElementById(`attTabBtn-${t}`);
+            if (btn) {
+                if (t === tab) {
+                    btn.classList.remove('text-[#8a8380]', 'hover:text-[#eeeeee]', 'bg-transparent', 'font-normal');
+                    btn.classList.add('bg-[#fafafa]', 'text-[#101010]', 'font-medium');
+                } else {
+                    btn.classList.remove('bg-[#fafafa]', 'text-[#101010]', 'font-medium');
+                    btn.classList.add('text-[#8a8380]', 'hover:text-[#eeeeee]', 'bg-transparent', 'font-normal');
+                }
             }
         });
 
-        // Filtrar por equipo
-        if (activeAttendanceTeamFilter !== 'ALL') {
-            list = list.filter(cName => {
-                const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
-                const team = meta.team || '';
-                const lead = meta.lead || '';
-                if (activeAttendanceTeamFilter.includes('Manuel') && (team.includes('Manuel') || lead.includes('Manuel') || cName.includes('Manuel'))) return true;
-                if (activeAttendanceTeamFilter.includes('Carlos') && (team.includes('Carlos') || lead.includes('Carlos') || cName.includes('Carlos'))) return true;
-                if (activeAttendanceTeamFilter.includes('Coordinación') && (team.includes('Coordinación') || lead.includes('Rafael') || cName.includes('Rafael') || cName.includes('Osvaldo') || cName.includes('Ricardo') || cName.includes('Muñoz'))) return true;
-                if (activeAttendanceTeamFilter.includes('Gerencia') && (team.includes('Gerencia') || lead.includes('Barbosa') || cName.includes('Emmanuel'))) return true;
-                return team === activeAttendanceTeamFilter;
-            });
+        const subbar = document.getElementById('attSubbarMatrix');
+        if (subbar) {
+            if (tab === 'matrix') subbar.classList.remove('hidden');
+            else subbar.classList.add('hidden');
         }
 
-        const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
+        window.renderAttendanceTable();
+    };
+
+    window.changeConsultantView = function(cName) {
+        activeAttendanceConsultant = cName;
+        window.renderAttendanceTable();
+    };
+
+    window.changeDailyDateView = function(dateStr) {
+        activeAttendanceDailyDate = dateStr;
+        window.renderAttendanceTable();
+    };
+
+    function renderAttendanceMatrixView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead) {
+        const aux = document.getElementById('attTabAuxControls');
+        if (aux) {
+            aux.innerHTML = `<span class="hidden sm:inline font-mono text-[10px] text-[#8a8380]">Vista Matriz Quincenal (${list.length} colaboradores)</span>`;
+        }
 
         let html = `
-        <div class="overflow-x-auto rounded-[3px] border border-[#3d3a39]">
+        <!-- Indicador táctil móvil -->
+        <div class="md:hidden mb-2.5 px-3 py-1.5 rounded-[3px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
+            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Desliza la tabla para ver todos los días</span>
+            <button type="button" onclick="setAttendanceViewTab('consultant')" class="text-[#fafafa] hover:text-[#ee6018] underline font-medium">Ver en Vertical ➔</button>
+        </div>
+
+        <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-[#161413] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
-                        <th class="p-3 sticky left-0 bg-[#161413] z-20 min-w-[210px] border-r border-[#3d3a39]">Colaborador & Equipo</th>
-                        <th class="p-3 min-w-[100px] border-r border-[#3d3a39] text-center">Horario</th>
+                        <th class="p-2.5 sm:p-3 relative md:sticky md:left-0 bg-[#161413] z-20 w-[140px] sm:w-[190px] md:min-w-[210px] border-r border-[#3d3a39]">Colaborador</th>
+                        <th class="p-2 sm:p-3 min-w-[75px] sm:min-w-[95px] border-r border-[#3d3a39] text-center">Horario</th>
                         ${workDays.map(wd => `
-                            <th class="p-2 text-center min-w-[125px] border-r border-[#3d3a39] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
+                            <th class="p-2 text-center min-w-[110px] sm:min-w-[125px] border-r border-[#3d3a39] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
                                 <div class="font-normal text-[#eeeeee]">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
                                 <div class="text-[9px] text-[#8a8380] lowercase font-mono">${monthName.substring(0, 3)}</div>
                             </th>
                         `).join('')}
-                        <th class="p-3 min-w-[140px] text-center text-[#eeeeee]">Resumen Quincena</th>
+                        <th class="p-2.5 sm:p-3 min-w-[110px] sm:min-w-[130px] text-center text-[#eeeeee]">Resumen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#1d1a18]">
@@ -10824,20 +10812,18 @@ window.renderDailyTasks = function() {
 
             html += `
                 <tr class="hover:bg-[#141211] transition-colors border-b border-[#1d1a18]">
-                    <td class="p-3 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39]">
-                        <div class="flex items-center gap-2.5">
+                    <td class="p-2 sm:p-3 relative md:sticky md:left-0 bg-[#101010] z-10 border-r border-[#3d3a39] w-[140px] sm:w-[190px] md:min-w-[210px]">
+                        <div class="flex items-center gap-2">
                             <div class="w-6 h-6 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5">
+                            <div class="min-w-0 truncate">
+                                <div class="flex items-center gap-1.5 truncate">
                                     <span class="font-normal text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
-                                    ${empNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#161413] border border-[#3d3a39] px-1 rounded-[2px]">${empNo}</span>` : ''}
+                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8.5px] text-[#8a8380] bg-[#161413] border border-[#3d3a39] px-1 rounded-[2px]">${empNo}</span>` : ''}
                                 </div>
-                                <div class="flex items-center gap-2 text-[10px] text-[#8a8380] truncate mt-0.5">
-                                    <span>${escapeHtml(jobTitle)}</span>
-                                    <span class="text-[#3d3a39]">•</span>
-                                    <span class="text-[#8a8380] font-mono text-[9px] uppercase">Líder: <b class="text-[#eeeeee] font-normal">${escapeHtml(lead)}</b></span>
+                                <div class="text-[9.5px] text-[#8a8380] truncate font-mono">
+                                    ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981] font-mono">${escapeHtml(lead.split(' ')[0])}</span>
                                 </div>
                             </div>
                         </div>
@@ -10846,7 +10832,7 @@ window.renderDailyTasks = function() {
                         ${escapeHtml(schedule)}
                     </td>
                     ${cellsHtml}
-                    <td class="p-2.5 text-center">
+                    <td class="p-2 sm:p-2.5 text-center">
                         <div class="flex flex-col items-center gap-1">
                             ${summaryHtml}
                         </div>
@@ -10862,6 +10848,395 @@ window.renderDailyTasks = function() {
         `;
 
         container.innerHTML = html;
+    }
+
+    function renderAttendanceConsultantView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead) {
+        let curC = activeAttendanceConsultant;
+        if (!curC || !list.includes(curC)) {
+            curC = (localAuthor && list.includes(localAuthor)) ? localAuthor : list[0];
+            activeAttendanceConsultant = curC;
+        }
+
+        const aux = document.getElementById('attTabAuxControls');
+        if (aux) {
+            aux.innerHTML = `
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Colaborador:</span>
+                    <select onchange="changeConsultantView(this.value)" class="bg-[#161413] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                        ${(isMaster || isLead)
+                            ? list.map(c => `<option value="${escapeHtml(c)}" ${c === curC ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')
+                            : `<option value="${escapeHtml(curC)}" selected>${escapeHtml(curC)} (Personal)</option>`
+                        }
+                    </select>
+                </div>
+            `;
+        }
+
+        const cMeta = consultants[curC] || defaultConsultantMetadata[curC] || {};
+        const empNo = cMeta.employeeNo || defaultConsultantMetadata[curC]?.employeeNo || '25950064';
+        const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[curC]?.jobTitle || cMeta.title || 'Consultor';
+        const schedule = cMeta.schedule || defaultConsultantMetadata[curC]?.schedule || '09:00 a 18:30';
+        const lead = cMeta.lead || defaultConsultantMetadata[curC]?.lead || 'Coordinación';
+        const team = cMeta.team || 'Equipo Consultoría';
+        const cAtt = periodData[curC] || {};
+
+        let distCount = 0, stgtCount = 0, commCount = 0, vacCount = 0, medCount = 0, faltaCount = 0;
+        workDays.forEach(wd => {
+            const dayRec = cAtt[wd.dateStr];
+            const st = (dayRec?.status || 'A distancia').toLowerCase();
+            if (st.includes('vacaci')) vacCount++;
+            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm')) commCount++;
+            else if (st.includes('stgt') || st.includes('oficina')) stgtCount++;
+            else if (st.includes('médico')) medCount++;
+            else if (st.includes('falta')) faltaCount++;
+            else distCount++;
+        });
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        let html = `
+        <div class="max-w-3xl mx-auto space-y-3">
+            <!-- TARJETA CABECERA DEL COLABORADOR -->
+            <div class="bg-[#161413] border border-[#3d3a39] rounded-[8px] p-3.5 sm:p-4 space-y-3">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-[4px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-xs text-[#fafafa] font-bold shrink-0">
+                            ${curC.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-normal text-sm text-[#fafafa]">${escapeHtml(curC)}</h3>
+                                <span class="px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380]">N° ${escapeHtml(empNo)}</span>
+                            </div>
+                            <div class="text-[11px] text-[#8a8380] font-mono truncate">
+                                ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981]">${escapeHtml(lead)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right font-mono text-[10px] text-[#8a8380]">
+                        <div>Horario: <span class="text-[#eeeeee]">${escapeHtml(schedule)}</span></div>
+                        <div class="text-[9.5px] text-[#8a8380]">${escapeHtml(team)}</div>
+                    </div>
+                </div>
+
+                <!-- CONTADORES RESUMEN QUINCENAL (FACTORY KPIS) -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#252220]">
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#ee6018]">${commCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Comisiones (PT)</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#eeeeee]">${stgtCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Oficina STGT</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#8a8380]">${distCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">A Distancia</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#101010] bg-[#eeeeee] rounded-[2px] inline-block px-2">${vacCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380] mt-0.5">Vacaciones (VA)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTA VERTICAL DE DÍAS HÁBILES DE LA QUINCENA -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between px-1 text-[10px] font-mono text-[#8a8380] uppercase">
+                    <span>Días de la Quincena (${workDays.length} hábiles)</span>
+                    <span>Toca en un día para cambiar</span>
+                </div>
+        `;
+
+        workDays.forEach(wd => {
+            const dayRecord = cAtt[wd.dateStr];
+            let status = (dayRecord && dayRecord.status) ? dayRecord.status : 'A distancia';
+            let chipClass = 'att-chip-distancia';
+            let label = status;
+
+            const st = status.toLowerCase();
+            if (st.includes('vacaci')) {
+                chipClass = 'att-chip-vacaciones';
+                label = 'Vacaciones (VA)';
+            } else if (st.includes('afr')) {
+                chipClass = 'att-chip-afr';
+                label = 'Oficina AFR (PT)';
+            } else if (st.includes('odm')) {
+                chipClass = 'att-chip-odm';
+                label = 'Oficina ODM (PT)';
+            } else if (st.includes('comisi')) {
+                chipClass = 'att-chip-comision';
+                label = 'En comisión (PT)';
+            } else if (st.includes('stgt') || st.includes('oficina')) {
+                chipClass = 'att-chip-stgt';
+                label = 'Oficina STGT';
+            } else if (st.includes('médico')) {
+                chipClass = 'att-chip-medico';
+                label = 'Permiso Médico (PM)';
+            } else if (st.includes('falta')) {
+                chipClass = 'att-chip-falta';
+                label = 'Falta (FA)';
+            }
+
+            const isToday = (wd.dateStr === todayStr);
+            const editCheck = window.canUserEditAttendanceCell(curC, wd.dateStr, periodKey);
+            const clickAction = editCheck.allowed
+                ? `openCellStatusPopover(event, '${jsArg(curC)}', '${wd.dateStr}')`
+                : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
+
+            let extraInfo = '';
+            if (dayRecord && dayRecord.client) {
+                extraInfo = `<div class="text-[10px] text-[#ee6018] font-mono mt-0.5">📍 Cliente: <strong>${escapeHtml(dayRecord.client)}</strong> ${dayRecord.reason ? `— ${escapeHtml(dayRecord.reason)}` : ''}</div>`;
+            }
+
+            html += `
+                <div class="p-3 rounded-[6px] bg-[#161413] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-12 text-center shrink-0">
+                            <div class="font-mono text-xs font-semibold text-[#eeeeee] uppercase">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                            <div class="font-mono text-[9px] text-[#8a8380] uppercase">${monthName.substring(0, 3)}</div>
+                        </div>
+                        <div class="h-8 w-px bg-[#2d2a29] shrink-0"></div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="${clickAction}" class="att-cell py-1 px-2 rounded-[3px] font-mono text-[10.5px] uppercase ${chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
+                                    ${escapeHtml(label)}
+                                </button>
+                                ${isToday ? '<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 font-mono text-[8.5px] uppercase font-bold">HOY</span>' : ''}
+                            </div>
+                            ${extraInfo}
+                        </div>
+                    </div>
+
+                    <div class="shrink-0">
+                        ${editCheck.allowed
+                            ? `<button type="button" onclick="${clickAction}" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition flex items-center gap-1">
+                                 <span>Cambiar</span>
+                                 <svg class="w-3 h-3 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                               </button>`
+                            : `<span class="text-[#8a8380] font-mono text-[10px] flex items-center gap-1" title="${escapeHtml(editCheck.reason)}">🔒</span>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+            </div>
+        </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function renderAttendanceDailyView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead) {
+        if (!workDays.length) {
+            container.innerHTML = `<div class="p-6 text-center text-[#8a8380] font-mono text-xs">No hay días hábiles en este periodo.</div>`;
+            return;
+        }
+
+        const validDates = workDays.map(w => w.dateStr);
+        let curDate = activeAttendanceDailyDate;
+        if (!curDate || !validDates.includes(curDate)) {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            curDate = validDates.includes(todayStr) ? todayStr : validDates[0];
+            activeAttendanceDailyDate = curDate;
+        }
+
+        const curWd = workDays.find(w => w.dateStr === curDate) || workDays[0];
+
+        const aux = document.getElementById('attTabAuxControls');
+        if (aux) {
+            aux.innerHTML = `
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Fecha:</span>
+                    <select onchange="changeDailyDateView(this.value)" class="bg-[#161413] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                        ${workDays.map(w => `
+                            <option value="${w.dateStr}" ${w.dateStr === curDate ? 'selected' : ''}>${w.dowName} ${String(w.dayNum).padStart(2, '0')} de ${monthName}</option>
+                        `).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        // Agrupar colaboradores por su estado en este día
+        const groups = {
+            comision: [],
+            oficina: [],
+            distancia: [],
+            vacaciones: [],
+            otros: []
+        };
+
+        list.forEach(cName => {
+            const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+            const dayRec = (periodData[cName] && periodData[cName][curDate]) || {};
+            const status = dayRec.status || 'A distancia';
+            const st = status.toLowerCase();
+
+            const item = {
+                name: cName,
+                meta: cMeta,
+                status: status,
+                record: dayRec
+            };
+
+            if (st.includes('vacaci')) groups.vacaciones.push(item);
+            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm')) groups.comision.push(item);
+            else if (st.includes('stgt') || st.includes('oficina')) groups.oficina.push(item);
+            else if (st.includes('médico') || st.includes('falta')) groups.otros.push(item);
+            else groups.distancia.push(item);
+        });
+
+        let html = `
+        <div class="max-w-3xl mx-auto space-y-4">
+            <!-- CABECERA DEL DÍA -->
+            <div class="bg-[#161413] border border-[#3d3a39] rounded-[8px] p-3.5 sm:p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                    <div class="font-mono text-sm font-semibold text-[#eeeeee] uppercase">${curWd.dowName} ${String(curWd.dayNum).padStart(2, '0')} DE ${monthName.toUpperCase()} DE 2026</div>
+                    <div class="text-[11px] text-[#8a8380] font-mono">Resumen de asignaciones y ubicaciones del equipo</div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.oficina.length} Ofic</span>
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#2d2a29]">${groups.distancia.length} Dist</span>
+                    ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
+                </div>
+            </div>
+
+            <!-- SECCIONES POR UBICACIÓN -->
+        `;
+
+        function renderGroupSection(title, colorDot, items, chipClass) {
+            if (!items.length) return '';
+            let sHtml = `
+            <div class="space-y-1.5">
+                <div class="flex items-center gap-2 px-1 font-mono text-[10px] uppercase text-[#8a8380]">
+                    <span class="w-1.5 h-1.5 rounded-full ${colorDot}"></span>
+                    <span>${title} (${items.length})</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            `;
+
+            items.forEach(it => {
+                const editCheck = window.canUserEditAttendanceCell(it.name, curDate, periodKey);
+                const clickAction = editCheck.allowed
+                    ? `openCellStatusPopover(event, '${jsArg(it.name)}', '${curDate}')`
+                    : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
+
+                sHtml += `
+                    <div class="p-2.5 rounded-[4px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-7 h-7 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
+                                ${it.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-normal text-xs text-[#eeeeee] truncate">${escapeHtml(it.name)}</div>
+                                <div class="text-[9.5px] text-[#8a8380] font-mono truncate">${escapeHtml(it.meta.jobTitle || 'Consultor')}</div>
+                                ${it.record.client ? `<div class="text-[9.5px] text-[#ee6018] font-mono truncate">📍 ${escapeHtml(it.record.client)}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <button type="button" onclick="${clickAction}" class="att-cell py-1 px-1.5 rounded-[3px] font-mono text-[9.5px] uppercase ${chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
+                                ${escapeHtml(it.status)}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            sHtml += `
+                </div>
+            </div>
+            `;
+            return sHtml;
+        }
+
+        html += renderGroupSection('En Comisión (PT)', 'bg-[#ee6018]', groups.comision, 'att-chip-comision');
+        html += renderGroupSection('En Oficina STGT', 'bg-[#eeeeee]', groups.oficina, 'att-chip-stgt');
+        html += renderGroupSection('A Distancia / Home Office', 'bg-[#8a8380]', groups.distancia, 'att-chip-distancia');
+        html += renderGroupSection('Vacaciones (VA)', 'bg-[#ffffff]', groups.vacaciones, 'att-chip-vacaciones');
+        html += renderGroupSection('Permiso Médico / Otros', 'bg-[#ff453a]', groups.otros, 'att-chip-medico');
+
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    window.renderAttendanceTable = function() {
+        const container = document.getElementById('attendanceTableContainer');
+        if (!container) return;
+
+        const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
+        const y = parseInt(document.getElementById('attSelYear')?.value || '2026');
+        const q = document.getElementById('attSelQuincena')?.value || 'Q1';
+        const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+
+        window.updateAttendanceHeaderControls();
+
+        const monthNames = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthName = monthNames[m] || 'Octubre';
+
+        const startDay = q === 'Q1' ? 1 : 16;
+        const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
+
+        const lbl = document.getElementById('attPeriodLabel');
+        if (lbl) {
+            lbl.textContent = `Periodo: Del ${startDay} al ${endDay} de ${monthName} de ${y}`;
+        }
+
+        // Días hábiles a mostrar (Lunes a Viernes)
+        const workDays = [];
+        for (let d = startDay; d <= endDay; d++) {
+            const dt = new Date(y, m - 1, d);
+            const dow = dt.getDay();
+            if (dow !== 0 && dow !== 6) {
+                const dowNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                workDays.push({
+                    dayNum: d,
+                    dowName: dowNames[dow],
+                    dateStr: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+                });
+            }
+        }
+
+        let list = [
+            "Manuel Gutierrez", "Carlos Islas", "Rafael Romero", "Miguel Muñoz",
+            "Óscar González", "Ricardo Lira", "Emmanuel Sánchez", "Osvaldo Avilés",
+            "Diego Cristobal", "Sue Oyuqui"
+        ];
+        Object.keys(consultants).forEach(k => {
+            if (!list.includes(k) && k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa') {
+                list.push(k);
+            }
+        });
+
+        // Filtrar por equipo si está en matriz
+        if (activeAttendanceTab === 'matrix' && activeAttendanceTeamFilter !== 'ALL') {
+            list = list.filter(cName => {
+                const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
+                const team = meta.team || '';
+                const lead = meta.lead || '';
+                if (activeAttendanceTeamFilter.includes('Manuel') && (team.includes('Manuel') || lead.includes('Manuel') || cName.includes('Manuel'))) return true;
+                if (activeAttendanceTeamFilter.includes('Carlos') && (team.includes('Carlos') || lead.includes('Carlos') || cName.includes('Carlos'))) return true;
+                if (activeAttendanceTeamFilter.includes('Coordinación') && (team.includes('Coordinación') || lead.includes('Rafael') || cName.includes('Rafael') || cName.includes('Osvaldo') || cName.includes('Ricardo') || cName.includes('Muñoz'))) return true;
+                if (activeAttendanceTeamFilter.includes('Gerencia') && (team.includes('Gerencia') || lead.includes('Barbosa') || cName.includes('Emmanuel'))) return true;
+                return team === activeAttendanceTeamFilter;
+            });
+        }
+
+        const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
+        const isLocked = window.isPeriodLocked(periodKey);
+        const isPast = window.isPastQuincena(y, m, q);
+        const isMaster = window.isAttendanceMasterAdmin();
+        const isLead = window.isAttendanceLead();
+
+        if (activeAttendanceTab === 'matrix') {
+            renderAttendanceMatrixView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead);
+        } else if (activeAttendanceTab === 'consultant') {
+            renderAttendanceConsultantView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead);
+        } else if (activeAttendanceTab === 'daily') {
+            renderAttendanceDailyView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead);
+        }
     };
 
     // --- MODAL DE COMISIONES RÁPIDAS ---
@@ -11345,6 +11720,11 @@ window.renderDailyTasks = function() {
 
     // --- GENERADOR OFICIAL DE PRENÓMINA EXCEL (.XLSX) FOPR-RHU-02-02 ---
     window.exportPrenominaXLSX = function() {
+        if (!window.isAttendanceMasterAdmin()) {
+            window.showToast("🔒 Acceso denegado: La descarga del archivo oficial de prenómina está reservada exclusivamente para Osvaldo Avilés (Auditoría).", true);
+            return;
+        }
+
         if (typeof XLSX === 'undefined') {
             window.showToast("⚠️ Cargando librería SheetJS, intenta en unos segundos...", true);
             return;

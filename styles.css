@@ -1254,7 +1254,9 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
    ========================================================================== */
 #mobileSearchDrawer {
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
-    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.95), 0 4px 12px rgba(0, 0, 0, 0.85);
+    z-index: 50;
+    background-color: #161413;
 }
 #mobileSearchDrawer.search-open {
     transform: translateY(0);
