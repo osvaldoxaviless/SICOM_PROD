@@ -1250,23 +1250,11 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 }
 
 /* ==========================================================================
-   BARRA DE BÚSQUEDA MÓVIL DESPLEGABLE HACIA ABAJO (FACTORY MOBILE SEARCH)
+   BARRA DE BÚSQUEDA MÓVIL DESPLEGABLE (FACTORY MOBILE SEARCH)
    ========================================================================== */
 #mobileSearchDrawer {
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.95), 0 4px 12px rgba(0, 0, 0, 0.85);
-    z-index: 50;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: #161413;
-}
-#mobileSearchDrawer.search-open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-#mobileSearchDrawer.search-closed {
-    transform: translateY(-12px);
-    opacity: 0;
-    pointer-events: none;
 }
 
 /* ==========================================================================
@@ -1314,6 +1302,7 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 }
 
 /* Chips de Asistencia — Factory Terminal Tokens (Monochrome Base + Live Data Accents) */
+.att-chip-normal,
 .att-chip-distancia {
     background-color: #161413;
     color: #8a8380;

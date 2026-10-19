@@ -1,3 +1,6 @@
+const SICOM_VERSION = 'v9.3';
+console.log('⚡ SICOM ERP', SICOM_VERSION, '— Terminal Control Surface Ready');
+
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
     // Escapa un valor para usarlo como argumento string en un handler inline: onclick="fn('${jsArg(valor)}')"
     const jsArg = (u) => escapeHtml((u == null ? '' : String(u)).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' '));
@@ -2544,25 +2547,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     
     window.isMobileSearchOpen = function() {
         const drawer = document.getElementById('mobileSearchDrawer');
-        return drawer && drawer.classList.contains('search-open');
+        return drawer && !drawer.classList.contains('hidden');
     };
 
     window.openMobileSearch = function() {
         const drawer = document.getElementById('mobileSearchDrawer');
         const btn = document.getElementById('searchBtnIcon');
         const inp = document.getElementById('searchInput');
-        const ticker = document.getElementById('announcementTickerBar');
         if (!drawer) return;
 
-        // Ocultar temporalmente el cintillo de avisos para evitar cualquier solapamiento
-        if (ticker && !ticker.classList.contains('hidden')) {
-            ticker.dataset.wasVisible = 'true';
-            ticker.style.opacity = '0';
-            ticker.style.pointerEvents = 'none';
-        }
-
-        drawer.classList.remove('search-closed');
-        drawer.classList.add('search-open');
+        drawer.classList.remove('hidden');
+        drawer.classList.add('flex');
         if (btn) {
             btn.classList.add('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
             btn.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
@@ -2583,21 +2578,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const drawer = document.getElementById('mobileSearchDrawer');
         const btn = document.getElementById('searchBtnIcon');
         const inp = document.getElementById('searchInput');
-        const ticker = document.getElementById('announcementTickerBar');
         if (!drawer) return;
 
-        drawer.classList.remove('search-open');
-        drawer.classList.add('search-closed');
+        drawer.classList.add('hidden');
+        drawer.classList.remove('flex');
         if (btn) {
             btn.classList.remove('bg-[#101010]', 'border-[#ee6018]', 'text-[#ee6018]');
             btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
-        }
-
-        // Restaurar el cintillo de avisos
-        if (ticker && ticker.dataset.wasVisible === 'true') {
-            ticker.style.opacity = '';
-            ticker.style.pointerEvents = '';
-            delete ticker.dataset.wasVisible;
         }
 
         if (!keepQuery && inp) {
@@ -10506,8 +10493,12 @@ window.renderDailyTasks = function() {
         m.classList.remove('hidden');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
 
-        window.updateAttendanceHeaderControls();
-        window.renderAttendanceTable();
+        if (window.innerWidth < 768) {
+            window.setAttendanceViewTab('consultant');
+        } else {
+            window.updateAttendanceHeaderControls();
+            window.renderAttendanceTable();
+        }
     };
 
     window.closeAttendanceModal = function() {
@@ -10616,6 +10607,18 @@ window.renderDailyTasks = function() {
         }
 
         const st = (status || '').toLowerCase();
+
+        // 0. Si el usuario selecciona 'Normal' o 'Día Ordinario' -> Restablecer / Limpiar excepción
+        if (st.includes('normal') || st.includes('ordinario') || st.includes('limpiar')) {
+            if (appData.attendance?.[periodKey]?.[currentCellConsultant]) {
+                delete appData.attendance[periodKey][currentCellConsultant][currentCellDate];
+            }
+            window.saveData(false);
+            window.closeCellStatusPopover();
+            window.renderAttendanceTable();
+            window.showToast(`Día ordinario restablecido para ${currentCellConsultant}`, false);
+            return;
+        }
 
         // 1. Si el usuario selecciona comisión (PT, AFR, ODM, ABM, etc.) -> Exigir captura de motivo y cliente en modal
         if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm')) {
@@ -10758,8 +10761,8 @@ window.renderDailyTasks = function() {
             <button type="button" onclick="setAttendanceViewTab('consultant')" class="text-[#fafafa] hover:text-[#ee6018] underline font-medium">Ver en Vertical ➔</button>
         </div>
 
-        <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]">
-            <table class="w-full text-left border-collapse text-xs">
+        <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]" style="-webkit-overflow-scrolling: touch;">
+            <table class="min-w-[1100px] w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-[#161413] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
                         <th class="p-2.5 sm:p-3 relative md:sticky md:left-0 bg-[#161413] z-20 w-[140px] sm:w-[190px] md:min-w-[210px] border-r border-[#3d3a39]">Colaborador</th>
@@ -10791,12 +10794,12 @@ window.renderDailyTasks = function() {
             let cellsHtml = '';
             workDays.forEach(wd => {
                 const dayRecord = cAtt[wd.dateStr];
-                let status = (dayRecord && dayRecord.status) ? dayRecord.status : 'A distancia';
-                let chipClass = 'att-chip-distancia';
-                let label = status;
+                let status = dayRecord?.status || '';
+                let chipClass = 'att-chip-normal text-[#8a8380] bg-transparent border border-[#2d2a29]';
+                let label = 'Normal';
 
-                const st = status.toLowerCase();
-                if (st.includes('vacaci')) {
+                const st = (status || '').toLowerCase();
+                if (st.includes('vacaci') || dayRecord?.code === 'VA') {
                     chipClass = 'att-chip-vacaciones';
                     vaCount++;
                     label = 'Vacaciones';
@@ -10808,19 +10811,28 @@ window.renderDailyTasks = function() {
                     chipClass = 'att-chip-odm';
                     ptCount++;
                     label = 'Oficina ODM';
-                } else if (st.includes('comisi')) {
+                } else if (st.includes('comisi') || dayRecord?.code === 'PT') {
                     chipClass = 'att-chip-comision';
                     ptCount++;
                     label = 'En comisión';
-                } else if (st.includes('stgt') || st.includes('oficina')) {
-                    chipClass = 'att-chip-stgt';
-                    label = 'Oficina STGT';
-                } else if (st.includes('médico')) {
+                } else if (st.includes('médico') || dayRecord?.code === 'PM') {
                     chipClass = 'att-chip-medico';
                     label = 'Permiso Médico';
-                } else if (st.includes('falta')) {
+                } else if (st.includes('falta') || dayRecord?.code === 'FA') {
                     chipClass = 'att-chip-falta';
                     label = 'Falta (FA)';
+                } else if (st.includes('festivo') || dayRecord?.code === 'FT') {
+                    chipClass = 'att-chip-festivo text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
+                    label = 'Festivo';
+                } else if (st.includes('contingencia') || dayRecord?.code === 'CG') {
+                    chipClass = 'att-chip-contingencia text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
+                    label = 'Contingencia';
+                } else if (status) {
+                    if (st.includes('distancia') || st.includes('stgt')) {
+                        label = 'Normal';
+                    } else {
+                        label = status;
+                    }
                 }
 
                 // Verificación de permiso granular para esta celda
@@ -10918,13 +10930,12 @@ window.renderDailyTasks = function() {
         let distCount = 0, stgtCount = 0, commCount = 0, vacCount = 0, medCount = 0, faltaCount = 0;
         workDays.forEach(wd => {
             const dayRec = cAtt[wd.dateStr];
-            const st = (dayRec?.status || 'A distancia').toLowerCase();
-            if (st.includes('vacaci')) vacCount++;
-            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm')) commCount++;
-            else if (st.includes('stgt') || st.includes('oficina')) stgtCount++;
-            else if (st.includes('médico')) medCount++;
-            else if (st.includes('falta')) faltaCount++;
-            else distCount++;
+            const st = (dayRec?.status || '').toLowerCase();
+            if (st.includes('vacaci') || dayRec?.code === 'VA') vacCount++;
+            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || dayRec?.code === 'PT') commCount++;
+            else if (st.includes('médico') || dayRec?.code === 'PM') medCount++;
+            else if (st.includes('falta') || dayRec?.code === 'FA') faltaCount++;
+            else normalCount++;
         });
 
         const todayStr = new Date().toISOString().slice(0, 10);
@@ -10961,16 +10972,16 @@ window.renderDailyTasks = function() {
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Comisiones (PT)</div>
                     </div>
                     <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
-                        <div class="font-mono text-base font-medium text-[#eeeeee]">${stgtCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Oficina STGT</div>
-                    </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
-                        <div class="font-mono text-base font-medium text-[#8a8380]">${distCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">A Distancia</div>
-                    </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
                         <div class="font-mono text-base font-medium text-[#101010] bg-[#eeeeee] rounded-[2px] inline-block px-2">${vacCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380] mt-0.5">Vacaciones (VA)</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#fafafa]">${normalCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Laborados Ordinarios</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#ff453a]">${medCount + faltaCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Permisos / Incidencias</div>
                     </div>
                 </div>
             </div>
@@ -10985,12 +10996,12 @@ window.renderDailyTasks = function() {
 
         workDays.forEach(wd => {
             const dayRecord = cAtt[wd.dateStr];
-            let status = (dayRecord && dayRecord.status) ? dayRecord.status : 'A distancia';
-            let chipClass = 'att-chip-distancia';
-            let label = status;
+            let status = dayRecord?.status || '';
+            let chipClass = 'att-chip-normal text-[#8a8380] bg-transparent border border-[#2d2a29]';
+            let label = 'Día Ordinario (Normal)';
 
-            const st = status.toLowerCase();
-            if (st.includes('vacaci')) {
+            const st = (status || '').toLowerCase();
+            if (st.includes('vacaci') || dayRecord?.code === 'VA') {
                 chipClass = 'att-chip-vacaciones';
                 label = 'Vacaciones (VA)';
             } else if (st.includes('afr')) {
@@ -10999,18 +11010,27 @@ window.renderDailyTasks = function() {
             } else if (st.includes('odm')) {
                 chipClass = 'att-chip-odm';
                 label = 'Oficina ODM (PT)';
-            } else if (st.includes('comisi')) {
+            } else if (st.includes('comisi') || dayRecord?.code === 'PT') {
                 chipClass = 'att-chip-comision';
                 label = 'En comisión (PT)';
-            } else if (st.includes('stgt') || st.includes('oficina')) {
-                chipClass = 'att-chip-stgt';
-                label = 'Oficina STGT';
-            } else if (st.includes('médico')) {
+            } else if (st.includes('médico') || dayRecord?.code === 'PM') {
                 chipClass = 'att-chip-medico';
                 label = 'Permiso Médico (PM)';
-            } else if (st.includes('falta')) {
+            } else if (st.includes('falta') || dayRecord?.code === 'FA') {
                 chipClass = 'att-chip-falta';
                 label = 'Falta (FA)';
+            } else if (st.includes('festivo') || dayRecord?.code === 'FT') {
+                chipClass = 'att-chip-festivo text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
+                label = 'Festivo Trabajado (FT)';
+            } else if (st.includes('contingencia') || dayRecord?.code === 'CG') {
+                chipClass = 'att-chip-contingencia text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
+                label = 'Contingencia (CG)';
+            } else if (status) {
+                if (st.includes('distancia') || st.includes('stgt')) {
+                    label = 'Día Ordinario (Normal)';
+                } else {
+                    label = status;
+                }
             }
 
             const isToday = (wd.dateStr === todayStr);
@@ -11097,16 +11117,15 @@ window.renderDailyTasks = function() {
         // Agrupar colaboradores por su estado en este día
         const groups = {
             comision: [],
-            oficina: [],
-            distancia: [],
             vacaciones: [],
-            otros: []
+            otros: [],
+            ordinario: []
         };
 
         list.forEach(cName => {
             const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
             const dayRec = (periodData[cName] && periodData[cName][curDate]) || {};
-            const status = dayRec.status || 'A distancia';
+            const status = dayRec.status || 'Normal';
             const st = status.toLowerCase();
 
             const item = {
@@ -11117,10 +11136,9 @@ window.renderDailyTasks = function() {
             };
 
             if (st.includes('vacaci')) groups.vacaciones.push(item);
-            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm')) groups.comision.push(item);
-            else if (st.includes('stgt') || st.includes('oficina')) groups.oficina.push(item);
+            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('pt')) groups.comision.push(item);
             else if (st.includes('médico') || st.includes('falta')) groups.otros.push(item);
-            else groups.distancia.push(item);
+            else groups.ordinario.push(item);
         });
 
         let html = `
@@ -11133,9 +11151,9 @@ window.renderDailyTasks = function() {
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
                     <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.oficina.length} Ofic</span>
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#2d2a29]">${groups.distancia.length} Dist</span>
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#2d2a29]">${groups.ordinario.length} Ordinario</span>
                     ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
+                    ${groups.otros.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#2a1717] text-[#ff453a] border border-[#ff453a]/40">${groups.otros.length} Incid</span>` : ''}
                 </div>
             </div>
 
@@ -11188,10 +11206,9 @@ window.renderDailyTasks = function() {
         }
 
         html += renderGroupSection('En Comisión (PT)', 'bg-[#ee6018]', groups.comision, 'att-chip-comision');
-        html += renderGroupSection('En Oficina STGT', 'bg-[#eeeeee]', groups.oficina, 'att-chip-stgt');
-        html += renderGroupSection('A Distancia / Home Office', 'bg-[#8a8380]', groups.distancia, 'att-chip-distancia');
         html += renderGroupSection('Vacaciones (VA)', 'bg-[#ffffff]', groups.vacaciones, 'att-chip-vacaciones');
         html += renderGroupSection('Permiso Médico / Otros', 'bg-[#ff453a]', groups.otros, 'att-chip-medico');
+        html += renderGroupSection('Laborado Ordinario (Normal)', 'bg-[#8a8380]', groups.ordinario, 'att-chip-normal');
 
         html += `</div>`;
         container.innerHTML = html;
