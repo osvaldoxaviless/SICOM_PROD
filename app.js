@@ -6686,6 +6686,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.renderMindMap = function() {
+      if (!canvasGroup) window.ensureDomReferences();
       if (!canvasGroup) return;
       const mapFrag = document.createDocumentFragment();
       const dynamicDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
