@@ -991,7 +991,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
             e.preventDefault();
             const dInp = document.getElementById('desktopSearchInput');
-            if (dInp && window.innerWidth >= 768) {
+            if (dInp && window.innerWidth >= 1024) {
                 dInp.focus();
                 dInp.select();
             } else if (typeof window.toggleSearch === 'function') {
@@ -1043,7 +1043,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPREMO</span>
                     <span>Dirección General</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura, configuración, usuarios y datos críticos del sistema STGT // SICOM.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura, configuración, usuarios, nómina y auditoría institucional del sistema STGT // SICOM.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
@@ -1074,6 +1074,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Auditoría Inmutable y Respaldos</strong>
                     En <strong class="text-[#eeeeee]">Panel &gt; Historial</strong> puedes auditar cada modificación. Al final del Panel dispones de exportación CSV, respaldo JSON y sincronización con la nube.
                 </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Rol de Asistencia y Esquema Híbrido (FOPR-RHU-02-02 Ver. 4)</strong>
+                    Acceso directo desde el botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en la cabecera superior. Navega entre quincenas (Q1 del 1 al 15, Q2 del 16 al fin de mes). Supervisa la <strong class="text-[#eeeeee]">Matriz General</strong>, la <strong class="text-[#eeeeee]">Vista Diaria</strong> y <strong class="text-[#eeeeee]">Mi Rol</strong>. Administra el esquema híbrido diferenciando entre <span class="text-[#a0ca92] font-medium">Asiste a oficina STGT</span> y <span class="text-[#eeeeee] font-medium">Home Office (A distancia)</span>, con permisos absolutos para editar y corregir cualquier celda o colaborador con un solo clic.
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">08 // Cierre Quincenal, Bloqueo y Descarga Oficial Excel</strong>
+                    Controla el ciclo de auditoría de cada quincena: conmuta entre <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Abierta (Captura)</span>, <span class="text-[#ee6018] font-mono text-[10px] uppercase">En Revisión</span> y <span class="text-[#8a8380] font-mono text-[10px] uppercase">Cerrada (Bloqueada)</span>. Al cerrar la quincena, se congelan automáticamente las modificaciones de consultores y supervisores. Cuenta con el botón exclusivo <strong class="text-[#10b981]">Descargar Excel FOPR-RHU-02-02 Ver. 4</strong>, que genera el formato oficial institucional STGT con colores corporativos, cuadrícula de días, subtotales y firmas de Recursos Humanos y Dirección.
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">09 // Gestión de Vacaciones (FOPR-RHU-02-03) & Comisiones</strong>
+                    Pestaña <strong class="text-[#eeeeee]">Vacaciones</strong> para auditar y autorizar solicitudes con saldo calculado automáticamente según la Ley Federal del Trabajo. Al aprobarse, los días hábiles se descuentan y se reflejan como vacaciones ('V') en el rol de asistencia. Supervisa también las comisiones de campo con motivo y cliente obligatorio.
+                </li>
             </ul>`;
         } else if (currentUserRole === 'Supervisor') {
             content.innerHTML = `
@@ -1082,7 +1094,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPERVISOR</span>
                     <span>Coordinación de Operaciones</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregas y cumplimiento de tiempos del equipo.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregas, seguimiento de asistencia y cumplimiento de tiempos del equipo.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
@@ -1105,6 +1117,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Foro y Bitácora Técnica</strong>
                     Registra acuerdos, bloqueos y menciones (<code class="font-mono text-[#ee6018]">@</code>) con acuse de lectura en cada proyecto.
                 </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Supervisión de Asistencia & Esquema Híbrido</strong>
+                    Ingresa al botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> para auditar la asistencia diaria y quincenal de tu equipo. Supervisa la alternancia del esquema híbrido: <strong class="text-[#eeeeee]">Asiste a oficina STGT</strong> vs <strong class="text-[#eeeeee]">Home Office (A distancia)</strong>, y corrobora que las salidas operativas a clientes tengan registrado su motivo y cliente bajo el estado <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> en quincenas activas.
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Solicitudes de Vacaciones & Vista Mi Rol</strong>
+                    Supervisa las solicitudes de descanso en la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong> para validar la disponibilidad y cobertura operativa de los proyectos. Utiliza la pestaña vertical <strong class="text-[#eeeeee]">Mi Rol</strong> para gestionar tu propio registro quincenal y la <strong class="text-[#eeeeee]">Vista Diaria</strong> para planificar la distribución presencial y remota del equipo.
+                </li>
             </ul>`;
         } else if (currentUserRole === 'Lector') {
             content.innerHTML = `
@@ -1113,7 +1133,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">LECTOR</span>
                     <span>Auditoría y Supervisión Ejecutiva</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // SICOM, con protección contra modificaciones.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // SICOM, con protección integral contra modificaciones accidentales.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
@@ -1132,6 +1152,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Métricas y Trazabilidad</strong>
                     En el menú <strong class="text-[#eeeeee]">Panel</strong>, consulta el <strong class="text-[#eeeeee]">Tablero</strong> para evaluar el rendimiento global y la pestaña <strong class="text-[#eeeeee]">Historial</strong>.
                 </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auditoría de Rol de Asistencia & Prenómina</strong>
+                    Accede al botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en la cabecera superior. En modo solo lectura y auditoría, podrás revisar en tiempo real la Matriz General del equipo, identificar quién asiste a oficina STGT, quién labora en Home Office (A distancia), comisiones en campo o ausencias, además de consultar el estatus de cierre quincenal institucional.
+                </li>
             </ul>`;
         } else {
             content.innerHTML = `
@@ -1140,7 +1164,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40">CONSULTOR</span>
                     <span>Operación y Ejecución</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta avances con evidencias y mantén al día tus entregas.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta avances con evidencias, registra tu asistencia y mantén al día tus entregas.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
@@ -1158,6 +1182,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Modo Enfoque y Foro Técnico</strong>
                     Usa <strong class="text-[#eeeeee]">Modo Enfoque</strong> en la barra superior para aislar tus proyectos asignados y utiliza el <strong class="text-[#eeeeee]">Foro y Bitácora Técnica</strong> para acuerdos, bloqueos y menciones con acuse de lectura.
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auto-registro de Asistencia & Esquema Híbrido</strong>
+                    En la barra superior pulsa <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> (o desde el menú de 3 puntos en tu celular) para registrar tu jornada diaria en tu fila asignada durante quincenas abiertas. Selecciona claramente entre <strong class="text-[#a0ca92] font-medium">Asiste a oficina STGT</strong> para días presenciales y <strong class="text-[#eeeeee] font-medium">Home Office (A distancia)</strong> para días remotos autorizados. Si necesitas restaurar el patrón semanal predeterminado, pulsa "Restablecer horario base".
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Comisiones a Clientes & Vista "Mi Rol" Móvil</strong>
+                    Al realizar actividades fuera de oficina o visitas a clientes, selecciona <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> e ingresa obligatoriamente el cliente y motivo de la salida. Al consultar el sistema desde tu teléfono celular, ingresa a la pestaña <strong class="text-[#eeeeee]">Mi Rol</strong>: una interfaz vertical táctil optimizada que te permite marcar o modificar tus días con un solo toque y ver tu balance quincenal sin desplazamientos incómodos.
+                </li>
+                <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Solicitud Formal de Vacaciones (FOPR-RHU-02-03)</strong>
+                    En la pestaña <strong class="text-[#eeeeee]">Vacaciones</strong>, consulta tu saldo de días con base en tu antigüedad por ley. Genera solicitudes ingresando tu rango de fechas; el sistema calcula los días hábiles a descontar y, tras ser aprobadas por Dirección, se reflejan automáticamente como vacaciones ('V') en tu rol quincenal. Una vez que Dirección realiza el cierre quincenal oficial, tus registros quedan protegidos y congelados.
                 </li>
             </ul>`;
         }
