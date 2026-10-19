@@ -4416,8 +4416,52 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 };
     window.confirmNa = function(p, id) { if(currentUserRole==='Lector') return; const btn = document.getElementById(`${p}BtnNa${id}`), valHidden = document.getElementById(`${p}NaValidated${id}`); if(valHidden)valHidden.value="true"; if(btn){btn.textContent="✓ Validado"; btn.className="pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2";} p==='quick'?window.calculateQuickProgress():window.calculateEditProgress(); if(p==='quick') window.silentSaveInfoCard(); };
 
-    window.calculateQuickProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`quickDoc${d.id}`)?.checked || (document.getElementById(`quickNa${d.id}`)?.checked && document.getElementById(`quickNaValidated${d.id}`)?.value==="true")) sc+=inc; }); const rounded = Math.round(sc); document.getElementById('quickEditProgress').value = rounded; document.getElementById('quickEditProgressLabel').textContent = rounded+'%'; const pp = document.getElementById('infoProgressPill'); if (pp) pp.textContent = rounded+'%'; }
-    window.calculateEditProgress = function() { if(globalDocs.length===0)return; let sc = 0; const inc = 100/globalDocs.length; globalDocs.forEach(d=>{ if(document.getElementById(`editDoc${d.id}`)?.checked || (document.getElementById(`editNa${d.id}`)?.checked && document.getElementById(`editNaValidated${d.id}`)?.value==="true")) sc+=inc; }); document.getElementById('editProgress').value = Math.round(sc); document.getElementById('editProgressLabel').textContent = Math.round(sc)+'%'; }
+    // Cálculo matemático riguroso de avance: Documentos completados entre documentos aplicables reales (LOG-06)
+    window.calculateDocProgress = function(prefix) {
+        if (!globalDocs || globalDocs.length === 0) return 0;
+        let totalDocs = globalDocs.length;
+        let completedDocs = 0;
+        let naValidatedDocs = 0;
+
+        globalDocs.forEach(d => {
+            const isChecked = document.getElementById(`${prefix}Doc${d.id}`)?.checked;
+            const isNa = document.getElementById(`${prefix}Na${d.id}`)?.checked;
+            const isNaValidated = document.getElementById(`${prefix}NaValidated${d.id}`)?.value === "true";
+
+            if (isNa && isNaValidated) {
+                naValidatedDocs++;
+            } else if (isChecked) {
+                completedDocs++;
+            }
+        });
+
+        const applicableDocs = totalDocs - naValidatedDocs;
+        if (applicableDocs <= 0) {
+            return naValidatedDocs > 0 ? 100 : 0;
+        }
+
+        return Math.min(100, Math.max(0, Math.round((completedDocs / applicableDocs) * 100)));
+    };
+
+    window.calculateQuickProgress = function() {
+        if (!globalDocs || globalDocs.length === 0) return;
+        const rounded = window.calculateDocProgress('quick');
+        const qep = document.getElementById('quickEditProgress');
+        if (qep) qep.value = rounded;
+        const qepl = document.getElementById('quickEditProgressLabel');
+        if (qepl) qepl.textContent = rounded + '%';
+        const pp = document.getElementById('infoProgressPill');
+        if (pp) pp.textContent = rounded + '%';
+    };
+
+    window.calculateEditProgress = function() {
+        if (!globalDocs || globalDocs.length === 0) return;
+        const rounded = window.calculateDocProgress('edit');
+        const ep = document.getElementById('editProgress');
+        if (ep) ep.value = rounded;
+        const epl = document.getElementById('editProgressLabel');
+        if (epl) epl.textContent = rounded + '%';
+    };
 
     window.renderDocChecklists = function(prefix, savedData) {
         const c = document.getElementById(`${prefix}DocsContainer`); if(!c) return; c.innerHTML = '';
@@ -5463,12 +5507,50 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     return `<option value="${escapeHtml(k)}" ${k === currentLead ? 'selected' : ''}>${escapeHtml(k)} (${kRole})</option>`;
                 }).join('');
         }
+
+        if (typeof window.renderVacationLedgerHistory === 'function') {
+            window.renderVacationLedgerHistory(name);
+        }
         
         const m = document.getElementById('editConsultantModal');
         if (m) {
             m.classList.remove('hidden');
             setTimeout(() => m.classList.remove('opacity-0'), 10);
         }
+    };
+
+    window.renderVacationLedgerHistory = function(name) {
+        const cont = document.getElementById('editConsVacationLedgerList');
+        if (!cont) return;
+        const ledger = (consultants[name] && Array.isArray(consultants[name].vacationLedger)) ? consultants[name].vacationLedger : [];
+        if (ledger.length === 0) {
+            cont.innerHTML = '<p class="text-[10px] font-mono text-[#8a8380] py-1">Sin movimientos registrados aún.</p>';
+            return;
+        }
+
+        cont.innerHTML = ledger.slice().reverse().map(m => {
+            const isReversal = m.type === 'REVERSAL';
+            const isAccrual = m.type === 'ACCRUAL';
+            const badgeClass = isReversal 
+                ? 'bg-[#30d158]/15 text-[#30d158] border-[#30d158]/30' 
+                : (isAccrual ? 'bg-[#ee6018]/15 text-[#ee6018] border-[#ee6018]/30' : 'bg-[#ff453a]/15 text-[#ff453a] border-[#ff453a]/30');
+            const sign = isReversal || isAccrual ? '+' : '-';
+            const daysCount = m.daysRestored || m.daysAccrued || m.daysDeducted || m.days || 1;
+            const periodStr = m.startDate && m.endDate ? `${m.startDate} al ${m.endDate}` : (m.date || '');
+            const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleDateString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
+
+            return `
+            <div class="p-1.5 bg-[#171513] border border-[#252220] rounded-[2px] flex items-center justify-between text-[10px] font-mono">
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="px-1 py-0.2 rounded-[2px] border text-[9px] uppercase font-bold ${badgeClass}">${m.type || 'MOVIMIENTO'}</span>
+                    <span class="text-[#eeeeee] truncate">${sign}${daysCount} d ${periodStr ? `(${escapeHtml(periodStr)})` : ''}</span>
+                </div>
+                <div class="flex items-center gap-2 text-[#8a8380] shrink-0">
+                    <span>${m.previousBalance ?? '?'} ➔ <strong class="text-[#eeeeee]">${m.newBalance ?? '?'} d</strong></span>
+                    ${timeStr ? `<span class="hidden sm:inline">${timeStr}</span>` : ''}
+                </div>
+            </div>`;
+        }).join('');
     };
 
     window.previewConsLftDays = function(val) {
@@ -6604,9 +6686,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.renderMindMap = function() {
-      if (!canvasGroup) return; canvasGroup.innerHTML = '';
+      if (!canvasGroup) return;
+      const mapFrag = document.createDocumentFragment();
       const dynamicDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-      canvasGroup.appendChild(dynamicDefs);
+      mapFrag.appendChild(dynamicDefs);
       const q = activeSearchQuery.toLowerCase();
 
       ensureDataStructure();
@@ -7012,7 +7095,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               pC.setAttribute('stroke', `url(#${coreGradId})`); 
               pC.setAttribute('stroke-width', '1.8');
               pC.setAttribute('opacity', lineOpacity);
-              canvasGroup.appendChild(pC);
+              mapFrag.appendChild(pC);
 
               const prevModPos = prevModulePositions.get(modId);
               const prevCorePathD = prevCorePaths.get(modId);
@@ -7107,7 +7190,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       pP.classList.add('connector-animate-in');
                       pP.style.animationDelay = `${idx * 15}ms`;
                   }
-                  canvasGroup.appendChild(pP);
+                  mapFrag.appendChild(pP);
               });
           });
       }
@@ -7239,7 +7322,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       pSec.classList.add('sec-connector-selected');
                       pSec.setAttribute('stroke-width', isMultiModCorrelationLink ? '2.4' : '2.2');
                   }
-                  canvasGroup.appendChild(pSec);
+                  mapFrag.appendChild(pSec);
               });
           });
       });
@@ -7660,7 +7743,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           hitBox.style.cursor = 'pointer';
           g.appendChild(hitBox);
           
-          canvasGroup.appendChild(g);
+          mapFrag.appendChild(g);
           });
         }
 
@@ -7870,7 +7953,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             g.appendChild(toggleBtnG);
         }
 
-        canvasGroup.appendChild(g);
+        mapFrag.appendChild(g);
       });
 
       if (appData.core) appData.core._renderData = { x: 0, y: 0 };
@@ -7999,7 +8082,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       coreHit.style.cursor = 'pointer';
       coreG.appendChild(coreHit);
 
-      canvasGroup.appendChild(coreG);
+      mapFrag.appendChild(coreG);
+
+      // Reconciliación atómica en 1 solo reflow eliminando parpadeo visual (PERF-01)
+      if (typeof canvasGroup.replaceChildren === 'function') {
+          canvasGroup.replaceChildren(mapFrag);
+      } else {
+          canvasGroup.innerHTML = '';
+          canvasGroup.appendChild(mapFrag);
+      }
 
       // Calcular caja delimitadora exacta de los módulos y proyectos filtrados para auto-enfoque de cámara
       if (!isDefaultState) {
@@ -8285,17 +8376,59 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.toggleTaskFromDashboard = function(pType, projId, taskId) {
-        let p = null;
-        if (pType === 'direct-project') p = (appData.directProjects || []).find(x => x.id === projId);
-        else (appData.modules || []).forEach(m => { const found = (m.projects || []).find(x => x.id === projId); if (found) p = found; });
-        if (!p || !Array.isArray(p.tasks)) return;
-        const task = p.tasks.find(t => t.id === taskId);
+        let item = null;
+        if (pType === 'direct-project') item = (appData.directProjects || []).find(x => x.id === projId);
+        else (appData.modules || []).forEach(m => { const found = (m.projects || []).find(x => x.id === projId); if (found) item = found; });
+        if (!item || !Array.isArray(item.tasks)) return;
+        const task = item.tasks.find(t => t.id === taskId);
         if (!task) return;
-        task.done = !task.done;
-        logActivity(p.id, p.name, `${task.done ? 'Completó' : 'Reabrió'} tarea: ${task.text}`, localAuthor);
-        window.saveData(true);
-        window.renderDashboard();
-        window.showToast(task.done ? "Tarea completada" : "Tarea reactivada", false);
+
+        const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+        if (task.done === true) {
+            if (isSuper) {
+                task.done = false;
+                archiveTaskFeedback(task);
+                delete task.validatedDate; delete task.validatedTime; delete task.validatedBy;
+                logActivity(item.id, item.name, `Reabrió tarea desde dashboard: ${task.text}`, localAuthor);
+                window.saveData(true);
+                window.renderDashboard();
+                window.showToast("Tarea reactivada", false);
+            } else {
+                window.showToast("Solo Supervisores pueden reabrir tareas completadas", true);
+                window.renderDashboard();
+            }
+        } else if (task.done === 'pending') {
+            if (isSuper) {
+                const now = new Date();
+                task.done = true;
+                task.validatedDate = now.toLocaleDateString('es-MX');
+                task.validatedTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                task.validatedBy = localAuthor;
+                const timeTrace = task.assignDate ? ` [Asignada: ${task.assignDate} ${task.assignTime || ''} ➔ Validada: ${task.validatedDate} ${task.validatedTime}]` : '';
+                logActivity(item.id, item.name, `Validó tarea desde dashboard de ${task.assignee || 'consultor'}: "${task.text}"${timeTrace}`, localAuthor);
+                window.sendExternalAlert('TASK_VALIDATED', {
+                    project: item.name,
+                    task: task.text,
+                    validatedBy: localAuthor,
+                    consultant: task.assignee || 'Consultor'
+                });
+                window.saveData(true);
+                window.renderDashboard();
+                window.showToast("Tarea validada", false);
+                window.triggerCelebration();
+            } else {
+                task.done = false;
+                archiveTaskFeedback(task);
+                logActivity(item.id, item.name, `Canceló envío a validación desde dashboard: ${task.text}`, localAuthor);
+                window.saveData(true);
+                window.renderDashboard();
+                window.showToast("Envío a validación cancelado", false);
+            }
+        } else {
+            // Completar / Enviar a validar con evidencia
+            window.openTaskFeedbackModal(taskId, 'project', item.id);
+            setTimeout(() => window.renderDashboard(), 100);
+        }
     };
 
     window.renderDashboard = function() {
@@ -11197,6 +11330,38 @@ window.renderDailyTasks = function() {
         if (popover) popover.classList.add('hidden');
     };
 
+    // Restituye automáticamente los días de vacaciones si un día previamente vacacional se cancela o modifica
+    window.revertVacationDayIfApplicable = function(consultant, dateStr, periodKey, reason = 'Modificación de día en rol de asistencia') {
+        const existing = appData.attendance?.[periodKey]?.[consultant]?.[dateStr];
+        if (existing && (String(existing.status).toLowerCase().includes('vacaci') || existing.code === 'VA')) {
+            const meta = (consultants && consultants[consultant]) || defaultConsultantMetadata[consultant] || {};
+            const curPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
+            const newBalance = curPending + 1;
+            if (!consultants[consultant]) consultants[consultant] = {};
+            consultants[consultant].pendingVacations = newBalance;
+
+            if (!Array.isArray(consultants[consultant].vacationLedger)) {
+                consultants[consultant].vacationLedger = [];
+            }
+            consultants[consultant].vacationLedger.push({
+                id: 'rev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                type: 'REVERSAL',
+                date: dateStr,
+                daysRestored: 1,
+                previousBalance: curPending,
+                newBalance: newBalance,
+                reason: reason,
+                timestamp: new Date().toISOString(),
+                registeredBy: localAuthor || 'Sistema'
+            });
+            if (typeof window.showToast === 'function') {
+                window.showToast(`🏖️ Restituido 1 día de vacaciones a ${consultant}. Saldo disponible: ${newBalance} días.`, false);
+            }
+            return true;
+        }
+        return false;
+    };
+
     window.selectCellStatus = function(status) {
         if (!currentCellConsultant || !currentCellDate) return;
         const m = parseInt(document.getElementById('attSelMonth')?.value || '10');
@@ -11212,6 +11377,11 @@ window.renderDailyTasks = function() {
         }
 
         const st = (status || '').toLowerCase().trim();
+
+        // Reversión contable automática: Si la celda contenía vacaciones y se cambia a otro estado, restituir saldo en VacationLedger
+        if (!st.includes('vacaci')) {
+            window.revertVacationDayIfApplicable(currentCellConsultant, currentCellDate, periodKey);
+        }
 
         // 0. Si el usuario selecciona 'Restablecer' o 'Limpiar' -> Restablecer horario base semanal
         if (st.includes('limpiar') || st.includes('restablecer') || st === 'normal' || st.includes('ordinario')) {
@@ -12205,10 +12375,18 @@ window.renderDailyTasks = function() {
         if (retInput) retInput.value = retStr;
 
         const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4', 10);
-        const balance = Math.max(0, pending - requested);
+        const balance = pending - requested;
 
         document.getElementById('vacRequestedDaysBadge').textContent = requested;
-        document.getElementById('vacBalanceBadge').textContent = balance;
+        const bBadge = document.getElementById('vacBalanceBadge');
+        if (bBadge) {
+            bBadge.textContent = balance;
+            if (balance < 0) {
+                bBadge.className = 'text-sm font-bold text-[#ff453a]';
+            } else {
+                bBadge.className = 'text-sm font-normal text-[#a0ca92]';
+            }
+        }
     };
 
     window.saveVacation = function() {
@@ -12258,6 +12436,27 @@ window.renderDailyTasks = function() {
 
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
         const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
+        const currentPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
+
+        // Pre-conteo de días hábiles no festivos y blindaje estricto contra sobregiros (LOG-05)
+        let testCountCur = new Date(startDt.getTime());
+        let preCount = 0;
+        while (testCountCur <= endDt) {
+            const dow = testCountCur.getDay();
+            const isHoliday = typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(testCountCur);
+            if (dow !== 0 && dow !== 6 && !isHoliday) preCount++;
+            testCountCur.setDate(testCountCur.getDate() + 1);
+        }
+
+        if (preCount === 0) {
+            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana o días de descanso oficial", true);
+            return;
+        }
+
+        if (preCount > currentPending) {
+            window.showToast(`⚠️ Saldo insuficiente: ${consultant} cuenta con ${currentPending} día(s) disponible(s) e intenta solicitar ${preCount} día(s) hábiles.`, true);
+            return;
+        }
 
         let cur = new Date(startDt.getTime());
         let count = 0;
@@ -12301,13 +12500,7 @@ window.renderDailyTasks = function() {
             cur.setDate(cur.getDate() + 1);
         }
 
-        if (count === 0) {
-            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana o días de descanso oficial", true);
-            return;
-        }
-
-        const currentPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
-        const newBalance = Math.max(0, currentPending - count);
+        const newBalance = currentPending - count;
         if (!consultants[consultant]) consultants[consultant] = {};
         consultants[consultant].pendingVacations = newBalance;
 

@@ -367,7 +367,16 @@
                           <input type="checkbox" id="editConsHo5" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Vie
                       </label>
                   </div>
-              </div>
+              <!-- LIBRO MAYOR DE VACACIONES (HISTORIAL CONTABLE) -->
+              <details class="bg-[#101010] border border-[#3d3a39] rounded-[3px] p-2.5">
+                  <summary class="font-mono text-[10px] text-[#b8b3b0] uppercase cursor-pointer select-none hover:text-[#eeeeee] flex items-center justify-between">
+                      <span>Historial de Movimientos Vacacionales (Libro Mayor)</span>
+                      <span class="text-[9px] text-[#8a8380] font-mono">Trazabilidad</span>
+                  </summary>
+                  <div id="editConsVacationLedgerList" class="mt-2 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                      <!-- Renderizado dinámico -->
+                  </div>
+              </details>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
