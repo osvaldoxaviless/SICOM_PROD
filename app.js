@@ -402,6 +402,140 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             };
         }
+        if (!appData.attendance["2026-10-Q2"]) {
+            appData.attendance["2026-10-Q2"] = {
+                "Manuel Gutierrez": {
+                    "2026-10-16": { status: "Asiste a oficina STGT" },
+                    "2026-10-19": { status: "Asiste a oficina STGT" },
+                    "2026-10-20": { status: "Home Office" },
+                    "2026-10-21": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-22": { status: "Home Office" },
+                    "2026-10-23": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-26": { status: "Asiste a oficina STGT" },
+                    "2026-10-27": { status: "Home Office" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Home Office" },
+                    "2026-10-30": { status: "Asiste a oficina STGT" }
+                },
+                "Carlos Islas": {
+                    "2026-10-16": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-19": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-20": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-21": { status: "Vacaciones", code: "VA", note: "Vacaciones solicitadas" },
+                    "2026-10-22": { status: "Vacaciones", code: "VA", note: "Vacaciones solicitadas" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-27": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Rafael Romero": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "En comisión", client: "Comisión General", code: "PT" },
+                    "2026-10-20": { status: "Home Office" },
+                    "2026-10-21": { status: "Asiste a oficina STGT" },
+                    "2026-10-22": { status: "Asiste a oficina STGT" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-27": { status: "Home Office" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Asiste a oficina STGT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Miguel Muñoz": {
+                    "2026-10-16": { status: "Asiste a oficina STGT" },
+                    "2026-10-19": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-20": { status: "Home Office" },
+                    "2026-10-21": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-22": { status: "Home Office" },
+                    "2026-10-23": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-26": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-27": { status: "Home Office" },
+                    "2026-10-28": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-29": { status: "Home Office" },
+                    "2026-10-30": { status: "Asiste a oficina STGT" }
+                },
+                "Óscar González": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "Home Office" },
+                    "2026-10-20": { status: "Asiste a oficina STGT" },
+                    "2026-10-21": { status: "Vacaciones", code: "VA", note: "Vacaciones autorizadas" },
+                    "2026-10-22": { status: "Vacaciones", code: "VA", note: "Vacaciones autorizadas" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Home Office" },
+                    "2026-10-27": { status: "Asiste a oficina STGT" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Asiste a oficina STGT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Ricardo Lira": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "Asiste a oficina STGT" },
+                    "2026-10-20": { status: "Home Office" },
+                    "2026-10-21": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-22": { status: "Asiste a oficina STGT" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Asiste a oficina STGT" },
+                    "2026-10-27": { status: "Home Office" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Emmanuel Sánchez": {
+                    "2026-10-16": { status: "Asiste a oficina STGT" },
+                    "2026-10-19": { status: "Home Office" },
+                    "2026-10-20": { status: "Asiste a oficina STGT" },
+                    "2026-10-21": { status: "Home Office" },
+                    "2026-10-22": { status: "Asiste a oficina STGT" },
+                    "2026-10-23": { status: "Asiste a oficina STGT" },
+                    "2026-10-26": { status: "Home Office" },
+                    "2026-10-27": { status: "Asiste a oficina STGT" },
+                    "2026-10-28": { status: "Home Office" },
+                    "2026-10-29": { status: "Asiste a oficina STGT" },
+                    "2026-10-30": { status: "Asiste a oficina STGT" }
+                },
+                "Osvaldo Avilés": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "Home Office" },
+                    "2026-10-20": { status: "Asiste a oficina STGT" },
+                    "2026-10-21": { status: "Asiste a oficina STGT" },
+                    "2026-10-22": { status: "Asiste a oficina STGT" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Home Office" },
+                    "2026-10-27": { status: "Asiste a oficina STGT" },
+                    "2026-10-28": { status: "Asiste a oficina STGT" },
+                    "2026-10-29": { status: "Asiste a oficina STGT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Diego Cristobal": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-20": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-21": { status: "Home Office" },
+                    "2026-10-22": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-27": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-28": { status: "Home Office" },
+                    "2026-10-29": { status: "Asiste a oficina AFR", client: "Flecha Roja", code: "PT" },
+                    "2026-10-30": { status: "Home Office" }
+                },
+                "Sue Oyuqui": {
+                    "2026-10-16": { status: "Home Office" },
+                    "2026-10-19": { status: "Home Office" },
+                    "2026-10-20": { status: "Asiste a oficina STGT" },
+                    "2026-10-21": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-22": { status: "Asiste a oficina STGT" },
+                    "2026-10-23": { status: "Home Office" },
+                    "2026-10-26": { status: "Home Office" },
+                    "2026-10-27": { status: "Asiste a oficina STGT" },
+                    "2026-10-28": { status: "Asiste a oficina ODM", client: "Ómnibus de México", code: "PT" },
+                    "2026-10-29": { status: "Asiste a oficina STGT" },
+                    "2026-10-30": { status: "Home Office" }
+                }
+            };
+        }
         if (!appData.attendanceLocks) appData.attendanceLocks = {};
 
         // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
@@ -840,8 +974,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
-    // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K)
+    // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K) y Cierre de Ventanas (Esc)
     document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const pop = document.getElementById('cellStatusPopover');
+            if (pop && !pop.classList.contains('hidden')) {
+                window.closeCellStatusPopover();
+                return;
+            }
+            const att = document.getElementById('attendanceModal');
+            if (att && !att.classList.contains('hidden')) {
+                window.closeAttendanceModal();
+                return;
+            }
+        }
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
             e.preventDefault();
             const dInp = document.getElementById('desktopSearchInput');
@@ -10272,6 +10418,181 @@ window.renderDailyTasks = function() {
         return `${y}-${m}-${d}`;
     }
 
+    // Esquema híbrido oficial STGT: define los días habituales de Home Office vs Oficina STGT
+    window.getDefaultWorkdayStatus = function(cName, dateStr) {
+        const dt = parseLocalDate(dateStr);
+        if (!dt) return 'Asiste a oficina STGT';
+        const dow = dt.getDay(); // 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie
+        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const name = norm(cName);
+
+        // Emmanuel Sánchez: Lunes y Miércoles Home Office, Mar/Jue/Vie Oficina STGT
+        if (name.includes('emmanuel') || name.includes('sanchez')) {
+            return (dow === 1 || dow === 3) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Osvaldo Avilés: Lunes y Viernes Home Office, Mar/Mié/Jue Oficina STGT
+        if (name.includes('osvaldo') || name.includes('aviles')) {
+            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Óscar González: Lunes y Viernes Home Office, Mar/Mié/Jue Oficina STGT
+        if (name.includes('oscar') || name.includes('gonzalez')) {
+            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Ricardo Lira: Martes y Viernes Home Office
+        if (name.includes('ricardo') || name.includes('lira')) {
+            return (dow === 2 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Rafael Romero: Martes y Viernes Home Office
+        if (name.includes('rafael') || name.includes('romero')) {
+            return (dow === 2 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Manuel Gutiérrez: Martes y Jueves Home Office
+        if (name.includes('manuel') || name.includes('gutierrez')) {
+            return (dow === 2 || dow === 4) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Miguel Muñoz: Martes y Jueves Home Office
+        if (name.includes('munoz')) {
+            return (dow === 2 || dow === 4) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Diego Cristobal: Miércoles y Viernes Home Office
+        if (name.includes('diego') || name.includes('cristobal')) {
+            return (dow === 3 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Sue Oyuqui: Lunes y Viernes Home Office
+        if (name.includes('sue') || name.includes('oyuqui')) {
+            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Carlos Islas: Lunes y Viernes Home Office
+        if (name.includes('carlos') || name.includes('islas')) {
+            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
+        }
+        // Default general: Lunes y Miércoles Home Office, otros Oficina STGT
+        return (dow === 1 || dow === 3) ? 'Home Office' : 'Asiste a oficina STGT';
+    };
+
+    // Determina tipo, etiqueta legible y estilo visual exacto de cada celda del rol
+    window.getAttendanceCellDetails = function(dayRecord, cName, dateStr) {
+        let rawStatus = dayRecord?.status || '';
+        const st = rawStatus.toLowerCase().trim();
+
+        // 1. Vacaciones
+        if (st.includes('vacaci') || dayRecord?.code === 'VA') {
+            return {
+                type: 'vacaciones',
+                label: 'Vacaciones',
+                chipClass: 'att-chip-vacaciones',
+                status: 'Vacaciones',
+                code: 'VA'
+            };
+        }
+        // 2. Comisiones a clientes específicos (AFR, ODM, ABM)
+        if (st.includes('afr')) {
+            return {
+                type: 'afr',
+                label: 'Oficina AFR',
+                chipClass: 'att-chip-afr',
+                status: rawStatus || 'Asiste a oficina AFR',
+                code: 'PT'
+            };
+        }
+        if (st.includes('odm') || st.includes('ómnibus') || st.includes('omnibus')) {
+            return {
+                type: 'odm',
+                label: 'Oficina ODM',
+                chipClass: 'att-chip-odm',
+                status: rawStatus || 'Asiste a oficina ODM',
+                code: 'PT'
+            };
+        }
+        // 3. Comisión general
+        if (st.includes('comisi') || dayRecord?.code === 'PT') {
+            return {
+                type: 'comision',
+                label: 'En comisión',
+                chipClass: 'att-chip-comision',
+                status: rawStatus || 'En comisión',
+                code: 'PT'
+            };
+        }
+        // 4. Permisos médicos e incidencias
+        if (st.includes('médico') || st.includes('medico') || dayRecord?.code === 'PM') {
+            return {
+                type: 'medico',
+                label: 'Permiso Médico',
+                chipClass: 'att-chip-medico',
+                status: 'Permiso médico',
+                code: 'PM'
+            };
+        }
+        if (st.includes('falta') || dayRecord?.code === 'FA') {
+            return {
+                type: 'falta',
+                label: 'Falta (FA)',
+                chipClass: 'att-chip-falta',
+                status: 'Falta',
+                code: 'FA'
+            };
+        }
+        if (st.includes('festivo') || dayRecord?.code === 'FT') {
+            return {
+                type: 'festivo',
+                label: 'Festivo',
+                chipClass: 'att-chip-festivo text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40',
+                status: 'Festivo',
+                code: 'FT'
+            };
+        }
+        if (st.includes('contingencia') || dayRecord?.code === 'CG') {
+            return {
+                type: 'contingencia',
+                label: 'Contingencia',
+                chipClass: 'att-chip-contingencia text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40',
+                status: 'Contingencia',
+                code: 'CG'
+            };
+        }
+        // 5. Explicit Home Office / A distancia
+        if (st.includes('home') || st.includes('distancia') || st.includes('remoto')) {
+            return {
+                type: 'home_office',
+                label: 'Home Office',
+                chipClass: 'att-chip-distancia',
+                status: 'Home Office',
+                code: ''
+            };
+        }
+        // 6. Explicit Oficina STGT
+        if (st.includes('stgt') || st.includes('oficina')) {
+            return {
+                type: 'stgt',
+                label: 'Oficina STGT',
+                chipClass: 'att-chip-stgt',
+                status: 'Asiste a oficina STGT',
+                code: ''
+            };
+        }
+
+        // 7. Si no tiene registro explícito o era el antiguo 'Normal', resolver con el horario base
+        const defaultMode = window.getDefaultWorkdayStatus(cName, dateStr);
+        if (defaultMode === 'Home Office') {
+            return {
+                type: 'home_office',
+                label: 'Home Office',
+                chipClass: 'att-chip-distancia',
+                status: 'Home Office',
+                code: ''
+            };
+        } else {
+            return {
+                type: 'stgt',
+                label: 'Oficina STGT',
+                chipClass: 'att-chip-stgt',
+                status: 'Asiste a oficina STGT',
+                code: ''
+            };
+        }
+    };
+
     // Validación de Administrador Maestro de Prenómina (Osvaldo Avilés / "yo")
     window.isAttendanceMasterAdmin = function() {
         const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -10606,21 +10927,59 @@ window.renderDailyTasks = function() {
             return;
         }
 
-        const st = (status || '').toLowerCase();
+        const st = (status || '').toLowerCase().trim();
 
-        // 0. Si el usuario selecciona 'Normal' o 'Día Ordinario' -> Restablecer / Limpiar excepción
-        if (st.includes('normal') || st.includes('ordinario') || st.includes('limpiar')) {
+        // 0. Si el usuario selecciona 'Restablecer' o 'Limpiar' -> Restablecer horario base semanal
+        if (st.includes('limpiar') || st.includes('restablecer') || st === 'normal' || st.includes('ordinario')) {
             if (appData.attendance?.[periodKey]?.[currentCellConsultant]) {
                 delete appData.attendance[periodKey][currentCellConsultant][currentCellDate];
             }
             window.saveData(false);
             window.closeCellStatusPopover();
             window.renderAttendanceTable();
-            window.showToast(`Día ordinario restablecido para ${currentCellConsultant}`, false);
+            window.showToast(`Horario base semanal restablecido para ${currentCellConsultant}`, false);
             return;
         }
 
-        // 1. Si el usuario selecciona comisión (PT, AFR, ODM, ABM, etc.) -> Exigir captura de motivo y cliente en modal
+        // 1. Si selecciona Home Office (A distancia)
+        if (st.includes('home') || st.includes('distancia') || st.includes('remoto')) {
+            if (!appData.attendance) appData.attendance = {};
+            if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+            if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
+
+            appData.attendance[periodKey][currentCellConsultant][currentCellDate] = {
+                status: 'Home Office',
+                code: '',
+                updatedBy: localAuthor || 'Sistema',
+                updatedAt: new Date().toISOString()
+            };
+            window.saveData(false);
+            window.closeCellStatusPopover();
+            window.renderAttendanceTable();
+            window.showToast(`📍 Modalidad asignada: "Home Office" para ${currentCellConsultant}`, false);
+            return;
+        }
+
+        // 2. Si selecciona Asiste a oficina STGT
+        if (st.includes('stgt') || st.includes('oficina stgt') || st === 'oficina') {
+            if (!appData.attendance) appData.attendance = {};
+            if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+            if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
+
+            appData.attendance[periodKey][currentCellConsultant][currentCellDate] = {
+                status: 'Asiste a oficina STGT',
+                code: '',
+                updatedBy: localAuthor || 'Sistema',
+                updatedAt: new Date().toISOString()
+            };
+            window.saveData(false);
+            window.closeCellStatusPopover();
+            window.renderAttendanceTable();
+            window.showToast(`🏢 Asistencia asignada: "Oficina STGT" para ${currentCellConsultant}`, false);
+            return;
+        }
+
+        // 3. Si el usuario selecciona comisión (PT, AFR, ODM, ABM, etc.) -> Exigir captura de motivo y cliente en modal
         if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm')) {
             let defaultClient = 'Autobuses Flecha Roja (AFR)';
             if (st.includes('odm') || st.includes('ómnibus') || st.includes('omnibus')) defaultClient = 'Ómnibus de México (ODM)';
@@ -10632,7 +10991,7 @@ window.renderDailyTasks = function() {
             return;
         }
 
-        // 2. Si el usuario selecciona vacaciones -> Abrir modal de solicitud formal de vacaciones FOPR
+        // 4. Si el usuario selecciona vacaciones -> Abrir modal de solicitud formal de vacaciones FOPR
         if (st.includes('vacaci')) {
             window.closeCellStatusPopover();
             window.openVacationModal(currentCellConsultant, currentCellDate);
@@ -10644,7 +11003,7 @@ window.renderDailyTasks = function() {
         if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
 
         let code = '';
-        if (st.includes('médico')) code = 'PM';
+        if (st.includes('médico') || st.includes('medico')) code = 'PM';
         else if (st.includes('falta')) code = 'FA';
 
         appData.attendance[periodKey][currentCellConsultant][currentCellDate] = {
@@ -10790,50 +11149,18 @@ window.renderDailyTasks = function() {
 
             let ptCount = 0;
             let vaCount = 0;
+            let stgtCount = 0;
+            let homeCount = 0;
 
             let cellsHtml = '';
             workDays.forEach(wd => {
                 const dayRecord = cAtt[wd.dateStr];
-                let status = dayRecord?.status || '';
-                let chipClass = 'att-chip-normal text-[#8a8380] bg-transparent border border-[#2d2a29]';
-                let label = 'Normal';
+                const cellInfo = window.getAttendanceCellDetails(dayRecord, cName, wd.dateStr);
 
-                const st = (status || '').toLowerCase();
-                if (st.includes('vacaci') || dayRecord?.code === 'VA') {
-                    chipClass = 'att-chip-vacaciones';
-                    vaCount++;
-                    label = 'Vacaciones';
-                } else if (st.includes('afr')) {
-                    chipClass = 'att-chip-afr';
-                    ptCount++;
-                    label = 'Oficina AFR';
-                } else if (st.includes('odm')) {
-                    chipClass = 'att-chip-odm';
-                    ptCount++;
-                    label = 'Oficina ODM';
-                } else if (st.includes('comisi') || dayRecord?.code === 'PT') {
-                    chipClass = 'att-chip-comision';
-                    ptCount++;
-                    label = 'En comisión';
-                } else if (st.includes('médico') || dayRecord?.code === 'PM') {
-                    chipClass = 'att-chip-medico';
-                    label = 'Permiso Médico';
-                } else if (st.includes('falta') || dayRecord?.code === 'FA') {
-                    chipClass = 'att-chip-falta';
-                    label = 'Falta (FA)';
-                } else if (st.includes('festivo') || dayRecord?.code === 'FT') {
-                    chipClass = 'att-chip-festivo text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
-                    label = 'Festivo';
-                } else if (st.includes('contingencia') || dayRecord?.code === 'CG') {
-                    chipClass = 'att-chip-contingencia text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
-                    label = 'Contingencia';
-                } else if (status) {
-                    if (st.includes('distancia') || st.includes('stgt')) {
-                        label = 'Normal';
-                    } else {
-                        label = status;
-                    }
-                }
+                if (cellInfo.type === 'vacaciones') vaCount++;
+                else if (cellInfo.type === 'comision' || cellInfo.type === 'afr' || cellInfo.type === 'odm') ptCount++;
+                else if (cellInfo.type === 'home_office') homeCount++;
+                else if (cellInfo.type === 'stgt') stgtCount++;
 
                 // Verificación de permiso granular para esta celda
                 const editCheck = window.canUserEditAttendanceCell(cName, wd.dateStr, periodKey);
@@ -10841,21 +11168,23 @@ window.renderDailyTasks = function() {
                     ? `openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')`
                     : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
                 const cursorStyle = editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default opacity-85';
-                const cellTitle = editCheck.allowed ? `${escapeHtml(status)} (Clic para cambiar)` : `${escapeHtml(status)} (${escapeHtml(editCheck.reason)})`;
+                const cellTitle = editCheck.allowed ? `${escapeHtml(cellInfo.label)} (Clic para cambiar)` : `${escapeHtml(cellInfo.label)} (${escapeHtml(editCheck.reason)})`;
 
                 cellsHtml += `
                     <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
-                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${chipClass} ${cursorStyle}" title="${cellTitle}">
-                            <span class="truncate">${escapeHtml(label)}</span>
+                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${cellInfo.chipClass} ${cursorStyle}" title="${cellTitle}">
+                            <span class="truncate">${escapeHtml(cellInfo.label)}</span>
                         </button>
                     </td>
                 `;
             });
 
             let summaryHtml = '';
-            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d${ptCount > 1 ? 'ías' : 'ía'} com</span> `;
-            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d${vaCount > 1 ? 'ías' : 'ía'} vac</span>`;
-            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px] uppercase">Normal</span>`;
+            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d com</span> `;
+            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d vac</span> `;
+            if (stgtCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[9px] uppercase font-medium">${stgtCount} ofi</span> `;
+            if (homeCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29] font-mono text-[9px] uppercase font-medium">${homeCount} home</span>`;
+            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px] uppercase">Laborando</span>`;
 
             html += `
                 <tr class="hover:bg-[#141211] transition-colors border-b border-[#1d1a18]">
@@ -10930,12 +11259,13 @@ window.renderDailyTasks = function() {
         let distCount = 0, stgtCount = 0, commCount = 0, vacCount = 0, medCount = 0, faltaCount = 0;
         workDays.forEach(wd => {
             const dayRec = cAtt[wd.dateStr];
-            const st = (dayRec?.status || '').toLowerCase();
-            if (st.includes('vacaci') || dayRec?.code === 'VA') vacCount++;
-            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || dayRec?.code === 'PT') commCount++;
-            else if (st.includes('médico') || dayRec?.code === 'PM') medCount++;
-            else if (st.includes('falta') || dayRec?.code === 'FA') faltaCount++;
-            else normalCount++;
+            const cellInfo = window.getAttendanceCellDetails(dayRec, curC, wd.dateStr);
+            if (cellInfo.type === 'vacaciones') vacCount++;
+            else if (cellInfo.type === 'comision' || cellInfo.type === 'afr' || cellInfo.type === 'odm') commCount++;
+            else if (cellInfo.type === 'medico') medCount++;
+            else if (cellInfo.type === 'falta') faltaCount++;
+            else if (cellInfo.type === 'home_office') distCount++;
+            else if (cellInfo.type === 'stgt') stgtCount++;
         });
 
         const todayStr = new Date().toISOString().slice(0, 10);
@@ -10966,7 +11296,7 @@ window.renderDailyTasks = function() {
                 </div>
 
                 <!-- CONTADORES RESUMEN QUINCENAL (FACTORY KPIS) -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#252220]">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-[#252220]">
                     <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
                         <div class="font-mono text-base font-medium text-[#ee6018]">${commCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Comisiones (PT)</div>
@@ -10976,12 +11306,16 @@ window.renderDailyTasks = function() {
                         <div class="font-mono text-[9px] uppercase text-[#8a8380] mt-0.5">Vacaciones (VA)</div>
                     </div>
                     <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
-                        <div class="font-mono text-base font-medium text-[#fafafa]">${normalCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Laborados Ordinarios</div>
+                        <div class="font-mono text-base font-medium text-[#ffffff]">${stgtCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Oficina STGT</div>
+                    </div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                        <div class="font-mono text-base font-medium text-[#8a8380]">${distCount}</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Home Office</div>
                     </div>
                     <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
                         <div class="font-mono text-base font-medium text-[#ff453a]">${medCount + faltaCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Permisos / Incidencias</div>
+                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Permisos / Falta</div>
                     </div>
                 </div>
             </div>
@@ -10996,42 +11330,18 @@ window.renderDailyTasks = function() {
 
         workDays.forEach(wd => {
             const dayRecord = cAtt[wd.dateStr];
-            let status = dayRecord?.status || '';
-            let chipClass = 'att-chip-normal text-[#8a8380] bg-transparent border border-[#2d2a29]';
-            let label = 'Día Ordinario (Normal)';
+            const cellInfo = window.getAttendanceCellDetails(dayRecord, curC, wd.dateStr);
 
-            const st = (status || '').toLowerCase();
-            if (st.includes('vacaci') || dayRecord?.code === 'VA') {
-                chipClass = 'att-chip-vacaciones';
-                label = 'Vacaciones (VA)';
-            } else if (st.includes('afr')) {
-                chipClass = 'att-chip-afr';
-                label = 'Oficina AFR (PT)';
-            } else if (st.includes('odm')) {
-                chipClass = 'att-chip-odm';
-                label = 'Oficina ODM (PT)';
-            } else if (st.includes('comisi') || dayRecord?.code === 'PT') {
-                chipClass = 'att-chip-comision';
-                label = 'En comisión (PT)';
-            } else if (st.includes('médico') || dayRecord?.code === 'PM') {
-                chipClass = 'att-chip-medico';
-                label = 'Permiso Médico (PM)';
-            } else if (st.includes('falta') || dayRecord?.code === 'FA') {
-                chipClass = 'att-chip-falta';
-                label = 'Falta (FA)';
-            } else if (st.includes('festivo') || dayRecord?.code === 'FT') {
-                chipClass = 'att-chip-festivo text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
-                label = 'Festivo Trabajado (FT)';
-            } else if (st.includes('contingencia') || dayRecord?.code === 'CG') {
-                chipClass = 'att-chip-contingencia text-[#ee6018] bg-[#1d1a18] border border-[#ee6018]/40';
-                label = 'Contingencia (CG)';
-            } else if (status) {
-                if (st.includes('distancia') || st.includes('stgt')) {
-                    label = 'Día Ordinario (Normal)';
-                } else {
-                    label = status;
-                }
-            }
+            let chipClass = cellInfo.chipClass;
+            let label = cellInfo.label;
+            if (cellInfo.type === 'vacaciones') label = 'Vacaciones (VA)';
+            else if (cellInfo.type === 'afr') label = 'Oficina AFR (PT)';
+            else if (cellInfo.type === 'odm') label = 'Oficina ODM (PT)';
+            else if (cellInfo.type === 'comision') label = 'En comisión (PT)';
+            else if (cellInfo.type === 'medico') label = 'Permiso Médico (PM)';
+            else if (cellInfo.type === 'falta') label = 'Falta (FA)';
+            else if (cellInfo.type === 'home_office') label = 'Home Office (A distancia)';
+            else if (cellInfo.type === 'stgt') label = 'Asiste a oficina STGT';
 
             const isToday = (wd.dateStr === todayStr);
             const editCheck = window.canUserEditAttendanceCell(curC, wd.dateStr, periodKey);
@@ -11116,29 +11426,31 @@ window.renderDailyTasks = function() {
 
         // Agrupar colaboradores por su estado en este día
         const groups = {
+            stgt: [],
+            homeOffice: [],
             comision: [],
             vacaciones: [],
-            otros: [],
-            ordinario: []
+            otros: []
         };
 
         list.forEach(cName => {
             const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
             const dayRec = (periodData[cName] && periodData[cName][curDate]) || {};
-            const status = dayRec.status || 'Normal';
-            const st = status.toLowerCase();
+            const cellInfo = window.getAttendanceCellDetails(dayRec, cName, curDate);
 
             const item = {
                 name: cName,
                 meta: cMeta,
-                status: status,
-                record: dayRec
+                status: cellInfo.label,
+                record: dayRec,
+                chipClass: cellInfo.chipClass
             };
 
-            if (st.includes('vacaci')) groups.vacaciones.push(item);
-            else if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('pt')) groups.comision.push(item);
-            else if (st.includes('médico') || st.includes('falta')) groups.otros.push(item);
-            else groups.ordinario.push(item);
+            if (cellInfo.type === 'vacaciones') groups.vacaciones.push(item);
+            else if (cellInfo.type === 'comision' || cellInfo.type === 'afr' || cellInfo.type === 'odm') groups.comision.push(item);
+            else if (cellInfo.type === 'medico' || cellInfo.type === 'falta') groups.otros.push(item);
+            else if (cellInfo.type === 'home_office') groups.homeOffice.push(item);
+            else groups.stgt.push(item);
         });
 
         let html = `
@@ -11150,8 +11462,9 @@ window.renderDailyTasks = function() {
                     <div class="text-[11px] text-[#8a8380] font-mono">Resumen de asignaciones y ubicaciones del equipo</div>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.stgt.length} Oficina STGT</span>
+                    <span class="px-2 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29]">${groups.homeOffice.length} Home Office</span>
                     <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#2d2a29]">${groups.ordinario.length} Ordinario</span>
                     ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
                     ${groups.otros.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#2a1717] text-[#ff453a] border border-[#ff453a]/40">${groups.otros.length} Incid</span>` : ''}
                 </div>
@@ -11190,7 +11503,7 @@ window.renderDailyTasks = function() {
                             </div>
                         </div>
                         <div class="shrink-0">
-                            <button type="button" onclick="${clickAction}" class="att-cell py-1 px-1.5 rounded-[3px] font-mono text-[9.5px] uppercase ${chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
+                            <button type="button" onclick="${clickAction}" class="att-cell py-1 px-1.5 rounded-[3px] font-mono text-[9.5px] uppercase ${it.chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
                                 ${escapeHtml(it.status)}
                             </button>
                         </div>
@@ -11205,10 +11518,11 @@ window.renderDailyTasks = function() {
             return sHtml;
         }
 
+        html += renderGroupSection('En Oficina STGT', 'bg-[#fafafa]', groups.stgt, 'att-chip-stgt');
+        html += renderGroupSection('En Home Office (A distancia)', 'bg-[#8a8380]', groups.homeOffice, 'att-chip-distancia');
         html += renderGroupSection('En Comisión (PT)', 'bg-[#ee6018]', groups.comision, 'att-chip-comision');
         html += renderGroupSection('Vacaciones (VA)', 'bg-[#ffffff]', groups.vacaciones, 'att-chip-vacaciones');
         html += renderGroupSection('Permiso Médico / Otros', 'bg-[#ff453a]', groups.otros, 'att-chip-medico');
-        html += renderGroupSection('Laborado Ordinario (Normal)', 'bg-[#8a8380]', groups.ordinario, 'att-chip-normal');
 
         html += `</div>`;
         container.innerHTML = html;

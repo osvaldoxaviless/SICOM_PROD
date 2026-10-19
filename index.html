@@ -435,7 +435,7 @@
   <div id="attendanceModal" class="fixed inset-0 z-[99990] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           <!-- HEADER DE LA TORRE DE ASISTENCIA -->
-          <div class="p-4 sm:p-5 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-3">
                   <span class="w-2 h-2 rounded-full bg-[#ee6018] shrink-0"></span>
                   <div>
@@ -446,6 +446,11 @@
                       <p class="text-[11px] text-[#8a8380]">Control quincenal de comisiones (PT), vacaciones (VA), oficina y home office</p>
                   </div>
               </div>
+
+              <!-- BOTÓN CERRAR ARRIBA A LA DERECHA (PUNTO DE SALIDA VISIBLE E INTUITIVO) -->
+              <button type="button" onclick="closeAttendanceModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#161413] border border-[#3d3a39] hover:border-[#8a8380] rounded-[4px] transition z-30 flex items-center justify-center cursor-pointer shadow-sm" title="Cerrar ventana (Esc)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
 
               <!-- SELECTOR DE QUINCENA / PERIODO -->
               <div class="flex items-center gap-2 flex-wrap">
@@ -499,10 +504,6 @@
                       <svg class="w-3.5 h-3.5 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                       <span>Descargar Prenómina (.xlsx)</span>
                   </button>
-
-                  <button type="button" onclick="closeAttendanceModal()" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] rounded-[3px] transition" title="Cerrar ventana">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                  </button>
               </div>
           </div>
 
@@ -553,7 +554,7 @@
           <div class="p-3 px-4 sm:px-5 border-t border-[#1d1a18] bg-[#121110] flex flex-wrap items-center justify-between gap-2 text-[10.5px] font-mono shrink-0">
               <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-[#8a8380] uppercase text-[9.5px]">Leyenda:</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> A DISTANCIA</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE (A DISTANCIA)</span>
                   <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
                   <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
                   <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
@@ -720,9 +721,14 @@
           <span id="popoverCellTitle" class="truncate pr-1">Cambiar Estado</span>
           <button onclick="closeCellStatusPopover()" class="hover:text-white font-mono text-xs shrink-0">✕</button>
       </div>
-      <button onclick="selectCellStatus('Normal')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#8a8380] hover:text-[#eeeeee] uppercase tracking-[-0.24px] transition">
-          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> Día Ordinario (Normal)</span>
-          <span class="text-[9px] text-[#5a5553]">Limpiar</span>
+      <!-- MODALIDADES DE TRABAJO ORDINARIO: HOME OFFICE Y OFICINA STGT -->
+      <button onclick="selectCellStatus('Home Office')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380] group-hover:bg-[#eeeeee]"></span> Home Office (A distancia)</span>
+          <span class="text-[9px] text-[#8a8380] group-hover:text-[#eeeeee]">Remoto</span>
+      </button>
+      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Asiste a oficina STGT</span>
+          <span class="text-[9px] text-[#8a8380] group-hover:text-[#eeeeee]">Presencial</span>
       </button>
       <div class="my-0.5 border-t border-[#252220]"></div>
       <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
@@ -749,6 +755,11 @@
       <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Falta (FA)</span>
           <span class="text-[9px] text-[#5a5553]">Directo</span>
+      </button>
+      <div class="my-0.5 border-t border-[#252220]"></div>
+      <button onclick="selectCellStatus('Normal')" class="text-left px-2 py-1 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[9px] text-[#5a5553] hover:text-[#8a8380] uppercase tracking-[-0.24px] transition" title="Restablecer al horario semanal predeterminado">
+          <span>Restablecer horario base</span>
+          <span>Limpiar</span>
       </button>
   </div>
 

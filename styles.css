@@ -1305,13 +1305,13 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 .att-chip-normal,
 .att-chip-distancia {
     background-color: #161413;
-    color: #8a8380;
-    border: 1px solid #2d2a29;
+    color: #9c9592;
+    border: 1px solid #33302f;
 }
 .att-chip-stgt {
-    background-color: #1d1a18;
-    color: #eeeeee;
-    border: 1px solid #4d4947;
+    background-color: #221f1d;
+    color: #ffffff;
+    border: 1px solid #5a5553;
     font-weight: 500;
 }
 .att-chip-comision {
