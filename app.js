@@ -10268,6 +10268,23 @@ window.renderDailyTasks = function() {
     let currentCellConsultant = null;
     let currentCellDate = null;
 
+    function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = String(dateStr).split('-').map(Number);
+        if (parts.length !== 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+            return new Date(dateStr);
+        }
+        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    }
+
+    function formatLocalDate(dt) {
+        if (!dt || isNaN(dt.getTime())) return '';
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const d = String(dt.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
     // Validación de Administrador Maestro de Prenómina (Osvaldo Avilés / "yo")
     window.isAttendanceMasterAdmin = function() {
         const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -10598,15 +10615,33 @@ window.renderDailyTasks = function() {
             return;
         }
 
+        const st = (status || '').toLowerCase();
+
+        // 1. Si el usuario selecciona comisión (PT, AFR, ODM, ABM, etc.) -> Exigir captura de motivo y cliente en modal
+        if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm')) {
+            let defaultClient = 'Autobuses Flecha Roja (AFR)';
+            if (st.includes('odm') || st.includes('ómnibus') || st.includes('omnibus')) defaultClient = 'Ómnibus de México (ODM)';
+            else if (st.includes('abm')) defaultClient = 'ABM';
+            else if (st.includes('comisi') && !st.includes('afr')) defaultClient = 'Comisión General';
+
+            window.closeCellStatusPopover();
+            window.openCommissionModal(currentCellConsultant, currentCellDate, defaultClient);
+            return;
+        }
+
+        // 2. Si el usuario selecciona vacaciones -> Abrir modal de solicitud formal de vacaciones FOPR
+        if (st.includes('vacaci')) {
+            window.closeCellStatusPopover();
+            window.openVacationModal(currentCellConsultant, currentCellDate);
+            return;
+        }
+
         if (!appData.attendance) appData.attendance = {};
         if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
         if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
 
         let code = '';
-        const st = status.toLowerCase();
-        if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm')) code = 'PT';
-        else if (st.includes('vacaci')) code = 'VA';
-        else if (st.includes('médico')) code = 'PM';
+        if (st.includes('médico')) code = 'PM';
         else if (st.includes('falta')) code = 'FA';
 
         appData.attendance[periodKey][currentCellConsultant][currentCellDate] = {
@@ -11240,23 +11275,25 @@ window.renderDailyTasks = function() {
     };
 
     // --- MODAL DE COMISIONES RÁPIDAS ---
-    window.openCommissionModal = function(defaultConsultant, defaultDate) {
+    window.openCommissionModal = function(defaultConsultant, defaultDate, defaultClient) {
         const m = document.getElementById('commissionModal');
         if (!m) return;
 
         const isMaster = window.isAttendanceMasterAdmin();
         const isLead = window.isAttendanceLead();
 
+        const targetConsultant = defaultConsultant || localAuthor || '';
+
         const sel = document.getElementById('commConsultant');
         if (sel) {
             if (isMaster || isLead) {
                 sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
-                    <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+                    <option value="${escapeHtml(k)}" ${k === targetConsultant ? 'selected' : ''}>${escapeHtml(k)}</option>
                 `).join('');
                 sel.disabled = false;
             } else {
                 // Consultor regular: restringido estrictamente a sí mismo
-                const me = localAuthor || 'Consultor';
+                const me = targetConsultant || localAuthor || 'Consultor';
                 sel.innerHTML = `<option value="${escapeHtml(me)}" selected>${escapeHtml(me)} (Personal)</option>`;
                 sel.disabled = true;
             }
@@ -11265,12 +11302,56 @@ window.renderDailyTasks = function() {
         const todayStr = defaultDate || new Date().toISOString().slice(0, 10);
         document.getElementById('commStartDate').value = todayStr;
         document.getElementById('commEndDate').value = todayStr;
-        document.getElementById('commReason').value = '';
+
+        // Si ya existe un registro previo para este consultor en esta fecha, pre-cargar cliente y motivo
+        let existingReason = '';
+        let existingClient = defaultClient || 'Autobuses Flecha Roja (AFR)';
+
+        if (defaultDate && targetConsultant) {
+            const parts = defaultDate.split('-');
+            if (parts.length === 3) {
+                const y = parts[0];
+                const mStr = parts[1];
+                const d = parseInt(parts[2], 10);
+                const q = d <= 15 ? 'Q1' : 'Q2';
+                const periodKey = `${y}-${mStr}-${q}`;
+                const rec = appData.attendance?.[periodKey]?.[targetConsultant]?.[defaultDate];
+                if (rec) {
+                    if (rec.client) existingClient = rec.client;
+                    if (rec.reason) existingReason = rec.reason;
+                }
+            }
+        }
+
+        const clientSel = document.getElementById('commClient');
+        if (clientSel) {
+            let matched = false;
+            for (let i = 0; i < clientSel.options.length; i++) {
+                const optVal = clientSel.options[i].value.toLowerCase();
+                const tgtVal = existingClient.toLowerCase();
+                if (optVal === tgtVal || optVal.includes(tgtVal) || tgtVal.includes(optVal)) {
+                    clientSel.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched && existingClient) {
+                clientSel.value = existingClient;
+            }
+        }
+
+        const reasonEl = document.getElementById('commReason');
+        if (reasonEl) {
+            reasonEl.value = existingReason;
+        }
 
         window.updateCommissionLeadPreview();
 
         m.classList.remove('hidden');
-        setTimeout(() => m.classList.remove('opacity-0'), 10);
+        setTimeout(() => {
+            m.classList.remove('opacity-0');
+            if (reasonEl) reasonEl.focus();
+        }, 50);
     };
 
     window.closeCommissionModal = function() {
@@ -11289,8 +11370,9 @@ window.renderDailyTasks = function() {
     };
 
     window.saveCommission = function() {
-        const consultant = document.getElementById('commConsultant')?.value || localAuthor;
-        const client = document.getElementById('commClient')?.value;
+        let consultant = document.getElementById('commConsultant')?.value;
+        if (!consultant && localAuthor) consultant = localAuthor;
+        const client = document.getElementById('commClient')?.value || 'Autobuses Flecha Roja (AFR)';
         const startDate = document.getElementById('commStartDate')?.value;
         const endDate = document.getElementById('commEndDate')?.value;
         const reason = (document.getElementById('commReason')?.value || '').trim();
@@ -11300,15 +11382,27 @@ window.renderDailyTasks = function() {
             return;
         }
 
-        const startDt = new Date(startDate);
-        const endDt = new Date(endDate);
+        if (!reason) {
+            window.showToast("⚠️ Es obligatorio especificar el motivo o justificación de la comisión", true);
+            const rEl = document.getElementById('commReason');
+            if (rEl) rEl.focus();
+            return;
+        }
+
+        const startDt = parseLocalDate(startDate);
+        const endDt = parseLocalDate(endDate);
+        if (!startDt || !endDt) {
+            window.showToast("⚠️ Fechas inválidas", true);
+            return;
+        }
+
         if (endDt < startDt) {
             window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
             return;
         }
 
         // Validación previa de todos los días en el rango para asegurar permisos
-        let testCur = new Date(startDt);
+        let testCur = new Date(startDt.getTime());
         while (testCur <= endDt) {
             const dow = testCur.getDay();
             if (dow !== 0 && dow !== 6) {
@@ -11317,7 +11411,7 @@ window.renderDailyTasks = function() {
                 const d = testCur.getDate();
                 const q = d <= 15 ? 'Q1' : 'Q2';
                 const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = formatLocalDate(testCur);
 
                 const check = window.canUserEditAttendanceCell(consultant, dateStr, periodKey);
                 if (!check.allowed) {
@@ -11331,8 +11425,11 @@ window.renderDailyTasks = function() {
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
         const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
 
-        let cur = new Date(startDt);
+        let cur = new Date(startDt.getTime());
         let count = 0;
+        const targetMonth = startDt.getMonth() + 1;
+        const targetYear = startDt.getFullYear();
+        const targetQuincena = startDt.getDate() <= 15 ? 'Q1' : 'Q2';
 
         while (cur <= endDt) {
             const dow = cur.getDay();
@@ -11342,7 +11439,7 @@ window.renderDailyTasks = function() {
                 const d = cur.getDate();
                 const q = d <= 15 ? 'Q1' : 'Q2';
                 const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = formatLocalDate(cur);
 
                 if (!appData.attendance) appData.attendance = {};
                 if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
@@ -11350,7 +11447,7 @@ window.renderDailyTasks = function() {
 
                 let statusName = 'En comisión';
                 if (client.includes('AFR') || client.includes('Flecha')) statusName = 'Asiste a oficina AFR';
-                else if (client.includes('ODM') || client.includes('Ómnibus')) statusName = 'Asiste a oficina ODM';
+                else if (client.includes('ODM') || client.includes('Ómnibus') || client.includes('Omnibus')) statusName = 'Asiste a oficina ODM';
 
                 appData.attendance[periodKey][consultant][dateStr] = {
                     status: statusName,
@@ -11365,6 +11462,11 @@ window.renderDailyTasks = function() {
             cur.setDate(cur.getDate() + 1);
         }
 
+        if (count === 0) {
+            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana (sábado/domingo)", true);
+            return;
+        }
+
         window.sendExternalAlert('COMMISSION_LOGGED', {
             consultant: consultant,
             client: client,
@@ -11377,33 +11479,46 @@ window.renderDailyTasks = function() {
 
         window.saveData(false);
         window.closeCommissionModal();
+
+        // Sincronizar automáticamente la vista de la prenómina a la quincena registrada para visibilidad inmediata
+        const selM = document.getElementById('attSelMonth');
+        const selY = document.getElementById('attSelYear');
+        const selQ = document.getElementById('attSelQuincena');
+        if (selM && selY && selQ) {
+            selM.value = String(targetMonth);
+            selY.value = String(targetYear);
+            selQ.value = targetQuincena;
+        }
+
         window.renderAttendanceTable();
-        window.showToast(`🚗 Comisión a "${client}" registrada (${count} días). Notificado a ${lead}.`, false);
+        window.showToast(`🚗 Comisión a "${client}" registrada (${count} día${count > 1 ? 's' : ''}). Notificado a ${lead}.`, false);
     };
 
     // --- MODAL DE VACACIONES (FOPR-RHU-02-03) ---
-    window.openVacationModal = function(defaultConsultant) {
+    window.openVacationModal = function(defaultConsultant, defaultDate) {
         const m = document.getElementById('vacationModal');
         if (!m) return;
 
         const isMaster = window.isAttendanceMasterAdmin();
         const isLead = window.isAttendanceLead();
 
+        const targetConsultant = defaultConsultant || localAuthor || '';
+
         const sel = document.getElementById('vacConsultant');
         if (sel) {
             if (isMaster || isLead) {
                 sel.innerHTML = Object.keys(consultants).filter(k => k !== 'Lector (Jefatura)').map(k => `
-                    <option value="${escapeHtml(k)}" ${k === (defaultConsultant || localAuthor) ? 'selected' : ''}>${escapeHtml(k)}</option>
+                    <option value="${escapeHtml(k)}" ${k === targetConsultant ? 'selected' : ''}>${escapeHtml(k)}</option>
                 `).join('');
                 sel.disabled = false;
             } else {
-                const me = localAuthor || 'Consultor';
+                const me = targetConsultant || localAuthor || 'Consultor';
                 sel.innerHTML = `<option value="${escapeHtml(me)}" selected>${escapeHtml(me)} (Personal)</option>`;
                 sel.disabled = true;
             }
         }
 
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = defaultDate || new Date().toISOString().slice(0, 10);
         document.getElementById('vacStartDate').value = todayStr;
         document.getElementById('vacEndDate').value = todayStr;
 
@@ -11440,28 +11555,28 @@ window.renderDailyTasks = function() {
         const endStr = document.getElementById('vacEndDate')?.value;
         if (!startStr || !endStr) return;
 
-        const startDt = new Date(startStr);
-        const endDt = new Date(endStr);
-        if (endDt < startDt) return;
+        const startDt = parseLocalDate(startStr);
+        const endDt = parseLocalDate(endStr);
+        if (!startDt || !endDt || endDt < startDt) return;
 
         let requested = 0;
-        let cur = new Date(startDt);
+        let cur = new Date(startDt.getTime());
         while (cur <= endDt) {
             const dow = cur.getDay();
             if (dow !== 0 && dow !== 6) requested++;
             cur.setDate(cur.getDate() + 1);
         }
 
-        let ret = new Date(endDt);
+        let ret = new Date(endDt.getTime());
         ret.setDate(ret.getDate() + 1);
         while (ret.getDay() === 0 || ret.getDay() === 6) {
             ret.setDate(ret.getDate() + 1);
         }
-        const retStr = ret.toISOString().slice(0, 10);
+        const retStr = formatLocalDate(ret);
         const retInput = document.getElementById('vacReturnDate');
         if (retInput) retInput.value = retStr;
 
-        const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4');
+        const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4', 10);
         const balance = Math.max(0, pending - requested);
 
         document.getElementById('vacRequestedDaysBadge').textContent = requested;
@@ -11469,7 +11584,8 @@ window.renderDailyTasks = function() {
     };
 
     window.saveVacation = function() {
-        const consultant = document.getElementById('vacConsultant')?.value || localAuthor;
+        let consultant = document.getElementById('vacConsultant')?.value;
+        if (!consultant && localAuthor) consultant = localAuthor;
         const startDate = document.getElementById('vacStartDate')?.value;
         const endDate = document.getElementById('vacEndDate')?.value;
         const returnDate = document.getElementById('vacReturnDate')?.value;
@@ -11479,15 +11595,20 @@ window.renderDailyTasks = function() {
             return;
         }
 
-        const startDt = new Date(startDate);
-        const endDt = new Date(endDate);
+        const startDt = parseLocalDate(startDate);
+        const endDt = parseLocalDate(endDate);
+        if (!startDt || !endDt) {
+            window.showToast("⚠️ Fechas inválidas", true);
+            return;
+        }
+
         if (endDt < startDt) {
             window.showToast("⚠️ La fecha de fin no puede ser anterior a la de inicio", true);
             return;
         }
 
         // Validación previa de permisos para todos los días
-        let testCur = new Date(startDt);
+        let testCur = new Date(startDt.getTime());
         while (testCur <= endDt) {
             const dow = testCur.getDay();
             if (dow !== 0 && dow !== 6) {
@@ -11496,7 +11617,7 @@ window.renderDailyTasks = function() {
                 const d = testCur.getDate();
                 const q = d <= 15 ? 'Q1' : 'Q2';
                 const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = formatLocalDate(testCur);
 
                 const check = window.canUserEditAttendanceCell(consultant, dateStr, periodKey);
                 if (!check.allowed) {
@@ -11510,8 +11631,11 @@ window.renderDailyTasks = function() {
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
         const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
 
-        let cur = new Date(startDt);
+        let cur = new Date(startDt.getTime());
         let count = 0;
+        const targetMonth = startDt.getMonth() + 1;
+        const targetYear = startDt.getFullYear();
+        const targetQuincena = startDt.getDate() <= 15 ? 'Q1' : 'Q2';
 
         while (cur <= endDt) {
             const dow = cur.getDay();
@@ -11521,7 +11645,7 @@ window.renderDailyTasks = function() {
                 const d = cur.getDate();
                 const q = d <= 15 ? 'Q1' : 'Q2';
                 const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = formatLocalDate(cur);
 
                 if (!appData.attendance) appData.attendance = {};
                 if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
@@ -11537,6 +11661,11 @@ window.renderDailyTasks = function() {
                 count++;
             }
             cur.setDate(cur.getDate() + 1);
+        }
+
+        if (count === 0) {
+            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana", true);
+            return;
         }
 
         const currentPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
@@ -11556,8 +11685,19 @@ window.renderDailyTasks = function() {
 
         window.saveData(false);
         window.closeVacationModal();
+
+        // Sincronizar automáticamente la vista de la prenómina a la quincena registrada para visibilidad inmediata
+        const selM = document.getElementById('attSelMonth');
+        const selY = document.getElementById('attSelYear');
+        const selQ = document.getElementById('attSelQuincena');
+        if (selM && selY && selQ) {
+            selM.value = String(targetMonth);
+            selY.value = String(targetYear);
+            selQ.value = targetQuincena;
+        }
+
         window.renderAttendanceTable();
-        window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} días). Saldo: ${newBalance} días.`, false);
+        window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} día${count > 1 ? 's' : ''}). Saldo: ${newBalance} días.`, false);
     };
 
     window.previewVacationDocument = function() {

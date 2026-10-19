@@ -743,34 +743,44 @@
   </div>
 
   <!-- POPOVER FLOTANTE: SELECTOR RÁPIDO DE ESTADO DE ASISTENCIA EN CELDA (FACTORY POPUP) -->
-  <div id="cellStatusPopover" class="fixed z-[99999] hidden bg-[#161413] border border-[#3d3a39] rounded-[3px] p-1.5 w-60 flex flex-col gap-0.5 text-xs select-none">
+  <div id="cellStatusPopover" class="fixed z-[99999] hidden bg-[#161413] border border-[#3d3a39] rounded-[3px] p-1.5 w-64 flex flex-col gap-0.5 text-xs select-none shadow-none">
       <div class="px-2 py-1.5 border-b border-[#2d2a29] font-mono text-[9px] uppercase text-[#8a8380] flex justify-between items-center tracking-[-0.24px]">
-          <span id="popoverCellTitle">Cambiar Estado</span>
-          <button onclick="closeCellStatusPopover()" class="hover:text-white font-mono text-xs">✕</button>
+          <span id="popoverCellTitle" class="truncate pr-1">Cambiar Estado</span>
+          <button onclick="closeCellStatusPopover()" class="hover:text-white font-mono text-xs shrink-0">✕</button>
       </div>
-      <button onclick="selectCellStatus('A distancia')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> A distancia
+      <button onclick="selectCellStatus('A distancia')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px] transition">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> A distancia</span>
+          <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Asiste a oficina STGT
+      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Asiste a oficina STGT</span>
+          <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
-      <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> En comisión (PT)
+      <div class="my-0.5 border-t border-[#252220]"></div>
+      <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> En comisión (PT)</span>
+          <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#ee6018]">Detallar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina AFR')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#a0ca92] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Oficina AFR (Flecha Roja)
+      <button onclick="selectCellStatus('Asiste a oficina AFR')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#a0ca92] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Oficina AFR (Flecha Roja)</span>
+          <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#a0ca92]">Detallar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina ODM')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#a0ca92] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Oficina ODM (Ómnibus)
+      <button onclick="selectCellStatus('Asiste a oficina ODM')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#a0ca92] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Oficina ODM (Ómnibus)</span>
+          <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#a0ca92]">Detallar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Vacaciones')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Vacaciones (VA)
+      <div class="my-0.5 border-t border-[#252220]"></div>
+      <button onclick="selectCellStatus('Vacaciones')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Vacaciones (VA)</span>
+          <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-white">Formato ➔</span>
       </button>
-      <button onclick="selectCellStatus('Permiso médico')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> Permiso Médico (PM)
+      <button onclick="selectCellStatus('Permiso médico')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.24px] transition">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> Permiso Médico (PM)</span>
+          <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
-      <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center gap-2 font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Falta (FA)
+      <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
+          <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Falta (FA)</span>
+          <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
   </div>
 
