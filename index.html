@@ -214,7 +214,11 @@
               <span class="font-mono text-[11px] uppercase text-[#b8b3b0]">EVIDENCIA OPERATIVA</span>
           </div>
           <h3 class="text-xl font-normal text-[#eeeeee] mb-2">Completar Tarea</h3>
-          <p class="text-xs text-[#8a8380] mb-5">Agrega una observación, enlace o evidencia de la tarea completada.</p>
+          <p class="text-xs text-[#8a8380] mb-3">Agrega una observación, enlace o evidencia de la tarea completada.</p>
+          <div id="taskPreviousFeedbackContainer" class="hidden mb-3 p-2.5 bg-[#1d1a18] border border-[#ee6018]/40 rounded-[3px] text-left">
+              <span class="text-[9px] font-mono uppercase text-[#ee6018] block font-bold mb-1">Última retroalimentación / Observación previa:</span>
+              <span id="taskPreviousFeedbackText" class="text-xs font-mono text-[#b8b3b0] leading-relaxed break-words"></span>
+          </div>
           <input type="hidden" id="feedbackTaskId">
           <input type="hidden" id="feedbackTaskType">
           <input type="hidden" id="feedbackProjectId">
@@ -326,12 +330,42 @@
               <!-- VACACIONES Y ANTIGÜEDAD -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Saldo Vacaciones (Días)</label>
+                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Saldo Vacaciones (Días Disponibles)</label>
                       <input type="number" id="editConsPendingVacations" min="0" step="1" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="4">
                   </div>
                   <div>
-                      <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Ingreso</label>
-                      <input type="text" id="editConsHireDate" class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono" placeholder="Ej. 01-dic-12">
+                      <div class="flex items-center justify-between mb-1">
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase">Fecha de Ingreso</label>
+                          <span id="editConsLftDaysLabel" class="font-mono text-[9px] text-[#a0ca92] hidden">Ley (LFT): <span id="editConsLftDaysVal">--</span> días</span>
+                      </div>
+                      <input type="date" id="editConsHireDate" onchange="previewConsLftDays(this.value)" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] font-mono">
+                      <div id="btnApplyLftVacationsRow" class="hidden mt-1 text-right">
+                          <button type="button" onclick="applyLftDaysToPendingVacations()" class="font-mono text-[9px] text-[#a0ca92] hover:text-[#eeeeee] underline transition">
+                              ↺ Asignar días por Ley al saldo
+                          </button>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- ESQUEMA HÍBRIDO (DÍAS DE HOME OFFICE) -->
+              <div>
+                  <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Días habituales de Home Office (A distancia)</label>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                      <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
+                          <input type="checkbox" id="editConsHo1" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Lun
+                      </label>
+                      <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
+                          <input type="checkbox" id="editConsHo2" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mar
+                      </label>
+                      <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
+                          <input type="checkbox" id="editConsHo3" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mié
+                      </label>
+                      <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
+                          <input type="checkbox" id="editConsHo4" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Jue
+                      </label>
+                      <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
+                          <input type="checkbox" id="editConsHo5" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Vie
+                      </label>
                   </div>
               </div>
 
@@ -689,7 +723,10 @@
                   <div class="grid grid-cols-3 gap-2 text-center pt-1 font-mono">
                       <div class="p-2 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
                           <span class="text-[9px] uppercase text-[#8a8380] block">Días Pendientes</span>
-                          <span id="vacPendingDaysBadge" class="text-sm font-normal text-[#eeeeee]">4</span>
+                          <div class="flex items-center justify-center gap-1">
+                              <span id="vacPendingDaysBadge" class="text-sm font-normal text-[#eeeeee]">4</span>
+                              <span id="vacLftBadge" class="text-[9px] text-[#e0b050] font-mono hidden"></span>
+                          </div>
                       </div>
                       <div class="p-2 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
                           <span class="text-[9px] uppercase text-[#ee6018] block">Solicitados</span>

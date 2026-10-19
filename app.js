@@ -75,16 +75,148 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
     let globalDocs = [{"id":"doc_1791193027382","name":"Propuesta Comercial"},{"id":"doc_1791192995498","name":"Contrato"},{"id":"doc_1791193015065","name":"Plano(s) de negocio"},{"id":"doc_1791350819805","name":"Plan de trabajo"},{"id":"doc_1791350871690","name":"Matriz de pruebas"},{"id":"doc_1791350852225","name":"Formato de Validación"},{"id":"doc_1791350881937","name":"Certificado de Pruebas"},{"id":"doc_1791350912895","name":"Certificado de Comité"},{"id":"doc_1791350927050","name":"Certificado de Capacitación"},{"id":"doc_1791350940031","name":"Carta de Liberación"},{"id":"doc_1791350945532","name":"Factura"}];
     window.getAppData = () => appData;
+    // --- PERSISTENCIA LOCAL AVANZADA SIN LÍMITE (INDEXEDDB NATIVO GRATUITO) ---
+    const SICOM_IDB = {
+        dbName: 'sicom_offline_storage',
+        storeName: 'snapshots',
+        _db: null,
+        async getDB() {
+            if (this._db) return this._db;
+            if (typeof indexedDB === 'undefined') return null;
+            return new Promise((resolve) => {
+                const req = indexedDB.open(this.dbName, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(this.storeName)) {
+                        db.createObjectStore(this.storeName);
+                    }
+                };
+                req.onsuccess = (e) => {
+                    this._db = e.target.result;
+                    resolve(this._db);
+                };
+                req.onerror = () => resolve(null);
+            });
+        },
+        async save(key, data) {
+            try {
+                const db = await this.getDB();
+                if (!db) return false;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(this.storeName, 'readwrite');
+                    const store = tx.objectStore(this.storeName);
+                    store.put(data, key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (_) { return false; }
+        },
+        async get(key) {
+            try {
+                const db = await this.getDB();
+                if (!db) return null;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(this.storeName, 'readonly');
+                    const store = tx.objectStore(this.storeName);
+                    const req = store.get(key);
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (_) { return null; }
+        }
+    };
+    window.SICOM_IDB = SICOM_IDB;
+
+    // --- SANITIZACIÓN BLINDADA PARA REPORTES CSV (PREVENCIÓN CWE-1236) ---
+    const sanitizeCsvCell = (val) => {
+        if (val === undefined || val === null) return '""';
+        const str = String(val);
+        const trimmed = str.trimStart();
+        if (!isNaN(Number(trimmed)) && !trimmed.includes('\n')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        if (/^[=\+\-@\t\r\n]/.test(trimmed)) {
+            return '"\'' + str.replace(/"/g, '""') + '"';
+        }
+        return '"' + str.replace(/"/g, '""') + '"';
+    };
+    window.sanitizeCsvCell = sanitizeCsvCell;
+
+    // --- PRESERVACIÓN HISTÓRICA DE RETROALIMENTACIÓN DE TAREAS (LOG-08) ---
+    function archiveTaskFeedback(t) {
+        if (!t || !t.feedback) return;
+        if (!Array.isArray(t.feedbackHistory)) t.feedbackHistory = [];
+        t.feedbackHistory.push({
+            text: t.feedback,
+            timestamp: new Date().toLocaleString('es-MX', { hour12: false })
+        });
+        t.lastRejectedFeedback = t.feedback;
+        delete t.feedback;
+    }
+    window.archiveTaskFeedback = archiveTaskFeedback;
+
+    // --- MOTOR LEGAL DE VACACIONES LFT (REFORMA "VACACIONES DIGNAS" ART. 76 LFT) ---
+    window.calculateLftVacationDays = function(hireDateStr, targetDate = new Date()) {
+        if (!hireDateStr || typeof hireDateStr !== 'string') return 0;
+        const parts = hireDateStr.trim().replace(/\//g, '-').split('-');
+        if (parts.length < 3) return 0;
+        const [y, m, d] = parts.map(Number);
+        if (isNaN(y) || isNaN(m) || isNaN(d)) return 0;
+
+        const hireDate = new Date(y, m - 1, d);
+        let years = targetDate.getFullYear() - hireDate.getFullYear();
+        const mDiff = targetDate.getMonth() - hireDate.getMonth();
+        
+        const isLeapHire = (m === 2 && d === 29);
+        const targetIsFebEnd = (targetDate.getMonth() === 1 && targetDate.getDate() >= 28);
+        const hasMetAnniversary = (mDiff > 0) || (mDiff === 0 && (targetDate.getDate() >= d || (isLeapHire && targetIsFebEnd)));
+        
+        if (!hasMetAnniversary) years--;
+        if (years < 1) return 0;
+        if (years === 1) return 12;
+        if (years === 2) return 14;
+        if (years === 3) return 16;
+        if (years === 4) return 18;
+        if (years === 5) return 20;
+        return 22 + Math.floor((years - 6) / 5) * 2;
+    };
+
+    // --- CATÁLOGO DE DÍAS FESTIVOS OFICIALES LFT (ART. 74 LFT) ---
+    window.isOfficialLftHoliday = function(dateObj) {
+        if (!dateObj || !(dateObj instanceof Date)) return false;
+        const y = dateObj.getFullYear();
+        const m = dateObj.getMonth() + 1; // 1-12
+        const d = dateObj.getDate();
+        const dow = dateObj.getDay();
+
+        if (m === 1 && d === 1) return true; // 1 Ene: Año Nuevo
+        if (m === 5 && d === 1) return true; // 1 May: Día del Trabajo
+        if (m === 9 && d === 16) return true; // 16 Sep: Independencia
+        if (m === 12 && d === 25) return true; // 25 Dic: Navidad
+        if (m === 2 && dow === 1 && d <= 7) return true; // 1er lun Feb: Constitución
+        if (m === 3 && dow === 1 && d >= 15 && d <= 21) return true; // 3er lun Mar: Juárez
+        if (m === 11 && dow === 1 && d >= 15 && d <= 21) return true; // 3er lun Nov: Revolución
+        if (m === 10 && d === 1 && (y % 6 === 0 || y === 2024)) return true; // 1 Oct cada 6 años
+
+        return false;
+    };
+
+    window.getAppData = () => appData;
+    window.getCurrentUserRole = () => String(currentUserRole);
+
     try {
       Object.defineProperty(window, 'appData', {
         get: () => appData,
         set: (v) => { appData = v; },
         configurable: true
       });
+      // BLINDAJE DE ROL: Lectura pública pero mutación directa restringida en consola
       Object.defineProperty(window, 'currentUserRole', {
         get: () => currentUserRole,
-        set: (v) => { currentUserRole = v; },
-        configurable: true
+        set: (v) => { 
+          console.warn("🛡️ [SICOM Guard] Modificación directa de currentUserRole denegada desde consola."); 
+        },
+        configurable: false
       });
     } catch (_) {
       window.appData = appData;
@@ -573,21 +705,46 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.getProjectTicket = getProjectTicket;
 
     function loadLocalFallback() {
-        const localD = localStorage.getItem('sicom_data'); const localC = localStorage.getItem('sicom_consultants'); const localDocs = localStorage.getItem('sicom_global_docs');
-        let parsedData = localD ? JSON.parse(localD) : null;
+        const localD = localStorage.getItem('sicom_data');
+        const localC = localStorage.getItem('sicom_consultants');
+        const localDocs = localStorage.getItem('sicom_global_docs');
+        let parsedData = null;
+        let parsedConsultants = null;
+        let parsedDocs = null;
+
+        try { if (localD) parsedData = JSON.parse(localD); } catch (e) { console.warn("Error leyendo sicom_data:", e); }
+        try { if (localC) parsedConsultants = JSON.parse(localC); } catch (e) { console.warn("Error leyendo sicom_consultants:", e); }
+        try { if (localDocs) parsedDocs = JSON.parse(localDocs); } catch (e) { console.warn("Error leyendo sicom_global_docs:", e); }
+
         if (!parsedData || !parsedData.modules || parsedData.modules.length === 0) { 
+            // Intentar autorecuperación desde IndexedDB nativo (sin límite de 5MB)
+            if (window.SICOM_IDB) {
+                window.SICOM_IDB.get('latest_state').then(idbSnapshot => {
+                    if (idbSnapshot && idbSnapshot.appData && Array.isArray(idbSnapshot.appData.modules) && idbSnapshot.appData.modules.length > 0) {
+                        console.log("🛡️ [SICOM Guard] Autorecuperación exitosa desde IndexedDB nativo.");
+                        appData = idbSnapshot.appData;
+                        if (idbSnapshot.consultants) consultants = idbSnapshot.consultants;
+                        if (idbSnapshot.globalDocs) globalDocs = idbSnapshot.globalDocs;
+                        ensureDataStructure();
+                        window.renderMindMap();
+                        if (typeof window.renderDashboard === 'function') window.renderDashboard();
+                        if (typeof window.showToast === 'function') window.showToast("Estado recuperado desde almacenamiento local seguro", false);
+                    }
+                }).catch(() => {});
+            }
             appData = JSON.parse(JSON.stringify(defaultTestingData)); 
             consultants = JSON.parse(JSON.stringify(fallbackConsultants)); 
             globalDocs = []; 
         } else { 
-            appData = parsedData; ensureDataStructure(); 
-            consultants = localC ? JSON.parse(localC) : JSON.parse(JSON.stringify(fallbackConsultants)); 
+            appData = parsedData; 
+            ensureDataStructure(); 
+            consultants = parsedConsultants || JSON.parse(JSON.stringify(fallbackConsultants)); 
             if (consultants["Osvaldo Avilés"]) consultants["Osvaldo Avilés"].role = "Supremo";
             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
-                            if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
+            if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
             Object.keys(consultants).forEach(k => { if(!consultants[k].role) consultants[k].role = "Consultor"; });
-            globalDocs = localDocs ? JSON.parse(localDocs) : []; 
+            globalDocs = parsedDocs || []; 
         }
 
         if(localAuthor && consultants[localAuthor]) {
@@ -819,6 +976,33 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('feedbackTaskType').value = taskType;
         document.getElementById('feedbackProjectId').value = projectId || '';
         document.getElementById('taskFeedbackText').value = '';
+
+        let targetTask = null;
+        if (taskType === 'global') {
+            targetTask = (appData.globalTasks || []).find(x => x.id === taskId);
+        } else if (taskType === 'daily') {
+            targetTask = (appData.dailyTasks || []).find(x => x.id === taskId);
+        } else if (taskType === 'project') {
+            let item = null;
+            if (projectId) {
+                item = (appData.directProjects || []).find(p => p.id === projectId);
+                if (!item) { (appData.modules || []).forEach(m => { const p = (m.projects||[]).find(proj => proj.id === projectId); if(p) item = p; }); }
+            }
+            if (!item && currentSelection) item = currentSelection;
+            if (item && item.tasks) targetTask = item.tasks.find(x => x.id === taskId);
+        }
+
+        const prevContainer = document.getElementById('taskPreviousFeedbackContainer');
+        const prevText = document.getElementById('taskPreviousFeedbackText');
+        if (prevContainer && prevText) {
+            const rejected = targetTask?.lastRejectedFeedback;
+            if (rejected) {
+                prevText.textContent = rejected;
+                prevContainer.classList.remove('hidden');
+            } else {
+                prevContainer.classList.add('hidden');
+            }
+        }
         
         const modal = document.getElementById('taskFeedbackModal');
         modal.classList.remove('hidden');
@@ -1554,7 +1738,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             localStorage.setItem('sicom_data', JSON.stringify(appData));
             localStorage.setItem('sicom_consultants', JSON.stringify(consultants));
             localStorage.setItem('sicom_global_docs', JSON.stringify(globalDocs));
-        } catch (e) {}
+        } catch (e) {
+            console.warn("Aviso de almacenamiento en localStorage:", e);
+            if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+                if (appData && Array.isArray(appData.history) && appData.history.length > 100) {
+                    appData.history = appData.history.slice(0, 100);
+                    try { localStorage.setItem('sicom_data', JSON.stringify(appData)); } catch (_) {}
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast("⚠️ Almacenamiento local optimizado para no exceder cuota", true);
+                }
+            }
+        }
+
+        // Respaldo asíncrono automático en IndexedDB nativo (sin límite de 5MB)
+        if (window.SICOM_IDB) {
+            window.SICOM_IDB.save('latest_state', {
+                appData,
+                consultants,
+                globalDocs,
+                savedAt: Date.now()
+            }).catch(() => {});
+        }
 
         if (isFirebaseReady && db && appId && globalDoc && globalSetDoc) {
             const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
@@ -3757,7 +3962,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
             } else {
                 delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
-                delete t.feedback;
+                archiveTaskFeedback(t);
             }
             const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
             logActivity('global', 'General', approve ? `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea general: "${t.text}"`, localAuthor);
@@ -3784,7 +3989,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
                 } else {
                     delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
-                    delete t.feedback;
+                    archiveTaskFeedback(t);
                 }
                 const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
                 logActivity(item.id, item.name, approve ? `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea: "${t.text}"`, localAuthor);
@@ -3879,7 +4084,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     // Desmarcar / Reabrir
                     if (isSuper) {
                         t.done = false;
-                        delete t.feedback; delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                        archiveTaskFeedback(t); delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                         logActivity(item.id, item.name, `Reabrió tarea de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
@@ -3902,7 +4107,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         window.triggerCelebration();
                     } else {
                         t.done = false;
-                        delete t.feedback;
+                        archiveTaskFeedback(t);
                         logActivity(item.id, item.name, `Canceló envío a validación: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
@@ -5232,8 +5437,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (document.getElementById('editConsPendingVacations')) {
             document.getElementById('editConsPendingVacations').value = cData.pendingVacations !== undefined ? cData.pendingVacations : (defaultConsultantMetadata[name]?.pendingVacations || 4);
         }
+        let rawHire = cData.hireDate || defaultConsultantMetadata[name]?.hireDate || '';
+        if (rawHire && rawHire.includes('/')) {
+            const p = rawHire.split('/');
+            if (p.length === 3) rawHire = `${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`;
+        }
         if (document.getElementById('editConsHireDate')) {
-            document.getElementById('editConsHireDate').value = cData.hireDate || defaultConsultantMetadata[name]?.hireDate || '';
+            document.getElementById('editConsHireDate').value = rawHire;
+            if (typeof window.previewConsLftDays === 'function') window.previewConsLftDays(rawHire);
+        }
+
+        // Cargar días de Home Office habituales (1=Lun ... 5=Vie)
+        const currentHoDays = cData.homeOfficeDays || (defaultConsultantMetadata[name]?.homeOfficeDays || (typeof window.getDefaultHoDaysForName === 'function' ? window.getDefaultHoDaysForName(name) : [1, 3]));
+        for (let d = 1; d <= 5; d++) {
+            const cb = document.getElementById('editConsHo' + d);
+            if (cb) cb.checked = Array.isArray(currentHoDays) && currentHoDays.includes(d);
         }
 
         const leadSel = document.getElementById('editConsLead');
@@ -5250,6 +5468,31 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (m) {
             m.classList.remove('hidden');
             setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+    };
+
+    window.previewConsLftDays = function(val) {
+        const label = document.getElementById('editConsLftDaysLabel');
+        const valSpan = document.getElementById('editConsLftDaysVal');
+        const rowApply = document.getElementById('btnApplyLftVacationsRow');
+        if (!val) {
+            if (label) label.classList.add('hidden');
+            if (rowApply) rowApply.classList.add('hidden');
+            return;
+        }
+        const days = typeof window.calculateLftVacationDays === 'function' ? window.calculateLftVacationDays(val) : 0;
+        if (valSpan) valSpan.textContent = days;
+        if (label) label.classList.remove('hidden');
+        if (rowApply) rowApply.classList.remove('hidden');
+    };
+
+    window.applyLftDaysToPendingVacations = function() {
+        const hireDateVal = document.getElementById('editConsHireDate')?.value;
+        const days = typeof window.calculateLftVacationDays === 'function' ? window.calculateLftVacationDays(hireDateVal) : 0;
+        const input = document.getElementById('editConsPendingVacations');
+        if (input) {
+            input.value = days;
+            if (typeof window.showToast === 'function') window.showToast(`Días correspondientes por Ley LFT (${days} días) asignados`, false);
         }
     };
 
@@ -5325,6 +5568,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (document.getElementById('editConsHireDate')) {
             consultants[targetName].hireDate = document.getElementById('editConsHireDate').value.trim();
         }
+
+        // Guardar días de Home Office configurados
+        consultants[targetName].homeOfficeDays = [1, 2, 3, 4, 5].filter(d => document.getElementById('editConsHo' + d)?.checked);
 
         window.saveData(false);
         window.populateConsultantSelects();
@@ -8537,10 +8783,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const addRow = (t, m, p) => { 
             const comps = (window.getProjectCompanies(p) || []).join('; ');
             const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim();
-            csv += `"${t}","${m}","${comps}","${p.name}","${tk}","${p.status||'Pendiente'}","${p.progress||0}","${p.priority||1}","${p.deadline||''}","${p.clientDeliveryDate||''}","${p.clientReturnDate||''}","${p.driveLink||''}","${p.invgateLink||''}","${getProjectConsultants(p).join(', ')}"\n`; 
+            const cols = [
+                sanitizeCsvCell(t),
+                sanitizeCsvCell(m),
+                sanitizeCsvCell(comps),
+                sanitizeCsvCell(p.name),
+                sanitizeCsvCell(tk),
+                sanitizeCsvCell(p.status || 'Pendiente'),
+                sanitizeCsvCell(p.progress || 0),
+                sanitizeCsvCell(p.priority || 1),
+                sanitizeCsvCell(p.deadline || ''),
+                sanitizeCsvCell(p.clientDeliveryDate || ''),
+                sanitizeCsvCell(p.clientReturnDate || ''),
+                sanitizeCsvCell(p.driveLink || ''),
+                sanitizeCsvCell(p.invgateLink || ''),
+                sanitizeCsvCell((getProjectConsultants(p) || []).join(', '))
+            ];
+            csv += cols.join(',') + "\n";
         };
-        appData.directProjects.forEach(p => addRow('Directo', appData.directHub.name, p)); appData.modules.forEach(m => (m.projects||[]).forEach(p => addRow('Módulo', m.name, p)));
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`; link.click();
+        (appData.directProjects || []).forEach(p => addRow('Directo', appData.directHub?.name || 'Directo', p));
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => addRow('Módulo', m.name, p)));
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
     };
     
     window.exportData = function() {
@@ -8833,7 +9099,7 @@ window.toggleDailyTask = function(taskId) {
             if (t.done === true) {
                 if (isSuper || isAssigner) {
                     t.done = false; 
-                    delete t.feedback; delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
+                    archiveTaskFeedback(t); delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                     logActivity('daily', 'Actividades Diarias', `Reabrió tarea diaria de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor);
                     window.saveData(false);
                 }
@@ -8846,7 +9112,7 @@ window.toggleDailyTask = function(taskId) {
                     window.saveData(false);
                     window.triggerCelebration();
                 } else if (t.assignee === localAuthor) {
-                    t.done = false; delete t.feedback;
+                    t.done = false; archiveTaskFeedback(t);
                     logActivity('daily', 'Actividades Diarias', `Canceló envío a validación: "${t.text}"`, localAuthor);
                     window.saveData(false);
                 }
@@ -8937,7 +9203,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
                 delete t.validatedDate;
                 delete t.validatedTime;
                 delete t.validatedBy;
-                delete t.feedback;
+                archiveTaskFeedback(t);
             }
             const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
             logActivity('daily', 'Actividades Diarias', approve ? `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó o reabrió tarea diaria: "${t.text}"`, localAuthor);
@@ -10454,56 +10720,38 @@ window.renderDailyTasks = function() {
         return `${y}-${m}-${d}`;
     }
 
+    // Días de Home Office predeterminados por colaborador oficial (1=Lun ... 5=Vie)
+    window.getDefaultHoDaysForName = function(cName) {
+        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const name = norm(cName);
+        if (name.includes('emmanuel') || name.includes('sanchez')) return [1, 3];
+        if (name.includes('osvaldo') || name.includes('aviles')) return [1, 5];
+        if (name.includes('oscar') || name.includes('gonzalez')) return [1, 5];
+        if (name.includes('ricardo') || name.includes('lira')) return [2, 5];
+        if (name.includes('rafael') || name.includes('romero')) return [2, 5];
+        if (name.includes('manuel') || name.includes('gutierrez')) return [2, 4];
+        if (name.includes('munoz')) return [2, 4];
+        if (name.includes('diego') || name.includes('cristobal')) return [3, 5];
+        if (name.includes('sue') || name.includes('oyuqui')) return [1, 5];
+        if (name.includes('carlos') || name.includes('islas')) return [1, 5];
+        return [1, 3];
+    };
+
     // Esquema híbrido oficial STGT: define los días habituales de Home Office vs Oficina STGT
     window.getDefaultWorkdayStatus = function(cName, dateStr) {
         const dt = parseLocalDate(dateStr);
         if (!dt) return 'Asiste a oficina STGT';
         const dow = dt.getDay(); // 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie
-        const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const name = norm(cName);
 
-        // Emmanuel Sánchez: Lunes y Miércoles Home Office, Mar/Jue/Vie Oficina STGT
-        if (name.includes('emmanuel') || name.includes('sanchez')) {
-            return (dow === 1 || dow === 3) ? 'Home Office' : 'Asiste a oficina STGT';
+        // Prioridad 1: Configuración dinámica guardada en perfil del consultor
+        const cMeta = (consultants && consultants[cName]) || {};
+        if (Array.isArray(cMeta.homeOfficeDays) && cMeta.homeOfficeDays.length > 0) {
+            return cMeta.homeOfficeDays.includes(dow) ? 'Home Office' : 'Asiste a oficina STGT';
         }
-        // Osvaldo Avilés: Lunes y Viernes Home Office, Mar/Mié/Jue Oficina STGT
-        if (name.includes('osvaldo') || name.includes('aviles')) {
-            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Óscar González: Lunes y Viernes Home Office, Mar/Mié/Jue Oficina STGT
-        if (name.includes('oscar') || name.includes('gonzalez')) {
-            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Ricardo Lira: Martes y Viernes Home Office
-        if (name.includes('ricardo') || name.includes('lira')) {
-            return (dow === 2 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Rafael Romero: Martes y Viernes Home Office
-        if (name.includes('rafael') || name.includes('romero')) {
-            return (dow === 2 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Manuel Gutiérrez: Martes y Jueves Home Office
-        if (name.includes('manuel') || name.includes('gutierrez')) {
-            return (dow === 2 || dow === 4) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Miguel Muñoz: Martes y Jueves Home Office
-        if (name.includes('munoz')) {
-            return (dow === 2 || dow === 4) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Diego Cristobal: Miércoles y Viernes Home Office
-        if (name.includes('diego') || name.includes('cristobal')) {
-            return (dow === 3 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Sue Oyuqui: Lunes y Viernes Home Office
-        if (name.includes('sue') || name.includes('oyuqui')) {
-            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Carlos Islas: Lunes y Viernes Home Office
-        if (name.includes('carlos') || name.includes('islas')) {
-            return (dow === 1 || dow === 5) ? 'Home Office' : 'Asiste a oficina STGT';
-        }
-        // Default general: Lunes y Miércoles Home Office, otros Oficina STGT
-        return (dow === 1 || dow === 3) ? 'Home Office' : 'Asiste a oficina STGT';
+
+        // Prioridad 2: Defaults oficiales por colaborador
+        const hoDays = window.getDefaultHoDaysForName(cName);
+        return hoDays.includes(dow) ? 'Home Office' : 'Asiste a oficina STGT';
     };
 
     // Determina tipo, etiqueta legible y estilo visual exacto de cada celda del rol
@@ -11914,6 +12162,18 @@ window.renderDailyTasks = function() {
         const pending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[cName]?.pendingVacations || 4);
         document.getElementById('vacPendingDaysBadge').textContent = pending;
 
+        const hireDate = meta.hireDate || defaultConsultantMetadata[cName]?.hireDate;
+        const lftBadge = document.getElementById('vacLftBadge');
+        if (lftBadge) {
+            if (hireDate && typeof window.calculateLftVacationDays === 'function') {
+                const lftDays = window.calculateLftVacationDays(hireDate);
+                lftBadge.textContent = `(LFT: ${lftDays} d)`;
+                lftBadge.classList.remove('hidden');
+            } else {
+                lftBadge.classList.add('hidden');
+            }
+        }
+
         window.calculateVacationDays();
     };
 
@@ -11930,13 +12190,14 @@ window.renderDailyTasks = function() {
         let cur = new Date(startDt.getTime());
         while (cur <= endDt) {
             const dow = cur.getDay();
-            if (dow !== 0 && dow !== 6) requested++;
+            const isHoliday = typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(cur);
+            if (dow !== 0 && dow !== 6 && !isHoliday) requested++;
             cur.setDate(cur.getDate() + 1);
         }
 
         let ret = new Date(endDt.getTime());
         ret.setDate(ret.getDate() + 1);
-        while (ret.getDay() === 0 || ret.getDay() === 6) {
+        while (ret.getDay() === 0 || ret.getDay() === 6 || (typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(ret))) {
             ret.setDate(ret.getDate() + 1);
         }
         const retStr = formatLocalDate(ret);
@@ -12006,6 +12267,7 @@ window.renderDailyTasks = function() {
 
         while (cur <= endDt) {
             const dow = cur.getDay();
+            const isHoliday = typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(cur);
             if (dow !== 0 && dow !== 6) {
                 const y = cur.getFullYear();
                 const m = cur.getMonth() + 1;
@@ -12018,20 +12280,29 @@ window.renderDailyTasks = function() {
                 if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
                 if (!appData.attendance[periodKey][consultant]) appData.attendance[periodKey][consultant] = {};
 
-                appData.attendance[periodKey][consultant][dateStr] = {
-                    status: 'Vacaciones',
-                    code: 'VA',
-                    returnDate: returnDate,
-                    loggedBy: localAuthor || 'Sistema',
-                    loggedAt: new Date().toISOString()
-                };
-                count++;
+                if (isHoliday) {
+                    appData.attendance[periodKey][consultant][dateStr] = {
+                        status: 'Día Festivo',
+                        code: 'DF',
+                        loggedBy: localAuthor || 'Sistema',
+                        loggedAt: new Date().toISOString()
+                    };
+                } else {
+                    appData.attendance[periodKey][consultant][dateStr] = {
+                        status: 'Vacaciones',
+                        code: 'VA',
+                        returnDate: returnDate,
+                        loggedBy: localAuthor || 'Sistema',
+                        loggedAt: new Date().toISOString()
+                    };
+                    count++;
+                }
             }
             cur.setDate(cur.getDate() + 1);
         }
 
         if (count === 0) {
-            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana", true);
+            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana o días de descanso oficial", true);
             return;
         }
 
@@ -12039,6 +12310,21 @@ window.renderDailyTasks = function() {
         const newBalance = Math.max(0, currentPending - count);
         if (!consultants[consultant]) consultants[consultant] = {};
         consultants[consultant].pendingVacations = newBalance;
+
+        // Trazabilidad contable en libro mayor de vacaciones (vacationLedger)
+        if (!Array.isArray(consultants[consultant].vacationLedger)) {
+            consultants[consultant].vacationLedger = [];
+        }
+        consultants[consultant].vacationLedger.push({
+            startDate: startDate,
+            endDate: endDate,
+            daysDeducted: count,
+            previousBalance: currentPending,
+            newBalance: newBalance,
+            returnDate: returnDate,
+            timestamp: new Date().toISOString(),
+            registeredBy: localAuthor || 'Sistema'
+        });
 
         window.sendExternalAlert('VACATION_REQUESTED', {
             consultant: consultant,
