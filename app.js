@@ -11700,173 +11700,35 @@ window.renderDailyTasks = function() {
         window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} día${count > 1 ? 's' : ''}). Saldo: ${newBalance} días.`, false);
     };
 
-    window.previewVacationDocument = function() {
-        const cName = document.getElementById('vacConsultant')?.value || '';
-        if (!cName) return;
-        const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
-        const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25950064';
-        const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
-        const lead = cMeta.lead || defaultConsultantMetadata[cName]?.lead || 'Manuel Gutiérrez';
-        const leadMeta = consultants[lead] || defaultConsultantMetadata[lead] || {};
-        const leadTitle = leadMeta.jobTitle || leadMeta.title || 'Coordinador';
-        const hireDate = cMeta.hireDate || defaultConsultantMetadata[cName]?.hireDate || '01-dic-12';
-        
-        const start = document.getElementById('vacStartDate')?.value || '';
-        const end = document.getElementById('vacEndDate')?.value || '';
-        const returnDt = document.getElementById('vacReturnDate')?.value || '';
-        const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4');
-        const requested = parseInt(document.getElementById('vacRequestedDaysBadge')?.textContent || '1');
-        const balance = parseInt(document.getElementById('vacBalanceBadge')?.textContent || '3');
+    // --- GENERADOR OFICIAL DE PRENÓMINA EXCEL (.XLSX) FOPR-RHU-02-02 (FORMATO IDÉNTICO OFICIAL) ---
+    function escapeXml(unsafe) {
+        return String(unsafe || '').replace(/[<>&'"]/g, c => {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+        });
+    }
 
-        const todayStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+    const officialPrenominaConsultants = [
+        { row: 14, name: 'Manuel Gutierrez', fullName: 'Jose Manuel Gutierrez López', empNo: '25950054', job: 'Coordinador' },
+        { row: 15, name: 'Carlos Islas', fullName: 'Carlos Islas Gutierrez', empNo: '25950053', job: 'Coordinador' },
+        { row: 16, name: 'Rafael Romero', fullName: 'Rafael Romero Romero', empNo: '25950052', job: 'Coordinador' },
+        { row: 17, name: 'Miguel Muñoz', fullName: 'Miguel Ángel Muñoz Solis', empNo: '25950056', job: 'Consultor' },
+        { row: 18, name: 'Óscar González', fullName: 'Oscar Hugo González Rubio', empNo: '25950064', job: 'Consultor' },
+        { row: 19, name: 'Ricardo Lira', fullName: 'Ricardo Lira Martínez', empNo: '25950239', job: 'Consultor' },
+        { row: 20, name: 'Emmanuel Sánchez', fullName: 'Emmanuel Luis Sánchez', empNo: '25053773', job: 'Consultor' },
+        { row: 21, name: 'Osvaldo Avilés', fullName: 'Emmanuel Osvaldo Sánchez Avilés', empNo: '25950322', job: 'Consultor' },
+        { row: 22, name: 'Diego Cristobal', fullName: 'Diego Cristobal Reyes', empNo: '25950271', job: 'Consultor' },
+        { row: 23, name: 'Sue Oyuqui', fullName: 'Sue Karol Oyuqui García', empNo: '25950327', job: 'Tester' }
+    ];
 
-        const sheetEl = document.getElementById('vacationPrintSheet');
-        if (!sheetEl) return;
-
-        sheetEl.innerHTML = `
-            <div class="border-b-2 border-gray-900 pb-3 mb-4 flex justify-between items-start">
-                <div class="flex items-center gap-3">
-                    <div class="font-extrabold text-2xl tracking-tighter text-blue-900">STGT</div>
-                    <div class="text-[10px] text-gray-600 border-l border-gray-400 pl-3">
-                        <p class="font-semibold text-gray-800 uppercase">Soluciones Tecnológicas</p>
-                        <p>Proceso de Negocio: Soporte o Apoyo</p>
-                        <p>Proceso: Gestión de Recursos Humanos</p>
-                        <p>Código: <span class="font-bold text-black">FOPR-RHU-02-03</span></p>
-                        <p>Fecha de última revisión: 28-may-2026 Ver.: 4</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="inline-block border border-gray-800 rounded px-4 py-2 text-center bg-gray-50">
-                        <h2 class="font-bold text-sm text-gray-900 uppercase">Solicitud de Permiso o Vacaciones</h2>
-                    </div>
-                    <p class="text-[10px] text-gray-600 mt-2 font-mono">Fecha de Solicitud: <strong class="text-black">${todayStr}</strong></p>
-                </div>
-            </div>
-
-            <!-- DATOS DEL COLABORADOR -->
-            <table class="w-full border-collapse mb-4 text-[10.5px]">
-                <tr class="bg-blue-900 text-white font-semibold">
-                    <th class="border border-blue-900 p-1.5 text-left w-1/4">No. de empleado:</th>
-                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-mono w-1/4">${escapeHtml(empNo)}</td>
-                    <th class="border border-blue-900 p-1.5 text-left w-1/4">Nombre:</th>
-                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-semibold w-1/4 uppercase">${escapeHtml(cName)}</td>
-                </tr>
-                <tr class="bg-blue-900 text-white font-semibold">
-                    <th class="border border-blue-900 p-1.5 text-left">Departamento:</th>
-                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 uppercase">CONSULTORIA DE APLICATIVOS</td>
-                    <th class="border border-blue-900 p-1.5 text-left">Puesto:</th>
-                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 uppercase">${escapeHtml(jobTitle)}</td>
-                </tr>
-                <tr class="bg-blue-900 text-white font-semibold">
-                    <th class="border border-blue-900 p-1.5 text-left">Fecha de ingreso:</th>
-                    <td class="border border-gray-400 p-1.5 text-black bg-gray-50 font-mono" colspan="3">${escapeHtml(hireDate)}</td>
-                </tr>
-            </table>
-
-            <!-- SECCIÓN VACACIONES -->
-            <div class="bg-blue-900 text-white font-bold text-center py-1 uppercase tracking-wider text-[11px] mb-2">
-                Vacaciones
-            </div>
-
-            <table class="w-full border-collapse mb-4 text-[10px]">
-                <thead>
-                    <tr class="bg-gray-100 text-gray-800">
-                        <th class="border border-gray-400 p-1 text-center" colspan="3">Días pendientes por periodo</th>
-                        <th class="border border-gray-400 p-1 text-center">Total pendientes:</th>
-                        <td class="border border-gray-400 p-1 text-center font-bold font-mono bg-blue-50">${pending}</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-gray-400 p-1 text-center font-mono">dic-2025</td>
-                        <td class="border border-gray-400 p-1 text-center">al</td>
-                        <td class="border border-gray-400 p-1 text-center font-mono">jun-2027</td>
-                        <th class="border border-gray-400 p-1 text-center bg-gray-50">Días solicitados:</th>
-                        <td class="border border-gray-400 p-1 text-center font-bold font-mono text-blue-900 bg-blue-50">${requested}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-400 p-1 text-center font-mono">N/A</td>
-                        <td class="border border-gray-400 p-1 text-center">al</td>
-                        <td class="border border-gray-400 p-1 text-center font-mono">N/A</td>
-                        <th class="border border-gray-400 p-1 text-center bg-gray-50">Saldo días de vacaciones:</th>
-                        <td class="border border-gray-400 p-1 text-center font-bold font-mono text-green-700 bg-green-50">${balance}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="p-2.5 bg-gray-50 border border-gray-300 rounded mb-4 text-[10.5px]">
-                <p>Deseo disfrutar mis vacaciones los días del <strong class="underline">${start || '___'}</strong> al <strong class="underline">${end || '___'}</strong> reincorporándome a mis labores el día <strong class="underline">${returnDt || '___'}</strong>.</p>
-                <p class="text-[9px] text-gray-600 mt-2 italic text-justify leading-tight">
-                    Por este medio expreso mi voluntad de solicitar y gozar mis vacaciones de acuerdo con lo que establecen los artículos 76, 78 y 81 de la Ley Federal del Trabajo, considerando los días expresados en este apartado y firmando de conformidad en la parte inferior del documento.
-                </p>
-            </div>
-
-            <!-- FIRMAS DE CONFORMIDAD -->
-            <div class="bg-blue-900 text-white font-bold text-center py-1 uppercase tracking-wider text-[11px] mb-6">
-                Firmas de conformidad
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 text-center text-[10px] mt-8 pt-4">
-                <div class="flex flex-col justify-end">
-                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
-                        ${escapeHtml(cName)}
-                    </div>
-                    <p class="font-bold uppercase text-[9px]">Colaborador(a)</p>
-                    <p class="text-[8.5px] text-gray-600 uppercase">${escapeHtml(jobTitle)}</p>
-                </div>
-
-                <div class="flex flex-col justify-end">
-                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
-                        ${escapeHtml(lead)}
-                    </div>
-                    <p class="font-bold uppercase text-[9px]">Jefe Inmediato</p>
-                    <p class="text-[8.5px] text-gray-600 uppercase">${escapeHtml(leadTitle)}</p>
-                </div>
-
-                <div class="flex flex-col justify-end">
-                    <div class="border-b border-gray-800 pb-1 mb-1 font-semibold text-gray-900">
-                        Jose Luis Bautista Cuchillo
-                    </div>
-                    <p class="font-bold uppercase text-[9px]">Recibe por Recursos Humanos</p>
-                    <p class="text-[8.5px] text-gray-600 uppercase">Gerente de Recursos Humanos</p>
-                </div>
-            </div>
-
-            <div class="mt-8 pt-2 border-t border-gray-300 flex justify-between text-[8px] text-gray-500 font-mono">
-                <span>FOGUPR-DC-01-01-02</span>
-                <span>STGT</span>
-                <span>Página 1 de 1</span>
-            </div>
-        `;
-
-        const m = document.getElementById('vacationPrintModal');
-        if (m) {
-            m.classList.remove('hidden');
-            setTimeout(() => m.classList.remove('opacity-0'), 10);
-        }
-    };
-
-    window.closeVacationPrintModal = function() {
-        const m = document.getElementById('vacationPrintModal');
-        if (m) {
-            m.classList.add('opacity-0');
-            setTimeout(() => m.classList.add('hidden'), 200);
-        }
-    };
-
-    window.printOfficialVacationSheet = function() {
-        window.print();
-    };
-
-    // --- GENERADOR OFICIAL DE PRENÓMINA EXCEL (.XLSX) FOPR-RHU-02-02 ---
-    window.exportPrenominaXLSX = function() {
+    window.exportPrenominaXLSX = async function() {
         if (!window.isAttendanceMasterAdmin()) {
             window.showToast("🔒 Acceso denegado: La descarga del archivo oficial de prenómina está reservada exclusivamente para Osvaldo Avilés (Auditoría).", true);
-            return;
-        }
-
-        if (typeof XLSX === 'undefined') {
-            window.showToast("⚠️ Cargando librería SheetJS, intenta en unos segundos...", true);
             return;
         }
 
@@ -11881,6 +11743,147 @@ window.renderDailyTasks = function() {
         const startDay = q === 'Q1' ? 1 : 16;
         const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
         const periodDaysCount = endDay - startDay + 1;
+        const authorName = localAuthor || 'Emmanuel Osvaldo Sánchez Avilés';
+        const fileName = `FOPR-RHU-02-02_Prenomina_${monthName}_${y}_${q}.xlsx`;
+
+        // 1. INTENTO CON PLANTILLA OFICIAL 100% IDÉNTICA (Logotipo, fuentes, catálogo y celdas combinadas)
+        if (typeof JSZip !== 'undefined' && window.PRENOMINA_EXCEL_TEMPLATE_BASE64) {
+            try {
+                window.showToast("⏳ Generando prenómina oficial con plantilla institucional...", false);
+                const zip = await JSZip.loadAsync(window.PRENOMINA_EXCEL_TEMPLATE_BASE64, { base64: true });
+                let sheetXml = await zip.file('xl/worksheets/sheet1.xml').async('text');
+
+                // Encabezado institucional (Fila 8)
+                const elaboroStr = escapeXml(authorName);
+                sheetXml = sheetXml.replace(/<c r="C8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="C8" s="68" t="inlineStr"><is><t>${elaboroStr}</t></is></c>`);
+                sheetXml = sheetXml.replace(/<c r="S8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="S8" s="4"><v>${startDay}</v></c>`);
+                sheetXml = sheetXml.replace(/<c r="U8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="U8" s="24"><v>${endDay}</v></c>`);
+                sheetXml = sheetXml.replace(/<c r="W8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="W8" s="67" t="inlineStr"><is><t>${escapeXml(monthName)}</t></is></c>`);
+
+                // Columnas de días: J a X (15 columnas de la quincena)
+                const colLetters = ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'];
+
+                // Fila 13: Números de día con estilo de fin de semana (s="36") o hábil (s="3")
+                let row13Cells = `<c r="B13" s="60"/><c r="C13" s="53"/><c r="D13" s="54"/><c r="E13" s="55"/><c r="F13" s="53"/><c r="G13" s="54"/><c r="H13" s="54"/><c r="I13" s="55"/>`;
+                for (let idx = 0; idx < 15; idx++) {
+                    const col = colLetters[idx];
+                    const dNum = startDay + idx;
+                    if (dNum <= endDay) {
+                        const dt = new Date(y, m - 1, dNum, 12, 0, 0);
+                        const isWeekend = (dt.getDay() === 0 || dt.getDay() === 6);
+                        row13Cells += `<c r="${col}13" s="${isWeekend ? 36 : 3}"><v>${dNum}</v></c>`;
+                    } else {
+                        row13Cells += `<c r="${col}13" s="3"/>`;
+                    }
+                }
+                row13Cells += `<c r="Y13" s="46"/>`;
+                sheetXml = sheetXml.replace(/<row r="13"[^>]*>.*?<\/row>/s, `<row r="13" spans="2:31" ht="19.95" customHeight="1" x14ac:dyDescent="0.3">${row13Cells}</row>`);
+
+                // Filas 14 a 23: Los 10 colaboradores oficiales del formato
+                const periodAttendance = (appData.attendance && appData.attendance[periodKey]) || {};
+
+                for (const cMap of officialPrenominaConsultants) {
+                    const rNum = cMap.row;
+                    let ptCount = 0;
+                    let vaCount = 0;
+
+                    let rowCells = `<c r="B${rNum}" s="28"><v>${cMap.empNo}</v></c>`;
+                    rowCells += `<c r="C${rNum}" s="63" t="inlineStr"><is><t>${escapeXml(cMap.fullName)}</t></is></c>`;
+                    rowCells += `<c r="D${rNum}" s="64"/><c r="E${rNum}" s="65"/>`;
+                    rowCells += `<c r="F${rNum}" s="63" t="inlineStr"><is><t>${escapeXml(cMap.job)}</t></is></c>`;
+                    rowCells += `<c r="G${rNum}" s="64"/><c r="H${rNum}" s="64"/><c r="I${rNum}" s="65"/>`;
+
+                    const cAtt = periodAttendance[cMap.name] || {};
+
+                    for (let idx = 0; idx < 15; idx++) {
+                        const col = colLetters[idx];
+                        const dNum = startDay + idx;
+                        if (dNum <= endDay) {
+                            const dt = new Date(y, m - 1, dNum, 12, 0, 0);
+                            const isWeekend = (dt.getDay() === 0 || dt.getDay() === 6);
+                            const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`;
+                            const dayRecord = cAtt[dateStr];
+
+                            let code = '';
+                            if (dayRecord) {
+                                const st = (dayRecord.status || '').toLowerCase();
+                                if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm') || dayRecord.code === 'PT') {
+                                    code = 'PT';
+                                    ptCount++;
+                                } else if (st.includes('vacaci') || dayRecord.code === 'VA') {
+                                    code = 'VA';
+                                    vaCount++;
+                                } else if (st.includes('médico') || dayRecord.code === 'PM') {
+                                    code = 'PM';
+                                } else if (st.includes('falta') || dayRecord.code === 'FA') {
+                                    code = 'FA';
+                                } else if (st.includes('contingencia') || dayRecord.code === 'CG') {
+                                    code = 'CG';
+                                } else if (st.includes('festivo') || dayRecord.code === 'FT') {
+                                    code = 'FT';
+                                } else if (dayRecord.code) {
+                                    code = dayRecord.code;
+                                }
+                            }
+
+                            const cellStyle = isWeekend ? 37 : 33;
+                            if (code) {
+                                rowCells += `<c r="${col}${rNum}" s="${cellStyle}" t="inlineStr"><is><t>${escapeXml(code)}</t></is></c>`;
+                            } else {
+                                rowCells += `<c r="${col}${rNum}" s="${cellStyle}"/>`;
+                            }
+                        } else {
+                            rowCells += `<c r="${col}${rNum}" s="33"/>`;
+                        }
+                    }
+
+                    // Observaciones (Columna Y)
+                    const obsParts = [];
+                    if (vaCount > 0) obsParts.push(`${vaCount} día${vaCount > 1 ? 's' : ''} de vacaciones`);
+                    if (ptCount > 0) obsParts.push(`${ptCount} día${ptCount > 1 ? 's' : ''} de comisión`);
+                    const obsText = obsParts.join(' - ');
+
+                    if (obsText) {
+                        rowCells += `<c r="Y${rNum}" s="34" t="inlineStr"><is><t>${escapeXml(obsText)}</t></is></c>`;
+                    } else {
+                        rowCells += `<c r="Y${rNum}" s="34"/>`;
+                    }
+
+                    const rowRegex = new RegExp(`<row r="${rNum}"[^>]*>.*?</row>`, 's');
+                    sheetXml = sheetXml.replace(rowRegex, `<row r="${rNum}" spans="2:31" s="27" customFormat="1" ht="30" customHeight="1" x14ac:dyDescent="0.3">${rowCells}</row>`);
+                }
+
+                zip.file('xl/worksheets/sheet1.xml', sheetXml);
+
+                const blob = await zip.generateAsync({
+                    type: 'blob',
+                    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    compression: 'DEFLATE'
+                });
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 500);
+
+                window.showToast(`📊 Prenómina oficial descargada con formato exacto FOPR-RHU-02-02: ${fileName}`, false);
+                return;
+            } catch (err) {
+                console.error("Error generando prenómina con plantilla idéntica:", err);
+            }
+        }
+
+        // 2. FALLBACK CON SHEETJS
+        if (typeof XLSX === 'undefined') {
+            window.showToast("⚠️ Cargando librería SheetJS, intenta en unos segundos...", true);
+            return;
+        }
 
         const aoa = [];
 
@@ -11892,7 +11895,6 @@ window.renderDailyTasks = function() {
         aoa.push(["", "", "", "", "", "Fecha de última revisión: 28-may-2026  Ver.: 4"]);
         aoa.push([]);
 
-        const authorName = localAuthor || 'Emmanuel Osvaldo Sánchez Avilés';
         aoa.push(["", "Elaboró:", authorName, "", "", "", "", "", "", "", "", "Periodo a reportar:", "", "", "", "Del", startDay, "al", endDay, "de", monthName, y]);
         aoa.push([]);
         aoa.push(["", "Área:", "Consultoría de Aplicaciones"]);
@@ -12010,7 +12012,6 @@ window.renderDailyTasks = function() {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, `Prenomina_${monthName.substring(0,3)}_${q}`);
 
-        const fileName = `FOPR-RHU-02-02_Prenomina_${monthName}_${y}_${q}.xlsx`;
         XLSX.writeFile(wb, fileName);
         window.showToast(`📊 Prenómina oficial descargada: ${fileName}`, false);
     };

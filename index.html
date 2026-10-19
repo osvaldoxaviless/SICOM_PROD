@@ -14,6 +14,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="prenomina_template.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -705,39 +707,9 @@
               </div>
           </div>
 
-          <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-[#1d1a18]">
-              <button onclick="closeVacationModal()" class="py-2.5 px-4 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
-              <button onclick="previewVacationDocument()" class="flex-1 py-2.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition flex items-center justify-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  <span>Vista Previa / Formato RH</span>
-              </button>
+          <div class="flex gap-2.5 pt-2 border-t border-[#1d1a18]">
+              <button onclick="closeVacationModal()" class="flex-1 py-2.5 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition">Cancelar</button>
               <button onclick="saveVacation()" class="flex-1 py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium text-[10px] uppercase rounded-[3px] transition">Guardar en Rol →</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- MODAL: VISOR / IMPRESIÓN DEL FORMATO OFICIAL RH (FOPR-RHU-02-03) -->
-  <div id="vacationPrintModal" class="fixed inset-0 z-[99998] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4">
-      <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] w-full max-w-3xl max-h-[94vh] flex flex-col overflow-hidden">
-          <div class="p-3.5 px-5 border-b border-[#3d3a39] bg-[#1d1a18] flex items-center justify-between shrink-0">
-              <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-[#a0ca92]"></span>
-                  <span class="font-mono text-xs uppercase text-[#eeeeee] font-medium tracking-[-0.24px]">Documento Oficial: Solicitud de Permiso o Vacaciones</span>
-              </div>
-              <div class="flex items-center gap-2">
-                  <button type="button" onclick="printOfficialVacationSheet()" class="px-3.5 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-medium rounded-[3px] flex items-center gap-1.5 transition">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                      <span>Imprimir / Guardar PDF</span>
-                  </button>
-                  <button type="button" onclick="closeVacationPrintModal()" class="p-1 text-[#8a8380] hover:text-[#eeeeee] font-mono text-xs">✕</button>
-              </div>
-          </div>
-
-          <!-- DOCUMENTO IMPRIMIBLE (FONDO BLANCO INSTITUCIONAL EXACTO AL FORMATO DE RH) -->
-          <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#161413]">
-              <div id="vacationPrintSheet" class="bg-white text-black p-8 rounded shadow-none max-w-[760px] mx-auto text-[11px] font-sans leading-tight border border-gray-300">
-                  <!-- Se genera dinámicamente en app.js con el diseño exacto del PDF de Recursos Humanos -->
-              </div>
           </div>
       </div>
   </div>
