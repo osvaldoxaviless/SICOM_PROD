@@ -12547,35 +12547,15 @@ window.renderDailyTasks = function() {
         window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} día${count > 1 ? 's' : ''}). Saldo: ${newBalance} días.`, false);
     };
 
-    // --- GENERADOR OFICIAL DE PRENÓMINA EXCEL (.XLSX) FOPR-RHU-02-02 (FORMATO IDÉNTICO OFICIAL) ---
-    function escapeXml(unsafe) {
-        return String(unsafe || '').replace(/[<>&'"]/g, c => {
-            switch (c) {
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '&': return '&amp;';
-                case '\'': return '&apos;';
-                case '"': return '&quot;';
-            }
-        });
-    }
-
-    const officialPrenominaConsultants = [
-        { row: 14, name: 'Manuel Gutierrez', fullName: 'Jose Manuel Gutierrez López', empNo: '25950054', job: 'Coordinador' },
-        { row: 15, name: 'Carlos Islas', fullName: 'Carlos Islas Gutierrez', empNo: '25950053', job: 'Coordinador' },
-        { row: 16, name: 'Rafael Romero', fullName: 'Rafael Romero Romero', empNo: '25950052', job: 'Coordinador' },
-        { row: 17, name: 'Miguel Muñoz', fullName: 'Miguel Ángel Muñoz Solis', empNo: '25950056', job: 'Consultor' },
-        { row: 18, name: 'Óscar González', fullName: 'Oscar Hugo González Rubio', empNo: '25950064', job: 'Consultor' },
-        { row: 19, name: 'Ricardo Lira', fullName: 'Ricardo Lira Martínez', empNo: '25950239', job: 'Consultor' },
-        { row: 20, name: 'Emmanuel Sánchez', fullName: 'Emmanuel Luis Sánchez', empNo: '25053773', job: 'Consultor' },
-        { row: 21, name: 'Osvaldo Avilés', fullName: 'Emmanuel Osvaldo Sánchez Avilés', empNo: '25950322', job: 'Consultor' },
-        { row: 22, name: 'Diego Cristobal', fullName: 'Diego Cristobal Reyes', empNo: '25950271', job: 'Consultor' },
-        { row: 23, name: 'Sue Oyuqui', fullName: 'Sue Karol Oyuqui García', empNo: '25950327', job: 'Tester' }
-    ];
-
+    // --- GENERADOR DINÁMICO DE PRENÓMINA INSTITUCIONAL EXCEL (.XLSX) FOPR-RHU-02-02 ---
     window.exportPrenominaXLSX = async function() {
         if (!window.isAttendanceMasterAdmin()) {
             window.showToast("🔒 Acceso denegado: La descarga del archivo oficial de prenómina está reservada exclusivamente para Osvaldo Avilés (Auditoría).", true);
+            return;
+        }
+
+        if (typeof XLSX === 'undefined') {
+            window.showToast("⚠️ Cargando librería XLSX, intenta en unos segundos...", true);
             return;
         }
 
@@ -12592,275 +12572,403 @@ window.renderDailyTasks = function() {
         const periodDaysCount = endDay - startDay + 1;
         const authorName = localAuthor || 'Emmanuel Osvaldo Sánchez Avilés';
         const fileName = `FOPR-RHU-02-02_Prenomina_${monthName}_${y}_${q}.xlsx`;
+        const obsCol = 9 + periodDaysCount;
 
-        // 1. INTENTO CON PLANTILLA OFICIAL 100% IDÉNTICA (Logotipo, fuentes, catálogo y celdas combinadas)
-        if (typeof JSZip !== 'undefined' && window.PRENOMINA_EXCEL_TEMPLATE_BASE64) {
-            try {
-                window.showToast("⏳ Generando prenómina oficial con plantilla institucional...", false);
-                const zip = await JSZip.loadAsync(window.PRENOMINA_EXCEL_TEMPLATE_BASE64, { base64: true });
-                let sheetXml = await zip.file('xl/worksheets/sheet1.xml').async('text');
+        const officialFullNames = {
+            'Manuel Gutierrez': 'Jose Manuel Gutierrez López',
+            'Carlos Islas': 'Carlos Islas Gutierrez',
+            'Rafael Romero': 'Rafael Romero Romero',
+            'Miguel Muñoz': 'Miguel Ángel Muñoz Solis',
+            'Óscar González': 'Oscar Hugo González Rubio',
+            'Ricardo Lira': 'Ricardo Lira Martínez',
+            'Emmanuel Sánchez': 'Emmanuel Luis Sánchez',
+            'Osvaldo Avilés': 'Emmanuel Osvaldo Sánchez Avilés',
+            'Diego Cristobal': 'Diego Cristobal Reyes',
+            'Sue Oyuqui': 'Sue Karol Oyuqui García',
+            'Miguel Barbosa': 'Miguel Barbosa'
+        };
 
-                // Encabezado institucional (Fila 8)
-                const elaboroStr = escapeXml(authorName);
-                sheetXml = sheetXml.replace(/<c r="C8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="C8" s="68" t="inlineStr"><is><t>${elaboroStr}</t></is></c>`);
-                sheetXml = sheetXml.replace(/<c r="S8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="S8" s="4"><v>${startDay}</v></c>`);
-                sheetXml = sheetXml.replace(/<c r="U8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="U8" s="24"><v>${endDay}</v></c>`);
-                sheetXml = sheetXml.replace(/<c r="W8"[^>]*>(?:<v>.*?<\/v>)?<\/c>/, `<c r="W8" s="67" t="inlineStr"><is><t>${escapeXml(monthName)}</t></is></c>`);
-
-                // Columnas de días: J a X (15 columnas de la quincena)
-                const colLetters = ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'];
-
-                // Fila 13: Números de día con estilo de fin de semana (s="36") o hábil (s="3")
-                let row13Cells = `<c r="B13" s="60"/><c r="C13" s="53"/><c r="D13" s="54"/><c r="E13" s="55"/><c r="F13" s="53"/><c r="G13" s="54"/><c r="H13" s="54"/><c r="I13" s="55"/>`;
-                for (let idx = 0; idx < 15; idx++) {
-                    const col = colLetters[idx];
-                    const dNum = startDay + idx;
-                    if (dNum <= endDay) {
-                        const dt = new Date(y, m - 1, dNum, 12, 0, 0);
-                        const isWeekend = (dt.getDay() === 0 || dt.getDay() === 6);
-                        row13Cells += `<c r="${col}13" s="${isWeekend ? 36 : 3}"><v>${dNum}</v></c>`;
-                    } else {
-                        row13Cells += `<c r="${col}13" s="3"/>`;
-                    }
-                }
-                row13Cells += `<c r="Y13" s="46"/>`;
-                sheetXml = sheetXml.replace(/<row r="13"[^>]*>.*?<\/row>/s, `<row r="13" spans="2:31" ht="19.95" customHeight="1" x14ac:dyDescent="0.3">${row13Cells}</row>`);
-
-                // Filas 14 a 23: Los 10 colaboradores oficiales del formato
-                const periodAttendance = (appData.attendance && appData.attendance[periodKey]) || {};
-
-                for (const cMap of officialPrenominaConsultants) {
-                    const rNum = cMap.row;
-                    let ptCount = 0;
-                    let vaCount = 0;
-
-                    let rowCells = `<c r="B${rNum}" s="28"><v>${cMap.empNo}</v></c>`;
-                    rowCells += `<c r="C${rNum}" s="63" t="inlineStr"><is><t>${escapeXml(cMap.fullName)}</t></is></c>`;
-                    rowCells += `<c r="D${rNum}" s="64"/><c r="E${rNum}" s="65"/>`;
-                    rowCells += `<c r="F${rNum}" s="63" t="inlineStr"><is><t>${escapeXml(cMap.job)}</t></is></c>`;
-                    rowCells += `<c r="G${rNum}" s="64"/><c r="H${rNum}" s="64"/><c r="I${rNum}" s="65"/>`;
-
-                    const cAtt = periodAttendance[cMap.name] || {};
-
-                    for (let idx = 0; idx < 15; idx++) {
-                        const col = colLetters[idx];
-                        const dNum = startDay + idx;
-                        if (dNum <= endDay) {
-                            const dt = new Date(y, m - 1, dNum, 12, 0, 0);
-                            const isWeekend = (dt.getDay() === 0 || dt.getDay() === 6);
-                            const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`;
-                            const dayRecord = cAtt[dateStr];
-
-                            let code = '';
-                            if (dayRecord) {
-                                const st = (dayRecord.status || '').toLowerCase();
-                                if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm') || dayRecord.code === 'PT') {
-                                    code = 'PT';
-                                    ptCount++;
-                                } else if (st.includes('vacaci') || dayRecord.code === 'VA') {
-                                    code = 'VA';
-                                    vaCount++;
-                                } else if (st.includes('médico') || dayRecord.code === 'PM') {
-                                    code = 'PM';
-                                } else if (st.includes('falta') || dayRecord.code === 'FA') {
-                                    code = 'FA';
-                                } else if (st.includes('contingencia') || dayRecord.code === 'CG') {
-                                    code = 'CG';
-                                } else if (st.includes('festivo') || dayRecord.code === 'FT') {
-                                    code = 'FT';
-                                } else if (dayRecord.code) {
-                                    code = dayRecord.code;
-                                }
-                            }
-
-                            const cellStyle = isWeekend ? 37 : 33;
-                            if (code) {
-                                rowCells += `<c r="${col}${rNum}" s="${cellStyle}" t="inlineStr"><is><t>${escapeXml(code)}</t></is></c>`;
-                            } else {
-                                rowCells += `<c r="${col}${rNum}" s="${cellStyle}"/>`;
-                            }
-                        } else {
-                            rowCells += `<c r="${col}${rNum}" s="33"/>`;
-                        }
-                    }
-
-                    // Observaciones (Columna Y)
-                    const obsParts = [];
-                    if (vaCount > 0) obsParts.push(`${vaCount} día${vaCount > 1 ? 's' : ''} de vacaciones`);
-                    if (ptCount > 0) obsParts.push(`${ptCount} día${ptCount > 1 ? 's' : ''} de comisión`);
-                    const obsText = obsParts.join(' - ');
-
-                    if (obsText) {
-                        rowCells += `<c r="Y${rNum}" s="34" t="inlineStr"><is><t>${escapeXml(obsText)}</t></is></c>`;
-                    } else {
-                        rowCells += `<c r="Y${rNum}" s="34"/>`;
-                    }
-
-                    const rowRegex = new RegExp(`<row r="${rNum}"[^>]*>.*?</row>`, 's');
-                    sheetXml = sheetXml.replace(rowRegex, `<row r="${rNum}" spans="2:31" s="27" customFormat="1" ht="30" customHeight="1" x14ac:dyDescent="0.3">${rowCells}</row>`);
-                }
-
-                zip.file('xl/worksheets/sheet1.xml', sheetXml);
-
-                const blob = await zip.generateAsync({
-                    type: 'blob',
-                    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    compression: 'DEFLATE'
-                });
-
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(blobUrl);
-                }, 500);
-
-                window.showToast(`📊 Prenómina oficial descargada con formato exacto FOPR-RHU-02-02: ${fileName}`, false);
-                return;
-            } catch (err) {
-                console.error("Error generando prenómina con plantilla idéntica:", err);
-            }
-        }
-
-        // 2. FALLBACK CON SHEETJS
-        if (typeof XLSX === 'undefined') {
-            window.showToast("⚠️ Cargando librería SheetJS, intenta en unos segundos...", true);
-            return;
-        }
-
-        const aoa = [];
-
-        // Encabezado institucional FOPR-RHU-02-02
-        aoa.push([]);
-        aoa.push(["", "", "", "", "", "Proceso de Negocio: Soporte o Apoyo"]);
-        aoa.push(["", "", "", "", "", "Proceso: Gestión de Recursos Humanos"]);
-        aoa.push(["", "", "", "", "", "Código: FOPR-RHU-02-02"]);
-        aoa.push(["", "", "", "", "", "Fecha de última revisión: 28-may-2026  Ver.: 4"]);
-        aoa.push([]);
-
-        aoa.push(["", "Elaboró:", authorName, "", "", "", "", "", "", "", "", "Periodo a reportar:", "", "", "", "Del", startDay, "al", endDay, "de", monthName, y]);
-        aoa.push([]);
-        aoa.push(["", "Área:", "Consultoría de Aplicaciones"]);
-        aoa.push([]);
-
-        // Encabezados de tabla
-        const rowHeader1 = ["", "No. de Empleado", "Colaborador", "", "", "Puesto", "", "", "", "Día"];
-        for (let i = 1; i < periodDaysCount; i++) rowHeader1.push("");
-        rowHeader1.push("Observaciones");
-        aoa.push(rowHeader1);
-
-        const rowHeader2 = ["", "", "", "", "", "", "", "", ""];
-        for (let d = startDay; d <= endDay; d++) {
-            rowHeader2.push(d);
-        }
-        rowHeader2.push("");
-        aoa.push(rowHeader2);
-
-        const priorityList = [
-            "Manuel Gutierrez", "Carlos Islas", "Rafael Romero", "Miguel Muñoz",
-            "Óscar González", "Ricardo Lira", "Emmanuel Sánchez", "Osvaldo Avilés",
-            "Diego Cristobal", "Sue Oyuqui"
-        ];
-        Object.keys(consultants).forEach(k => {
-            if (!priorityList.includes(k) && k !== 'Lector (Jefatura)' && k !== 'Miguel Barbosa') {
-                priorityList.push(k);
-            }
+        // 1. Obtener lista viva y dinámica de colaboradores activos en el Rol de Asistencia (excluyendo Lector)
+        let priorityList = Object.keys(consultants).filter(k => {
+            const role = (consultants[k] && consultants[k].role) || '';
+            return role !== 'Lector' && !k.toLowerCase().includes('lector');
         });
+        if (priorityList.length === 0) {
+            priorityList = Object.keys(officialFullNames);
+        }
 
         const periodData = (appData.attendance && appData.attendance[periodKey]) || {};
+
+        // 2. Construir matriz AOA (Array of Arrays)
+        const aoa = [];
+        const totalRowsEstimate = 12 + priorityList.length + 30;
+        for (let r = 0; r < totalRowsEstimate; r++) {
+            const row = [];
+            for (let c = 0; c <= obsCol; c++) row.push('');
+            aoa.push(row);
+        }
+
+        // Encabezado institucional FOPR-RHU-02-02
+        aoa[1][1] = "SISTEMA DE CONTROL OPERATIVO - FORMATO DE PRENÓMINA";
+        aoa[1][9] = "Proceso de Negocio: Soporte o Apoyo";
+        aoa[2][1] = "Control de Asistencia del Personal";
+        aoa[2][9] = "Proceso: Gestión de Recursos Humanos";
+        aoa[3][9] = "Código: FOPR-RHU-02-02";
+        aoa[4][9] = "Fecha de última revisión: 28-may-2024  Ver.: 4";
+
+        // Metadatos
+        aoa[6][1] = "Elaboró:";
+        aoa[6][2] = authorName;
+        aoa[6][11] = "Periodo a reportar:";
+        aoa[6][15] = "Del";
+        aoa[6][16] = startDay;
+        aoa[6][17] = "al";
+        aoa[6][18] = endDay;
+        aoa[6][19] = "de";
+        aoa[6][20] = monthName;
+        aoa[6][21] = y;
+
+        aoa[8][1] = "Área:";
+        aoa[8][2] = "Consultoría de Aplicaciones";
+
+        // Cabeceras de tabla
+        aoa[10][1] = "No. de Empleado";
+        aoa[10][2] = "Colaborador";
+        aoa[10][5] = "Puesto";
+        aoa[10][9] = "Día";
+        aoa[10][obsCol] = "Observaciones";
+
+        for (let d = startDay; d <= endDay; d++) {
+            aoa[11][9 + (d - startDay)] = d;
+        }
+
+        // Combinaciones de celdas (Merges)
+        const merges = [
+            { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } },
+            { s: { r: 1, c: 9 }, e: { r: 1, c: obsCol } },
+            { s: { r: 2, c: 1 }, e: { r: 2, c: 8 } },
+            { s: { r: 2, c: 9 }, e: { r: 2, c: obsCol } },
+            { s: { r: 3, c: 9 }, e: { r: 3, c: obsCol } },
+            { s: { r: 4, c: 9 }, e: { r: 4, c: obsCol } },
+
+            { s: { r: 6, c: 2 }, e: { r: 6, c: 5 } },
+            { s: { r: 6, c: 11 }, e: { r: 6, c: 14 } },
+            { s: { r: 8, c: 2 }, e: { r: 8, c: 8 } },
+
+            { s: { r: 10, c: 1 }, e: { r: 11, c: 1 } },
+            { s: { r: 10, c: 2 }, e: { r: 11, c: 4 } },
+            { s: { r: 10, c: 5 }, e: { r: 11, c: 8 } },
+            { s: { r: 10, c: 9 }, e: { r: 10, c: obsCol - 1 } },
+            { s: { r: 10, c: obsCol }, e: { r: 11, c: obsCol } }
+        ];
+
+        // Llenar datos de cada colaborador activo
+        const cellComments = {};
+        let curRow = 12;
 
         priorityList.forEach(cName => {
             const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
             const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '';
-            const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
+            const fullName = cMeta.fullName || officialFullNames[cName] || cName;
+            const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.role || 'Consultor';
 
-            const row = ["", empNo, cName, "", "", jobTitle, "", "", ""];
+            aoa[curRow][1] = empNo;
+            aoa[curRow][2] = fullName;
+            aoa[curRow][5] = jobTitle;
+
+            merges.push({ s: { r: curRow, c: 2 }, e: { r: curRow, c: 4 } });
+            merges.push({ s: { r: curRow, c: 5 }, e: { r: curRow, c: 8 } });
 
             let ptCount = 0;
             let vaCount = 0;
             const cAtt = periodData[cName] || {};
 
             for (let d = startDay; d <= endDay; d++) {
+                const colIdx = 9 + (d - startDay);
+                const dt = new Date(y, m - 1, d, 12, 0, 0);
+                const isWeekend = (dt.getDay() === 0 || dt.getDay() === 6);
                 const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const dayRecord = cAtt[dateStr];
-                let code = "";
+
+                let code = '';
                 if (dayRecord) {
-                    const st = (dayRecord.status || '').toLowerCase();
-                    if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm') || dayRecord.code === 'PT') {
-                        code = "PT";
-                        ptCount++;
-                    } else if (st.includes('vacaci') || dayRecord.code === 'VA') {
-                        code = "VA";
-                        vaCount++;
-                    } else if (st.includes('médico') || dayRecord.code === 'PM') {
-                        code = "PM";
-                    } else if (st.includes('falta') || dayRecord.code === 'FA') {
-                        code = "FA";
-                    } else if (st.includes('contingencia') || dayRecord.code === 'CG') {
-                        code = "CG";
-                    } else if (st.includes('festivo') || dayRecord.code === 'FT') {
-                        code = "FT";
-                    } else if (dayRecord.code) {
-                        code = dayRecord.code;
+                    const cellInfo = window.getAttendanceCellDetails ? window.getAttendanceCellDetails(dayRecord, cName, dateStr) : null;
+                    if (cellInfo) {
+                        if (cellInfo.type === 'vacaciones') {
+                            code = 'VA';
+                            vaCount++;
+                        } else if (cellInfo.type === 'comision' || cellInfo.type === 'cliente_a' || cellInfo.type === 'cliente_b') {
+                            code = 'PT';
+                            ptCount++;
+                        } else if (cellInfo.type === 'medico') {
+                            code = 'PM';
+                        } else if (cellInfo.type === 'falta') {
+                            code = 'FA';
+                        } else if (cellInfo.type === 'festivo') {
+                            code = 'FT';
+                        } else if (cellInfo.type === 'contingencia') {
+                            code = 'CG';
+                        } else if (cellInfo.code) {
+                            code = cellInfo.code;
+                        }
+                    } else {
+                        const st = (dayRecord.status || '').toLowerCase();
+                        if (st.includes('comisi') || st.includes('afr') || st.includes('odm') || st.includes('abm') || dayRecord.code === 'PT') {
+                            code = 'PT';
+                            ptCount++;
+                        } else if (st.includes('vacaci') || dayRecord.code === 'VA') {
+                            code = 'VA';
+                            vaCount++;
+                        } else if (st.includes('médico') || dayRecord.code === 'PM') {
+                            code = 'PM';
+                        } else if (st.includes('falta') || dayRecord.code === 'FA') {
+                            code = 'FA';
+                        } else if (st.includes('contingencia') || dayRecord.code === 'CG') {
+                            code = 'CG';
+                        } else if (st.includes('festivo') || dayRecord.code === 'FT') {
+                            code = 'FT';
+                        } else if (dayRecord.code) {
+                            code = dayRecord.code;
+                        }
+                    }
+
+                    if (dayRecord.client || dayRecord.reason) {
+                        const noteText = `${dayRecord.client ? dayRecord.client + ': ' : ''}${dayRecord.reason || dayRecord.status || ''}`;
+                        cellComments[`${curRow}_${colIdx}`] = { note: noteText, author: dayRecord.loggedBy || authorName };
                     }
                 }
-                row.push(code);
+
+                aoa[curRow][colIdx] = code;
             }
 
             const obsParts = [];
             if (vaCount > 0) obsParts.push(`${vaCount} día${vaCount > 1 ? 's' : ''} de vacaciones`);
             if (ptCount > 0) obsParts.push(`${ptCount} día${ptCount > 1 ? 's' : ''} de comisión`);
-            const obsText = obsParts.join(' - ');
-            row.push(obsText);
+            aoa[curRow][obsCol] = obsParts.join(' - ');
 
-            aoa.push(row);
+            curRow++;
         });
 
-        // Catálogo oficial al pie
-        aoa.push([]);
-        aoa.push([]);
-        aoa.push([]);
+        // 3. Catálogo oficial FOPR-RHU-02-02 al pie
+        curRow += 3;
+        aoa[curRow][1] = "CATÁLOGO OFICIAL DE INCIDENCIAS FOPR-RHU-02-02";
+        merges.push({ s: { r: curRow, c: 1 }, e: { r: curRow, c: 8 } });
+        curRow++;
 
-        aoa.push(["", "Código", "Concepto", "", "", "Descripción"]);
+        aoa[curRow][1] = "Código";
+        aoa[curRow][2] = "Concepto";
+        aoa[curRow][5] = "Descripción";
+        merges.push({ s: { r: curRow, c: 2 }, e: { r: curRow, c: 4 } });
+        merges.push({ s: { r: curRow, c: 5 }, e: { r: curRow, c: obsCol } });
+        const catHeaderRow = curRow;
+        curRow++;
+
         const catalog = [
-            ["PD", "Prima dominical", "Trabajo realizado en día Domingo por jornada regular o por descanso semanal"],
-            ["CG", "Contingencia", "Evento, situación o riesgo imprevisto que puede ocurrir e impide acudir al trabajo"],
-            ["FT", "Festivo trabajado", "Trabajo realizado en día festivo, o día feriado que no es día laborable y se considera como descanso obligatorio"],
-            ["DT", "Descanso trabajado", "Prestación de servicios durante un día de descanso semanal"],
-            ["FA", "Falta", "Inasistencia de un trabajador a su puesto sin permiso, ni causa justificada"],
-            ["HE", "Horas Extra", "Tiempo laboral que un empleado labora de forma adicional a su jornada ordinaria establecida"],
-            ["VA", "Vacaciones", "Periodo de descanso al que se tiene derecho por cada año trabajado"],
+            ["PD", "Prima dominical", "Trabajo realizado en día Domingo por jornada regular o por descanso semanal."],
+            ["CG", "Contingencia", "Evento, situación o riesgo imprevisto que puede ocurrir e impide acudir al trabajo."],
+            ["FT", "Festivo trabajado", "Trabajo realizado en día festivo, o día feriado que no es día laborable y se considera como descanso obligatorio."],
+            ["DT", "Descanso trabajado", "Prestación de servicios durante un día de descanso semanal."],
+            ["FA", "Falta", "Inasistencia de un trabajador a su puesto sin permiso, ni causa justificada."],
+            ["HE", "Horas Extra", "Tiempo laboral que un empleado labora de forma adicional a su jornada ordinaria establecida."],
+            ["VA", "Vacaciones", "Periodo de descanso al que se tiene derecho por cada año trabajado."],
             ["PM", "Permiso médico", "Permiso otorgado por una afectación de salud que le impide al colaborador presentarse a laborar, y se concede para concurrir al médico."],
-            ["IG", "Incapacidad por enfermedad general", "Permiso de ausencia por una condición de salud que impide trabajar en un periodo temporal"],
-            ["IM", "Incapacidad por maternidad", "Permiso de ausencia que garantiza un descanso antes y después del parto"],
-            ["PP", "Permiso por paternidad", "Permiso de ausencia que se otorga por nacimiento o adopción de un menor"],
-            ["PL", "Permiso por lactancia", "Descansos extraordinarios por día, de media hora cada uno posteriores al nacimiento de un infante"],
-            ["PF", "Permiso por defunción", "Ausencia laboral por luto (defunción de un familiar directo en primer grado (cónyuge, padres, hijos o hermanos)"],
-            ["PH", "Permiso por actividad fuera de horario", "Ausencia al centro de trabajo por realizar actividades o tareas relacionadas a sus funciones fuera de la jornada laboral establecida"],
+            ["IG", "Incapacidad por enfermedad general", "Permiso de ausencia por una condición de salud que impide trabajar en un periodo temporal."],
+            ["IM", "Incapacidad por maternidad", "Permiso de ausencia que garantiza un descanso antes y después del parto."],
+            ["PP", "Permiso por paternidad", "Permiso de ausencia que se otorga por nacimiento o adopción de un menor."],
+            ["PL", "Permiso por lactancia", "Descansos extraordinarios por día, de media hora cada uno posteriores al nacimiento de un infante."],
+            ["PF", "Permiso por defunción", "Ausencia laboral por luto (defunción de un familiar directo en primer grado (cónyuge, padres, hijos o hermanos)."],
+            ["PH", "Permiso por actividad fuera de horario", "Ausencia al centro de trabajo por realizar actividades o tareas relacionadas a sus funciones fuera de la jornada laboral establecida."],
             ["PC", "Permiso por curso de capacitación presencial", "Permiso otorgado para acudir a un curso presencial fueras de las instalaciones de la organización."],
-            ["PT", "Permiso por trabajo fuera de la oficina", "Ausencia al sitio de trabajo por desempeñar funciones en sitios distintos al principal del empleador"]
+            ["PT", "Permiso por trabajo fuera de la oficina", "Ausencia al sitio de trabajo por desempeñar funciones en sitios distintos al principal del empleador."]
         ];
 
         catalog.forEach(item => {
-            aoa.push(["", item[0], item[1], "", "", item[2]]);
+            aoa[curRow][1] = item[0];
+            aoa[curRow][2] = item[1];
+            aoa[curRow][5] = item[2];
+            merges.push({ s: { r: curRow, c: 2 }, e: { r: curRow, c: 4 } });
+            merges.push({ s: { r: curRow, c: 5 }, e: { r: curRow, c: obsCol } });
+            curRow++;
         });
 
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        // 4. Crear hoja de cálculo con SheetJS / XLSX
+        const trimmedAoa = aoa.slice(0, curRow + 1);
+        const ws = XLSX.utils.aoa_to_sheet(trimmedAoa);
+        ws['!merges'] = merges;
 
-        const colWidths = [{ wch: 3 }, { wch: 16 }, { wch: 32 }, { wch: 4 }, { wch: 4 }, { wch: 36 }, { wch: 3 }, { wch: 3 }, { wch: 3 }];
-        for (let i = 0; i < periodDaysCount; i++) colWidths.push({ wch: 5 });
-        colWidths.push({ wch: 38 });
+        // Anchos de columna institucionales
+        const colWidths = [
+            { wch: 3 },  // A
+            { wch: 16 }, // B: No. Empleado
+            { wch: 15 }, // C: Colaborador
+            { wch: 12 }, // D
+            { wch: 12 }, // E
+            { wch: 15 }, // F: Puesto
+            { wch: 10 }, // G
+            { wch: 10 }, // H
+            { wch: 10 }  // I
+        ];
+        for (let i = 0; i < periodDaysCount; i++) colWidths.push({ wch: 5 }); // Días
+        colWidths.push({ wch: 36 }); // Observaciones
         ws['!cols'] = colWidths;
 
+        // Alturas de fila
+        const rowHeights = [];
+        rowHeights[1] = { hpt: 20 };
+        rowHeights[2] = { hpt: 18 };
+        rowHeights[10] = { hpt: 22 };
+        rowHeights[11] = { hpt: 20 };
+        for (let r = 12; r < 12 + priorityList.length; r++) {
+            rowHeights[r] = { hpt: 22 };
+        }
+        ws['!rows'] = rowHeights;
+
+        // 5. Aplicar estilos enriquecidos compatibles con xlsx-js-style
+        const borderThin = {
+            top: { style: "thin", color: { rgb: "C0C0C0" } },
+            bottom: { style: "thin", color: { rgb: "C0C0C0" } },
+            left: { style: "thin", color: { rgb: "C0C0C0" } },
+            right: { style: "thin", color: { rgb: "C0C0C0" } }
+        };
+
+        const titleStyle = { font: { name: "Arial", sz: 12, bold: true, color: { rgb: "101010" } }, alignment: { vertical: "center" } };
+        const subtitleStyle = { font: { name: "Arial", sz: 9.5, italic: true, color: { rgb: "555555" } }, alignment: { vertical: "center" } };
+        const headerInfoStyle = { font: { name: "Arial", sz: 8.5, color: { rgb: "555555" } }, alignment: { horizontal: "right", vertical: "center" } };
+
+        const metaLabelStyle = { font: { name: "Arial", sz: 9, bold: true, color: { rgb: "333333" } }, fill: { patternType: "solid", fgColor: { rgb: "F2F2F2" } }, border: borderThin, alignment: { horizontal: "center", vertical: "center" } };
+        const metaValStyle = { font: { name: "Arial", sz: 9, color: { rgb: "101010" } }, border: borderThin, alignment: { horizontal: "center", vertical: "center" } };
+
+        if (ws['B2']) ws['B2'].s = titleStyle;
+        if (ws['B3']) ws['B3'].s = subtitleStyle;
+        if (ws['J2']) ws['J2'].s = headerInfoStyle;
+        if (ws['J3']) ws['J3'].s = headerInfoStyle;
+        if (ws['J4']) ws['J4'].s = headerInfoStyle;
+        if (ws['J5']) ws['J5'].s = headerInfoStyle;
+
+        if (ws['B7']) ws['B7'].s = metaLabelStyle;
+        if (ws['C7']) ws['C7'].s = { ...metaValStyle, alignment: { horizontal: "left", vertical: "center" }, font: { name: "Arial", sz: 9, bold: true, color: { rgb: "101010" } } };
+        if (ws['L7']) ws['L7'].s = metaLabelStyle;
+        ['P7', 'Q7', 'R7', 'S7', 'T7', 'U7', 'V7'].forEach(addr => {
+            if (ws[addr]) ws[addr].s = { ...metaValStyle, font: { name: "Arial", sz: 9, bold: true, color: { rgb: "101010" } } };
+        });
+        if (ws['B9']) ws['B9'].s = metaLabelStyle;
+        if (ws['C9']) ws['C9'].s = { ...metaValStyle, alignment: { horizontal: "left", vertical: "center" } };
+
+        const tableHeaderStyle = {
+            font: { name: "Arial", sz: 9, bold: true, color: { rgb: "101010" } },
+            fill: { patternType: "solid", fgColor: { rgb: "EAEAEA" } },
+            border: borderThin,
+            alignment: { horizontal: "center", vertical: "center", wrapText: true }
+        };
+
+        const weekendHeaderStyle = {
+            font: { name: "Arial", sz: 9, bold: true, color: { rgb: "444444" } },
+            fill: { patternType: "solid", fgColor: { rgb: "D5D5D5" } },
+            border: borderThin,
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        // Estilos de cabecera de tabla
+        for (let r = 10; r <= 11; r++) {
+            for (let c = 1; c <= obsCol; c++) {
+                const addr = XLSX.utils.encode_cell({ r, c });
+                if (ws[addr]) {
+                    let isWk = false;
+                    if (r === 11 && c >= 9 && c < obsCol) {
+                        const dayNum = startDay + (c - 9);
+                        const dt = new Date(y, m - 1, dayNum, 12, 0, 0);
+                        isWk = (dt.getDay() === 0 || dt.getDay() === 6);
+                    }
+                    ws[addr].s = isWk ? weekendHeaderStyle : tableHeaderStyle;
+                }
+            }
+        }
+
+        // Estilos de filas de colaboradores y celdas de asistencia
+        for (let r = 12; r < 12 + priorityList.length; r++) {
+            for (let c = 1; c <= obsCol; c++) {
+                const addr = XLSX.utils.encode_cell({ r, c });
+                if (ws[addr]) {
+                    const isDayCol = (c >= 9 && c < obsCol);
+                    let isWk = false;
+                    if (isDayCol) {
+                        const dayNum = startDay + (c - 9);
+                        const dt = new Date(y, m - 1, dayNum, 12, 0, 0);
+                        isWk = (dt.getDay() === 0 || dt.getDay() === 6);
+                    }
+
+                    const val = ws[addr].v;
+                    let fill = isWk ? { patternType: "solid", fgColor: { rgb: "F7F7F7" } } : undefined;
+                    let fontColor = "101010";
+
+                    if (val === 'PT') {
+                        fill = { patternType: "solid", fgColor: { rgb: "FFF0E5" } };
+                        fontColor = "D9530F";
+                    } else if (val === 'VA') {
+                        fill = { patternType: "solid", fgColor: { rgb: "E6F4EA" } };
+                        fontColor = "137333";
+                    } else if (val === 'FA') {
+                        fill = { patternType: "solid", fgColor: { rgb: "FCE8E6" } };
+                        fontColor = "C5221F";
+                    } else if (val === 'PM') {
+                        fill = { patternType: "solid", fgColor: { rgb: "F3E8FD" } };
+                        fontColor = "7627BB";
+                    } else if (val === 'FT' || val === 'DF') {
+                        fill = { patternType: "solid", fgColor: { rgb: "FEF7E0" } };
+                        fontColor = "B06000";
+                    } else if (val === 'CG') {
+                        fill = { patternType: "solid", fgColor: { rgb: "E8F0FE" } };
+                        fontColor = "1A73E8";
+                    }
+
+                    ws[addr].s = {
+                        font: { name: "Arial", sz: 9, bold: !!val, color: { rgb: fontColor } },
+                        border: borderThin,
+                        fill: fill,
+                        alignment: {
+                            horizontal: (c === 1 || isDayCol ? "center" : "left"),
+                            vertical: "center"
+                        }
+                    };
+
+                    // Adjuntar comentario de celda si existió nota u observación en el registro
+                    const commentKey = `${r}_${c}`;
+                    if (cellComments[commentKey]) {
+                        ws[addr].c = [{ t: cellComments[commentKey].note, a: cellComments[commentKey].author }];
+                    }
+                }
+            }
+        }
+
+        // Estilos del catálogo
+        const catHeaderAddr = XLSX.utils.encode_cell({ r: catHeaderRow - 1, c: 1 });
+        if (ws[catHeaderAddr]) {
+            ws[catHeaderAddr].s = { font: { name: "Arial", sz: 10, bold: true, color: { rgb: "101010" } }, alignment: { vertical: "center" } };
+        }
+        [1, 2, 5].forEach(col => {
+            const addr = XLSX.utils.encode_cell({ r: catHeaderRow, c: col });
+            if (ws[addr]) ws[addr].s = tableHeaderStyle;
+        });
+
+        for (let r = catHeaderRow + 1; r < curRow; r++) {
+            [1, 2, 5].forEach(col => {
+                const cellAddr = XLSX.utils.encode_cell({ r, c: col });
+                if (ws[cellAddr]) {
+                    ws[cellAddr].s = {
+                        font: { name: "Arial", sz: 8.5, bold: col === 1, color: { rgb: "333333" } },
+                        border: borderThin,
+                        alignment: { horizontal: col === 1 ? "center" : "left", vertical: "center" }
+                    };
+                }
+            });
+        }
+
+        // 6. Generar y descargar archivo
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, `Prenomina_${monthName.substring(0,3)}_${q}`);
+        XLSX.utils.book_append_sheet(wb, ws, `Prenomina_${monthName.substring(0, 3)}_${q}`);
 
         XLSX.writeFile(wb, fileName);
-        window.showToast(`📊 Prenómina oficial descargada: ${fileName}`, false);
+        window.showToast(`📊 Prenómina oficial descargada con formato exacto FOPR-RHU-02-02: ${fileName}`, false);
     };
 
     // Cerrar popover de celda al hacer clic fuera
