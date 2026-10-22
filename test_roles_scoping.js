@@ -28,7 +28,7 @@ assert(html.includes('id="mobileBtnExecutiveDashboard"') && html.includes('audit
 assert(html.includes('id="acc-executive-metadata"') && html.includes('class="space-y-3 pt-2 border-t border-[#3d3a39]/60 hidden"'), 'Bloque acc-executive-metadata envuelto con hidden en Sección 01');
 assert(html.includes('<option value="Gestor de Proyectos">Gestor de Proyectos (PMO - Auditoría & Matriz)</option>'), 'Opción Gestor de Proyectos presente en selectores de operador');
 assert(html.includes('id="consRoleFilterBtn-Gestor de Proyectos"'), 'Pill de filtro de operadores para Gestor de Proyectos presente');
-assert(html.includes('app.js?v=20261021_v952'), 'Cache buster actualizado a v952');
+assert(html.includes('app.js?v=20261021_v953'), 'Cache buster actualizado a v952');
 
 // 2. Verificación app.js
 assert(app.includes('window.canManageAuditAndStrategy ='), 'Helper window.canManageAuditAndStrategy definido');

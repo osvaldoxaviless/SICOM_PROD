@@ -813,10 +813,10 @@
   </div>
 
   <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER) -->
-  <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 z-40 relative gap-1.5 sm:gap-3">
+  <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 z-40 relative gap-1.5 sm:gap-2">
     <!-- LOGO DE SISTEMA (EXTREMO IZQUIERDO) -->
     <div class="flex items-center gap-2 shrink-0">
-      <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[3px] bg-[#161413] border border-[#3d3a39]">
+      <div class="h-8 flex items-center gap-1.5 px-2.5 rounded-[3px] bg-[#161413] border border-[#3d3a39]">
         <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
         <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">SICOM // STGT</span>
       </div>
@@ -824,116 +824,122 @@
     
     <!-- BUSCADOR INTEGRADO EN ESCRITORIO (lg:flex, oculto en móvil y landscape móvil) -->
     <div class="hidden lg:flex items-center relative flex-1 max-w-xs xl:max-w-sm">
-      <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR PROYECTO... (Ctrl+K)" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-8 pr-3 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+      <svg class="w-4 h-4 text-[#8a8380] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR PROYECTO... (Ctrl+K)" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-9 pr-3 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
     </div>
 
-    <!-- CONTROLES Y FILTROS DERECHA (Con overflow seguro y botones compactos en móvil/landscape) -->
-    <div class="flex items-center gap-1 sm:gap-1.5 lg:gap-2 relative justify-end shrink-0 max-w-full overflow-x-auto no-scrollbar py-1">
+    <!-- CONTROLES Y FILTROS DERECHA -->
+    <div class="flex items-center gap-1 sm:gap-1.5 relative justify-end shrink-0 py-1">
       <!-- BOTÓN BÚSQUEDA MÓVIL (lg:hidden) -->
-      <button id="searchBtnIcon" onclick="toggleSearch()" class="shrink-0 p-2 text-[#b8b3b0] hover:text-[#eeeeee] transition-all bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] lg:hidden flex items-center justify-center" title="Buscar proyecto">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <button id="searchBtnIcon" onclick="toggleSearch()" class="w-8 h-8 shrink-0 text-[#b8b3b0] hover:text-[#eeeeee] transition-all bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] lg:hidden flex items-center justify-center cursor-pointer" title="Buscar proyecto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </button>
       <datalist id="projectsDatalist"></datalist>
 
-      <!-- MODO ENFOQUE -->
-      <button id="btnFocusMode" onclick="toggleFocusMode()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Modo Enfoque: Ver proyectos en riesgo">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+      <!-- MODO ENFOQUE (visible en sm: y superior; en móvil vertical está en menú 3 puntos) -->
+      <button id="btnFocusMode" onclick="toggleFocusMode()" class="hidden sm:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] cursor-pointer" title="Modo Enfoque: Ver proyectos en riesgo">
+          <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
           <span class="hidden lg:inline">Enfoque</span>
       </button>
 
-      <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS -->
-      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Alternar entre vista compacta y vista completa">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+      <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS (visible en sm: y superior) -->
+      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="hidden sm:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] cursor-pointer" title="Alternar entre vista compacta y vista completa">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
           <span id="textCollapseAll" class="hidden lg:inline">Colapsar</span>
       </button>
       
       <!-- BOTÓN FILTROS AVANZADOS (PROTAGONISTA) -->
-      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3.5 py-1.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Filtros Operativos">
-          <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="h-8 shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Filtros Operativos">
+          <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
           <span class="hidden lg:inline font-medium">Filtros</span>
           <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5 font-semibold">1</span>
       </button>
 
-      <!-- BOTÓN PRIORIDADES (VISIBLE EN LG+) -->
-      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA (FASE 2) -->
-      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="audit-pmo-only hidden shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Dashboard Ejecutivo & Matriz de Auditoría">
-          <svg class="w-3.5 h-3.5 text-[#3b82f6] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA (FASE 2) - Visible en md: (en móvil está en menú 3 puntos) -->
+      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="audit-pmo-only hidden md:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Dashboard Ejecutivo & Matriz de Auditoría">
+          <svg class="w-4 h-4 text-[#3b82f6] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           <span class="hidden lg:inline font-medium">Matriz & Auditoría</span>
       </button>
 
-      <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden lg:flex shrink-0 items-center gap-1.5 bg-transparent border border-[#3d3a39] hover:border-[#fafafa] text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Panel de Prioridades y Cuellos de Botella">
-          <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      <!-- BOTÓN PRIORIDADES (VISIBLE EN LG+) -->
+      <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden lg:flex h-8 shrink-0 items-center gap-1.5 bg-transparent border border-[#3d3a39] hover:border-[#fafafa] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] cursor-pointer" title="Panel de Prioridades y Cuellos de Botella">
+          <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
           <span>Prioridades</span>
       </button>
 
-      <!-- BOTÓN ROL Y PRENÓMINA -->
-      <button id="btnTopAttendanceModal" onclick="openAttendanceModal()" class="shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#10b981] text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Rol de Asistencia Quincenal y Prenómina (FOPR-RHU-02-02)">
-          <svg class="w-3.5 h-3.5 text-[#10b981] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <!-- BOTÓN ROL Y PRENÓMINA (Visible en md: / landscape) -->
+      <button id="btnTopAttendanceModal" onclick="openAttendanceModal()" class="hidden md:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#10b981] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Rol de Asistencia Quincenal y Prenómina (FOPR-RHU-02-02)">
+          <svg class="w-4 h-4 text-[#10b981] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span class="hidden lg:inline font-medium">Rol & Prenómina</span>
       </button>
 
-      <!-- BOTÓN 3 PUNTOS MÓVIL (LG:HIDDEN) -->
-      <button id="mobileMenuBtn" onclick="toggleMobileMenu(event)" class="shrink-0 p-2 bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] transition lg:hidden flex items-center justify-center border border-[#3d3a39] rounded-[3px]" title="Más opciones">
-          <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-      </button>
+      <!-- BOTÓN 3 PUNTOS MÓVIL Y SU MENÚ DESPLEGABLE (LG:HIDDEN) -->
+      <div class="relative shrink-0 lg:hidden">
+          <button id="mobileMenuBtn" type="button" onclick="toggleMobileMenu(event)" class="w-8 h-8 bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] transition flex items-center justify-center border border-[#3d3a39] rounded-[3px] cursor-pointer" title="Más opciones">
+              <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+          </button>
 
-      <!-- MENÚ DESPLEGABLE MÓVIL -->
-      <div id="mobileMenuDropdown" class="absolute top-[58px] right-0 w-60 liquid-glass rounded-[10px] p-2 z-[9999] transform scale-95 opacity-0 pointer-events-none transition-all duration-150 origin-top-right flex flex-col gap-1 lg:hidden border border-[#3d3a39]">
-          <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-              Centrar Mapa
-          </button>
-          <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-              <span id="mobileToggleCollapseText">Colapsar Módulos</span>
-          </button>
-          <div class="h-px w-full bg-[#3d3a39] my-1"></div>
-          <button onclick="openAttendanceModal(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              Rol & Prenómina
-          </button>
-          <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="audit-pmo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-              Matriz & Auditoría
-          </button>
-          <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-              Prioridades
-          </button>
-          <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              Configuración y Perfil
-          </button>
-          <div class="h-px w-full bg-[#3d3a39] my-1"></div>
-          <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-              Cerrar Sesión
-          </button>
+          <!-- MENÚ DESPLEGABLE MÓVIL -->
+          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#141211] border border-[#3d3a39] rounded-[8px] p-2 z-[99999] shadow-2xl flex-col gap-1 origin-top-right">
+              <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                  Centrar Mapa
+              </button>
+              <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                  <span id="mobileToggleCollapseText">Colapsar Módulos</span>
+              </button>
+              <button onclick="toggleFocusMode(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  Modo Enfoque
+              </button>
+              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+              <button onclick="openAttendanceModal(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  Rol & Prenómina
+              </button>
+              <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="audit-pmo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                  Matriz & Auditoría
+              </button>
+              <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                  Prioridades
+              </button>
+              <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  Configuración y Perfil
+              </button>
+              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+              <button onclick="logout(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                  Cerrar Sesión
+              </button>
+          </div>
       </div>
-    </div>
   
-    <!-- SEPARADOR DISCRETO -->
-    <div class="w-px h-6 bg-[#3d3a39] shrink-0 mx-1"></div>
+      <!-- SEPARADOR DISCRETO -->
+      <div class="w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
 
-    <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
-    <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer shadow-sm" title="Centro de Control // Configuración & Perfil">
-      <div class="flex items-center gap-1.5">
-        <!-- Ícono de Configuración / Engrane -->
-        <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
-        <div id="userAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
-          --
+      <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
+      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="h-8 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer shadow-sm" title="Centro de Control // Configuración & Perfil">
+        <div class="flex items-center gap-1.5">
+          <!-- Ícono de Configuración / Engrane -->
+          <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
+          <div id="userAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
+            --
+          </div>
         </div>
-      </div>
-      <span id="userRoleBadgePill" class="hidden sm:inline font-mono text-[9px] uppercase tracking-wider text-[#8a8380] group-hover:text-[#b8b3b0] transition-colors">
-        CONSULTOR
-      </span>
-      <span class="hidden xl:inline font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] group-hover:text-[#ee6018] transition-colors">Control</span>
-      <svg class="w-3 h-3 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-    </button>
+        <span id="userRoleBadgePill" class="hidden md:inline font-mono text-[9px] uppercase tracking-wider text-[#8a8380] group-hover:text-[#b8b3b0] transition-colors">
+          CONSULTOR
+        </span>
+        <span class="hidden xl:inline font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] group-hover:text-[#ee6018] transition-colors">Control</span>
+        <svg class="w-3.5 h-3.5 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+    </div>
   </header>
-
+  
   <!-- BARRA DE BÚSQUEDA MÓVIL (lg:hidden, FLUJO NORMAL NO BLOQUEANTE) -->
   <div id="mobileSearchDrawer" class="hidden lg:hidden w-full bg-[#161413] border-b border-[#3d3a39] px-3 py-2 z-40 items-center gap-2 shrink-0">
     <div class="relative flex-1 flex items-center">
@@ -2709,7 +2715,7 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261021_v952"></script>
+  <script type="module" src="app.js?v=20261021_v953"></script>
 
 </body>
 </html>

@@ -1218,30 +1218,39 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     
     window.toggleMobileMenu = function(e) {
-        if (e && e.stopPropagation) e.stopPropagation();
+        if (e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+        }
         const menu = document.getElementById('mobileMenuDropdown');
         if (!menu) return;
-        const isHidden = menu.classList.contains('opacity-0');
-        if (isHidden) {
-            menu.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-            menu.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        const isClosed = menu.classList.contains('hidden');
+        if (isClosed) {
+            menu.classList.remove('hidden');
+            menu.classList.add('flex');
         } else {
-            menu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-            menu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+    };
+
+    window.closeMobileMenu = function() {
+        const menu = document.getElementById('mobileMenuDropdown');
+        if (menu) {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
         }
     };
     
-    // Cerrar menú móvil al hacer clic o tocar fuera
-    const handleCloseMobileMenuOutside = (e) => {
+    // Cerrar menú móvil al hacer clic fuera
+    document.addEventListener('click', function(e) {
         const menu = document.getElementById('mobileMenuDropdown');
-        if (menu && !menu.classList.contains('opacity-0')) {
+        if (menu && !menu.classList.contains('hidden')) {
             if (e.target.closest('#mobileMenuBtn') || e.target.closest('#mobileMenuDropdown')) return;
-            menu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-            menu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
         }
-    };
-    document.addEventListener('click', handleCloseMobileMenuOutside);
-    document.addEventListener('touchend', handleCloseMobileMenuOutside, { passive: true });
+    });
 
     // Cierre al hacer clic fuera del menú predictivo de edición
     document.addEventListener('click', function(e) {
@@ -1580,11 +1589,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         document.querySelectorAll('.audit-pmo-only').forEach(el => {
             if(canAudit) {
-                el.classList.remove('hidden');
-                if (el.id === 'btnTopExecutiveDashboard') el.classList.add('flex');
+                if (el.id === 'btnTopExecutiveDashboard') {
+                    el.classList.remove('hidden');
+                    el.classList.add('hidden', 'md:flex');
+                } else {
+                    el.classList.remove('hidden');
+                }
             } else {
                 el.classList.add('hidden');
-                if (el.id === 'btnTopExecutiveDashboard') el.classList.remove('flex');
+                if (el.id === 'btnTopExecutiveDashboard') el.classList.remove('md:flex');
             }
         });
 
