@@ -153,7 +153,7 @@
 
           <!-- NUEVA TAREA DIARIA (Todos menos lector) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastDailyTaskModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
-              Nueva tarea diaria
+              Nueva tarea general
               <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
           </button>
 
@@ -385,6 +385,7 @@
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Nivel de Permisos (Rol)</label>
                       <select id="editConsRole" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer">
                           <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
+                          <option value="Gestor de Proyectos">Gestor de Proyectos (PMO - Auditoría & Matriz)</option>
                           <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
                           <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
                           <option value="Lector">Lector (Solo vista - Para jefatura)</option>
@@ -457,17 +458,17 @@
               <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
               <span class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">REGISTRO PERSONAL</span>
           </div>
-          <h3 class="text-xl font-normal text-[#eeeeee] mb-1">Mi Tarea Diaria</h3>
-          <p class="text-xs text-[#8a8380] mb-5">Agrega una tarea rápida a tu lista del día.</p>
+          <h3 class="text-xl font-normal text-[#eeeeee] mb-1">Nueva Tarea General</h3>
+          <p class="text-xs text-[#8a8380] mb-5">Agrega una tarea operativa a tu lista general.</p>
           <div class="space-y-4 mb-6">
               <div>
-                  <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">¿Qué harás hoy?</label>
-                  <input type="text" id="fdtDescription" placeholder="Ej. Actualizar formato..." class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none">
+                  <input type="hidden" id="fdtTaskId"><label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">Descripción de la Tarea <span class="text-[#ee6018]">*</span></label>
+                  <input type="text" id="fdtDescription" placeholder="Ej. Actualizar formato o trámite operativo..." class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none text-[#eeeeee]"></div><div><label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase flex items-center justify-between"><span>Fecha Compromiso</span><span id="fdtDateNotice" class="text-[9px] text-[#8a8380] font-mono lowercase">(opcional)</span></label><input type="date" id="fdtCommitmentDate" lang="es-MX" class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none [color-scheme:dark] text-[#eeeeee]">
               </div>
           </div>
           <div class="flex gap-3">
               <button onclick="closeFastDailyTaskModal()" class="flex-1 py-3 bg-transparent border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] transition">Cancelar</button>
-              <button onclick="saveFastDailyTask()" class="flex-1 py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[11px] uppercase rounded-[3px] transition">Añadir a mi lista</button>
+              <button onclick="saveFastDailyTask()" class="flex-1 py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[11px] uppercase rounded-[3px] transition">Guardar Tarea</button>
           </div>
       </div>
   </div>
@@ -813,19 +814,13 @@
 
   <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER) -->
   <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 z-40 relative gap-1.5 sm:gap-3">
-    <!-- PASTILLA TÁCTIL DE PERFIL E INICIALES (FACTORY USER PILL) -->
-    <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0" title="Perfil y Configuración">
-      <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
-      <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">STGT</span>
-      <span class="w-px h-3 bg-[#3d3a39]"></span>
-      <div id="userAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
-        --
+    <!-- LOGO DE SISTEMA (EXTREMO IZQUIERDO) -->
+    <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[3px] bg-[#161413] border border-[#3d3a39]">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+        <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">SICOM // STGT</span>
       </div>
-      <span id="userRoleBadgePill" class="hidden lg:inline font-mono text-[9px] uppercase tracking-wider text-[#8a8380] group-hover:text-[#b8b3b0] transition-colors">
-        CONSULTOR
-      </span>
-      <svg class="w-3 h-3 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-    </button>
+    </div>
     
     <!-- BUSCADOR INTEGRADO EN ESCRITORIO (lg:flex, oculto en móvil y landscape móvil) -->
     <div class="hidden lg:flex items-center relative flex-1 max-w-xs xl:max-w-sm">
@@ -861,6 +856,12 @@
       </button>
 
       <!-- BOTÓN PRIORIDADES (VISIBLE EN LG+) -->
+      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA (FASE 2) -->
+      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="audit-pmo-only hidden shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 lg:px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px] group" title="Dashboard Ejecutivo & Matriz de Auditoría">
+          <svg class="w-3.5 h-3.5 text-[#3b82f6] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="hidden lg:inline font-medium">Matriz & Auditoría</span>
+      </button>
+
       <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden lg:flex shrink-0 items-center gap-1.5 bg-transparent border border-[#3d3a39] hover:border-[#fafafa] text-[#eeeeee] transition-all rounded-[3px] px-3 py-1.5 font-mono uppercase text-[11px] tracking-[-0.24px]" title="Panel de Prioridades y Cuellos de Botella">
           <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
           <span>Prioridades</span>
@@ -892,6 +893,10 @@
               <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               Rol & Prenómina
           </button>
+          <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="audit-pmo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
+              <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Matriz & Auditoría
+          </button>
           <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3">
               <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               Prioridades
@@ -907,6 +912,26 @@
           </button>
       </div>
     </div>
+  
+    <!-- SEPARADOR DISCRETO -->
+    <div class="w-px h-6 bg-[#3d3a39] shrink-0 mx-1"></div>
+
+    <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
+    <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer shadow-sm" title="Centro de Control // Configuración & Perfil">
+      <div class="flex items-center gap-1.5">
+        <!-- Ícono de Configuración / Engrane -->
+        <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
+        <div id="userAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
+          --
+        </div>
+      </div>
+      <span id="userRoleBadgePill" class="hidden sm:inline font-mono text-[9px] uppercase tracking-wider text-[#8a8380] group-hover:text-[#b8b3b0] transition-colors">
+        CONSULTOR
+      </span>
+      <span class="hidden xl:inline font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] group-hover:text-[#ee6018] transition-colors">Control</span>
+      <svg class="w-3 h-3 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+    </button>
   </header>
 
   <!-- BARRA DE BÚSQUEDA MÓVIL (lg:hidden, FLUJO NORMAL NO BLOQUEANTE) -->
@@ -979,6 +1004,8 @@
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] shrink-0"></span>
             <span id="infoType" class="font-mono text-[11px] tracking-[-0.24px] uppercase text-[#4d4947] font-medium shrink-0">TIPO</span>
+            <!-- BADGE DIR. GENERAL (FASE 2) -->
+            <span id="infoDirGeneralBadge" class="hidden bg-[#ef4444] text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded-[3px] uppercase tracking-wider animate-pulse items-center gap-1 shadow-sm shrink-0">⚠️ DIR. GENERAL</span>
             <!-- TICKET DEL PROYECTO ENFRENTE DE PROYECTO -->
             <div id="infoTicketContainer" class="hidden items-center gap-1.5 min-w-0"></div>
           </div>
@@ -1036,14 +1063,41 @@
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39] space-y-3">
                   <div class="grid grid-cols-2 gap-2.5">
-                      <div>
-                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Estado</label>
+                      <div class="relative">
+                          <div class="flex items-center justify-between mb-1">
+                              <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase">Estado STGT</label>
+                              <button type="button" onclick="toggleStatusTooltip(event)" class="text-[#8a8380] hover:text-[#eeeeee] transition px-1 py-0.5 rounded text-[10px] font-mono cursor-pointer" title="Ver definiciones oficiales de estatus">(?)</button>
+                          </div>
                           <select id="quickEditStatus" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none appearance-none cursor-pointer text-[#eeeeee]">
-                              <option value="No Iniciado">⏸️ No Iniciado</option>
-                              <option value="Pendiente">⏳ Pendiente</option>
-                              <option value="En Progreso">🚀 En Progreso</option>
-                              <option value="Completado">✅ Completado</option>
+                              <option value="Liberado">🟢 Liberado</option>
+                              <option value="Estabilización o Piloto">🔵 Estabilización o Piloto</option>
+                              <option value="Desarrollado y/o Configurado">🟠 Desarrollado y/o Configurado</option>
+                              <option value="En proceso de desarrollo y/o Configuración">🟡 En proceso desarrollo / Config</option>
+                              <option value="Retraso STGT">🔴 Retraso STGT</option>
+                              <option value="Autorizado, sin iniciar">⚪ Autorizado, sin iniciar</option>
+                              <option value="En proceso de autorización">⚫ En proceso de autorización</option>
+                              <option value="En pausa">⏸️ En pausa</option>
+                              <option value="Cancelado">❌ Cancelado</option>
                           </select>
+                          
+                          <!-- TOOLTIP POPOVER DEFINICIONES DE ESTATUS -->
+                          <div id="statusTooltipPopover" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-3 z-50 text-xs shadow-2xl space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                              <div class="flex justify-between items-center border-b border-[#3d3a39] pb-1.5">
+                                  <span class="font-mono text-[10px] uppercase text-[#eeeeee] font-semibold">Definiciones Oficiales STGT</span>
+                                  <button type="button" onclick="toggleStatusTooltip(event)" class="text-[#8a8380] hover:text-[#eeeeee] text-xs">✕</button>
+                              </div>
+                              <div class="space-y-1.5 font-mono text-[10px]">
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#22c55e] mt-1 shrink-0"></span><span><b>Liberado:</b> Puesto en producción y aceptado formalmente.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#3b82f6] mt-1 shrink-0"></span><span><b>Estabilización o Piloto:</b> En pruebas de campo con usuarios o ambiente controlado tras pase.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#f97316] mt-1 shrink-0"></span><span><b>Desarrollado y/o Configurado:</b> Concluido técnicamente, pendiente de pruebas/visto bueno.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#eab308] mt-1 shrink-0"></span><span><b>En proceso desarrollo / Config:</b> Trabajo técnico activo en desarrollo o parametrización.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ef4444] mt-1 shrink-0"></span><span><b>Retraso STGT:</b> Fuera de fecha compromiso por causas internas STGT.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#9ca3af] mt-1 shrink-0"></span><span><b>Autorizado, sin iniciar:</b> Aprobado por cliente/dirección, pendiente de inicio.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#374151] mt-1 shrink-0"></span><span><b>En proceso autorización:</b> Propuesta en revisión, pendiente de visto bueno formal.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ffffff] border border-gray-400 mt-1 shrink-0"></span><span><b>En pausa:</b> Suspendido temporalmente por cliente o dependencia.</span></div>
+                                  <div class="flex items-start gap-1.5"><span class="w-2 h-2 rounded-full bg-[#991b1b] mt-1 shrink-0"></span><span><b>Cancelado:</b> Proyecto cancelado o descartado formalmente.</span></div>
+                              </div>
+                          </div>
                       </div>
                       <div>
                           <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase flex items-center justify-between">
@@ -1069,6 +1123,100 @@
                         <input type="date" id="quickEditReturnDate" lang="es-MX" max="2099-12-31" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none [color-scheme:dark]">
                       </div>
                   </div>
+                  <!-- METADATOS MATRIZ FOPR-OFP-01-01 (FASE 2) - EXCLUSIVO PMO & SUPREMO -->
+                  <div id="acc-executive-metadata" class="space-y-3 pt-2 border-t border-[#3d3a39]/60 hidden">
+                      <div class="grid grid-cols-2 gap-2.5">
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Empresa</label>
+                          <select id="quickEditEmpresa" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none appearance-none cursor-pointer text-[#eeeeee]">
+                              <option value="">Sin asignar</option>
+                              <option value="AFR">AFR</option><option value="ZIN">ZIN</option><option value="TEO">TEO</option>
+                              <option value="AVM">AVM</option><option value="ODM">ODM</option><option value="STGT">STGT</option>
+                              <option value="CETRAM">CETRAM</option><option value="ODA">ODA</option><option value="ACAM">ACAM</option>
+                              <option value="SATEL">SATEL</option><option value="SIG">SIG</option><option value="CSP">CSP</option>
+                              <option value="TDN">TDN</option><option value="OVN">OVN</option><option value="ORO">ORO</option>
+                              <option value="MOD">MOD</option><option value="TMT">TMT</option><option value="SGC">SGC</option>
+                              <option value="CGT">CGT</option><option value="SLLP">SLLP</option><option value="CAE">CAE</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Área Solicitante</label>
+                          <select id="quickEditAreaSolicitante" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none appearance-none cursor-pointer text-[#eeeeee]">
+                              <option value="TI">TI</option>
+                              <option value="Sistemas">Sistemas</option>
+                              <option value="Finanzas">Finanzas</option>
+                              <option value="Operaciones">Operaciones</option>
+                              <option value="RH">RH</option>
+                              <option value="Análisis">Análisis</option>
+                              <option value="Dir. General">Dir. General</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2.5">
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Paquete</label>
+                          <select id="quickEditPaquete" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none appearance-none cursor-pointer text-[#eeeeee]">
+                              <option value="Sin paquete">Sin paquete</option>
+                              <option value="Paquete 1">Paquete 1</option>
+                              <option value="Paquete 2">Paquete 2</option>
+                              <option value="Paquete 3">Paquete 3</option>
+                              <option value="Paquete 4">Paquete 4</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Tipo Propuesta</label>
+                          <select id="quickEditTipoPropuesta" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none appearance-none cursor-pointer text-[#eeeeee]">
+                              <option value="Mantenimiento">Mantenimiento</option>
+                              <option value="Servicio Administrado">Servicio Administrado</option>
+                              <option value="Venta">Venta</option>
+                              <option value="Innovación">Innovación</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  <!-- RESPONSABLES EXPANDIDOS (FASE 2) -->
+                  <div class="pt-2 border-t border-[#3d3a39]/60">
+                      <span class="block font-mono text-[9px] text-[#8a8380] uppercase tracking-wider mb-2">Responsables del Proyecto</span>
+                      <div class="grid grid-cols-2 gap-2">
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#b8b3b0] mb-0.5 uppercase">Líder Proyecto</label>
+                              <select id="quickEditLiderProyecto" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-1.5 text-xs text-[#eeeeee] focus:outline-none appearance-none cursor-pointer"></select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#b8b3b0] mb-0.5 uppercase">Consultor</label>
+                              <select id="quickEditConsultor" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-1.5 text-xs text-[#eeeeee] focus:outline-none appearance-none cursor-pointer"></select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#b8b3b0] mb-0.5 uppercase">Tester</label>
+                              <select id="quickEditTester" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-1.5 text-xs text-[#eeeeee] focus:outline-none appearance-none cursor-pointer"></select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#b8b3b0] mb-0.5 uppercase">Programador</label>
+                              <select id="quickEditProgramador" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-1.5 text-xs text-[#eeeeee] focus:outline-none appearance-none cursor-pointer"></select>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- RELEVANCIA EJECUTIVA Y OBSERVACIÓN -->
+                  <div class="pt-2 border-t border-[#3d3a39]/60 space-y-2">
+                      <div class="flex items-center justify-between gap-2">
+                          <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#eeeeee] uppercase cursor-pointer select-none">
+                              <input type="checkbox" id="quickEditRelevanteAltaDir" onchange="silentSaveInfoCard()" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                              <span>⭐ Relevante Alta Dir.</span>
+                          </label>
+                          <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#eeeeee] uppercase cursor-pointer select-none">
+                              <input type="checkbox" id="quickEditRelevanteStgt" onchange="silentSaveInfoCard()" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                              <span>⚡ Relevante STGT</span>
+                          </label>
+                      </div>
+                      <div>
+                          <label class="block font-mono text-[9px] text-[#8a8380] mb-1 uppercase">Observación Ejecutiva</label>
+                          <input type="text" id="quickEditObsEjecutiva" onchange="silentSaveInfoCard()" maxlength="250" placeholder="Resumen corto para juntas..." class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none">
+                      </div>
+                  </div>
+
+                  </div>
 
                   <!-- SECCIÓN DE ENLACES INTEGRADA (Solo visible para Supremo / Supervisor) -->
                   <div id="acc-links-details" class="pt-3 border-t border-[#3d3a39]/70 space-y-2.5 hidden">
@@ -1079,25 +1227,17 @@
                       <div class="space-y-2">
                           <div>
                               <label class="block font-mono text-[9px] text-[#ee6018] mb-1 uppercase font-semibold">Número de Ticket / ID</label>
-                              <div class="flex gap-2">
-                                  <input type="text" id="quickEditTicket" class="flex-1 liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none" placeholder="Ej. 12345 o TK-102">
-                                  <button onclick="saveQuickLinks()" class="pill-btn px-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition shrink-0">Guardar</button>
-                              </div>
+                              <input type="text" id="quickEditTicket" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none" placeholder="Ej. 12345 o TK-102">
                           </div>
                           <div>
                               <label class="block font-mono text-[9px] text-[#b8b3b0] mb-1 uppercase">Carpeta Drive (URL)</label>
-                              <div class="flex gap-2">
-                                  <input type="url" id="quickEditDriveLink" class="flex-1 liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none" placeholder="Pegar enlace de Drive...">
-                                  <button onclick="saveQuickLinks()" class="pill-btn px-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition shrink-0">Guardar</button>
-                              </div>
+                              <input type="url" id="quickEditDriveLink" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee] focus:outline-none" placeholder="Pegar enlace de Drive...">
                           </div>
                           <div>
                               <label class="block font-mono text-[9px] text-[#a0ca92] mb-1 uppercase">Ticket Invgate (URL)</label>
-                              <div class="flex gap-2">
-                                  <input type="url" id="quickEditInvgateLink" class="flex-1 liquid-input rounded-[3px] p-2 text-xs text-[#a0ca92] focus:outline-none" placeholder="Pegar enlace de Invgate...">
-                                  <button onclick="saveQuickLinks()" class="pill-btn px-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] transition shrink-0">Guardar</button>
-                              </div>
+                              <input type="url" id="quickEditInvgateLink" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#a0ca92] focus:outline-none" placeholder="Pegar enlace de Invgate...">
                           </div>
+                          <button id="btnSaveQuickLinks" onclick="saveQuickLinks()" class="w-full py-2 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-bold rounded-[3px] transition mt-1">Guardar Vínculos Técnicos</button>
                       </div>
                   </div>
               </div>
@@ -1296,6 +1436,21 @@
         </details>
       </div>
 
+      <!-- ACORDEÓN MIS PROYECTOS ASIGNADOS (MIGRADO AL PANEL DE TRABAJO) -->
+      <div id="dailyAssignedProjectsSection" class="shrink-0">
+        <details id="dailyAssignedProjectsDetails" class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition" open>
+          <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
+              <span class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Mis Proyectos Asignados</span>
+              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px] shrink-0">0 PROYECTOS</span>
+            </div>
+            <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div id="dailyMyProjectsList" class="p-2.5 space-y-2 border-t border-[#3d3a39]"></div>
+        </details>
+      </div>
+
       <!-- LISTA DE TAREAS Y ALERTAS -->
       <div id="dailyTasksContainer" class="flex-1 min-h-0 flex flex-col space-y-2.5"></div>
     </div>
@@ -1406,23 +1561,19 @@
       </button>
     </div>
 
-    <!-- CENTRO DE NOTIFICACIONES PUSH PARA ESTE DISPOSITIVO (CELULAR & CHROME) -->
-    <div class="px-6 py-2.5 bg-[#110f0e] border-b border-[#1d1a18] flex items-center justify-between gap-3 shrink-0">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <div id="devicePushIconBox" class="w-7 h-7 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center text-[#8a8380] shrink-0">
+    <!-- INDICADOR COMPACTO PUSH (SEMÁFORO EN 1 LÍNEA) -->
+    <div class="px-5 py-2 bg-[#110f0e] border-b border-[#1d1a18] flex items-center justify-between gap-2 shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <div id="devicePushIconBox" class="text-[#8a8380] shrink-0 flex items-center">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
         </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5 font-mono text-[10px] uppercase">
-            <span id="devicePushDot" class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span>
-            <span id="devicePushStatusText" class="text-[#eeeeee]">Alertas del Dispositivo</span>
-          </div>
-          <p id="devicePushSubText" class="font-mono text-[9px] text-[#8a8380] truncate mt-0.5">Celular & Chrome en segundo plano</p>
-        </div>
+        <span id="devicePushDot" class="w-1.5 h-1.5 rounded-full bg-[#8a8380] shrink-0"></span>
+        <span id="devicePushStatusText" class="font-mono text-[10px] uppercase text-[#eeeeee] truncate">Alertas Push</span>
+        <span id="devicePushSubText" class="hidden"></span>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btnTestPushDevice" type="button" onclick="testCurrentDevicePush()" class="hidden pill-btn px-2 py-1 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[9px] transition" title="Enviar sonido y vibración de prueba">Probar</button>
-        <button id="btnTogglePushDevice" type="button" onclick="toggleDevicePushNotification()" class="pill-btn px-3 py-1 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[10px] transition font-medium">Activar</button>
+        <button id="btnTestPushDevice" type="button" onclick="testCurrentDevicePush()" class="hidden pill-btn px-2 py-0.5 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[9px] transition" title="Enviar sonido y vibración de prueba">Probar</button>
+        <button id="btnTogglePushDevice" type="button" onclick="toggleDevicePushNotification()" class="pill-btn px-2.5 py-0.5 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[9px] transition font-medium">Activar</button>
       </div>
     </div>
 
@@ -1588,30 +1739,20 @@
               </div>
            </div>
 
-           <!-- RESUMEN OPERATIVO PERSONAL DEL CONSULTOR -->
-           <div id="dashConsultantContainer" class="space-y-4 hidden">
-              <!-- MIS PROYECTOS ASIGNADOS -->
-              <div class="bg-[#101010] p-5 rounded-[10px] border border-[#3d3a39] space-y-3">
-                 <div class="flex items-center justify-between">
+           <!-- RESUMEN OPERATIVO PERSONAL DEL CONSULTOR (FLUJO CENTRALIZADO) -->
+           <div id="dashConsultantContainer" class="hidden">
+              <div class="p-4 rounded-[8px] border border-[#3d3a39] bg-[#141211] flex items-center justify-between gap-3">
+                 <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-2 h-2 rounded-full bg-[#ee6018] shrink-0"></span>
                     <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Mis Proyectos Asignados</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">Acceso directo a iniciativas bajo tu responsabilidad</p>
+                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee]">Flujo de Trabajo Operativo</h4>
+                       <p class="text-[11px] text-[#8a8380] mt-0.5">Tus proyectos asignados y backlog de tareas viven en el panel Notificaciones y Trabajo.</p>
                     </div>
-                    <span id="dashMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">0 PROYECTOS</span>
                  </div>
-                 <div id="dashMyProjectsList" class="space-y-2.5 max-h-64 overflow-y-auto scrollbar-thin pr-1"></div>
-              </div>
-
-              <!-- MIS TAREAS PENDIENTES -->
-              <div class="bg-[#101010] p-5 rounded-[10px] border border-[#3d3a39] space-y-3">
-                 <div class="flex items-center justify-between">
-                    <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Mis Tareas Pendientes</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">Actividades por entregar asignadas a tu cuenta</p>
-                    </div>
-                    <span id="dashMyTasksBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">0 PENDIENTES</span>
-                 </div>
-                 <div id="dashMyTasksList" class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
+                 <button type="button" onclick="closeConfigDrawer(); toggleDailyDrawer();" class="pill-btn px-3 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-medium shrink-0 transition flex items-center gap-1">
+                    <span>Abrir</span>
+                    <span>→</span>
+                 </button>
               </div>
            </div>
         </div>
@@ -1747,7 +1888,15 @@
                   <div class="space-y-1.5">
                       <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Estado</label>
                       <select id="editStatus" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none">
-                          <option value="No Iniciado">⏸️ No Iniciado</option><option value="Pendiente">⏳ Pendiente</option><option value="En Progreso">🚀 En Progreso</option><option value="Completado">✅ Completado</option>
+                          <option value="Liberado">🟢 Liberado</option>
+                          <option value="Estabilización o Piloto">🔵 Estabilización o Piloto</option>
+                          <option value="Desarrollado y/o Configurado">🟠 Desarrollado y/o Configurado</option>
+                          <option value="En proceso de desarrollo y/o Configuración">🟡 En proceso desarrollo / Config</option>
+                          <option value="Retraso STGT">🔴 Retraso STGT</option>
+                          <option value="Autorizado, sin iniciar">⚪ Autorizado, sin iniciar</option>
+                          <option value="En proceso de autorización">⚫ En proceso de autorización</option>
+                          <option value="En pausa">⏸️ En pausa</option>
+                          <option value="Cancelado">❌ Cancelado</option>
                       </select>
                   </div>
                   <div class="space-y-1.5">
@@ -1928,9 +2077,17 @@
                 <div class="space-y-1.5">
                     <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Estado Inicial</label>
                     <select id="newProjStatus" class="w-full liquid-input rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee]">
-                        <option value="No Iniciado">⏸️ No Iniciado</option>
-                        <option value="Pendiente">⏳ Pendiente</option>
-                        <option value="En Progreso">🚀 En Progreso</option>
+                        <option value="Liberado">🟢 Liberado</option>
+                        <option value="Estabilización o Piloto">🔵 Estabilización o Piloto</option>
+                        <option value="Desarrollado y/o Configurado">🟠 Desarrollado y/o Configurado</option>
+                        <option value="En proceso de desarrollo y/o Configuración">🟡 En proceso desarrollo / Config</option>
+                        <option value="Retraso STGT">🔴 Retraso STGT</option>
+                        <option value="Autorizado, sin iniciar" selected>⚪ Autorizado, sin iniciar</option>
+                        <option value="En proceso de autorización">⚫ En proceso de autorización</option>
+                        <option value="En pausa">⏸️ En pausa</option>
+                        <option value="Cancelado">❌ Cancelado</option>
+
+
                     </select>
                 </div>
             </div>
@@ -2226,6 +2383,7 @@
                   <label class="font-mono text-[9px] text-[#b8b3b0] uppercase block mb-1">Nivel de Permisos</label>
                   <select id="newConsultantRole" class="w-full liquid-input rounded-[3px] p-2 text-xs appearance-none cursor-pointer text-[#eeeeee]">
                       <option value="Consultor">Consultor (Básico - Proyectos rápidos)</option>
+                      <option value="Gestor de Proyectos">Gestor de Proyectos (PMO - Auditoría & Matriz)</option>
                       <option value="Supervisor">Supervisor (Intermedio - Edición completa)</option>
                       <option value="Supremo">Supremo (Total - Borrar, Usuarios, Docs)</option>
                       <option value="Lector">Lector (Solo vista - Para jefatura)</option>
@@ -2275,6 +2433,7 @@
             <div class="flex gap-1 overflow-x-auto scrollbar-thin pb-0.5">
                 <button type="button" onclick="setConsultantRoleFilter('ALL')" id="consRoleFilterBtn-ALL" class="cons-role-pill active px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition bg-white/15 text-white border border-white/20 shrink-0">Todos</button>
                 <button type="button" onclick="setConsultantRoleFilter('Supremo')" id="consRoleFilterBtn-Supremo" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Supremos</button>
+                <button type="button" onclick="setConsultantRoleFilter('Gestor de Proyectos')" id="consRoleFilterBtn-Gestor de Proyectos" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Gestor PMO</button>
                 <button type="button" onclick="setConsultantRoleFilter('Supervisor')" id="consRoleFilterBtn-Supervisor" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Supervisores</button>
                 <button type="button" onclick="setConsultantRoleFilter('Consultor')" id="consRoleFilterBtn-Consultor" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Consultores</button>
                 <button type="button" onclick="setConsultantRoleFilter('Lector')" id="consRoleFilterBtn-Lector" class="cons-role-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-white bg-[#101010] border border-[#3d3a39] shrink-0">Lectores</button>
@@ -2412,7 +2571,145 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=20261018_v950"></script>
+  
+  <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (FASE 2) -->
+  <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 backdrop-blur-sm">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl">
+          <!-- HEADER DEL DASHBOARD -->
+          <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <div class="flex items-center gap-3">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shrink-0 animate-pulse"></span>
+                  <div>
+                      <div class="flex items-center gap-2">
+                          <h2 class="font-mono text-xs sm:text-sm font-semibold text-[#eeeeee] uppercase tracking-[-0.24px]">Dashboard Ejecutivo & Auditoría</h2>
+                          <span class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] text-[#3b82f6] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider font-semibold">FOPR-OFP-01-01</span>
+                      </div>
+                      <p class="text-[11px] text-[#8a8380]">Control integral de requerimientos, matriz cruzada por empresas y auditoría de documentos base</p>
+                  </div>
+              </div>
+
+              <!-- BOTÓN CERRAR -->
+              <button type="button" onclick="closeExecutiveDashboard()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#161413] border border-[#3d3a39] hover:border-[#8a8380] rounded-[4px] transition z-30 flex items-center justify-center cursor-pointer shadow-sm" title="Cerrar ventana (Esc)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+
+              <!-- SELECTOR DE SUB-PESTAÑAS -->
+              <div class="flex items-center gap-1.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] p-1">
+                  <button type="button" id="btnTabExecCharts" onclick="switchExecutiveTab('charts')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold">
+                      📊 Gráficos y Matriz
+                  </button>
+                  <button type="button" id="btnTabExecTables" onclick="switchExecutiveTab('tables')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]">
+                      📋 Tablas de Control
+                  </button>
+              </div>
+          </div>
+
+          <!-- CUERPO PRINCIPAL (CONTENEDORES SCROLLABLES) -->
+          <div class="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin bg-[#101010] space-y-6">
+              
+              <!-- ================= SUB-PESTAÑA 1: GRÁFICOS Y MATRIZ ================= -->
+              <div id="execSubtabCharts" class="space-y-6">
+                  <!-- FILA 1: 3 GRÁFICOS DE INSTRUMENTO -->
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                      <!-- Gráfica 1: Agrupación por Paquete -->
+                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider font-semibold">Agrupación Requerimientos</span>
+                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Por Paquete</span>
+                          </div>
+                          <div class="h-48 w-full relative">
+                              <canvas id="execChartPaquetesCanvas"></canvas>
+                          </div>
+                      </div>
+
+                      <!-- Gráfica 2: Tipo de Propuesta -->
+                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#3b82f6] uppercase tracking-wider font-semibold">Tipo de Propuesta</span>
+                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Distribución</span>
+                          </div>
+                          <div class="h-48 w-full relative">
+                              <canvas id="execChartPropuestasCanvas"></canvas>
+                          </div>
+                      </div>
+
+                      <!-- Gráfica 3: Estatus de Requerimientos + Mini Tabla -->
+                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#a0ca92] uppercase tracking-wider font-semibold">Estatus Requerimientos</span>
+                              <span id="execTotalReqCount" class="font-mono text-[10px] text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded border border-[#3d3a39]">0 Total</span>
+                          </div>
+                          <div class="flex items-center gap-3">
+                              <div class="h-44 w-44 relative shrink-0">
+                                  <canvas id="execChartEstatusCanvas"></canvas>
+                              </div>
+                              <div id="execStatusMiniTable" class="flex-1 max-h-44 overflow-y-auto scrollbar-thin text-[10px] font-mono space-y-1"></div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- FILA 2: MATRIZ CRUZADA 9x21 -->
+                  <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39]">
+                      <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-[#3d3a39]">
+                          <div class="flex items-center gap-2">
+                              <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
+                              <h3 class="font-mono text-xs uppercase text-[#fafafa] font-semibold tracking-[-0.2px]">Requerimientos por Empresas (Matriz Cruzada 9 Estatus × 21 Empresas)</h3>
+                          </div>
+                          <div class="text-[10px] font-mono text-[#8a8380]">
+                              💡 Haz clic en cualquier número para activar <span class="text-[#3b82f6] font-semibold">Drill-Down</span> en Tablas de Control
+                          </div>
+                      </div>
+                      <div id="execMatrixContainer" class="overflow-x-auto scrollbar-thin max-h-[460px]"></div>
+                  </div>
+              </div>
+
+              <!-- ================= SUB-PESTAÑA 2: TABLAS DE CONTROL ================= -->
+              <div id="execSubtabTables" class="hidden space-y-4">
+                  <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA + PILLS DE FILTRO RÁPIDO -->
+                  <div class="bg-[#141211] p-3.5 rounded-[8px] border border-[#3d3a39] flex flex-wrap items-center justify-between gap-3">
+                      <!-- Pills Filtros Rápidos -->
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                          <button type="button" onclick="setExecutivePreset('ALL')" id="execPill_ALL" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#3d3a39] text-[#fafafa] font-semibold">
+                              Todos
+                          </button>
+                          <button type="button" onclick="setExecutivePreset('retraso_stgt')" id="execPill_retraso_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#ef4444] border border-[#ef4444]/40 hover:bg-[#ef4444]/10">
+                              🔴 Retraso STGT
+                          </button>
+                          <button type="button" onclick="setExecutivePreset('alta_dir')" id="execPill_alta_dir" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#eab308] border border-[#eab308]/40 hover:bg-[#eab308]/10">
+                              🟡 Relevantes Alta Dirección
+                          </button>
+                          <button type="button" onclick="setExecutivePreset('stgt')" id="execPill_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#9ca3af] border border-[#9ca3af]/40 hover:bg-[#9ca3af]/10">
+                              ⚡ Relevantes STGT
+                          </button>
+                          <button type="button" onclick="setExecutivePreset('auditoria')" id="execPill_auditoria" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#a0ca92] border border-[#a0ca92]/40 hover:bg-[#a0ca92]/10">
+                              👤 Auditoría / Fechas Docs
+                          </button>
+                      </div>
+
+                      <!-- Búsqueda y Píldora de Filtro Activo Drill-Down -->
+                      <div class="flex items-center gap-2">
+                          <div id="execActiveDrillDownPill" class="hidden items-center gap-1.5 bg-[#3b82f6]/15 border border-[#3b82f6]/50 text-[#60a5fa] px-2.5 py-1 rounded-[3px] font-mono text-[10px]">
+                              <span id="execActiveDrillDownText">Filtro Activo</span>
+                              <button type="button" onclick="clearExecutiveDrillDown()" class="hover:text-white font-bold ml-1 text-xs">✕</button>
+                          </div>
+                          <div class="relative w-56 sm:w-72">
+                              <input type="text" id="execSearchInput" oninput="handleExecutiveSearch(this.value)" placeholder="Buscar por nombre, empresa, consultor..." class="w-full liquid-input rounded-[3px] pl-8 pr-3 py-1.5 text-xs text-[#eeeeee] focus:outline-none">
+                              <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- CONTENEDOR DE LA TABLA EJECUTIVA -->
+                  <div class="bg-[#141211] rounded-[8px] border border-[#3d3a39] overflow-hidden">
+                      <div id="execTableContainer" class="overflow-x-auto scrollbar-thin max-h-[560px]"></div>
+                  </div>
+              </div>
+
+          </div>
+      </div>
+  </div>
+  
+  <script type="module" src="app.js?v=20261021_v952"></script>
 
 </body>
 </html>

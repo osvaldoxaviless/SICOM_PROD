@@ -4,7 +4,48 @@ console.log('⚡ SICOM ERP', SICOM_VERSION, '— Terminal Control Surface Ready'
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
     // Escapa un valor para usarlo como argumento string en un handler inline: onclick="fn('${jsArg(valor)}')"
     const jsArg = (u) => escapeHtml((u == null ? '' : String(u)).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' '));
+    window.jsArg = jsArg;
     
+    // ==========================================================================
+    // CATÁLOGO OFICIAL DE 9 ESTATUS STGT Y DEFINICIONES (FASE 2)
+    // ==========================================================================
+    window.STGT_STATUS_CATALOG = {
+        'Liberado': { color: '#22c55e', text: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)', desc: 'Puesto en producción y aceptado formalmente por el cliente.' },
+        'Estabilización o Piloto': { color: '#3b82f6', text: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: 'En pruebas de campo con usuarios o ambiente controlado tras pase.' },
+        'Desarrollado y/o Configurado': { color: '#f97316', text: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: 'Concluido técnicamente, pendiente de pruebas o visto bueno final.' },
+        'En proceso de desarrollo y/o Configuración': { color: '#eab308', text: '#eab308', bg: 'rgba(234, 179, 8, 0.15)', desc: 'Trabajo técnico activo en desarrollo o parametrización.' },
+        'Retraso STGT': { color: '#ef4444', text: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: 'Fuera de la fecha compromiso por causas internas atribuibles a STGT.' },
+        'Autorizado, sin iniciar': { color: '#9ca3af', text: '#9ca3af', bg: 'rgba(156, 163, 175, 0.15)', desc: 'Proyecto aprobado por el cliente o dirección, en fila de arranque.' },
+        'En proceso de autorización': { color: '#374151', text: '#9ca3af', bg: 'rgba(55, 65, 81, 0.4)', desc: 'Propuesta comercial o técnica en revisión, pendiente de firma/visto bueno.' },
+        'En pausa': { color: '#ffffff', text: '#ffffff', bg: 'rgba(255, 255, 255, 0.1)', desc: 'Suspendido temporalmente por solicitud del cliente o dependencia externa.' },
+        'Cancelado': { color: '#991b1b', text: '#ef4444', bg: 'rgba(153, 27, 27, 0.2)', desc: 'Proyecto cancelado o descartado formalmente.' }
+    };
+
+    window.normalizeProjectStatus = function(status) {
+        if (!status || typeof status !== 'string') return 'Autorizado, sin iniciar';
+        const s = status.trim();
+        if (!s) return 'Autorizado, sin iniciar';
+        const lower = s.toLowerCase();
+        if (lower === 'completado') return 'Liberado';
+        if (lower === 'en progreso') return 'En proceso de desarrollo y/o Configuración';
+        if (lower === 'pendiente' || lower === 'no iniciado') return 'Autorizado, sin iniciar';
+        const cat = (typeof window !== 'undefined' && window.STGT_STATUS_CATALOG) ? window.STGT_STATUS_CATALOG : null;
+        if (cat && cat[s]) return s;
+        if (cat) {
+            const matchKey = Object.keys(cat).find(k => k.toLowerCase() === lower);
+            if (matchKey) return matchKey;
+        }
+        return 'Autorizado, sin iniciar';
+    };
+    const STGT_STATUS_CATALOG = window.STGT_STATUS_CATALOG;
+    const normalizeProjectStatus = window.normalizeProjectStatus;
+    window.isCompletedStatus = function(status) {
+        if (!status) return false;
+        const norm = (typeof window.normalizeProjectStatus === 'function') ? window.normalizeProjectStatus(status) : status;
+        return norm === 'Liberado' || status === 'Completado';
+    };
+    const isCompletedStatus = window.isCompletedStatus;
+
     let appId, db, auth, isFirebaseReady = false, unsubscribeSnapshot = null;
     let globalDoc, globalSetDoc;
     
@@ -73,7 +114,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     let appData = JSON.parse(JSON.stringify(defaultTestingData));
     let consultants = JSON.parse(JSON.stringify(fallbackConsultants));
-    let globalDocs = [{"id":"doc_1791193027382","name":"Propuesta Comercial"},{"id":"doc_1791192995498","name":"Contrato"},{"id":"doc_1791193015065","name":"Plano(s) de negocio"},{"id":"doc_1791350819805","name":"Plan de trabajo"},{"id":"doc_1791350871690","name":"Matriz de pruebas"},{"id":"doc_1791350852225","name":"Formato de Validación"},{"id":"doc_1791350881937","name":"Certificado de Pruebas"},{"id":"doc_1791350912895","name":"Certificado de Comité"},{"id":"doc_1791350927050","name":"Certificado de Capacitación"},{"id":"doc_1791350940031","name":"Carta de Liberación"},{"id":"doc_1791350945532","name":"Factura"}];
+    window.normalizeGlobalDocs = function(docs) {
+        const OFFICIAL_9_DOCS = [
+            { id: "doc_1791193027382", name: "Propuesta Comercial" },
+            { id: "doc_1791192995498", name: "Contrato" },
+            { id: "doc_1791350819805", name: "Plan de trabajo" },
+            { id: "doc_1791193015065", name: "Plano(s) de negocio" },
+            { id: "doc_1791350871690", name: "Testing" },
+            { id: "doc_1791350912895", name: "Comité" },
+            { id: "doc_1791350927050", name: "Certificado de Capacitación" },
+            { id: "doc_1791350940031", name: "Carta de Liberación" },
+            { id: "doc_1791350945532", name: "Factura" }
+        ];
+        if (!Array.isArray(docs) || docs.length === 0) {
+            return JSON.parse(JSON.stringify(OFFICIAL_9_DOCS));
+        }
+        const legacy11Ids = new Set([
+            'doc_1791193027382', 'doc_1791192995498', 'doc_1791350819805', 'doc_1791193015065',
+            'doc_1791350871690', 'doc_1791350852225', 'doc_1791350881937', 'doc_1791350912895',
+            'doc_1791350927050', 'doc_1791350940031', 'doc_1791350945532'
+        ]);
+        const customDocs = docs.filter(d => d && d.id && !legacy11Ids.has(d.id));
+        return [...OFFICIAL_9_DOCS.map(d => ({ ...d })), ...customDocs];
+    };
+    let globalDocs = window.normalizeGlobalDocs();
     window.getAppData = () => appData;
     // --- PERSISTENCIA LOCAL AVANZADA SIN LÍMITE (INDEXEDDB NATIVO GRATUITO) ---
     const SICOM_IDB = {
@@ -203,6 +267,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.getAppData = () => appData;
     window.getCurrentUserRole = () => String(currentUserRole);
+    window.canManageAuditAndStrategy = () => {
+        return currentUserRole === 'Supremo' || currentUserRole === 'Gestor de Proyectos';
+    };
 
     try {
       Object.defineProperty(window, 'appData', {
@@ -671,6 +738,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!appData.attendanceLocks) appData.attendanceLocks = {};
 
         // --- Autoreparación: un proyecto con datos dañados ya no impide abrir su ficha ---
+        if (typeof window.normalizeGlobalDocs === 'function') {
+            globalDocs = window.normalizeGlobalDocs(globalDocs);
+        }
         const idsVistos = new Set();
         const repararProyectos = (lista) => (lista || []).filter(p => p && typeof p === 'object').map(p => {
             if (!p.id || idsVistos.has(p.id)) { let n = 1, base = p.id || 'p', nuevo = base + '_r' + n; while (idsVistos.has(nuevo)) nuevo = base + '_r' + (++n); p.id = nuevo; }
@@ -682,6 +752,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (p.driveLink && typeof p.driveLink !== 'string') p.driveLink = '';
             if (p.invgateLink && typeof p.invgateLink !== 'string') p.invgateLink = '';
             if (typeof p.ticket !== 'string') p.ticket = (p.ticket ? String(p.ticket) : '');
+            if (p.docs && typeof p.docs === 'object') {
+                const canonTestId = 'doc_1791350871690';
+                const legacyTestIds = ['doc_1791350852225', 'doc_1791350881937'];
+                if (!p.docs[canonTestId]) {
+                    p.docs[canonTestId] = { checked: false, na: false, naValidated: false, obs: '', fecha_compromiso: '' };
+                }
+                legacyTestIds.forEach(legId => {
+                    const leg = p.docs[legId];
+                    if (leg && typeof leg === 'object') {
+                        if (leg.checked) p.docs[canonTestId].checked = true;
+                        if (leg.na && leg.naValidated && !p.docs[canonTestId].checked) {
+                            p.docs[canonTestId].na = true;
+                            p.docs[canonTestId].naValidated = true;
+                            if (leg.obs && !p.docs[canonTestId].obs) p.docs[canonTestId].obs = leg.obs;
+                        }
+                        if (leg.fecha_compromiso && !p.docs[canonTestId].fecha_compromiso) {
+                            p.docs[canonTestId].fecha_compromiso = leg.fecha_compromiso;
+                        }
+                    }
+                });
+            }
+            p.status = window.normalizeProjectStatus(p.status);
             return p;
         });
         appData.directProjects = repararProyectos(appData.directProjects);
@@ -789,6 +881,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (userRole === 'Supremo') {
                 passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Acceso Supremo (Administración)`;
                 passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#ee6018]';
+            } else if (userRole === 'Gestor de Proyectos') {
+                passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> Acceso Gestor PMO (Auditoría & Matriz)`;
+                passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#3b82f6]';
             } else if (userRole === 'Supervisor') {
                 passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Acceso Supervisor (Edición Completa)`;
                 passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#eeeeee]';
@@ -876,6 +971,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // Hashes SHA-256 de credenciales por rol (Cero contraseñas en texto plano en el código fuente)
     const ROLE_PASSWORD_HASHES = {
         Supremo: '43521c6d451cdba4e26f837672ab85d0e40a8e05d1679e37587a30a851e006a5',
+        'Gestor de Proyectos': 'd7f4cd045526fd00bb0880cc98e7b38357843c9524f74d82f57ae873d40f96d9',
         Supervisor: 'd7f4cd045526fd00bb0880cc98e7b38357843c9524f74d82f57ae873d40f96d9',
         Lector: 'bb689e16a21690a2d6b3da908110a2e5a922e07942a8f8b62e8871f72a43d23a',
         Consultor: '2d335d79507ea715ed46a2ce905b0baf721f194fb89930091fa9a2876d6cd16b'
@@ -1161,6 +1257,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K) y Cierre de Ventanas (Esc)
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            const execMod = document.getElementById('executiveDashboardModal');
+            if (execMod && !execMod.classList.contains('hidden')) {
+                window.closeExecutiveDashboard();
+                return;
+            }
             const pop = document.getElementById('cellStatusPopover');
             if (pop && !pop.classList.contains('hidden')) {
                 window.closeCellStatusPopover();
@@ -1461,7 +1562,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.applyRolePermissions = function() {
         const isSupremo = currentUserRole === 'Supremo';
-        const isSupervisorUp = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+        const isSupervisorUp = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
+        const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : isSupremo;
 
         document.querySelectorAll('.supremo-only').forEach(el => { 
             if(isSupremo) el.classList.remove('hidden'); else el.classList.add('hidden'); 
@@ -1475,6 +1577,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.querySelectorAll('.lector-hide').forEach(el => { 
             if(isLector) el.classList.add('hidden'); else el.classList.remove('hidden'); 
         });
+
+        document.querySelectorAll('.audit-pmo-only').forEach(el => {
+            if(canAudit) {
+                el.classList.remove('hidden');
+                if (el.id === 'btnTopExecutiveDashboard') el.classList.add('flex');
+            } else {
+                el.classList.add('hidden');
+                if (el.id === 'btnTopExecutiveDashboard') el.classList.remove('flex');
+            }
+        });
+
+        const execMetaBlock = document.getElementById('acc-executive-metadata');
+        if (execMetaBlock) {
+            if (canAudit) execMetaBlock.classList.remove('hidden');
+            else execMetaBlock.classList.add('hidden');
+        }
         
         const activeTabEl = document.querySelector('.tab-content:not(.hidden)');
         if (activeTabEl && activeTabEl.id === 'tab-new' && isLector) {
@@ -1544,10 +1662,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const checkAlert = (p, pType, pParent) => {
             if (!p) return;
-            const canSeeAll = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+            const canSeeAll = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos');
             const pConsArray = getProjectConsultants(p); // Usa el parser seguro que creamos
             const isInProject = pConsArray.includes(localAuthor);
-            const isProjectComplete = (p.status === 'Completado' || p.progress === 100);
+            const isProjectComplete = (isCompletedStatus(p.status) || p.progress === 100);
             
             if(!isProjectComplete && p.deadline) {
                 const [y,m,d] = p.deadline.split('-'); 
@@ -1666,7 +1784,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             });
         }
         
-        const canSeeAll = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+        const canSeeAll = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos');
         if(appData.globalTasks && Array.isArray(appData.globalTasks)) {
             for(let t of appData.globalTasks) {
                 if(t.done === true) continue;
@@ -2884,15 +3002,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.openFastCreateProject = function() { window.openConfigDrawer(); window.switchTab('new'); window.setCreateType('project'); setTimeout(() => document.getElementById('newProjName').focus(), 300); }
     
     window.switchTab = function(tabId) {
-      if (tabId === 'history' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
-          window.showToast("Acceso denegado: El Historial solo es accesible para Supervisores y Administrador.", true);
+      if (tabId === 'history' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor' && currentUserRole !== 'Gestor de Proyectos') {
+          window.showToast("Acceso denegado: El Historial solo es accesible para Supervisores, Gestor PMO y Administrador.", true);
           return;
       }
       if (tabId === 'announcements' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
           window.showToast("Acceso denegado: El Gestor de Anuncios es exclusivo para Supervisores y Administrador.", true);
           return;
       }
-      if (tabId === 'edit' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor') {
+      if (tabId === 'edit' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor' && currentUserRole !== 'Gestor de Proyectos') {
           window.showToast("Acceso denegado: Función para Supervisores y Administrador.", true);
           return;
       }
@@ -3197,7 +3315,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.getProjectRiskStatus = function(proj) {
-        if (!proj || proj.status === 'Completado') return null;
+        if (!proj || isCompletedStatus(proj.status)) return null;
 
         const now = new Date();
         const todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -3786,11 +3904,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             });
             
-            if (p.clientDeliveryDate && !p.clientReturnDate && p.status !== 'Completado') {
+            if (p.clientDeliveryDate && !p.clientReturnDate && !isCompletedStatus(p.status)) {
                 clientHold.push({ name: p.name, sentDate: p.clientDeliveryDate, consultants: (p.consultants || []).join(', ') || 'Sin asignar' });
             }
             
-            if (p.deadline && p.status !== 'Completado') {
+            if (p.deadline && !isCompletedStatus(p.status)) {
                 const parts = p.deadline.split('-');
                 const deadTime = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getTime();
                 const diffDays = Math.round((deadTime - todayTime) / 86400000);
@@ -4228,6 +4346,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     // Renderizado táctico del badge de Ticket en el encabezado de InfoCard (enfrente de "PROYECTO")
+    
+    // Nota: window.STGT_STATUS_CATALOG y window.normalizeProjectStatus han sido declarados
+    // tempranamente al inicio del archivo para disponibilidad antes del ciclo de carga.
+
+    window.toggleStatusTooltip = function(e) {
+        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+        const el = document.getElementById('statusTooltipPopover');
+        if (!el) return;
+        el.classList.toggle('hidden');
+    };
+
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('statusTooltipPopover');
+        if (pop && !pop.classList.contains('hidden')) {
+            if (!pop.contains(e.target) && !e.target.closest('[onclick*="toggleStatusTooltip"]')) {
+                pop.classList.add('hidden');
+            }
+        }
+    });
+
     window.renderInfoCardTicket = function(item) {
         const cont = document.getElementById('infoTicketContainer');
         if (!cont) return;
@@ -4250,16 +4388,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const ticketDisplay = ticketRaw.startsWith('#') ? ticketRaw : `#${ticketRaw}`;
             const linkHref = invLink ? (invLink.startsWith('http') ? invLink : 'https://' + invLink) : '';
 
-            cont.innerHTML = `
-            <div class="factory-ticket-pill inline-flex items-center gap-1.5 font-mono text-[10px] px-2 py-0.5 rounded-[3px] max-w-[210px] group cursor-pointer" onclick="event.stopPropagation(); ${!isLector ? 'window.promptEditTicket(event)' : (linkHref ? `window.open('${escapeHtml(linkHref)}', '_blank')` : '')}" title="${!isLector ? 'Clic para editar ticket' : (linkHref ? 'Abrir ticket en Invgate ↗' : 'Ticket oficial')}">
-                <span class="tk-tag shrink-0">TK</span>
-                <span class="tk-num truncate select-all" title="Ticket: ${escapeHtml(ticketRaw)}">${escapeHtml(ticketDisplay)}</span>
-                ${linkHref ? `<a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-[#ee6018] hover:text-[#d04f0f] font-bold ml-0.5 shrink-0 transition" title="Abrir ticket en Invgate ↗">↗</a>` : ''}
+            if (linkHref) {
+                // Píldora amarilla clickable según requerimiento Fase 2 (🎫 #[id] ↗)
+                cont.innerHTML = `
+                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-[#eab308]/20 hover:bg-[#eab308]/30 border border-[#eab308]/50 text-[#fde047] font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
+                    <span>🎫</span>
+                    <span class="truncate max-w-[120px]">${escapeHtml(ticketDisplay)}</span>
+                    <span class="text-xs">↗</span>
+                </a>
                 ${!isLector ? `
-                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#4d4947] hover:text-[#ee6018] ml-0.5 p-0.5 transition shrink-0" title="Editar número de ticket">
+                <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#8a8380] hover:text-[#ee6018] ml-1 p-0.5 transition shrink-0" title="Editar número de ticket">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                </button>` : ''}
-            </div>`;
+                </button>` : ''}`;
+            } else {
+                cont.innerHTML = `
+                <div class="factory-ticket-pill inline-flex items-center gap-1.5 font-mono text-[10px] px-2 py-0.5 rounded-[3px] max-w-[210px] group cursor-pointer" onclick="event.stopPropagation(); ${!isLector ? 'window.promptEditTicket(event)' : ''}" title="${!isLector ? 'Clic para asignar enlace o editar' : 'Ticket oficial'}">
+                    <span class="tk-tag shrink-0">TK</span>
+                    <span class="tk-num truncate select-all" title="Ticket: ${escapeHtml(ticketRaw)}">${escapeHtml(ticketDisplay)}</span>
+                    ${!isLector ? `
+                    <button type="button" onclick="event.stopPropagation(); window.promptEditTicket(event)" class="text-[#4d4947] hover:text-[#ee6018] ml-0.5 p-0.5 transition shrink-0" title="Editar número de ticket">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </button>` : ''}
+                </div>`;
+            }
         } else {
             if (isLector) {
                 cont.innerHTML = `<span class="font-mono text-[9px] text-[#4d4947]/70 uppercase tracking-tight">Sin ticket</span>`;
@@ -4358,11 +4509,63 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         let item = getSelectedItem();
         if (item) {
             const oldStatus = item.status || 'Pendiente'; const oldProg = item.progress || 0;
-            item.status = document.getElementById('quickEditStatus').value; if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') { item.deadline = document.getElementById('quickEditDeadline').value; } item.clientDeliveryDate = document.getElementById('quickEditDeliveryDate').value; item.clientReturnDate = document.getElementById('quickEditReturnDate').value; item.progress = parseInt(document.getElementById('quickEditProgress').value);
-            item.docs = {}; globalDocs.forEach(d => { item.docs[d.id] = { checked: document.getElementById(`quickDoc${d.id}`)?.checked||false, obs: document.getElementById(`quickObs${d.id}`)?.value||'', na: document.getElementById(`quickNa${d.id}`)?.checked||false, naValidated: document.getElementById(`quickNaValidated${d.id}`)?.value==="true" }; });
+            item.status = window.normalizeProjectStatus(document.getElementById('quickEditStatus').value) || 'Autorizado, sin iniciar';
+            if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') { item.deadline = document.getElementById('quickEditDeadline').value; }
+            item.clientDeliveryDate = document.getElementById('quickEditDeliveryDate').value;
+            item.clientReturnDate = document.getElementById('quickEditReturnDate').value;
+            item.progress = parseInt(document.getElementById('quickEditProgress').value);
+
+            // Metadatos Fase 2 (Matriz FOPR-OFP-01-01) - Control de rol PMO / Supremo
+            const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
+            if (canAudit) {
+                if (document.getElementById('quickEditEmpresa')) item.empresa = document.getElementById('quickEditEmpresa').value;
+                if (document.getElementById('quickEditAreaSolicitante')) {
+                    item.area_solicitante = document.getElementById('quickEditAreaSolicitante').value;
+                    const dgb = document.getElementById('infoDirGeneralBadge');
+                    if (dgb) {
+                        if (item.area_solicitante === 'Dir. General') {
+                            dgb.classList.remove('hidden'); dgb.classList.add('inline-flex');
+                        } else {
+                            dgb.classList.add('hidden'); dgb.classList.remove('inline-flex');
+                        }
+                    }
+                }
+                if (document.getElementById('quickEditPaquete')) item.paquete = document.getElementById('quickEditPaquete').value;
+                if (document.getElementById('quickEditTipoPropuesta')) item.tipo_propuesta = document.getElementById('quickEditTipoPropuesta').value;
+                if (document.getElementById('quickEditLiderProyecto')) item.lider_proyecto = document.getElementById('quickEditLiderProyecto').value;
+                if (document.getElementById('quickEditConsultor')) item.consultor = document.getElementById('quickEditConsultor').value;
+                if (document.getElementById('quickEditTester')) item.tester = document.getElementById('quickEditTester').value;
+                if (document.getElementById('quickEditProgramador')) item.programador = document.getElementById('quickEditProgramador').value;
+                if (document.getElementById('quickEditRelevanteAltaDir')) item.es_relevante_alta_direccion = document.getElementById('quickEditRelevanteAltaDir').checked;
+                if (document.getElementById('quickEditRelevanteStgt')) item.es_relevante_stgt = document.getElementById('quickEditRelevanteStgt').checked;
+                if (document.getElementById('quickEditObsEjecutiva')) item.observacion_ejecutiva = document.getElementById('quickEditObsEjecutiva').value.trim();
+            }
+
+            const prevDocs = item.docs || {};
+            item.docs = {};
+            globalDocs.forEach(d => {
+                const curDoc = prevDocs[d.id] || {};
+                const fcEl = document.getElementById(`quickFechaComp${d.id}`);
+                const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
+                item.docs[d.id] = {
+                    checked: document.getElementById(`quickDoc${d.id}`)?.checked || false,
+                    obs: document.getElementById(`quickObs${d.id}`)?.value || '',
+                    na: document.getElementById(`quickNa${d.id}`)?.checked || false,
+                    naValidated: document.getElementById(`quickNaValidated${d.id}`)?.value === "true",
+                    fecha_compromiso: fcVal
+                };
+            });
+
             if (oldStatus !== item.status) logActivity(item.id, item.name, `Cambió estado a [${item.status}]`, localAuthor);
             else if (oldProg !== item.progress) logActivity(item.id, item.name, `Actualizó avance a ${item.progress}%`, localAuthor);
-            window.saveData(false); const ind = document.getElementById('quickSaveIndicator'); ind.classList.remove('opacity-0'); setTimeout(() => ind.classList.add('opacity-0'), 800); window.renderMindMap(); if(isDrawerOpen) window.renderHistory();
+            window.saveData(false);
+            const ind = document.getElementById('quickSaveIndicator');
+            if (ind) {
+                ind.classList.remove('opacity-0');
+                setTimeout(() => ind.classList.add('opacity-0'), 800);
+            }
+            window.renderMindMap();
+            if(isDrawerOpen) window.renderHistory();
         }
     }
 
@@ -4465,20 +4668,65 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.renderDocChecklists = function(prefix, savedData) {
         const c = document.getElementById(`${prefix}DocsContainer`); if(!c) return; c.innerHTML = '';
-        if (globalDocs.length === 0) { c.innerHTML = `<p class="font-mono text-xs text-[#8a8380] uppercase">No hay documentos base.</p>`; document.getElementById(`${prefix}SliderContainer`).classList.remove('hidden'); return; }
-        document.getElementById(`${prefix}SliderContainer`).classList.add('hidden');
-        c.innerHTML = globalDocs.map(doc => `<div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] mb-2.5">
-                 <div class="flex justify-between items-start gap-3">
-                     <label class="flex items-start gap-3 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
+        if (!globalDocs || globalDocs.length === 0) {
+            c.innerHTML = `<p class="font-mono text-xs text-[#8a8380] uppercase">No hay documentos base.</p>`;
+            document.getElementById(`${prefix}SliderContainer`)?.classList.remove('hidden'); return;
+        }
+        document.getElementById(`${prefix}SliderContainer`)?.classList.add('hidden');
+
+          const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
+        const today = new Date(); today.setHours(0,0,0,0);
+
+        c.innerHTML = globalDocs.map(doc => {
+            const data = savedData ? savedData[doc.id] : null;
+            const isChecked = data ? !!data.checked : false;
+            const isNa = data ? !!data.na : false;
+            const isNaVal = data ? !!data.naValidated : false;
+            const fechaComp = (data && data.fecha_compromiso) ? data.fecha_compromiso : '';
+
+            // Semáforo de auditoría (Fase 2)
+            let semBadge = '<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#8a8380] uppercase px-1.5 py-0.5 rounded bg-[#101010] border border-[#3d3a39]">⚪ Sin fecha</span>';
+            if (isChecked || (isNa && isNaVal)) {
+                semBadge = '<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#22c55e] uppercase px-1.5 py-0.5 rounded bg-[#22c55e]/15 border border-[#22c55e]/30 font-semibold">🟢 Entregado</span>';
+            } else if (fechaComp) {
+                const [cy, cm, cd] = fechaComp.split('-').map(Number);
+                const cDate = new Date(cy, cm - 1, cd);
+                const diff = Math.ceil((cDate - today) / (1000 * 60 * 60 * 24));
+                if (diff < 0) {
+                    semBadge = `<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#ef4444] uppercase px-1.5 py-0.5 rounded bg-[#ef4444]/15 border border-[#ef4444]/40 font-semibold animate-pulse">🔴 Vencido (${Math.abs(diff)}d)</span>`;
+                } else {
+                    semBadge = `<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#eab308] uppercase px-1.5 py-0.5 rounded bg-[#eab308]/15 border border-[#eab308]/40 font-semibold">🟡 En tiempo (${diff}d)</span>`;
+                }
+            }
+
+            return `
+            <div class="bg-[#101010] p-3 rounded-[8px] border border-[#3d3a39] mb-2.5 space-y-2">
+                <div class="flex justify-between items-start gap-2">
+                    <label class="flex items-start gap-2.5 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
                         <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
                         <span class="break-words whitespace-normal leading-relaxed group-hover:text-[#fafafa] transition" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
-                     </label>
-                     <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer shrink-0 mt-0.5">
+                    </label>
+                    <label class="flex items-center gap-1 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer shrink-0 mt-0.5">
                         <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
-                     </label>
-                 </div>
-                 <div id="${prefix}ObsContainer${doc.id}" class="flex flex-col gap-2 hidden mt-2.5 pt-2.5 border-t border-[#3d3a39]"><input type="text" id="${prefix}Obs${doc.id}" oninput="handleObsInput('${prefix}', '${doc.id}')" placeholder="Motivo N/A..." class="w-full liquid-input rounded-[3px] p-2.5 text-xs focus:outline-none text-[#eeeeee]" ${currentUserRole==='Lector'?'readonly':''}><button id="${prefix}BtnNa${doc.id}" type="button" onclick="confirmNa('${prefix}', '${doc.id}')" class="hidden pill-btn w-full py-2 bg-[#fafafa] hover:bg-[#eeeeee] font-mono text-[10px] uppercase text-[#101010] transition">Validar N/A</button></div>
-                 <input type="hidden" id="${prefix}NaValidated${doc.id}" value="false"></div>`).join('');
+                    </label>
+                </div>
+
+                <!-- FECHA COMPROMISO Y SEMÁFORO DE AUDITORÍA (FASE 2) -->
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-[#3d3a39]/50">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="font-mono text-[9px] text-[#8a8380] uppercase shrink-0">Compromiso:</span>
+                        <input type="date" id="${prefix}FechaComp${doc.id}" value="${fechaComp}" onchange="${prefix === 'quick' ? "silentSaveInfoCard(); renderDocChecklists('quick', getSelectedItem()?.docs || {});" : ""}" class="liquid-input text-[10px] px-1.5 py-0.5 rounded-[3px] [color-scheme:dark] ${!canAudit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}" ${!canAudit ? 'disabled title="Solo Rol Supremo o Gestor de Proyectos puede alterar fechas de auditoría"' : 'title="Fecha compromiso de auditoría"'}>
+                    </div>
+                    <div class="shrink-0">${semBadge}</div>
+                </div>
+
+                <div id="${prefix}ObsContainer${doc.id}" class="flex flex-col gap-2 hidden pt-2 border-t border-[#3d3a39]">
+                    <input type="text" id="${prefix}Obs${doc.id}" oninput="handleObsInput('${prefix}', '${doc.id}')" placeholder="Motivo N/A..." class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none text-[#eeeeee]" ${currentUserRole==='Lector'?'readonly':''}>
+                    <button id="${prefix}BtnNa${doc.id}" type="button" onclick="confirmNa('${prefix}', '${doc.id}')" class="hidden pill-btn w-full py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] font-mono text-[10px] uppercase text-[#101010] transition">Validar N/A</button>
+                </div>
+                <input type="hidden" id="${prefix}NaValidated${doc.id}" value="false">
+            </div>`;
+        }).join('');
         
         globalDocs.forEach(doc => {
             const data = savedData ? savedData[doc.id] : null;
@@ -4533,18 +4781,24 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           item.invgateLink = document.getElementById('editInvgateLink').value.trim(); 
           const elEditTk = document.getElementById('editTicket');
           if (elEditTk) item.ticket = elEditTk.value.trim();
-          item.status = document.getElementById('editStatus').value; 
+          item.status = window.normalizeProjectStatus(document.getElementById('editStatus').value) || 'Autorizado, sin iniciar';
           item.deadline = document.getElementById('editDeadline').value; 
           item.clientDeliveryDate = document.getElementById('editDeliveryDate').value; 
           item.clientReturnDate = document.getElementById('editReturnDate').value; 
           item.progress = parseInt(document.getElementById('editProgress').value);
+          const prevDocs = item.docs || {};
+          const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
           item.docs = {}; 
           globalDocs.forEach(d => { 
+            const curDoc = prevDocs[d.id] || {};
+            const fcEl = document.getElementById(`editFechaComp${d.id}`);
+            const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
             item.docs[d.id] = { 
               checked: document.getElementById(`editDoc${d.id}`)?.checked || false, 
               obs: document.getElementById(`editObs${d.id}`)?.value || '', 
               na: document.getElementById(`editNa${d.id}`)?.checked || false, 
-              naValidated: document.getElementById(`editNaValidated${d.id}`)?.value === "true" 
+              naValidated: document.getElementById(`editNaValidated${d.id}`)?.value === "true",
+              fecha_compromiso: fcVal
             }; 
           });
           item.consultants = Array.from(document.querySelectorAll('.editProjCons-chk:checked')).map(cb => cb.value);
@@ -4918,7 +5172,55 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         }
         
-        document.getElementById('quickEditStatus').value = item.status || 'Pendiente'; document.getElementById('quickEditDeadline').value = item.deadline || ''; 
+        document.getElementById('quickEditStatus').value = window.normalizeProjectStatus(item.status);
+        document.getElementById('quickEditDeadline').value = item.deadline || ''; 
+        document.getElementById('quickEditDeliveryDate').value = item.clientDeliveryDate || '';
+        document.getElementById('quickEditReturnDate').value = item.clientReturnDate || ''; 
+
+        // Poblar Metadatos Fase 2
+        const elEmp = document.getElementById('quickEditEmpresa');
+        if (elEmp) elEmp.value = item.empresa || (item.companies && item.companies[0]) || '';
+        
+        const elArea = document.getElementById('quickEditAreaSolicitante');
+        if (elArea) elArea.value = item.area_solicitante || 'TI';
+
+        // Badge Dir. General en cabecera
+        const dgb = document.getElementById('infoDirGeneralBadge');
+        if (dgb) {
+            if (item.area_solicitante === 'Dir. General') {
+                dgb.classList.remove('hidden'); dgb.classList.add('inline-flex');
+            } else {
+                dgb.classList.add('hidden'); dgb.classList.remove('inline-flex');
+            }
+        }
+
+        const elPaq = document.getElementById('quickEditPaquete');
+        if (elPaq) elPaq.value = item.paquete || 'Sin paquete';
+
+        const elProp = document.getElementById('quickEditTipoPropuesta');
+        if (elProp) elProp.value = item.tipo_propuesta || 'Mantenimiento';
+
+        // Poblar selects de responsables expandidos
+        const consNames = Object.keys(consultants).sort();
+        const fillRespSelect = (selId, val) => {
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            sel.innerHTML = '<option value="">(Sin asignar)</option>' + consNames.map(c => `<option value="${escapeHtml(c)}" ${c === val ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+            sel.disabled = isLector;
+        };
+        fillRespSelect('quickEditLiderProyecto', item.lider_proyecto || '');
+        fillRespSelect('quickEditConsultor', item.consultor || (item.consultants && item.consultants[0]) || '');
+        fillRespSelect('quickEditTester', item.tester || '');
+        fillRespSelect('quickEditProgramador', item.programador || '');
+
+        const elRad = document.getElementById('quickEditRelevanteAltaDir');
+        if (elRad) { elRad.checked = !!item.es_relevante_alta_direccion; elRad.disabled = isLector; }
+
+        const elRst = document.getElementById('quickEditRelevanteStgt');
+        if (elRst) { elRst.checked = !!item.es_relevante_stgt; elRst.disabled = isLector; }
+
+        const elObs = document.getElementById('quickEditObsEjecutiva');
+        if (elObs) { elObs.value = item.observacion_ejecutiva || ''; elObs.disabled = isLector; } 
         document.getElementById('quickEditDeliveryDate').value = item.clientDeliveryDate || ''; document.getElementById('quickEditReturnDate').value = item.clientReturnDate || ''; 
         
         const riskInfo = window.getProjectRiskStatus(item);
@@ -4936,7 +5238,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const rt = document.getElementById('infoRelativeTime'); rt.classList.remove('hidden');
             const [y,m,d] = item.deadline.split('-'); const dDate = new Date(y, m-1, d); const today = new Date(new Date().setHours(0,0,0,0));
             const diffTime = dDate - today; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if(item.status === 'Completado') { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#a0ca92] border-[#a0ca92]/40"; rt.innerHTML = "✅ ENTREGADO"; }
+            if(isCompletedStatus(item.status)) { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#a0ca92] border-[#a0ca92]/40"; rt.innerHTML = "✅ ENTREGADO"; }
             else if(diffDays < 0) { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#ee6018] border-[#ee6018]/60"; rt.innerHTML = `⚠️ VENCIDO HACE ${Math.abs(diffDays)} DÍAS`; }
             else if(diffDays === 0) { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#ee6018] border-[#ee6018]/40"; rt.innerHTML = `⚠️ VENCE HOY`; }
             else { rt.className = "font-mono text-[10px] uppercase px-3 py-2 rounded-[3px] mb-4 border flex items-center gap-2 bg-[#1d1a18] text-[#b8b3b0] border-[#3d3a39]"; rt.innerHTML = `📅 VENCE EN ${diffDays} DÍAS`; }
@@ -5049,7 +5351,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('editProjectFields').classList.remove('hidden'); 
         document.getElementById('editPriority').value = item.priority; 
         document.getElementById('editNotes').value = ''; 
-        document.getElementById('editStatus').value = item.status || 'Pendiente';
+        document.getElementById('editStatus').value = window.normalizeProjectStatus(item.status) || 'Autorizado, sin iniciar';
         window.renderNotesHistory(item.notes, 'editNotesHistory'); 
         if (typeof window.setNoteTag === 'function') window.setNoteTag('comentario', 'edit');
         document.getElementById('editDeadline').value = item.deadline || '';
@@ -5122,7 +5424,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (sumCont) {
           const projs = (type === 'module' ? (item.projects || []) : (appData.directProjects || []));
           const total = projs.length;
-          const comp = projs.filter(p => p.status === 'Completado').length;
+          const comp = projs.filter(p => isCompletedStatus(p.status)).length;
           const inProg = projs.filter(p => p.status === 'En Progreso').length;
           const pend = projs.filter(p => p.status === 'Pendiente' || p.status === 'No Iniciado').length;
           const avgProg = total > 0 ? Math.round(projs.reduce((acc, p) => acc + (p.progress || 0), 0) / total) : 0;
@@ -5304,8 +5606,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const invgateLink = document.getElementById('newProjInvgate').value.trim();
       const ticket = (document.getElementById('newProjTicket')?.value || '').trim();
       const deadline = document.getElementById('newProjDeadline')?.value || '';
-      const status = document.getElementById('newProjStatus')?.value || 'No Iniciado';
-      const progress = (status === 'Completado') ? 100 : 0;
+      const status = window.normalizeProjectStatus(document.getElementById('newProjStatus')?.value) || 'Autorizado, sin iniciar';
+      const progress = (status === 'Liberado' || status === 'Completado') ? 100 : 0;
 
       const np = { 
         id: 'p_' + Date.now(), 
@@ -5347,7 +5649,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('newProjInvgate').value = ''; 
       if (document.getElementById('newProjTicket')) document.getElementById('newProjTicket').value = '';
       if (document.getElementById('newProjDeadline')) document.getElementById('newProjDeadline').value = '';
-      if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'No Iniciado';
+      if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'Autorizado, sin iniciar';
       if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
       document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); 
       document.querySelectorAll('.newProjSecMod-chk').forEach(cb => cb.checked = false);
@@ -6264,7 +6566,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const checkP = (p) => {
                 if (getProjectConsultants(p).includes(n)) {
                     pCount++;
-                    if (p.deadline && p.status !== 'Completado') {
+                    if (p.deadline && !isCompletedStatus(p.status)) {
                         const parts = p.deadline.split('-');
                         if (parts.length === 3) {
                             const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getTime();
@@ -6293,8 +6595,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             const displayTitle = cData.title || (
                 cData.role === 'Supremo' ? 'Dirección Técnica & Arquitectura' :
+                (cData.role === 'Gestor de Proyectos' ? 'Gestión de Proyectos & Auditoría PMO' :
                 (cData.role === 'Supervisor' ? 'Supervisor Operativo & Calidad' :
-                (cData.role === 'Lector' ? 'Auditoría / Vista Ejecutiva' : 'Consultor Especialista'))
+                (cData.role === 'Lector' ? 'Auditoría / Vista Ejecutiva' : 'Consultor Especialista')))
             );
 
             let roleBadgeStyle = 'text-[#ee6018] bg-[#ee6018]/10 border-[#ee6018]/30';
@@ -6302,6 +6605,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (cData.role === 'Supremo') {
                 roleBadgeStyle = 'text-[#0071e3] bg-[#0071e3]/10 border-[#0071e3]/30';
                 roleIcon = '👑';
+            } else if (cData.role === 'Gestor de Proyectos') {
+                roleBadgeStyle = 'text-[#3b82f6] bg-[#3b82f6]/10 border-[#3b82f6]/30';
+                roleIcon = '📊';
             } else if (cData.role === 'Supervisor') {
                 roleBadgeStyle = 'text-[#30d158] bg-[#30d158]/10 border-[#30d158]/30';
                 roleIcon = '🛡️';
@@ -6430,7 +6736,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (name.includes('propuesta') || name.includes('contrato') || name.includes('plano') || name.includes('plan de trabajo') || name.includes('alcance')) {
             return 'Fase 1: Contractual';
         }
-        if (name.includes('prueba') || name.includes('validación') || name.includes('matriz') || name.includes('qa')) {
+        if (name.includes('prueba') || name.includes('validación') || name.includes('matriz') || name.includes('qa') || name.includes('testing')) {
             return 'Fase 2: Calidad';
         }
         if (name.includes('comité') || name.includes('capacitación') || name.includes('liberación') || name.includes('factura') || name.includes('cierre')) {
@@ -6645,9 +6951,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         const renderProjectCards = (projs, cData) => projs.map(p => {
-            let sIco = p.status === 'En Progreso' ? '🚀' : (p.status === 'Completado' ? '✅' : (p.status === 'No Iniciado' ? '⏸️' : '⏳'));
+            let sIco = p.status === 'En Progreso' ? '🚀' : (isCompletedStatus(p.status) ? '✅' : (p.status === 'No Iniciado' ? '⏸️' : '⏳'));
             let over = false;
-            if (p.deadline && p.status !== 'Completado') {
+            if (p.deadline && !isCompletedStatus(p.status)) {
                 const [y, m, d] = p.deadline.split('-');
                 if (new Date(y, m - 1, d) < new Date(new Date().setHours(0, 0, 0, 0))) over = true;
             }
@@ -6752,7 +7058,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const isFiltered = (p) => {
           if (isFocusMode) {
               let isOverdue = false, isSoon = false;
-              if (p.deadline && p.status !== 'Completado') {
+              if (p.deadline && !isCompletedStatus(p.status)) {
                   const [y,m,d] = p.deadline.split('-'); 
                   const diff = Math.ceil((new Date(y, m-1, d) - new Date(new Date().setHours(0,0,0,0))) / 86400000);
                   if (diff < 0) isOverdue = true;
@@ -6802,7 +7108,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
           
           if (activeFilterUrgency !== 'ALL') {
-              if (p.status === 'Completado') return false;
+              if (isCompletedStatus(p.status)) return false;
               let isOver = false, isSoon = false, is30 = false;
               if (p.deadline) {
                   const [y,m,d] = p.deadline.split('-'); 
@@ -6823,7 +7129,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
 
           if (activeFilterBottleneck !== 'ALL') {
-              if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || p.status === 'Completado')) return false;
+              if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || isCompletedStatus(p.status))) return false;
               if (activeFilterBottleneck === 'VALIDATION' && !(p.tasks||[]).some(t => t.done === 'pending')) return false;
               if (activeFilterBottleneck === 'NA') {
                   let unv = false; if(p.docs) Object.keys(p.docs).forEach(k => { if(p.docs[k].na && !p.docs[k].naValidated) unv = true; });
@@ -7129,7 +7435,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                   const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
                   const isModCorrMatch = isProjectModCorrelated(p);
                   let isOver = false;
-                  if(p.deadline && p.status !== 'Completado') {
+                  if(p.deadline && !isCompletedStatus(p.status)) {
                       const [dy, dm, dd] = p.deadline.split('-');
                       if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true;
                   }
@@ -7342,7 +7648,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const riskInfo = window.getProjectRiskStatus(p);
           const isOver = riskInfo && riskInfo.level === 'critical';
           const isCooling = riskInfo && riskInfo.level === 'cooling';
-          const sCol = p.status==='En Progreso'?'#ee6018':(p.status==='Completado'?'#a0ca92':(p.status==='No Iniciado'?'#4d4947':'#8a8380'));
+          const sCol = p.status==='En Progreso'?'#ee6018':(isCompletedStatus(p.status)?'#a0ca92':(p.status==='No Iniciado'?'#4d4947':'#8a8380'));
 
           // 1. CREACIÓN DEL CONTENEDOR PRINCIPAL
           const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -8512,13 +8818,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const in72Hours = new Date(todayMidnight.getTime() + (3 * 24 * 60 * 60 * 1000));
 
         const isOver = (proj) => { 
-            if (!proj.deadline || proj.status === 'Completado') return false; 
+            if (!proj.deadline || isCompletedStatus(proj.status)) return false; 
             const [y, m, d] = proj.deadline.split('-'); 
             return new Date(y, m - 1, d) < todayMidnight; 
         };
 
         const isRisk = (proj) => {
-            if (!proj.deadline || proj.status === 'Completado') return false;
+            if (!proj.deadline || isCompletedStatus(proj.status)) return false;
             const [y, m, d] = proj.deadline.split('-');
             const dDate = new Date(y, m - 1, d);
             return dDate >= todayMidnight && dDate <= in72Hours && (proj.progress || 0) < 80;
@@ -8551,7 +8857,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (over) o++;
             if (risk) riskCount++;
 
-            if (proj.status === 'Completado') c++; 
+            if (isCompletedStatus(proj.status)) c++; 
             else if (proj.status === 'En Progreso') p++; 
             else if (proj.status === 'No Iniciado') noIni++; 
             else pend++; 
@@ -8572,7 +8878,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     if (!consStats[cons]) {
                         consStats[cons] = { completed: 0, inProgress: 0, overdue: 0 };
                     }
-                    if (proj.status === 'Completado') {
+                    if (isCompletedStatus(proj.status)) {
                         consStats[cons].completed++;
                     } else if (over) {
                         consStats[cons].overdue++;
@@ -8638,8 +8944,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     });
                     pList.innerHTML = myProjects.map(proj => {
                         const over = isOver(proj);
-                        const statusCol = proj.status === 'Completado' ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
-                        const sIco = proj.status === 'Completado' ? '✅' : (proj.status === 'En Progreso' ? '🚀' : (proj.status === 'No Iniciado' ? '⏸️' : '⏳'));
+                        const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
+                        const sIco = isCompletedStatus(proj.status) ? '✅' : (proj.status === 'En Progreso' ? '🚀' : (proj.status === 'No Iniciado' ? '⏸️' : '⏳'));
                         return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-3 transition flex items-center justify-between gap-3 cursor-pointer group" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
@@ -8861,14 +9167,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         let candidateList = [];
         if (type === 'overdue') {
             candidateList = filteredProjects.filter(p => {
-                if (!p.deadline || p.status === 'Completado') return false;
+                if (!p.deadline || isCompletedStatus(p.status)) return false;
                 const [y, m, d] = p.deadline.split('-');
                 return new Date(y, m - 1, d) < todayMidnight;
             });
             candidateList.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
         } else if (type === 'risk') {
             candidateList = filteredProjects.filter(p => {
-                if (!p.deadline || p.status === 'Completado') return false;
+                if (!p.deadline || isCompletedStatus(p.status)) return false;
                 const [y, m, d] = p.deadline.split('-');
                 const dDate = new Date(y, m - 1, d);
                 return dDate >= todayMidnight && dDate <= in72Hours && (p.progress || 0) < 80;
@@ -9179,46 +9485,102 @@ window.toggleDailyDrawer = function() {
         window.saveData(false);
     };
 
-// NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD DIARIA
-    window.openFastDailyTaskModal = function() {
+// NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD GENERAL
+    window.openFastDailyTaskModal = function(taskId = null) {
         if (isDrawerOpen) window.closeConfigDrawer();
         if (isPriorityDrawerOpen) window.closePriorityDrawer();
         
-        document.getElementById('fdtDescription').value = '';
+        const idInput = document.getElementById('fdtTaskId');
+        const descInput = document.getElementById('fdtDescription');
+        const dateInput = document.getElementById('fdtCommitmentDate');
+        const noticeEl = document.getElementById('fdtDateNotice');
+        const isSupremo = (currentUserRole || '').toLowerCase() === 'supremo';
+
+        if (taskId) {
+            const t = (appData.dailyTasks || []).find(x => x.id === taskId);
+            if (!t) return;
+            if (idInput) idInput.value = t.id;
+            if (descInput) descInput.value = t.text || '';
+            if (dateInput) {
+                dateInput.value = t.fecha_compromiso || t.deadline || '';
+                dateInput.disabled = !isSupremo;
+                if (!isSupremo) {
+                    dateInput.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    dateInput.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            if (noticeEl) {
+                noticeEl.textContent = isSupremo ? '(editable: rol supremo)' : '(solo editable por rol supremo)';
+                noticeEl.className = isSupremo ? 'text-[9px] text-[#a0ca92] font-mono lowercase' : 'text-[9px] text-[#ee6018] font-mono lowercase';
+            }
+        } else {
+            if (idInput) idInput.value = '';
+            if (descInput) descInput.value = '';
+            if (dateInput) {
+                dateInput.value = '';
+                dateInput.disabled = false;
+                dateInput.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (noticeEl) {
+                noticeEl.textContent = '(opcional)';
+                noticeEl.className = 'text-[9px] text-[#8a8380] font-mono lowercase';
+            }
+        }
+
         document.getElementById('fastDailyTaskModal').classList.remove('hidden');
         setTimeout(() => document.getElementById('fastDailyTaskModal').classList.remove('opacity-0'), 10);
-    }
+    };
     
     window.closeFastDailyTaskModal = function() {
         document.getElementById('fastDailyTaskModal').classList.add('opacity-0');
         setTimeout(() => document.getElementById('fastDailyTaskModal').classList.add('hidden'), 400);
-    }
+    };
 
     window.saveFastDailyTask = function() {
         if (currentUserRole === 'Lector') return;
-        const text = document.getElementById('fdtDescription').value.trim();
+        const descInput = document.getElementById('fdtDescription');
+        const text = descInput ? descInput.value.trim() : '';
         if (!text) { window.showToast("La descripción es obligatoria", true); return; }
         
-        const now = new Date();
-        const assignDate = now.toLocaleDateString('es-MX');
-        const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-        
+        const dateInput = document.getElementById('fdtCommitmentDate');
+        const commitDate = dateInput ? dateInput.value : '';
+        const idInput = document.getElementById('fdtTaskId');
+        const taskId = idInput ? idInput.value : '';
+        const isSupremo = (currentUserRole || '').toLowerCase() === 'supremo';
+
         appData.dailyTasks = appData.dailyTasks || [];
-        appData.dailyTasks.push({ 
-            id: 'dt_' + Date.now(), 
-            text: text, 
-            assignee: localAuthor, 
-            assignedBy: localAuthor, 
-            assignDate: assignDate,
-            assignTime: assignTime,
-            date: assignDate, 
-            done: false 
-        });
+
+        if (taskId) {
+            const t = appData.dailyTasks.find(x => x.id === taskId);
+            if (t) {
+                t.text = text;
+                if (isSupremo) {
+                    t.fecha_compromiso = commitDate;
+                }
+                logActivity('daily', 'Actividades Diarias', `Editó tarea general: "${text}"${isSupremo && commitDate ? ` (Compromiso: ${commitDate})` : ''}`, localAuthor);
+            }
+        } else {
+            const now = new Date();
+            const assignDate = now.toLocaleDateString('es-MX');
+            const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            appData.dailyTasks.push({ 
+                id: 'dt_' + Date.now(), 
+                text: text, 
+                assignee: localAuthor, 
+                assignedBy: localAuthor, 
+                assignDate: assignDate,
+                assignTime: assignTime,
+                date: assignDate,
+                fecha_compromiso: commitDate,
+                done: false 
+            });
+            logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea general: "${text}"${commitDate ? ` (Compromiso: ${commitDate})` : ''}`, localAuthor);
+        }
         
-        logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea diaria: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(true);
         window.closeFastDailyTaskModal();
-    }
+    };
 
 window.toggleDailyTask = function(taskId) {
         if (currentUserRole === 'Lector') return;
@@ -9347,7 +9709,78 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
     }
 };
 
+
+    // === RENDERIZADO DE PROYECTOS ASIGNADOS EN PANEL IZQUIERDO ===
+    window.renderMyAssignedProjects = function() {
+        const pList = document.getElementById('dailyMyProjectsList');
+        const pBadge = document.getElementById('dailyMyProjectsBadge');
+        const pSec = document.getElementById('dailyAssignedProjectsSection');
+        if (!pList || !pBadge) return;
+
+        if (currentNotifTab !== 'pending') {
+            if (pSec) pSec.classList.add('hidden');
+            return;
+        }
+        if (pSec) pSec.classList.remove('hidden');
+
+        const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const isOver = (proj) => { 
+            if (!proj.deadline || isCompletedStatus(proj.status)) return false; 
+            const [y, m, d] = proj.deadline.split('-'); 
+            return new Date(y, m - 1, d) < todayMidnight; 
+        };
+
+        let myProjects = [];
+        const checkProj = (proj, pType, parentName) => {
+            const projCons = getProjectConsultants(proj);
+            if (projCons.includes(localAuthor)) {
+                myProjects.push({ ...proj, pType, parentName });
+            }
+        };
+
+        (appData.directProjects || []).forEach(p => checkProj(p, 'direct-project', appData.directHub ? appData.directHub.name : 'Directos'));
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => checkProj(p, 'project', m.name)));
+
+        pBadge.textContent = `${myProjects.length} PROYECTO${myProjects.length === 1 ? '' : 'S'}`;
+
+        if (myProjects.length === 0) {
+            pList.innerHTML = `<div class="p-3 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">No tienes proyectos asignados</div>`;
+            return;
+        }
+
+        myProjects.sort((a, b) => {
+            const aOver = isOver(a) ? 1 : 0;
+            const bOver = isOver(b) ? 1 : 0;
+            if (bOver !== aOver) return bOver - aOver;
+            return (a.progress || 0) - (b.progress || 0);
+        });
+
+        pList.innerHTML = myProjects.map(proj => {
+            const over = isOver(proj);
+            const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
+            const sIco = isCompletedStatus(proj.status) ? '✓' : (proj.status === 'En Progreso' ? '⚡' : (proj.status === 'No Iniciado' ? '⏸' : '⏳'));
+            return `
+            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="if(typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
+                        <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
+                    </div>
+                    <div class="flex items-center gap-2 font-mono text-[9px] text-[#8a8380] uppercase">
+                        <span class="truncate">${escapeHtml(proj.parentName || 'Directo')}</span>
+                        <span>·</span>
+                        <span>${sIco} ${proj.status || 'Pendiente'} (${proj.progress || 0}%)</span>
+                        ${proj.deadline ? `<span>·</span><span class="${over ? 'text-[#ee6018]' : ''}">⏱ ${proj.deadline}</span>` : ''}
+                    </div>
+                </div>
+                <span class="font-mono text-[9px] text-[#8a8380] group-hover:text-[#eeeeee] shrink-0">VER →</span>
+            </div>`;
+        }).join('');
+    };
+
 window.renderDailyTasks = function() {
+    if (typeof window.renderMyAssignedProjects === "function") window.renderMyAssignedProjects();
     const container = document.getElementById('dailyTasksContainer'); 
     const badge = document.getElementById('dailyAlertsBadge');
     if (!container) return;
@@ -9358,7 +9791,7 @@ window.renderDailyTasks = function() {
     // 1. RECOLECTOR MAESTRO DE TAREAS
     let allTasks = [];
     if (appData.dailyTasks) {
-        appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea Diaria'}));
+        appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea General'}));
     }
     if (appData.globalTasks) {
         appData.globalTasks.forEach(t => allTasks.push({...t, sourceType: 'global', pName: 'Asignación Global'}));
@@ -9579,6 +10012,8 @@ window.renderDailyTasks = function() {
                         if (t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}', '${t.projectId}')`;
                         if (t.sourceType === 'project' || t.sourceType === 'global') {
                             openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openProjectTaskModal();`;
+                        } else if (t.sourceType === 'daily') {
+                            openAction = `window.openFastDailyTaskModal('${t.id}');`;
                         }
 
                         let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
@@ -9592,6 +10027,7 @@ window.renderDailyTasks = function() {
                                     <span class="font-mono text-[9px] uppercase ${srcColor}">${escapeHtml(t.pName)}</span>
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                                     ${t.deadline ? `<span class="text-[9px] text-[#ee6018] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
+                                    ${t.fecha_compromiso ? `<span class="text-[9px] text-[#a0ca92] font-mono">📅 Compromiso: ${escapeHtml(t.fecha_compromiso)}</span>` : ''}
                                     ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#101010] text-[#8a8380] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                                 </div>
                             </div>
@@ -9838,12 +10274,13 @@ window.renderDailyTasks = function() {
             
             // 4. Filtro de Estatus
             if (excludeCategory !== 'status' && !isStatusAll) {
-                if (!activeFilterStatuses.includes(p.status)) return false;
+                const normSt = window.normalizeProjectStatus ? window.normalizeProjectStatus(p.status) : p.status;
+                if (!activeFilterStatuses.includes(normSt) && !activeFilterStatuses.includes(p.status)) return false;
             }
             
             // 5. Filtros complementarios
             if (activeFilterUrgency !== 'ALL') {
-                if (p.status === 'Completado') return false;
+                if (isCompletedStatus(p.status)) return false;
                 let isOver = false, isSoon = false, is30 = false;
                 if (p.deadline) {
                     const [y,m,d] = p.deadline.split('-');
@@ -9864,7 +10301,7 @@ window.renderDailyTasks = function() {
             }
 
             if (activeFilterBottleneck !== 'ALL') {
-                if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || p.status === 'Completado')) return false;
+                if (activeFilterBottleneck === 'CLIENT' && (!p.clientDeliveryDate || p.clientReturnDate || isCompletedStatus(p.status))) return false;
                 if (activeFilterBottleneck === 'VALIDATION' && !(p.tasks||[]).some(t => t.done === 'pending')) return false;
                 if (activeFilterBottleneck === 'NA') {
                     let unv = false; if(p.docs) Object.keys(p.docs).forEach(k => { if(p.docs[k].na && !p.docs[k].naValidated) unv = true; });
@@ -10013,10 +10450,18 @@ window.renderDailyTasks = function() {
         if (statusContainer) {
             const statuses = [
                 { id: 'ALL', label: '🌐 Todos' },
-                { id: 'No Iniciado', label: '⏸️ No Iniciado' },
-                { id: 'Pendiente', label: '⏳ Pendiente' },
-                { id: 'En Progreso', label: '🚀 En Progreso' },
-                { id: 'Completado', label: '✅ Completado' }
+                { id: 'Liberado', label: '🟢 Liberado' },
+                { id: 'Estabilización o Piloto', label: '🔵 Estabilización o Piloto' },
+                { id: 'Desarrollado y/o Configurado', label: '🟠 Desarrollado y/o Configurado' },
+                { id: 'En proceso de desarrollo y/o Configuración', label: '🟡 En proceso desarrollo / Config' },
+                { id: 'Retraso STGT', label: '🔴 Retraso STGT' },
+                { id: 'Autorizado, sin iniciar', label: '⚪ Autorizado, sin iniciar' },
+                { id: 'En proceso de autorización', label: '⚫ En proceso de autorización' },
+                { id: 'En pausa', label: '⏸️ En pausa' },
+                { id: 'Cancelado', label: '❌ Cancelado' },
+
+
+
             ];
             const isAllSelected = activeFilterStatuses.includes('ALL') || activeFilterStatuses.length === 0;
             const projsForStatus = window.getFilteredProjectsScope('status');
@@ -10025,7 +10470,7 @@ window.renderDailyTasks = function() {
             let html = '';
             statuses.forEach(st => {
                 const isAct = (st.id === 'ALL' && isAllSelected) || (!isAllSelected && activeFilterStatuses.includes(st.id));
-                const sCnt = st.id === 'ALL' ? projsForStatus.length : projsForStatus.filter(p => p.status === st.id).length;
+                const sCnt = st.id === 'ALL' ? projsForStatus.length : projsForStatus.filter(p => { const norm = window.normalizeProjectStatus ? window.normalizeProjectStatus(p.status) : p.status; return norm === st.id; }).length;
                 const isBlocked = st.id !== 'ALL' && hasNonStatusFilters && sCnt === 0;
 
                 html += `<button type="button" onclick="toggleFilterChip('status', '${jsArg(st.id)}', ${isBlocked})" class="filter-chip ${isAct ? 'active' : ''} ${isBlocked ? 'blocked' : ''}" title="${isBlocked ? 'Sin proyectos en esta selección' : ''}">
@@ -12999,3 +13444,522 @@ window.renderDailyTasks = function() {
             }
         }, 250);
     });
+
+
+// ==========================================================================
+// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN (FASE 2)
+// MATRIZ FOPR-OFP-01-01 / GRÁFICAS DE INSTRUMENTO / TABLAS DE CONTROL
+// ==========================================================================
+
+let execChartPaquetes = null;
+let execChartPropuestas = null;
+let execChartEstatus = null;
+let currentExecutiveTab = 'charts';
+
+let executiveTableFilter = {
+    empresa: 'ALL',
+    estado: 'ALL',
+    paquete: 'ALL',
+    tipo_propuesta: 'ALL',
+    preset: 'ALL',
+    search: ''
+};
+
+window.openExecutiveDashboard = function(tabName) {
+    if (typeof window.canManageAuditAndStrategy === 'function' && !window.canManageAuditAndStrategy()) {
+        if (typeof window.showToast === 'function') {
+            window.showToast("🔒 Acceso exclusivo para Gestor de Proyectos y Administrador Supremo.", true);
+        }
+        return;
+    }
+    const modal = document.getElementById('executiveDashboardModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+    });
+    window.switchExecutiveTab(tabName || currentExecutiveTab || 'charts');
+};
+
+window.closeExecutiveDashboard = function() {
+    const modal = document.getElementById('executiveDashboardModal');
+    if (!modal) return;
+    
+    // Destrucción estricta de instancias Chart.js para evitar memory leaks
+    if (typeof Chart !== 'undefined' && Chart.getChart) {
+        ['execChartPaquetesCanvas', 'execChartPropuestasCanvas', 'execChartEstatusCanvas'].forEach(id => {
+            const cv = document.getElementById(id);
+            if (cv) Chart.getChart(cv)?.destroy();
+        });
+    }
+    if (execChartPaquetes) { execChartPaquetes.destroy(); execChartPaquetes = null; }
+    if (execChartPropuestas) { execChartPropuestas.destroy(); execChartPropuestas = null; }
+    if (execChartEstatus) { execChartEstatus.destroy(); execChartEstatus = null; }
+
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 150);
+};
+
+window.switchExecutiveTab = function(tabName) {
+    currentExecutiveTab = tabName;
+    const btnCharts = document.getElementById('btnTabExecCharts');
+    const btnTables = document.getElementById('btnTabExecTables');
+    const subCharts = document.getElementById('execSubtabCharts');
+    const subTables = document.getElementById('execSubtabTables');
+
+    if (tabName === 'charts') {
+        if (btnCharts) {
+            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold";
+        }
+        if (btnTables) {
+            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]";
+        }
+        if (subCharts) subCharts.classList.remove('hidden');
+        if (subTables) subTables.classList.add('hidden');
+        window.renderExecutiveMatrixAndCharts();
+    } else {
+        if (btnCharts) {
+            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]";
+        }
+        if (btnTables) {
+            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold";
+        }
+        if (subCharts) subCharts.classList.add('hidden');
+        if (subTables) subTables.classList.remove('hidden');
+        window.renderExecutiveTable();
+    }
+};
+
+window.getAllProjectsFlat = function() {
+    const list = [];
+    (appData.directProjects || []).forEach(p => {
+        list.push({ ...p, isDirect: true, moduleName: 'Directo', moduleColor: '#f59e0b' });
+    });
+    (appData.modules || []).forEach(m => {
+        (m.projects || []).forEach(p => {
+            list.push({ ...p, isDirect: false, moduleName: m.name, moduleColor: m.color || '#3b82f6' });
+        });
+    });
+    return list;
+};
+
+window.renderExecutiveMatrixAndCharts = function() {
+    const allProjs = window.getAllProjectsFlat();
+    
+    const countBadge = document.getElementById('execTotalReqCount');
+    if (countBadge) countBadge.textContent = `${allProjs.length} Total`;
+
+    // 1. Gráfica de Paquetes
+    const paqCounts = { 'Paquete 1': 0, 'Paquete 2': 0, 'Paquete 3': 0, 'Paquete 4': 0, 'Sin paquete': 0 };
+    allProjs.forEach(p => {
+        const paq = p.paquete || 'Sin paquete';
+        if (paqCounts[paq] !== undefined) paqCounts[paq]++;
+        else paqCounts['Sin paquete']++;
+    });
+
+    const canvasPaq = document.getElementById('execChartPaquetesCanvas');
+    const ctxPaq = canvasPaq?.getContext('2d');
+    if (typeof Chart !== 'undefined' && Chart.getChart && canvasPaq) { Chart.getChart(canvasPaq)?.destroy(); }
+    if (ctxPaq) {
+        if (execChartPaquetes) { execChartPaquetes.destroy(); execChartPaquetes = null; }
+        execChartPaquetes = new Chart(ctxPaq, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(paqCounts),
+                datasets: [{
+                    label: 'Requerimientos',
+                    data: Object.values(paqCounts),
+                    backgroundColor: ['#ee6018', '#f97316', '#fb923c', '#fdba74', '#78716c'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#8a8380', font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { color: '#8a8380', font: { size: 10 }, stepSize: 1 }, grid: { color: '#252220' } }
+                },
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const label = Object.keys(paqCounts)[idx];
+                        window.setExecutiveDrillDown({ paquete: label });
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Gráfica de Tipo de Propuesta
+    const propCounts = { 'Mantenimiento': 0, 'Servicio Administrado': 0, 'Venta': 0, 'Innovación': 0 };
+    allProjs.forEach(p => {
+        const prop = p.tipo_propuesta || 'Mantenimiento';
+        if (propCounts[prop] !== undefined) propCounts[prop]++;
+        else propCounts['Mantenimiento']++;
+    });
+
+    const canvasProp = document.getElementById('execChartPropuestasCanvas');
+    const ctxProp = canvasProp?.getContext('2d');
+    if (typeof Chart !== 'undefined' && Chart.getChart && canvasProp) { Chart.getChart(canvasProp)?.destroy(); }
+    if (ctxProp) {
+        if (execChartPropuestas) { execChartPropuestas.destroy(); execChartPropuestas = null; }
+        execChartPropuestas = new Chart(ctxProp, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(propCounts),
+                datasets: [{
+                    label: 'Propuestas',
+                    data: Object.values(propCounts),
+                    backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#a855f7'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#8a8380', font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { color: '#8a8380', font: { size: 10 }, stepSize: 1 }, grid: { color: '#252220' } }
+                },
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const label = Object.keys(propCounts)[idx];
+                        window.setExecutiveDrillDown({ tipo_propuesta: label });
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. Gráfica de Estatus Oficiales (Doughnut) + Tabla Lateral
+    const statusKeys = Object.keys(window.STGT_STATUS_CATALOG);
+    const statusCounts = {};
+    statusKeys.forEach(k => statusCounts[k] = 0);
+
+    allProjs.forEach(p => {
+        const norm = window.normalizeProjectStatus(p.status);
+        if (statusCounts[norm] !== undefined) statusCounts[norm]++;
+        else statusCounts['Autorizado, sin iniciar']++;
+    });
+
+    const canvasStat = document.getElementById('execChartEstatusCanvas');
+    const ctxStat = canvasStat?.getContext('2d');
+    if (typeof Chart !== 'undefined' && Chart.getChart && canvasStat) { Chart.getChart(canvasStat)?.destroy(); }
+    if (ctxStat) {
+        if (execChartEstatus) { execChartEstatus.destroy(); execChartEstatus = null; }
+        execChartEstatus = new Chart(ctxStat, {
+            type: 'doughnut',
+            data: {
+                labels: statusKeys,
+                datasets: [{
+                    data: statusKeys.map(k => statusCounts[k]),
+                    backgroundColor: statusKeys.map(k => window.STGT_STATUS_CATALOG[k].color),
+                    borderWidth: 1,
+                    borderColor: '#101010'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '68%',
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const label = statusKeys[idx];
+                        window.setExecutiveDrillDown({ estado: label });
+                    }
+                }
+            }
+        });
+    }
+
+    // Mini tabla lateral de conteo y porcentaje
+    const miniTable = document.getElementById('execStatusMiniTable');
+    if (miniTable) {
+        const tot = allProjs.length || 1;
+        miniTable.innerHTML = statusKeys.map(k => {
+            const c = statusCounts[k];
+            const pct = Math.round((c / tot) * 100);
+            const cat = window.STGT_STATUS_CATALOG[k];
+            return `
+            <div onclick="window.setExecutiveDrillDown({ estado: '${k}' })" class="flex items-center justify-between p-1 rounded hover:bg-[#1d1a18] cursor-pointer transition">
+                <div class="flex items-center gap-1.5 truncate">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cat.color}"></span>
+                    <span class="text-[#eeeeee] truncate text-[9px]">${k}</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 text-[9px]">
+                    <span class="text-[#fafafa] font-bold">${c}</span>
+                    <span class="text-[#8a8380] w-7 text-right">${pct}%</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // 4. Renderizar Matriz Cruzada 9x21
+    const companies = ['AFR', 'ZIN', 'TEO', 'AVM', 'ODM', 'STGT', 'CETRAM', 'ODA', 'ACAM', 'SATEL', 'SIG', 'CSP', 'TDN', 'OVN', 'ORO', 'MOD', 'TMT', 'SGC', 'CGT', 'SLLP', 'CAE'];
+    const matrixCont = document.getElementById('execMatrixContainer');
+    if (matrixCont) {
+        let matrixHtml = `
+        <table class="w-full border-collapse text-left font-mono text-[10px]">
+            <thead>
+                <tr class="border-b border-[#3d3a39] bg-[#161413] text-[#8a8380] uppercase">
+                    <th class="p-2 sm:p-2.5 sticky left-0 bg-[#161413] z-10 min-w-[200px]">Estatus STGT</th>
+                    ${companies.map(c => `<th class="p-2 text-center min-w-[42px]">${c}</th>`).join('')}
+                    <th class="p-2 text-center bg-[#1d1a18] text-[#ee6018] min-w-[50px]">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        // Calcular celdas
+        statusKeys.forEach((statusName, sIdx) => {
+            const cat = window.STGT_STATUS_CATALOG[statusName];
+            let rowTotal = 0;
+            matrixHtml += `
+            <tr class="border-b border-[#252220] hover:bg-[#1d1a18]/60 transition">
+                <td class="p-2 sm:p-2.5 sticky left-0 bg-[#141211] z-10 flex items-center gap-2 font-medium">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cat.color}"></span>
+                    <span class="truncate" style="color: ${cat.text}">${statusName}</span>
+                </td>`;
+
+            companies.forEach(comp => {
+                const count = allProjs.filter(p => {
+                    const norm = window.normalizeProjectStatus(p.status);
+                    const matchesComp = (p.empresa === comp) || (Array.isArray(p.companies) && p.companies.includes(comp));
+                    return norm === statusName && matchesComp;
+                }).length;
+
+                rowTotal += count;
+
+                if (count > 0) {
+                    matrixHtml += `
+                    <td class="p-1 text-center">
+                        <button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}', estado: '${statusName}' })" class="px-2 py-0.5 rounded font-mono text-[10px] font-bold transition hover:scale-110 shadow-sm cursor-pointer" style="background-color: ${cat.bg}; color: ${cat.color}; border: 1px solid ${cat.color}60;" title="Filtrar ${comp} en ${statusName}">
+                            ${count}
+                        </button>
+                    </td>`;
+                } else {
+                    matrixHtml += `<td class="p-1 text-center text-[#3d3a39]">-</td>`;
+                }
+            });
+
+            matrixHtml += `
+                <td class="p-2 text-center bg-[#1d1a18] font-bold text-[#fafafa]">
+                    ${rowTotal > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ estado: '${statusName}' })" class="hover:text-[#ee6018] transition">${rowTotal}</button>` : '0'}
+                </td>
+            </tr>`;
+        });
+
+        // Fila Total Columnas
+        matrixHtml += `
+            <tr class="border-t-2 border-[#3d3a39] bg-[#161413] font-bold text-[#fafafa]">
+                <td class="p-2.5 sticky left-0 bg-[#161413] z-10 text-[#ee6018]">TOTAL POR EMPRESA</td>
+                ${companies.map(comp => {
+                    const cTot = allProjs.filter(p => {
+                        return (p.empresa === comp) || (Array.isArray(p.companies) && p.companies.includes(comp));
+                    }).length;
+                    return `<td class="p-2 text-center ${cTot > 0 ? 'text-[#fafafa]' : 'text-[#8a8380]'}">
+                        ${cTot > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}' })" class="hover:text-[#ee6018] transition">${cTot}</button>` : '0'}
+                    </td>`;
+                }).join('')}
+                <td class="p-2 text-center bg-[#1d1a18] text-[#ee6018] text-xs font-bold">${allProjs.length}</td>
+            </tr>
+            </tbody>
+        </table>`;
+
+        matrixCont.innerHTML = matrixHtml;
+    }
+};
+
+window.setExecutiveDrillDown = function(patchFilter) {
+    executiveTableFilter = { ...executiveTableFilter, ...patchFilter };
+    
+    // Actualizar píldora de filtro activo
+    const pillCont = document.getElementById('execActiveDrillDownPill');
+    const pillText = document.getElementById('execActiveDrillDownText');
+    if (pillCont && pillText) {
+        const parts = [];
+        if (executiveTableFilter.empresa !== 'ALL') parts.push(executiveTableFilter.empresa);
+        if (executiveTableFilter.estado !== 'ALL') parts.push(executiveTableFilter.estado);
+        if (executiveTableFilter.paquete !== 'ALL') parts.push(executiveTableFilter.paquete);
+        if (executiveTableFilter.tipo_propuesta !== 'ALL') parts.push(executiveTableFilter.tipo_propuesta);
+        
+        if (parts.length > 0) {
+            pillText.textContent = `Filtro: ${parts.join(' + ')}`;
+            pillCont.classList.remove('hidden');
+            pillCont.classList.add('inline-flex');
+        } else {
+            pillCont.classList.add('hidden');
+            pillCont.classList.remove('inline-flex');
+        }
+    }
+
+    window.switchExecutiveTab('tables');
+};
+
+window.clearExecutiveDrillDown = function() {
+    executiveTableFilter = {
+        empresa: 'ALL',
+        estado: 'ALL',
+        paquete: 'ALL',
+        tipo_propuesta: 'ALL',
+        preset: 'ALL',
+        search: ''
+    };
+    const pillCont = document.getElementById('execActiveDrillDownPill');
+    if (pillCont) {
+        pillCont.classList.add('hidden');
+        pillCont.classList.remove('inline-flex');
+    }
+    const sInput = document.getElementById('execSearchInput');
+    if (sInput) sInput.value = '';
+    window.setExecutivePreset('ALL');
+};
+
+window.setExecutivePreset = function(presetKey) {
+    executiveTableFilter.preset = presetKey;
+    document.querySelectorAll('.exec-pill-btn').forEach(btn => {
+        btn.classList.remove('bg-[#3d3a39]', 'text-[#fafafa]');
+        btn.classList.add('bg-[#101010]');
+    });
+    const activeBtn = document.getElementById(`execPill_${presetKey}`);
+    if (activeBtn) {
+        activeBtn.classList.add('bg-[#3d3a39]', 'text-[#fafafa]');
+        activeBtn.classList.remove('bg-[#101010]');
+    }
+    window.renderExecutiveTable();
+};
+
+window.handleExecutiveSearch = function(val) {
+    executiveTableFilter.search = val.trim().toLowerCase();
+    window.renderExecutiveTable();
+};
+
+window.renderExecutiveTable = function() {
+    const safeArg = (typeof jsArg === 'function') ? jsArg : ((u) => escapeHtml(u));
+    const allProjs = window.getAllProjectsFlat();
+    const cont = document.getElementById('execTableContainer');
+    if (!cont) return;
+
+    const filtered = allProjs.filter(p => {
+        const normStatus = window.normalizeProjectStatus(p.status);
+        const pEmp = p.empresa || (p.companies && p.companies[0]) || '';
+        const pPaq = p.paquete || 'Sin paquete';
+        const pProp = p.tipo_propuesta || 'Mantenimiento';
+
+        const matchesEmpresa = (p.empresa === executiveTableFilter.empresa) || (Array.isArray(p.companies) && p.companies.includes(executiveTableFilter.empresa));
+        if (executiveTableFilter.empresa !== 'ALL' && !matchesEmpresa) return false;
+        if (executiveTableFilter.estado !== 'ALL' && normStatus !== executiveTableFilter.estado) return false;
+        if (executiveTableFilter.paquete !== 'ALL' && pPaq !== executiveTableFilter.paquete) return false;
+        if (executiveTableFilter.tipo_propuesta !== 'ALL' && pProp !== executiveTableFilter.tipo_propuesta) return false;
+
+        if (executiveTableFilter.preset === 'retraso_stgt' && normStatus !== 'Retraso STGT') return false;
+        if (executiveTableFilter.preset === 'alta_dir' && !p.es_relevante_alta_direccion) return false;
+        if (executiveTableFilter.preset === 'stgt' && !p.es_relevante_stgt) return false;
+        if (executiveTableFilter.preset === 'auditoria') {
+            const docs = p.docs || {};
+            const hasAuditDoc = Object.values(docs).some(d => d.fecha_compromiso);
+            if (!hasAuditDoc) return false;
+        }
+
+        if (executiveTableFilter.search) {
+            const q = executiveTableFilter.search;
+            const textToSearch = [
+                p.name, pEmp, p.moduleName, normStatus, p.observacion_ejecutiva,
+                p.lider_proyecto, p.consultor, p.tester, p.programador, p.ticket, p.area_solicitante, p.paquete, p.tipo_propuesta,
+                ...(p.consultants || [])
+            ].join(' ').toLowerCase();
+            if (!textToSearch.includes(q)) return false;
+        }
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        cont.innerHTML = `<div class="p-8 text-center text-[#8a8380] font-mono text-xs uppercase">No se encontraron requerimientos con los filtros activos.</div>`;
+        return;
+    }
+
+    let tableHtml = `
+    <table class="w-full border-collapse text-left font-mono text-xs">
+        <thead>
+            <tr class="border-b border-[#3d3a39] bg-[#161413] text-[#8a8380] uppercase text-[10px]">
+                <th class="p-3 w-10 text-center">#</th>
+                <th class="p-3">Estatus</th>
+                <th class="p-3">Empresa</th>
+                <th class="p-3">Aplicativo</th>
+                <th class="p-3 min-w-[220px]">Requerimiento</th>
+                <th class="p-3 min-w-[160px]">Responsables</th>
+                <th class="p-3 min-w-[200px]">Observaciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#252220]">
+    `;
+
+    filtered.forEach((p, idx) => {
+        const normStatus = window.normalizeProjectStatus(p.status);
+        const cat = window.STGT_STATUS_CATALOG[normStatus] || { color: '#9ca3af', bg: 'rgba(156,163,175,0.1)' };
+        const pEmp = p.empresa || (p.companies && p.companies[0]) || 'Sin asignar';
+        const pType = p.isDirect ? 'direct-project' : 'project';
+
+        // Responsables badge list
+        const resps = [
+            p.lider_proyecto ? `L: ${p.lider_proyecto}` : null,
+            p.consultor ? `C: ${p.consultor}` : (p.consultants?.[0] ? `C: ${p.consultants[0]}` : null),
+            p.tester ? `T: ${p.tester}` : null,
+            p.programador ? `P: ${p.programador}` : null
+        ].filter(Boolean);
+
+        tableHtml += `
+        <tr onclick="window.selectExecutiveTableRow('${safeArg(p.id)}', '${safeArg(pType)}')" class="hover:bg-[#1d1a18] cursor-pointer transition">
+            <td class="p-3 text-center text-[#8a8380] text-[10px] font-medium">${idx + 1}</td>
+            <td class="p-3 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-semibold" style="background-color: ${cat.bg}; color: ${cat.color}; border: 1px solid ${cat.color}50;">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cat.color}"></span>
+                    ${normStatus}
+                </span>
+            </td>
+            <td class="p-3 font-semibold text-[#fafafa] whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded bg-[#161413] border border-[#3d3a39] text-[10px]">${escapeHtml(pEmp)}</span>
+            </td>
+            <td class="p-3 text-[#b8b3b0] text-[11px] truncate max-w-[140px]" title="${escapeHtml(p.moduleName)}">
+                ${escapeHtml(p.moduleName)}
+            </td>
+            <td class="p-3 font-medium text-[#eeeeee]">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="hover:text-[#ee6018] transition font-sans text-xs">${escapeHtml(p.name)}</span>
+                    ${p.ticket ? `<span class="bg-[#eab308]/20 text-[#fde047] border border-[#eab308]/40 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
+                    ${p.area_solicitante === 'Dir. General' ? '<span class="bg-[#ef4444] text-white px-1 py-0.2 rounded text-[8px] font-bold">DIR. GEN</span>' : ''}
+                </div>
+            </td>
+            <td class="p-3 text-[10px] text-[#8a8380]">
+                ${resps.length > 0 ? resps.map(r => `<span class="inline-block bg-[#101010] border border-[#3d3a39] px-1 py-0.2 rounded mr-1 mb-0.5 text-[#eeeeee]">${escapeHtml(r)}</span>`).join('') : '<span class="text-[#4d4947]">Sin asignar</span>'}
+            </td>
+            <td class="p-3 text-[11px]">
+                <div class="flex flex-col gap-1">
+                    ${p.es_relevante_alta_direccion ? '<span class="text-[#eab308] text-[9px] font-semibold">⭐ Relevante Alta Dir</span>' : ''}
+                    ${p.es_relevante_stgt ? '<span class="text-[#60a5fa] text-[9px] font-semibold">⚡ Relevante STGT</span>' : ''}
+                    <span class="text-[#b8b3b0] text-[10px] italic line-clamp-2">${escapeHtml(p.observacion_ejecutiva || 'Sin observaciones')}</span>
+                </div>
+            </td>
+        </tr>`;
+    });
+
+    tableHtml += '</tbody></table>';
+    cont.innerHTML = tableHtml;
+};
+
+window.selectExecutiveTableRow = function(projId, type) {
+    if (typeof window.closeExecutiveDashboard === 'function') {
+        window.closeExecutiveDashboard();
+    }
+    if (typeof window.selectNode === 'function') {
+        window.selectNode(type, projId);
+    }
+};

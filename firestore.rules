@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAnonymousOrNoRole() {
+      return isAuthenticated() && (
+        !request.auth.token.keys().hasAny(['role']) ||
+        request.auth.token.get('role', null) == null ||
+        request.auth.token.get('role', '') == '' ||
+        (request.auth.token.keys().hasAny(['firebase']) && 
+         request.auth.token.firebase.get('sign_in_provider', '') == 'anonymous')
+      );
+    }
+
+    function isSupremo() {
+      return isAuthenticated() && (
+        request.auth.token.get('role', '') == 'Supremo' || 
+        request.auth.token.get('role', '') == 'supremo' ||
+        request.auth.token.get('email', '') == 'osvaldo.aviles@stgt.com.mx' ||
+        (request.auth.token.get('email', '') != '' && 
+         request.auth.token.get('email', '').matches('.*@stgt[.]com[.]mx') && 
+         request.auth.token.get('role', '') != 'Lector' &&
+         request.auth.token.get('role', '') != 'lector')
+      );
+    }
+
+    function canManageAudit() {
+      return isAuthenticated() && (
+        isSupremo() ||
+        request.auth.token.get('role', '') in ['Gestor de Proyectos', 'gestor de proyectos', 'PMO', 'pmo']
+      );
+    }
+
+    function isAuthorizedWriter() {
+      return isAuthenticated() && (
+        isAnonymousOrNoRole() ||
+        request.auth.token.get('role', '') in ['Supremo', 'supremo', 'Gestor de Proyectos', 'gestor de proyectos', 'Supervisor', 'supervisor', 'Consultor', 'consultor']
+      );
+    }
+
+    function areAuditDatesUntouched() {
+      return isAnonymousOrNoRole() || (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['globalDocs', 'auditCommitments', 'auditDates'])
+      );
+    }
+
+    match /artifacts/{appId}/public/data/sicom_state/main {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        canManageAudit() || 
+        isAnonymousOrNoRole() || 
+        (isAuthorizedWriter() && areAuditDatesUntouched())
+      );
+      allow delete: if isSupremo();
+    }
+
+    match /sicom_data/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthorizedWriter();
+      allow update: if isAuthenticated() && (
+        canManageAudit() || 
+        isAnonymousOrNoRole() || 
+        (isAuthorizedWriter() && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['fecha_compromiso', 'auditDates', 'globalDocs'])
+        ))
+      );
+      allow delete: if isSupremo();
+    }
+  }
+}
