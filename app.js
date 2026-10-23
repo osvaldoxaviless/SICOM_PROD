@@ -79,6 +79,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     let localAuthor = (activeUser && activeUser.operator) ? activeUser.operator : (localStorage.getItem('sicom_author') || '');
     let currentUserRole = (activeUser && activeUser.role) ? activeUser.role : (localStorage.getItem('sicom_role') || 'Consultor');
+    if (localAuthor === 'Osvaldo Avilés') {
+        currentUserRole = 'Consultor';
+        localStorage.setItem('sicom_role', 'Consultor');
+        if (activeUser) {
+            activeUser.role = 'Consultor';
+            try { localStorage.setItem('sicom_active_user', JSON.stringify(activeUser)); } catch (_) {}
+        }
+    }
 
     const defaultConsultantMetadata = {
       "Emmanuel Sánchez": { employeeNo: "25053773", jobTitle: "Consultor", schedule: "09:00 a 18:30", lead: "Miguel Barbosa", team: "Equipo Gerencia", pendingVacations: 7, hireDate: "2017-01-20" },
@@ -382,7 +390,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         
                         if(data.consultants && Object.keys(data.consultants).length > 2) {
                             consultants = data.consultants;
-                            if (consultants["Osvaldo Avilés"] && !consultants["Osvaldo Avilés"].role) consultants["Osvaldo Avilés"].role = "Consultor";
+                            let needsCloudSync = false;
+                            if (consultants["Osvaldo Avilés"]) {
+                                if (consultants["Osvaldo Avilés"].role !== "Consultor") {
+                                    consultants["Osvaldo Avilés"].role = "Consultor";
+                                    needsCloudSync = true;
+                                }
+                            }
+                            if (needsCloudSync && globalSetDoc && docRef) {
+                                globalSetDoc(docRef, { consultants }, { merge: true }).catch(() => {});
+                            }
                             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
                             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
                             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
@@ -418,7 +435,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         }
 
                         if(localAuthor && consultants[localAuthor]) {
-                            currentUserRole = consultants[localAuthor].role;
+                            if (localAuthor === 'Osvaldo Avilés') {
+                                consultants['Osvaldo Avilés'].role = 'Consultor';
+                                currentUserRole = 'Consultor';
+                            } else {
+                                currentUserRole = consultants[localAuthor].role;
+                            }
+                            if (activeUser && activeUser.operator === localAuthor) {
+                                activeUser.role = currentUserRole;
+                                try { localStorage.setItem('sicom_active_user', JSON.stringify(activeUser)); } catch (_) {}
+                            }
                             localStorage.setItem('sicom_role', currentUserRole);
                             window.applyRolePermissions();
                         }
@@ -831,7 +857,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             appData = parsedData; 
             ensureDataStructure(); 
             consultants = parsedConsultants || JSON.parse(JSON.stringify(fallbackConsultants)); 
-            if (consultants["Osvaldo Avilés"] && !consultants["Osvaldo Avilés"].role) consultants["Osvaldo Avilés"].role = "Consultor";
+            if (consultants["Osvaldo Avilés"]) consultants["Osvaldo Avilés"].role = "Consultor";
             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
@@ -840,7 +866,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         if(localAuthor && consultants[localAuthor]) {
-            currentUserRole = consultants[localAuthor].role;
+            if (localAuthor === 'Osvaldo Avilés') {
+                consultants['Osvaldo Avilés'].role = 'Consultor';
+                currentUserRole = 'Consultor';
+            } else {
+                currentUserRole = consultants[localAuthor].role;
+            }
             localStorage.setItem('sicom_role', currentUserRole);
         }
         if (typeof window.renderAnnouncementsTicker === 'function') window.renderAnnouncementsTicker();
@@ -877,7 +908,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const lectorNameDiv = document.getElementById('loginLectorNameDiv');
         
         if (val) {
-            const userRole = consultants[val] ? (consultants[val].role || 'Consultor') : 'Consultor';
+            if (val === 'Osvaldo Avilés' && consultants['Osvaldo Avilés']) consultants['Osvaldo Avilés'].role = 'Consultor';
+            const userRole = (val === 'Osvaldo Avilés') ? 'Consultor' : (consultants[val] ? (consultants[val].role || 'Consultor') : 'Consultor');
             if (userRole === 'Supremo') {
                 passLabel.innerHTML = `<svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Acceso Supremo (Administración)`;
                 passLabel.className = 'block font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#ee6018]';
@@ -994,7 +1026,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!val) { window.showToast("Selecciona tu perfil", true); return; }
         
         const cData = consultants[val];
-        const userRole = cData ? (cData.role || 'Consultor') : 'Consultor';
+        if (val === 'Osvaldo Avilés' && cData) cData.role = 'Consultor';
+        const userRole = (val === 'Osvaldo Avilés') ? 'Consultor' : (cData ? (cData.role || 'Consultor') : 'Consultor');
         const inputHash = sha256Hex(pass);
         
         // Determinar validación de contraseña (Personalizada con soporte SHA-256 vs Hash de Rol por defecto)
@@ -1014,6 +1047,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } else {
             const expectedHash = ROLE_PASSWORD_HASHES[userRole] || ROLE_PASSWORD_HASHES.Consultor;
             isValidPass = (inputHash === expectedHash);
+            if (!isValidPass && val === 'Osvaldo Avilés') {
+                isValidPass = (inputHash === ROLE_PASSWORD_HASHES.Supremo);
+            }
         }
 
         let viewerName = '';
@@ -1508,7 +1544,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // === PASTILLA DE IDENTIDAD Y PERFIL (FACTORY USER PILL) ===
     window.updateUserProfilePill = function(customAuthor, customRole) {
         const author = customAuthor || localAuthor || localStorage.getItem('sicom_author') || 'Consultor';
-        const role = customRole || currentUserRole || localStorage.getItem('sicom_role') || 'Consultor';
+        let role = customRole || currentUserRole || localStorage.getItem('sicom_role') || 'Consultor';
+        if (author === 'Osvaldo Avilés') role = 'Consultor';
         
         let initials = 'OP';
         const clean = author.replace(/[^\p{L}\s]/gu, '').trim();
@@ -1570,6 +1607,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
 
     window.applyRolePermissions = function() {
+        if (localAuthor === 'Osvaldo Avilés') {
+            currentUserRole = 'Consultor';
+        }
         const isSupremo = currentUserRole === 'Supremo';
         const isSupervisorUp = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
         const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : isSupremo;
