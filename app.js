@@ -1898,6 +1898,32 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.addEventListener('online', () => window.setConnectionStatus('online'));
     window.addEventListener('offline', () => window.setConnectionStatus('offline'));
 
+    // === ESCRITURA DEBOUNCED A FIRESTORE (ahorro de cuota) ===
+    const CLOUD_WRITE_DEBOUNCE_MS = 1500;
+    let cloudWriteTimer = null;
+    let cloudWritePending = false;
+
+    window.flushCloudWrite = function() {
+        if (cloudWriteTimer) { clearTimeout(cloudWriteTimer); cloudWriteTimer = null; }
+        if (!cloudWritePending) return;
+        cloudWritePending = false;
+        if (!(isFirebaseReady && db && appId && globalDoc && globalSetDoc)) return;
+        // Mismo blindaje que saveData: nunca sobreescribir la nube con datos vacíos
+        if (!appData || !Array.isArray(appData.modules) || (appData.modules.length === 0 && (!appData.directProjects || appData.directProjects.length === 0))) return;
+        const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
+        globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false }).catch(e => console.warn('Firestore write:', e));
+    };
+
+    window.scheduleCloudWrite = function() {
+        cloudWritePending = true;
+        if (cloudWriteTimer) clearTimeout(cloudWriteTimer);
+        cloudWriteTimer = setTimeout(window.flushCloudWrite, CLOUD_WRITE_DEBOUNCE_MS);
+    };
+
+    // Evitar pérdida de cambios pendientes al cerrar/ocultar la pestaña
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') window.flushCloudWrite(); });
+    window.addEventListener('pagehide', () => window.flushCloudWrite());
+
     window.saveData = function(showToastUI = true) {
         // Blindaje contra borrado accidental de la nube
         if (!appData || !Array.isArray(appData.modules) || (appData.modules.length === 0 && (!appData.directProjects || appData.directProjects.length === 0))) {
@@ -1932,10 +1958,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }).catch(() => {});
         }
 
-        if (isFirebaseReady && db && appId && globalDoc && globalSetDoc) {
-            const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
-            globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false });
-        }
+        // Optimización de cuota: las escrituras a Firestore se agrupan (debounce 1.5s).
+        // El guardado local (localStorage/IndexedDB) sigue siendo inmediato.
+        window.scheduleCloudWrite();
         
         setTimeout(() => { if(navigator.onLine) window.setConnectionStatus('online'); }, 800);
         
