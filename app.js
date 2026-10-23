@@ -97,7 +97,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     const fallbackConsultants = {
       "Emmanuel Sánchez": {"color": "#f97316", "role": "Consultor", ...defaultConsultantMetadata["Emmanuel Sánchez"]}, 
-      "Osvaldo Avilés": {"color": "#0071e3", "role": "Supremo", ...defaultConsultantMetadata["Osvaldo Avilés"]}, 
+      "Osvaldo Avilés": {"color": "#0071e3", "role": "Consultor", ...defaultConsultantMetadata["Osvaldo Avilés"]}, 
       "Óscar González": {"color": "#10b981", "role": "Consultor", ...defaultConsultantMetadata["Óscar González"]}, 
       "Rafael Romero": {"color": "#a855f7", "role": "Supervisor", ...defaultConsultantMetadata["Rafael Romero"]}, 
       "Carlos Islas": {"color": "#ff453a", "role": "Consultor", ...defaultConsultantMetadata["Carlos Islas"]}, 
@@ -382,7 +382,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         
                         if(data.consultants && Object.keys(data.consultants).length > 2) {
                             consultants = data.consultants;
-                            if (consultants["Osvaldo Avilés"]) consultants["Osvaldo Avilés"].role = "Supremo";
+                            if (consultants["Osvaldo Avilés"] && !consultants["Osvaldo Avilés"].role) consultants["Osvaldo Avilés"].role = "Consultor";
                             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
                             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
                             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
@@ -831,7 +831,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             appData = parsedData; 
             ensureDataStructure(); 
             consultants = parsedConsultants || JSON.parse(JSON.stringify(fallbackConsultants)); 
-            if (consultants["Osvaldo Avilés"]) consultants["Osvaldo Avilés"].role = "Supremo";
+            if (consultants["Osvaldo Avilés"] && !consultants["Osvaldo Avilés"].role) consultants["Osvaldo Avilés"].role = "Consultor";
             if (consultants["Rafael Romero"]) consultants["Rafael Romero"].role = "Supervisor";
             if (!consultants["Miguel Barbosa"]) consultants["Miguel Barbosa"] = {"color": "#30d158", "role": "Supervisor"};
             if (!consultants["Lector (Jefatura)"]) consultants["Lector (Jefatura)"] = {"color": "#8e8e93", "role": "Lector"};
@@ -5476,7 +5476,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           `;
         }
       }
-      if (isProject && !item._renderData) {
+      if (isProject) {
           let parentModKey = (type === 'direct-project') ? 'hub-direct' : null;
           if (!parentModKey) {
               const pMod = (appData.modules || []).find(m => (m.projects || []).some(p => p.id === id));
@@ -5493,7 +5493,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       
       setTimeout(() => {
           if (item && item._renderData) {
-              window.focusNode(item._renderData.x, item._renderData.y);
+              const fresh = (type === 'direct-project') ? (appData.directProjects || []).find(p => p.id === id) : (appData.modules || []).flatMap(m => m.projects || []).find(p => p.id === id) || item;
+              const coords = (fresh && fresh._renderData) || item._renderData;
+              window.focusNode(coords.x, coords.y);
           } else if (type === 'core') {
               window.focusNode(0, 0);
           } else if (type === 'direct-hub' && appData.directHub && appData.directHub._renderData) {
@@ -5946,6 +5948,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         consultants[targetName].jobTitle = newTitle;
         consultants[targetName].role = newRole;
         consultants[targetName].color = newColor;
+        if (localAuthor === targetName) {
+            currentUserRole = newRole;
+            localStorage.setItem('sicom_role', newRole);
+            if (typeof window.applyRolePermissions === 'function') window.applyRolePermissions();
+        }
 
         if (document.getElementById('editConsEmployeeNo')) {
             consultants[targetName].employeeNo = document.getElementById('editConsEmployeeNo').value.trim();
@@ -5991,6 +5998,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.updateConsultantRole = function(name, newRole) { 
         if(consultants[name]) { 
             consultants[name].role = newRole; 
+            if (localAuthor === name) {
+                currentUserRole = newRole;
+                localStorage.setItem('sicom_role', newRole);
+                if (typeof window.applyRolePermissions === 'function') window.applyRolePermissions();
+            }
             window.saveData(false); 
             window.renderRegisteredConsultantsList();
             window.showToast(`Rol de ${name} actualizado a ${newRole}`, false);
@@ -9318,13 +9330,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // Inicialización directa
 
 // === LÓGICA DE ACTIVIDADES DIARIAS ===
+window.closeDailyDrawer = function() {
+    const drawer = document.getElementById('dailyDrawer');
+    if (drawer) {
+        drawer.classList.add('-translate-x-full');
+    }
+    isDailyDrawerOpen = false;
+    
+    // Restaurar botones al cerrar
+    const btnDaily = document.getElementById('btnDailyTasks');
+    const btnManual = document.getElementById('btnManual');
+    const btnZoom = document.getElementById('canvasZoomWidget');
+    if (btnDaily) btnDaily.classList.remove('hidden');
+    if (btnManual) btnManual.classList.remove('hidden');
+    if (btnZoom) btnZoom.classList.remove('hidden');
+};
+
 window.toggleDailyDrawer = function() {
         const btnDaily = document.getElementById('btnDailyTasks');
         const btnManual = document.getElementById('btnManual');
         const btnZoom = document.getElementById('canvasZoomWidget');
 
         if(isDailyDrawerOpen) {
-            document.getElementById('dailyDrawer').classList.add('-translate-x-full');
+            window.closeDailyDrawer();
             isDailyDrawerOpen = false;
             
             // Restaurar botones al cerrar
@@ -9353,7 +9381,90 @@ window.toggleDailyDrawer = function() {
         }
     };
 
+    window.navigateToProjectFromNotif = function(type, id, noteId = null) {
+        // 1. Cerrar incondicional y limpiamente el drawer de notificaciones en móvil y desktop
+        window.closeDailyDrawer();
+        if (typeof isPriorityDrawerOpen !== 'undefined' && isPriorityDrawerOpen) window.closePriorityDrawer();
+        if (typeof isDrawerOpen !== 'undefined' && isDrawerOpen) window.closeConfigDrawer();
+
+        if (!id) return;
+
+        // 2. Determinar tipo y módulo padre
+        let proj = null;
+        let finalType = type;
+        let parentModKey = null;
+
+        if (finalType === 'direct-project' || !finalType) {
+            proj = (appData.directProjects || []).find(p => p.id === id);
+            if (proj) {
+                finalType = 'direct-project';
+                parentModKey = 'hub-direct';
+            }
+        }
+
+        if (!proj && (appData.modules || []).length > 0) {
+            for (let m of appData.modules) {
+                const found = (m.projects || []).find(p => p.id === id);
+                if (found) {
+                    proj = found;
+                    finalType = 'project';
+                    parentModKey = m.id;
+                    break;
+                }
+            }
+        }
+
+        if (!proj) {
+            console.warn('Proyecto no encontrado para navegación:', id);
+            return;
+        }
+
+        // 3. Descolapsar módulo padre para que aparezca en el mapa si estaba colapsado
+        if (parentModKey && collapsedModules.has(parentModKey)) {
+            collapsedModules.delete(parentModKey);
+            lastExpandedModuleId = parentModKey;
+            if (typeof window.updateCollapseAllButtonState === 'function') window.updateCollapseAllButtonState();
+            window.renderMindMap();
+        }
+
+        // 4. Seleccionar el proyecto en el sistema y abrir la tabla/tarjeta de detalles
+        window.selectNode(finalType, id);
+
+        // 5. Enfocar el mapa en el proyecto inmediatamente y tras completar la animación
+        const focusTarget = () => {
+            const freshProj = (finalType === 'direct-project')
+                ? (appData.directProjects || []).find(p => p.id === id)
+                : (appData.modules || []).flatMap(m => m.projects || []).find(p => p.id === id) || proj;
+            if (freshProj && freshProj._renderData) {
+                window.focusNode(freshProj._renderData.x, freshProj._renderData.y);
+            }
+        };
+
+        setTimeout(focusTarget, 60);
+        setTimeout(focusTarget, 220);
+
+        // 6. Si es alerta por mención en el foro, abrir notas y enfocar
+        if (noteId) {
+            setTimeout(() => {
+                const acc = document.getElementById('acc-notes-details');
+                if (acc) acc.open = true;
+                const notesCont = document.getElementById('infoNotes');
+                if (notesCont) notesCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const noteEl = document.getElementById(`note-${noteId}`) || document.querySelector(`[data-note-id="${noteId}"]`);
+                if (noteEl) {
+                    noteEl.classList.add('ring-2', 'ring-[#ee6018]');
+                    setTimeout(() => noteEl.classList.remove('ring-2', 'ring-[#ee6018]'), 3000);
+                }
+                const input = document.getElementById('infoNoteInput');
+                if (input) input.focus();
+            }, 320);
+        }
+    };
+
     window.goToProjectForum = function(type, id, noteId) {
+        window.navigateToProjectFromNotif(type, id, noteId);
+    };
+    window._legacyGoToProjectForum = function(type, id, noteId) {
         if (isDailyDrawerOpen) window.toggleDailyDrawer();
         window.selectNode(type, id);
 
@@ -9774,7 +9885,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
             const sIco = isCompletedStatus(proj.status) ? '✓' : (proj.status === 'En Progreso' ? '⚡' : (proj.status === 'No Iniciado' ? '⏸' : '⏳'));
             return `
-            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="if(typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) window.toggleDailyDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
+            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="window.navigateToProjectFromNotif('${proj.pType}', '${proj.id}')">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
@@ -9943,7 +10054,7 @@ window.renderDailyTasks = function() {
                     const [txt, bg, br] = style[a.alertType] || style.info;
                     const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
                     const canOpen = a.pType && a.pType !== 'global';
-                    const click = canOpen ? ` onclick="window.selectNode('${jsArg(a.pType)}', '${jsArg(a.id)}'); window.toggleDailyDrawer();"` : '';
+                    const click = canOpen ? ` onclick="window.navigateToProjectFromNotif('${jsArg(a.pType)}', '${jsArg(a.id)}');"` : '';
                     return `
                     <div class="${bg} border ${br} rounded-[10px] p-3.5 ${canOpen ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'} transition" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
                         <div class="flex items-start gap-2.5">
@@ -9951,7 +10062,7 @@ window.renderDailyTasks = function() {
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-2">
                                     <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa ↗</span>` : ''}
+                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa & Ficha ↗</span>` : ''}
                                 </div>
                                 <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
                                 <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
@@ -10024,7 +10135,7 @@ window.renderDailyTasks = function() {
                         if (t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`;
                         if (t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}', '${t.projectId}')`;
                         if (t.sourceType === 'project' || t.sourceType === 'global') {
-                            openAction = t.sourceType === 'project' ? `window.selectNode('${t.strictType}', '${t.projectId}'); window.toggleDailyDrawer();` : `window.openProjectTaskModal();`;
+                            openAction = t.sourceType === 'project' ? `window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}');` : `window.openProjectTaskModal();`;
                         } else if (t.sourceType === 'daily') {
                             openAction = `window.openFastDailyTaskModal('${t.id}');`;
                         }
@@ -10037,7 +10148,7 @@ window.renderDailyTasks = function() {
                             <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
                                 <span class="text-xs text-[#eeeeee] break-words leading-snug">${escapeHtml(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                    <span class="font-mono text-[9px] uppercase ${srcColor}">${escapeHtml(t.pName)}</span>
+                                    <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                                     ${t.deadline ? `<span class="text-[9px] text-[#ee6018] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
                                     ${t.fecha_compromiso ? `<span class="text-[9px] text-[#a0ca92] font-mono">📅 Compromiso: ${escapeHtml(t.fecha_compromiso)}</span>` : ''}
@@ -10083,7 +10194,7 @@ window.renderDailyTasks = function() {
                     </div>
 
                     <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                        <span class="font-mono text-[9px] uppercase ${srcColor}">${escapeHtml(t.pName)}</span>
+                        <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
                         <span class="text-[9px] text-[#eeeeee] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">👤 ${escapeHtml(t.assignee || 'Sin asignar')}</span>
                         ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                         ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
@@ -10163,7 +10274,7 @@ window.renderDailyTasks = function() {
                             <div class="flex flex-col flex-1 min-w-0">
                                 <span class="text-xs text-[#8a8380] line-through break-words">${escapeHtml(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                    <span class="font-mono text-[9px] uppercase text-[#b8b3b0]">${escapeHtml(t.pName)}</span>
+                                    <span class="font-mono text-[9px] uppercase text-[#b8b3b0] ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                                     <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[2px]">✓ ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
                                 </div>
@@ -11473,14 +11584,14 @@ window.renderDailyTasks = function() {
     window.isAttendanceMasterAdmin = function() {
         const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const cur = norm(localAuthor);
-        return cur.includes('osvaldo') || cur.includes('sanchez aviles') || cur.includes('aviles') || currentUserRole === 'Supremo';
+        return currentUserRole === 'Supremo';
     };
 
     // Validación de Jefatura y Coordinación (Miguel Barbosa, Rafael Romero, Osvaldo Avilés)
     window.isAttendanceLead = function() {
         const norm = (s) => (s || '').trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const cur = norm(localAuthor);
-        return window.isAttendanceMasterAdmin() || cur.includes('barbosa') || cur.includes('rafael') || cur.includes('romero');
+        return window.isAttendanceMasterAdmin() || currentUserRole === 'Supervisor' || cur.includes('barbosa') || cur.includes('rafael') || cur.includes('romero');
     };
 
     // Verifica si una quincena específica está cerrada y validada
