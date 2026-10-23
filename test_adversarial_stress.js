@@ -132,7 +132,7 @@ function renderInfoCardTicket(item, currentSelectionType = 'project', currentUse
 
         if (linkHref) {
             cont.innerHTML = `
-            <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-yellow-200 hover:bg-yellow-300 border border-yellow-400 text-yellow-900 font-medium font-mono text-[10px] px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
+            <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-[#eab308]/20 hover:bg-[#eab308]/30 border border-[#eab308]/50 text-[#fde047] font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
                 <span>🎫</span>
                 <span class="truncate max-w-[120px]">${escapeHtml(ticketDisplay)}</span>
                 <span class="text-xs">↗</span>
