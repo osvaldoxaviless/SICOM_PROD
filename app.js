@@ -4467,9 +4467,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const linkHref = invLink ? (invLink.startsWith('http') ? invLink : 'https://' + invLink) : '';
 
             if (linkHref) {
-                // Píldora amarilla clickable según requerimiento Fase 2 (🎫 #[id] ↗)
+                // Píldora amarilla clickable según requerimiento Fase 2 (🎫 #[id] ↗) con alto contraste
                 cont.innerHTML = `
-                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-[#eab308]/20 hover:bg-[#eab308]/30 border border-[#eab308]/50 text-[#fde047] font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
+                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-yellow-200 hover:bg-yellow-300 border border-yellow-400 text-yellow-900 font-medium font-mono text-[10px] px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
                     <span>🎫</span>
                     <span class="truncate max-w-[120px]">${escapeHtml(ticketDisplay)}</span>
                     <span class="text-xs">↗</span>
@@ -14123,7 +14123,7 @@ window.renderExecutiveTable = function() {
             <td class="p-3 font-medium text-[#eeeeee]">
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="hover:text-[#ee6018] transition font-sans text-xs">${escapeHtml(p.name)}</span>
-                    ${p.ticket ? `<span class="bg-[#eab308]/20 text-[#fde047] border border-[#eab308]/40 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
+                    ${p.ticket ? `<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
                     ${p.area_solicitante === 'Dir. General' ? '<span class="bg-[#ef4444] text-white px-1 py-0.2 rounded text-[8px] font-bold">DIR. GEN</span>' : ''}
                 </div>
             </td>
