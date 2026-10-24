@@ -1011,6 +1011,10 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     visibility: hidden;
     transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.15s;
 }
+#canvasToolsDock:not(.csd-open) .csd-items {
+    display: none !important;
+    pointer-events: none !important;
+}
 #canvasToolsDock.csd-open .csd-items {
     opacity: 1;
     transform: none;

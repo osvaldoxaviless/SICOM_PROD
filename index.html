@@ -115,20 +115,20 @@
   </div>
 
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ARRIBA DEL GATILLO DE HERRAMIENTAS) -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-4 md:bottom-22 md:left-8 z-[45] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] shadow-lg cursor-pointer" title="Notificaciones y Trabajo">
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-4 md:bottom-22 md:left-8 z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] shadow-lg cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[2px] hidden">0</span>
   </button>
 
   <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
-  <div id="canvasToolsDock" class="fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex flex-col-reverse items-start select-none">
+  <div id="canvasToolsDock" class="fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex flex-col-reverse items-start select-none pointer-events-none">
       <!-- BOTÓN GATILLO HERRAMIENTAS -->
-      <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group shadow-lg" title="Herramientas del Mapa Mental">
+      <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group shadow-lg pointer-events-auto" title="Herramientas del Mapa Mental">
           <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
       </button>
 
       <!-- ITEMS DESPLEGABLES HACIA ARRIBA -->
-      <div class="csd-items flex flex-col-reverse items-start gap-2 pb-2.5" role="menu" aria-label="Herramientas del mapa">
+      <div class="csd-items pointer-events-auto flex flex-col-reverse items-start gap-2 pb-2.5" role="menu" aria-label="Herramientas del mapa">
           <!-- GUÍA RÁPIDA / MANUAL -->
           <button type="button" id="btnManual" role="menuitem" onclick="closeCanvasSpeedDial(); openManual()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Guía Rápida de Uso">
               <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></span>
@@ -2788,7 +2788,7 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261024_v959"></script>
+  <script type="module" src="app.js?v=20261024_v960"></script>
 
 </body>
 </html>

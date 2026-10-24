@@ -2823,6 +2823,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     const ws = document.getElementById('workspace');
     if(ws) {
         ws.addEventListener('touchstart', (e) => {
+            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
             if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
             if (cameraAnimId) {
                 cancelAnimationFrame(cameraAnimId);
@@ -2849,6 +2850,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }, {passive: true});
 
         ws.addEventListener('touchmove', (e) => {
+            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
             if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
             if (e.touches.length === 1 && isTouchActive) { 
                 const dx = e.touches[0].clientX - touchStartX;
@@ -2944,6 +2946,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         ws.addEventListener('touchcancel', handleTouchEnd);
 
         ws.addEventListener('mousedown', (e) => { 
+            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
             if(e.target.closest('.interactive-node') || e.target.closest('#infoCard') || isAnyDrawerActive()) return; 
             if (cameraAnimId) {
                 cancelAnimationFrame(cameraAnimId);
@@ -2956,6 +2959,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.add('is-panning');
         }); 
         ws.addEventListener('mousemove', (e) => { 
+            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
             if(!isPanning) return; 
             translateX = e.clientX - startX; 
             translateY = e.clientY - startY; 
@@ -2972,6 +2976,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.remove('is-panning');
         }); 
         ws.addEventListener('wheel', (e) => { 
+            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
             if(isAnyDrawerActive() || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
             e.preventDefault(); 
             if (cameraAnimId) {
@@ -7213,6 +7218,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (dock) dock.classList.remove('hidden');
             if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
             window.renderMindMap();
+
+            // RECENTER AUTOMÁTICO INMEDIATO Y ANIMADO AL VOLVER AL MAPA
+            setTimeout(() => {
+                if (typeof window.recenterCanvas === 'function') {
+                    window.recenterCanvas(0);
+                    setTimeout(() => {
+                        try { window.recenterCanvas(400); } catch(e) {}
+                    }, 50);
+                }
+            }, 30);
         }
     };
 
@@ -7288,6 +7303,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } else {
             window.selectNode(type, id);
         }
+    };
+
+
+    window.bindPriorityBoardScroll = function() {
+        const pCols = document.getElementById('priorityBoardColumns');
+        if (!pCols || pCols.__wheelBound) return;
+        pCols.__wheelBound = true;
+
+        pCols.addEventListener('wheel', function(e) {
+            const innerScroll = e.target.closest('.overflow-y-auto');
+            if (innerScroll) {
+                const canScrollDown = e.deltaY > 0 && (innerScroll.scrollTop + innerScroll.clientHeight < innerScroll.scrollHeight - 1);
+                const canScrollUp = e.deltaY < 0 && (innerScroll.scrollTop > 1);
+                if (canScrollDown || canScrollUp) {
+                    return; // Permitir scroll vertical fluido de la columna
+                }
+            }
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                pCols.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        }, { passive: false });
     };
 
     window.renderPriorityBoard = function() {
@@ -7565,6 +7602,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         boardContainer.innerHTML = htmlColumns;
+        if (typeof window.bindPriorityBoardScroll === 'function') window.bindPriorityBoardScroll();
     };
 
     window.renderMindMap = function() {
