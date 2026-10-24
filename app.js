@@ -7190,9 +7190,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const boardView = document.getElementById('priorityBoardView');
         const dock = document.getElementById('canvasToolsDock');
         const actFilterPill = document.getElementById('activeFilterPill');
+        const btnDaily = document.getElementById('btnDailyTasks');
+        const speedDial = document.getElementById('speedDial');
 
         if (mode === 'priority') {
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
+            if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
+            if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (btnMap) {
                 btnMap.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
             }
@@ -7201,12 +7205,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (dock) dock.classList.add('hidden');
+            if (btnDaily) btnDaily.classList.add('hidden');
+            if (speedDial) speedDial.classList.add('hidden');
             if (actFilterPill) actFilterPill.classList.add('hidden');
             if (boardView) {
                 boardView.classList.remove('hidden');
                 window.renderPriorityBoard();
             }
         } else {
+            if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (btnMap) {
                 btnMap.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
             }
@@ -7216,6 +7223,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (boardView) boardView.classList.add('hidden');
             if (svgCanvas) svgCanvas.classList.remove('hidden');
             if (dock) dock.classList.remove('hidden');
+            if (btnDaily) btnDaily.classList.remove('hidden');
+            if (speedDial) speedDial.classList.remove('hidden');
             if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
             window.renderMindMap();
 
@@ -7229,6 +7238,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             }, 30);
         }
+    };
+
+    
+    window.togglePriorityCreateMenu = function() {
+        const menu = document.getElementById('priorityCreateMenu');
+        const trigger = document.getElementById('priorityCreateTrigger');
+        if (!menu) return;
+        const isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            menu.classList.add('hidden');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+    };
+
+    window.closePriorityCreateMenu = function() {
+        const menu = document.getElementById('priorityCreateMenu');
+        const trigger = document.getElementById('priorityCreateTrigger');
+        if (menu) menu.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
     };
 
     window.setPriorityBoardGroupBy = function(groupBy) {
@@ -9926,13 +9957,13 @@ window.closeDailyDrawer = function() {
     }
     isDailyDrawerOpen = false;
     
-    // Restaurar botones al cerrar
+    // Restaurar botones al cerrar SOLO si estamos en el mapa mental
     const btnDaily = document.getElementById('btnDailyTasks');
-    const btnManual = document.getElementById('btnManual');
-    const btnZoom = document.getElementById('canvasZoomWidget');
-    if (btnDaily) btnDaily.classList.remove('hidden');
-    if (btnManual) btnManual.classList.remove('hidden');
-    if (btnZoom) btnZoom.classList.remove('hidden');
+    const dock = document.getElementById('canvasToolsDock');
+    if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
+        if (btnDaily) btnDaily.classList.remove('hidden');
+        if (dock) dock.classList.remove('hidden');
+    }
 };
 
 window.toggleDailyDrawer = function() {
@@ -9944,21 +9975,23 @@ window.toggleDailyDrawer = function() {
             window.closeDailyDrawer();
             isDailyDrawerOpen = false;
             
-            // Restaurar botones al cerrar
-            if (btnDaily) btnDaily.classList.remove('hidden');
-            if (btnManual) btnManual.classList.remove('hidden');
-            if (btnZoom) btnZoom.classList.remove('hidden');
+            const dock = document.getElementById('canvasToolsDock');
+            if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
+                if (btnDaily) btnDaily.classList.remove('hidden');
+                if (dock) dock.classList.remove('hidden');
+            }
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
+            if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (window.innerWidth < 768) window.closeInfoCardSafe();
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
             
-            // Ocultar botones para limpiar la interfaz
+            // Ocultar botones flotantes para que no traslapen el drawer
+            const dock = document.getElementById('canvasToolsDock');
             if (btnDaily) btnDaily.classList.add('hidden');
-            if (btnManual) btnManual.classList.add('hidden');
-            if (btnZoom) btnZoom.classList.add('hidden');
+            if (dock) dock.classList.add('hidden');
 
             // Si hay menciones activas sin leer, abrir directamente la pestaña de Alertas & Menciones
             if (window.__lastAlerts && window.__lastAlerts.some(a => a.alertType === 'mention')) {
@@ -10562,6 +10595,15 @@ window.renderDailyTasks = function() {
             badge.classList.remove('hidden');
         } else {
             badge.classList.add('hidden');
+        }
+    }
+    const pBadge = document.getElementById('priorityDailyAlertsBadge');
+    if (pBadge) {
+        if (alertBadgeTotal > 0) {
+            pBadge.textContent = alertBadgeTotal;
+            pBadge.classList.remove('hidden');
+        } else {
+            pBadge.classList.add('hidden');
         }
     }
 
@@ -14679,3 +14721,10 @@ window.selectExecutiveTableRow = function(projId, type) {
         window.selectNode(type, projId);
     }
 };
+
+document.addEventListener('click', function(e) {
+    const container = document.getElementById('priorityCreateContainer');
+    if (container && !container.contains(e.target)) {
+        if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+    }
+});
