@@ -2,6 +2,11 @@ const SICOM_VERSION = 'v9.3';
 console.log('⚡ SICOM ERP', SICOM_VERSION, '— Terminal Control Surface Ready');
 
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
+    const formatTaskTextWithTicket = (u) => {
+        const safe = escapeHtml(u);
+        return safe.replace(/##([^#\s]+)##/g, '<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1.5 py-0.5 rounded-md font-mono text-[10px] mr-1">#$1</span>');
+    };
+    window.formatTaskTextWithTicket = formatTaskTextWithTicket;
     // Escapa un valor para usarlo como argumento string en un handler inline: onclick="fn('${jsArg(valor)}')"
     const jsArg = (u) => escapeHtml((u == null ? '' : String(u)).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' '));
     window.jsArg = jsArg;
@@ -4424,7 +4429,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 ${boxUI}
                 <div class="flex flex-col flex-1 min-w-0">
                     <div class="flex items-start justify-between">
-                        <span class="text-xs text-[#eeeeee] break-words pr-2 ${isChecked ? 'line-through text-[#8a8380]' : ''}">${escapeHtml(t.text)}</span>
+                        <span class="text-xs text-[#eeeeee] break-words pr-2 ${isChecked ? 'line-through text-[#8a8380]' : ''}">${formatTaskTextWithTicket(t.text)}</span>
                         ${statusBadge}
                     </div>
                     <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -4487,7 +4492,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (linkHref) {
                 // Píldora amarilla clickable según requerimiento Fase 2 (🎫 #[id] ↗)
                 cont.innerHTML = `
-                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-[#eab308]/20 hover:bg-[#eab308]/30 border border-[#eab308]/50 text-[#fde047] font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
+                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-yellow-200 hover:bg-yellow-300 border border-yellow-400 text-yellow-900 font-medium font-mono text-[10px] px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
                     <span>🎫</span>
                     <span class="truncate max-w-[120px]">${escapeHtml(ticketDisplay)}</span>
                     <span class="text-xs">↗</span>
@@ -9088,7 +9093,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         return `<div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[8px] p-2.5 flex items-start gap-2.5">
                             <input type="checkbox" onchange="window.toggleTaskFromDashboard('${proj.pType}', '${proj.id}', '${task.id}')" class="mt-0.5 rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#a0ca92] focus:ring-[#a0ca92] h-3.5 w-3.5 cursor-pointer shrink-0">
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs text-[#eeeeee] leading-tight">${escapeHtml(task.text)}</p>
+                                <p class="text-xs text-[#eeeeee] leading-tight">${formatTaskTextWithTicket(task.text)}</p>
                                 <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380] mt-1">
                                     <span class="truncate cursor-pointer hover:text-[#eeeeee]" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">📁 ${escapeHtml(proj.name)}</span>
                                     ${task.deadline ? `<span>•</span><span>📅 ${task.deadline}</span>` : ''}
@@ -10229,7 +10234,7 @@ window.renderDailyTasks = function() {
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] hover:border-[#4d4947] group transition" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
                             <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[2px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
                             <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
-                                <span class="text-xs text-[#eeeeee] break-words leading-snug">${escapeHtml(t.text)}</span>
+                                <span class="text-xs text-[#eeeeee] break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                     <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
@@ -10272,7 +10277,7 @@ window.renderDailyTasks = function() {
                 return `
                 <div class="bg-[#101010] border border-[#ee6018]/60 rounded-[10px] p-3.5">
                     <div class="flex items-start justify-between gap-2">
-                        <span class="text-xs text-[#eeeeee] font-normal break-words">${escapeHtml(t.text)}</span>
+                        <span class="text-xs text-[#eeeeee] font-normal break-words">${formatTaskTextWithTicket(t.text)}</span>
                         <span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase shrink-0">⏳ Validación</span>
                     </div>
 
@@ -10355,7 +10360,7 @@ window.renderDailyTasks = function() {
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-80 hover:opacity-100 transition">
                             <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[2px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
                             <div class="flex flex-col flex-1 min-w-0">
-                                <span class="text-xs text-[#8a8380] line-through break-words">${escapeHtml(t.text)}</span>
+                                <span class="text-xs text-[#8a8380] line-through break-words">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                     <span class="font-mono text-[9px] uppercase text-[#b8b3b0] ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
@@ -14141,7 +14146,7 @@ window.renderExecutiveTable = function() {
             <td class="p-3 font-medium text-[#eeeeee]">
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="hover:text-[#ee6018] transition font-sans text-xs">${escapeHtml(p.name)}</span>
-                    ${p.ticket ? `<span class="bg-[#eab308]/20 text-[#fde047] border border-[#eab308]/40 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
+                    ${p.ticket ? `<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
                     ${p.area_solicitante === 'Dir. General' ? '<span class="bg-[#ef4444] text-white px-1 py-0.2 rounded text-[8px] font-bold">DIR. GEN</span>' : ''}
                 </div>
             </td>
