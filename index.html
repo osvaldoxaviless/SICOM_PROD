@@ -1024,38 +1024,39 @@
     <!-- TABLERO KANBAN DE PRIORIDADES A PANTALLA COMPLETA (VISTA PRIORIDADES) -->
     <div id="priorityBoardView" class="hidden absolute inset-0 z-20 bg-[#101010] flex flex-col overflow-hidden">
       <!-- HEADER / CONTROLES DEL TABLERO -->
-      <div class="h-14 shrink-0 border-b border-[#24211f] bg-[#141211] px-4 sm:px-6 flex items-center justify-between gap-3 select-none">
+      <div class="h-14 shrink-0 border-b border-[#24211f] bg-[#141211] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-3 select-none">
         <!-- IZQUIERDA: TÍTULO Y CONTADOR -->
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-pulse"></span>
-            <span class="font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#eeeeee]">Tablero de Prioridades</span>
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-pulse shrink-0"></span>
+            <span class="hidden sm:inline font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#eeeeee] truncate">Tablero de Prioridades</span>
+            <span class="sm:hidden font-mono text-xs font-semibold uppercase tracking-wider text-[#eeeeee]">Prioridades</span>
           </div>
-          <span id="priorityBoardCountBadge" class="font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold">80 PROYECTOS</span>
+          <span id="priorityBoardCountBadge" class="font-mono text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">80 PROYECTOS</span>
         </div>
 
         <!-- CENTRO: SELECTOR DE AGRUPACIÓN (CONSULTOR VS TIER) -->
         <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] shrink-0">
-          <button type="button" id="btnGroupConsultant" onclick="setPriorityBoardGroupBy('consultant')" class="px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Agrupar proyectos por consultor responsable">
+          <button type="button" id="btnGroupConsultant" onclick="setPriorityBoardGroupBy('consultant')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Agrupar proyectos por consultor responsable">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span class="hidden sm:inline">Por Consultor</span>
           </button>
-          <button type="button" id="btnGroupTier" onclick="setPriorityBoardGroupBy('tier')" class="px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Agrupar proyectos por nivel de prioridad (*1-*2, *3-*4, etc.)">
+          <button type="button" id="btnGroupTier" onclick="setPriorityBoardGroupBy('tier')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Agrupar proyectos por nivel de prioridad (*1-*2, *3-*4, etc.)">
             <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             <span class="hidden sm:inline">Por Nivel *1, *2, *3</span>
           </button>
         </div>
 
         <!-- DERECHA: ACCIONES COMPLEMENTARIAS DEL TABLERO DE PRIORIDADES -->
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- LISTA LATERAL COMPACTA -->
-          <button type="button" onclick="togglePriorityDrawer()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
+          <button type="button" onclick="togglePriorityDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
             <svg class="w-3.5 h-3.5 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h7"/></svg>
             <span class="hidden sm:inline">Lista Lateral</span>
           </button>
 
           <!-- TAREAS DIARIAS Y NOTIFICACIONES (ANOTAR TAREA / ALERTAS) -->
-          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
             <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="hidden sm:inline">Tareas</span>
             <span id="priorityDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
@@ -1063,10 +1064,10 @@
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CABECERA -->
           <div class="relative lector-hide" id="priorityCreateContainer">
-            <button type="button" id="priorityCreateTrigger" onclick="window.togglePriorityCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer shadow-sm" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
+            <button type="button" id="priorityCreateTrigger" onclick="window.togglePriorityCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer shadow-sm" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
               <svg class="w-3.5 h-3.5 transition-transform duration-200" id="priorityCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
-              <span>Nuevo</span>
-              <svg class="w-3 h-3 text-[#555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              <span class="hidden sm:inline">Nuevo</span>
+              <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             
             <div id="priorityCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[4px] shadow-2xl z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
