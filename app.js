@@ -5024,6 +5024,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.showInfoCard = function(type, id) {
       if (infoCardHideTimer) { clearTimeout(infoCardHideTimer); infoCardHideTimer = null; }
       const card = document.getElementById('infoCard'); let item = null;
+      if (card) {
+        card.scrollTop = 0;
+        if (typeof card.scrollTo === 'function') {
+          try { card.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch(e) {}
+        }
+      }
+      const qTasks = document.getElementById('quickTasksList');
+      if (qTasks) qTasks.scrollTop = 0;
+      const qDocs = document.getElementById('quickDocsContainer');
+      if (qDocs) qDocs.scrollTop = 0;
+      const infoNotes = document.getElementById('infoNotes');
+      if (infoNotes) infoNotes.scrollTop = 0;
       document.getElementById('infoQuickEditContainer').classList.add('hidden'); document.getElementById('btnFullEditInfoCard').classList.add('hidden');
       document.getElementById('infoNotesContainer').classList.add('hidden');
       const modActions = document.getElementById('moduleActionsInfoCard');
@@ -5426,7 +5438,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       document.body.classList.add('info-card-open');
       card.classList.remove('hidden'); 
-      setTimeout(() => card.classList.remove('opacity-0'), 10);
+      card.scrollTop = 0;
+      requestAnimationFrame(() => {
+        if (card) card.scrollTop = 0;
+      });
+      setTimeout(() => {
+        if (card) {
+          card.classList.remove('opacity-0');
+          card.scrollTop = 0;
+        }
+      }, 10);
+      setTimeout(() => {
+        if (card) card.scrollTop = 0;
+      }, 35);
     }
     window.editFromInfoCard = function() {
       if (!currentSelection || !currentSelection.id) return;
@@ -5444,6 +5468,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.selectNode = function(type, id) {
       currentSelection = { type, id };
+      if (typeof window.highlightPriorityCard === 'function') {
+        window.highlightPriorityCard(id);
+      }
       const ges = document.getElementById('globalEditSelector');
       if (ges) ges.value = `${type}|${id}`;
       if (typeof window.updateEditActiveItemDisplay === 'function') {
@@ -7241,6 +7268,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     
+    
+    window.highlightPriorityCard = function(id) {
+        document.querySelectorAll('#priorityBoardColumns .priority-card-active').forEach(el => {
+            el.classList.remove('priority-card-active', 'ring-2', 'ring-[#ee6018]', 'border-[#ee6018]');
+            el.classList.add('border-[#2d2a29]');
+        });
+        const target = document.querySelector(`#priorityBoardColumns [data-node-id="${id}"]`);
+        if (target) {
+            target.classList.add('priority-card-active', 'ring-2', 'ring-[#ee6018]', 'border-[#ee6018]');
+            target.classList.remove('border-[#2d2a29]');
+        }
+    };
+
     window.togglePriorityCreateMenu = function() {
         const menu = document.getElementById('priorityCreateMenu');
         const trigger = document.getElementById('priorityCreateTrigger');
@@ -7482,9 +7522,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }).join('');
 
             const prioVal = parseInt(p.priority, 10) || 1;
+            const isSelected = currentSelection && currentSelection.id === p.id;
+            const cardBorder = isSelected 
+                ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' 
+                : (isOver ? 'border-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60');
 
             return `
-            <div class="bg-[#161413] hover:bg-[#1c1917] border ${isOver ? 'border-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
+            <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${cardBorder} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
               <div class="flex items-center justify-between gap-1.5 min-w-0">
                 <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
                   <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] shadow-inner" style="color: ${accentColor || '#ee6018'}">*${prioVal}</span>
