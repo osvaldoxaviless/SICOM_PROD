@@ -114,17 +114,52 @@
       </div>
   </div>
 
-  <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-6 z-[45] w-11 h-11 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39]" title="Notificaciones y Trabajo">
-      <svg class="w-4 h-4 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+  <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ARRIBA DEL GATILLO DE HERRAMIENTAS) -->
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-20 left-4 md:bottom-22 md:left-8 z-[45] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] shadow-lg cursor-pointer" title="Notificaciones y Trabajo">
+      <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[2px] hidden">0</span>
   </button>
 
-  <!-- BOTÓN GUÍA FLOTANTE -->
-  <button id="btnManual" onclick="openManual()" class="fixed bottom-6 left-6 z-[45] w-11 h-11 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#b8b3b0] transition-all group border border-[#3d3a39]" title="Guía Rápida de Uso">
-      <svg class="w-4 h-4 text-[#b8b3b0] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-  </button>
+  <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
+  <div id="canvasToolsDock" class="fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex flex-col-reverse items-start select-none">
+      <!-- BOTÓN GATILLO HERRAMIENTAS -->
+      <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group shadow-lg" title="Herramientas del Mapa Mental">
+          <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+      </button>
 
+      <!-- ITEMS DESPLEGABLES HACIA ARRIBA -->
+      <div class="csd-items flex flex-col-reverse items-start gap-2 pb-2.5" role="menu" aria-label="Herramientas del mapa">
+          <!-- GUÍA RÁPIDA / MANUAL -->
+          <button type="button" id="btnManual" role="menuitem" onclick="closeCanvasSpeedDial(); openManual()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Guía Rápida de Uso">
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></span>
+              <span>Manual y Guía</span>
+          </button>
+
+          <!-- VÍNCULOS MULTIMÓDULO -->
+          <button type="button" id="btnToggleSecondaryLinksDock" role="menuitem" onclick="closeCanvasSpeedDial(); toggleSecondaryLinks()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Alternar visualización de vínculos entre módulos">
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#38bdf8] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></span>
+              <span>Vínculos multimódulo</span>
+          </button>
+
+          <!-- MODO ENFOQUE -->
+          <button type="button" id="btnFocusMode" role="menuitem" onclick="closeCanvasSpeedDial(); toggleFocusMode()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Modo Enfoque: Ver proyectos en riesgo">
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></span>
+              <span>Modo Enfoque</span>
+          </button>
+
+          <!-- COLAPSAR / EXPANDIR MÓDULOS -->
+          <button type="button" id="btnToggleCollapseAll" role="menuitem" onclick="closeCanvasSpeedDial(); toggleAllModulesCollapse()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Alternar entre vista compacta y vista completa">
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg></span>
+              <span id="textCollapseAll">Colapsar módulos</span>
+          </button>
+
+          <!-- CENTRAR MAPA -->
+          <button type="button" id="canvasZoomWidget" role="menuitem" onclick="closeCanvasSpeedDial(); recenterCanvas()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Centrar y reajustar zoom del mapa">
+              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></span>
+              <span>Centrar mapa</span>
+          </button>
+      </div>
+  </div>
 
   <!-- SPEED DIAL: NÚCLEO DE CREACIÓN (abajo a la derecha) -->
   <div id="speedDial" class="lector-hide fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
@@ -821,11 +856,11 @@
       <div id="mainViewSwitcher" class="flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
         <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-          <span class="hidden xs:inline sm:inline">Mapa</span>
+          <span class="hidden sm:inline">Mapa</span>
         </button>
         <button type="button" id="btnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Tablero Kanban de Prioridades (*1, *2, *3)">
           <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-          <span class="hidden xs:inline sm:inline">Prioridades</span>
+          <span class="hidden sm:inline">Prioridades</span>
         </button>
       </div>
     </div>
@@ -986,33 +1021,6 @@
     </svg>
 
     
-    <!-- DOCK FLOTANTE DE HERRAMIENTAS DEL LIENZO (VISTA MAPA) -->
-    <div id="canvasToolsDock" class="fixed bottom-6 left-20 md:left-24 z-[45] flex items-center p-1 bg-[#141211]/95 backdrop-blur-md border border-[#3d3a39] rounded-[6px] shadow-2xl gap-1 select-none">
-      <!-- BOTÓN FLOTANTE DISCRETO: CENTRAR MAPA (FACTORY RECENTER WIDGET) -->
-      <button id="canvasZoomWidget" onclick="recenterCanvas()" class="h-9 px-2.5 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center gap-1.5 rounded-[4px] transition-all group border border-[#3d3a39]/70 cursor-pointer shadow-none" title="Centrar y reajustar zoom del mapa">
-        <svg class="w-4 h-4 text-[#b8b3b0] group-hover:text-[#101010] transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-        <span class="font-mono text-[10px] uppercase hidden sm:inline">Centrar</span>
-      </button>
-
-      <!-- BOTÓN COLAPSAR / DESPLEGAR MÓDULOS -->
-      <button id="btnToggleCollapseAll" onclick="toggleAllModulesCollapse()" class="h-9 px-2.5 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center gap-1.5 rounded-[4px] transition-all group border border-[#3d3a39]/70 cursor-pointer" title="Alternar entre vista compacta y vista completa">
-        <svg class="w-4 h-4 text-[#b8b3b0] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-        <span id="textCollapseAll" class="font-mono text-[10px] uppercase hidden sm:inline">Colapsar</span>
-      </button>
-
-      <!-- MODO ENFOQUE -->
-      <button id="btnFocusMode" onclick="toggleFocusMode()" class="h-9 px-2.5 bg-[#1d1a18] hover:border-[#ee6018] text-[#b8b3b0] hover:text-[#eeeeee] flex items-center gap-1.5 rounded-[4px] transition-all group border border-[#3d3a39]/70 cursor-pointer" title="Modo Enfoque: Ver proyectos en riesgo">
-        <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-        <span class="font-mono text-[10px] uppercase hidden sm:inline">Enfoque</span>
-      </button>
-
-      <!-- VÍNCULOS MULTIMÓDULO -->
-      <button id="btnToggleSecondaryLinksDock" onclick="toggleSecondaryLinks()" class="h-9 px-2.5 bg-[#1d1a18] hover:bg-[#252220] text-[#b8b3b0] hover:text-[#eeeeee] flex items-center gap-1.5 rounded-[4px] transition-all border border-[#3d3a39]/70 cursor-pointer" title="Alternar visualización de vínculos entre módulos">
-        <svg class="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-        <span class="font-mono text-[10px] uppercase hidden md:inline">Vínculos</span>
-      </button>
-    </div>
-
     <!-- TABLERO KANBAN DE PRIORIDADES A PANTALLA COMPLETA (VISTA PRIORIDADES) -->
     <div id="priorityBoardView" class="hidden absolute inset-0 z-20 bg-[#101010] flex flex-col overflow-hidden">
       <!-- HEADER / CONTROLES DEL TABLERO -->
@@ -2780,7 +2788,7 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261024_v958"></script>
+  <script type="module" src="app.js?v=20261024_v959"></script>
 
 </body>
 </html>

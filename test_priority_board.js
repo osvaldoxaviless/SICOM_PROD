@@ -22,21 +22,27 @@ function test(name, fn) {
 
 const html = fs.readFileSync('index.html', 'utf8');
 const app = fs.readFileSync('app.js', 'utf8');
+const css = fs.readFileSync('styles.css', 'utf8');
 
 // 1. Verificación DOM index.html
-test('index.html: Conmutador principal #mainViewSwitcher presente', () => {
+test('index.html: Conmutador principal #mainViewSwitcher presente con soporte compacto móvil', () => {
     assert(html.includes('id="mainViewSwitcher"'));
     assert(html.includes('id="btnViewModeMap"'));
     assert(html.includes('id="btnViewModePriority"'));
+    assert(html.includes('class="hidden sm:inline">Mapa</span>'));
+    assert(html.includes('class="hidden sm:inline">Prioridades</span>'));
 });
 
-test('index.html: Dock de herramientas del lienzo #canvasToolsDock presente con controles', () => {
+test('index.html: Speed Dial izquierdo #canvasToolsDock presente con gatillo y controles', () => {
     assert(html.includes('id="canvasToolsDock"'));
+    assert(html.includes('id="canvasSpeedDialTrigger"'));
     assert(html.includes('id="canvasZoomWidget"'));
     assert(html.includes('id="btnToggleCollapseAll"'));
     assert(html.includes('id="textCollapseAll"'));
     assert(html.includes('id="btnFocusMode"'));
     assert(html.includes('id="btnToggleSecondaryLinksDock"'));
+    assert(html.includes('id="btnManual"'));
+    assert(html.includes('id="btnDailyTasks"'));
 });
 
 test('index.html: Tablero Kanban #priorityBoardView y columnas presentes', () => {
@@ -51,7 +57,19 @@ test('index.html: Botón de compatibilidad #btnTopPriorityDrawer presente', () =
     assert(html.includes('id="btnTopPriorityDrawer"'));
 });
 
-// 2. Verificación app.js
+// 2. Verificación styles.css
+test('styles.css: Reglas para Speed Dial izquierdo #canvasToolsDock definidas', () => {
+    assert(css.includes('#canvasToolsDock .csd-items'));
+    assert(css.includes('#canvasToolsDock.csd-open .csd-items'));
+    assert(css.includes('#canvasToolsDock.csd-open .csd-icon'));
+});
+
+// 3. Verificación app.js
+test('app.js: window.toggleCanvasSpeedDial y window.closeCanvasSpeedDial definidos', () => {
+    assert(app.includes('window.toggleCanvasSpeedDial = function()'));
+    assert(app.includes('window.closeCanvasSpeedDial = function()'));
+});
+
 test('app.js: window.switchMainWorkspaceView definido', () => {
     assert(app.includes('window.switchMainWorkspaceView = function(mode)'));
 });
@@ -89,7 +107,7 @@ test('app.js: reactividad de búsqueda y filtros vinculada a renderPriorityBoard
     assert(app.includes("refreshUI") && app.includes("renderPriorityBoard"));
 });
 
-// 3. Simulación funcional en sandbox Node
+// 4. Simulación funcional en sandbox Node
 test('Sandbox: adjustProjectPriority incrementa y decrementa correctamente sin rebasar límites', () => {
     const mockAppData = {
         directProjects: [

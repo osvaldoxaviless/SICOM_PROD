@@ -7147,6 +7147,36 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let mainWorkspaceViewMode = 'map'; // 'map' | 'priority'
     let priorityBoardGroupBy = 'consultant'; // 'consultant' | 'tier'
 
+
+    window.toggleCanvasSpeedDial = function() {
+        const dock = document.getElementById('canvasToolsDock');
+        const trig = document.getElementById('canvasSpeedDialTrigger');
+        if (!dock) return;
+        const isOpen = dock.classList.contains('csd-open');
+        dock.classList.toggle('csd-open', !isOpen);
+        if (trig) trig.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+    };
+
+    window.closeCanvasSpeedDial = function() {
+        const dock = document.getElementById('canvasToolsDock');
+        const trig = document.getElementById('canvasSpeedDialTrigger');
+        if (dock) dock.classList.remove('csd-open');
+        if (trig) trig.setAttribute('aria-expanded', 'false');
+    };
+
+    document.addEventListener('click', function(e) {
+        const dock = document.getElementById('canvasToolsDock');
+        if (dock && dock.classList.contains('csd-open') && !dock.contains(e.target)) {
+            window.closeCanvasSpeedDial();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.closeCanvasSpeedDial();
+        }
+    });
+
     window.switchMainWorkspaceView = function(mode) {
         mainWorkspaceViewMode = mode;
         const btnMap = document.getElementById('btnViewModeMap');
@@ -7157,6 +7187,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const actFilterPill = document.getElementById('activeFilterPill');
 
         if (mode === 'priority') {
+            if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (btnMap) {
                 btnMap.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
             }
