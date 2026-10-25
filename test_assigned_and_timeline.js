@@ -57,9 +57,9 @@ test('3. index.html: Acordeón de Proyectos Asignados cuenta con selector tácti
     assert(html.includes('id="dailyMyProjectsList"'), 'dailyMyProjectsList must exist');
 });
 
-// 4. Verificación de Cache Buster v967
-test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261024_v967', () => {
-    assert(html.includes('app.js?v=20261024_v967'), 'index.html must reference v967');
+// 4. Verificación de Cache Buster v968
+test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261024_v968', () => {
+    assert(html.includes('app.js?v=20261024_v968'), 'index.html must reference v968');
 });
 
 // 5. Verificación de Event Listener Guards en workspace
@@ -162,6 +162,20 @@ test('10. Logic Test: Generación de 7 días continuos en vista semanal', () => 
     assert.strictEqual(week[0].dateStr, '2026-10-19', 'Lunes es 19 de Octubre');
     assert.strictEqual(week[4].dateStr, '2026-10-23', 'Viernes de entrega es 23 de Octubre');
     assert.strictEqual(week[6].dateStr, '2026-10-25', 'Domingo es 25 de Octubre');
+});
+
+// 13. Verificación de Navegación Móvil (Barra Segmentada y Menú 3 Puntos)
+test('13. index.html & app.js: Navegación móvil con barra segmentada (#mobileViewSwitcherBar) y menú 3 puntos', () => {
+    assert(html.includes('id="mobileViewSwitcherBar"'), 'mobileViewSwitcherBar must exist');
+    assert(html.includes('id="mobileBtnViewModeMap"'), 'mobileBtnViewModeMap must exist');
+    assert(html.includes('id="mobileBtnViewModePriority"'), 'mobileBtnViewModePriority must exist');
+    assert(html.includes('id="mobileBtnViewModeTimeline"'), 'mobileBtnViewModeTimeline must exist');
+    assert(html.includes('id="mobileMenuOptMap"'), 'mobileMenuOptMap must exist');
+    assert(html.includes('id="mobileMenuOptPriority"'), 'mobileMenuOptPriority must exist');
+    assert(html.includes('id="mobileMenuOptTimeline"'), 'mobileMenuOptTimeline must exist');
+    assert(app.includes('mobileBtnViewModeMap'), 'app.js must manage mobileBtnViewModeMap state');
+    assert(app.includes('mobileBtnViewModePriority'), 'app.js must manage mobileBtnViewModePriority state');
+    assert(app.includes('mobileBtnViewModeTimeline'), 'app.js must manage mobileBtnViewModeTimeline state');
 });
 
 console.log(`\n====================================================`);

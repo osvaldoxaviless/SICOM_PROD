@@ -7242,13 +7242,35 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const btnDaily = document.getElementById('btnDailyTasks');
         const speedDial = document.getElementById('speedDial');
 
-        const setActiveTabStyle = (activeBtn) => {
-            const inact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            const act = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
-            if (btnMap) btnMap.className = inact;
-            if (btnPrio) btnPrio.className = inact;
-            if (btnTimeline) btnTimeline.className = inact;
-            if (activeBtn) activeBtn.className = act;
+        const setActiveTabStyle = (activeMode) => {
+            // Conmutador de escritorio (Header)
+            const dInact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
+            const dAct = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+            if (btnMap) btnMap.className = (activeMode === 'map') ? dAct : dInact;
+            if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
+            if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
+
+            // Barra segmentada móvil (Sub-header)
+            const mBtnMap = document.getElementById('mobileBtnViewModeMap');
+            const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
+            const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
+            const mInact = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
+            const mAct = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+            if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
+            if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
+            if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline') ? mAct : mInact;
+
+            // Menú desplegable móvil (3 puntos)
+            const badge = document.getElementById('mobileMenuCurrentViewBadge');
+            if (badge) {
+                badge.textContent = (activeMode === 'priority') ? 'PRIORIDADES' : (activeMode === 'timeline') ? 'CALENDARIO' : 'MAPA';
+            }
+            const indMap = document.getElementById('mobileMenuIndicatorMap');
+            const indPrio = document.getElementById('mobileMenuIndicatorPriority');
+            const indTimeline = document.getElementById('mobileMenuIndicatorTimeline');
+            if (indMap) indMap.classList.toggle('hidden', activeMode !== 'map');
+            if (indPrio) indPrio.classList.toggle('hidden', activeMode !== 'priority');
+            if (indTimeline) indTimeline.classList.toggle('hidden', activeMode !== 'timeline');
         };
 
         if (mode === 'priority') {
@@ -7256,7 +7278,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
-            setActiveTabStyle(btnPrio);
+            setActiveTabStyle('priority');
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
             if (dock) dock.classList.add('hidden');
@@ -7273,7 +7295,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
             if (typeof window.closeCalendarDayModal === 'function') window.closeCalendarDayModal();
-            setActiveTabStyle(btnTimeline);
+            setActiveTabStyle('timeline');
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (boardView) boardView.classList.add('hidden');
             if (dock) dock.classList.add('hidden');
@@ -7293,7 +7315,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } else {
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
-            setActiveTabStyle(btnMap);
+            setActiveTabStyle('map');
             if (boardView) boardView.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
             if (svgCanvas) svgCanvas.classList.remove('hidden');

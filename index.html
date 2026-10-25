@@ -51,7 +51,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261024_v967">
+  <link rel="stylesheet" href="styles.css?v=20261024_v968">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -853,7 +853,7 @@
       </div>
 
       <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES | CRONOGRAMA) -->
-      <div id="mainViewSwitcher" class="flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
+      <div id="mainViewSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
         <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
           <span class="hidden sm:inline">Mapa</span>
@@ -913,6 +913,34 @@
 
           <!-- MENÚ DESPLEGABLE MÓVIL -->
           <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#141211] border border-[#3d3a39] rounded-[8px] p-2 z-[99999] shadow-2xl flex-col gap-1 origin-top-right">
+              <!-- SECCIÓN VISTAS PRINCIPALES DEL SISTEMA -->
+              <div class="px-3 py-1 text-[9px] font-mono uppercase tracking-[0.08em] text-[#8a8380] flex items-center justify-between border-b border-[#252220] mb-0.5">
+                  <span>Vistas del Sistema</span>
+                  <span id="mobileMenuCurrentViewBadge" class="text-[9px] text-[#ee6018] font-semibold">MAPA</span>
+              </div>
+              <button id="mobileMenuOptMap" onclick="switchMainWorkspaceView('map'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                      <svg class="w-4 h-4 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                      <span>Mapa Mental</span>
+                  </div>
+                  <span id="mobileMenuIndicatorMap" class="text-[#ee6018] text-xs">●</span>
+              </button>
+              <button id="mobileMenuOptPriority" onclick="switchMainWorkspaceView('priority'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                      <span>Tablero Prioridades</span>
+                  </div>
+                  <span id="mobileMenuIndicatorPriority" class="text-[#ee6018] text-xs hidden">●</span>
+              </button>
+              <button id="mobileMenuOptTimeline" onclick="switchMainWorkspaceView('timeline'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                      <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span>Calendario de Entregas</span>
+                  </div>
+                  <span id="mobileMenuIndicatorTimeline" class="text-[#ee6018] text-xs hidden">●</span>
+              </button>
+              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+
               <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
                   Centrar Mapa
@@ -933,10 +961,6 @@
               <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="audit-pmo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                   Matriz & Auditoría
-              </button>
-              <button onclick="togglePriorityDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
-                  <svg class="w-4 h-4 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                  Prioridades
               </button>
               <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -971,6 +995,24 @@
       </button>
     </div>
   </header>
+  
+  <!-- BARRA MÓVIL DEDICADA DE NAVEGACIÓN DE VISTAS (SOLO MÓVIL: sm:hidden) -->
+  <nav id="mobileViewSwitcherBar" aria-label="Navegación de vistas móvil" class="sm:hidden w-full h-10 px-2.5 py-1 bg-[#141211] border-b border-[#252220] flex items-center justify-between shrink-0 z-30 select-none">
+    <div class="grid grid-cols-3 gap-1.5 w-full bg-[#1b1918] p-0.5 rounded-[4px] border border-[#322f2d]">
+      <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+        <span>Mapa</span>
+      </button>
+      <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span>Prioridades</span>
+      </button>
+      <button type="button" id="mobileBtnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Calendario</span>
+      </button>
+    </div>
+  </nav>
   
   <!-- BARRA DE BÚSQUEDA MÓVIL (lg:hidden, FLUJO NORMAL NO BLOQUEANTE) -->
   <div id="mobileSearchDrawer" class="hidden lg:hidden w-full bg-[#161413] border-b border-[#3d3a39] px-3 py-2 z-40 items-center gap-2 shrink-0">
@@ -2986,7 +3028,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261024_v967"></script>
+  <script type="module" src="app.js?v=20261024_v968"></script>
 
 </body>
 </html>
