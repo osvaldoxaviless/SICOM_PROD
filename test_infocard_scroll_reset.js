@@ -51,8 +51,8 @@ test('app.js: renderPriorityBoard asigna data-node-id y evalúa isSelected para 
     assert(app.includes('priority-card-active'));
 });
 
-test('index.html: cache buster actualizado a v971', () => {
-    assert(index.includes('app.js?v=20261025_v971'));
+test('index.html: cache buster actualizado a v972', () => {
+    assert(index.includes('app.js?v=20261025_v972'));
 });
 
 console.log('====================================================');

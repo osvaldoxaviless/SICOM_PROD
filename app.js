@@ -7333,9 +7333,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (boardView) boardView.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
             if (svgCanvas) svgCanvas.classList.remove('hidden');
-            if (dock) dock.classList.remove('hidden');
-            if (btnDaily) btnDaily.classList.remove('hidden');
-            if (speedDial) speedDial.classList.remove('hidden');
+            const isDesktopMap = window.innerWidth >= 640;
+            if (isDesktopMap) {
+                if (dock) dock.classList.remove('hidden');
+                if (btnDaily) btnDaily.classList.remove('hidden');
+                if (speedDial) speedDial.classList.remove('hidden');
+            } else {
+                if (dock) dock.classList.add('hidden');
+                if (btnDaily) btnDaily.classList.add('hidden');
+                if (speedDial) speedDial.classList.add('hidden');
+            }
             if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
             window.renderMindMap();
 
@@ -10106,12 +10113,19 @@ window.closeDailyDrawer = function() {
     }
     isDailyDrawerOpen = false;
     
-    // Restaurar botones al cerrar SOLO si estamos en el mapa mental
+    // Restaurar botones al cerrar SOLO si estamos en escritorio y en el mapa mental
     const btnDaily = document.getElementById('btnDailyTasks');
     const dock = document.getElementById('canvasToolsDock');
-    if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
+    const speedDial = document.getElementById('speedDial');
+    const isDesktop = window.innerWidth >= 640;
+    if (isDesktop && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
         if (btnDaily) btnDaily.classList.remove('hidden');
         if (dock) dock.classList.remove('hidden');
+        if (speedDial) speedDial.classList.remove('hidden');
+    } else {
+        if (btnDaily) btnDaily.classList.add('hidden');
+        if (dock) dock.classList.add('hidden');
+        if (speedDial) speedDial.classList.add('hidden');
     }
 };
 
@@ -10125,9 +10139,16 @@ window.toggleDailyDrawer = function() {
             isDailyDrawerOpen = false;
             
             const dock = document.getElementById('canvasToolsDock');
-            if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
+            const speedDial = document.getElementById('speedDial');
+            const isDeskToggle = window.innerWidth >= 640;
+            if (isDeskToggle && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
                 if (btnDaily) btnDaily.classList.remove('hidden');
                 if (dock) dock.classList.remove('hidden');
+                if (speedDial) speedDial.classList.remove('hidden');
+            } else {
+                if (btnDaily) btnDaily.classList.add('hidden');
+                if (dock) dock.classList.add('hidden');
+                if (speedDial) speedDial.classList.add('hidden');
             }
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
@@ -10832,6 +10853,15 @@ window.renderDailyTasks = function() {
             mobTopBadge.classList.remove('hidden');
         } else {
             mobTopBadge.classList.add('hidden');
+        }
+    }
+    const mobBottomBadge = document.getElementById('mobileBottomDailyAlertsBadge');
+    if (mobBottomBadge) {
+        if (alertBadgeTotal > 0) {
+            mobBottomBadge.textContent = alertBadgeTotal;
+            mobBottomBadge.classList.remove('hidden');
+        } else {
+            mobBottomBadge.classList.add('hidden');
         }
     }
     if (pBadge) {
@@ -15600,3 +15630,31 @@ window.closeMobileTopCreateMenu = function() {
     const menu = document.getElementById('mobileTopCreateMenu');
     if (menu) menu.classList.add('hidden');
 };
+
+// ==========================================================================
+// MÉTRICAS & KPIS EN DOCK MÓVIL (CONSULTORÍA STGT)
+// ==========================================================================
+window.openMetricsOrDashboard = function() {
+    if (typeof window.canManageAuditAndStrategy === 'function' && window.canManageAuditAndStrategy()) {
+        if (typeof window.openExecutiveDashboard === 'function') window.openExecutiveDashboard();
+    } else {
+        if (typeof window.openConfigDrawer === 'function') window.openConfigDrawer();
+        if (typeof window.switchTab === 'function') window.switchTab('dashboard');
+    }
+};
+
+window.addEventListener('resize', function() {
+    const isDesktop = window.innerWidth >= 640;
+    const dock = document.getElementById('canvasToolsDock');
+    const btnDaily = document.getElementById('btnDailyTasks');
+    const speedDial = document.getElementById('speedDial');
+    if (!isDesktop) {
+        if (dock) dock.classList.add('hidden');
+        if (btnDaily) btnDaily.classList.add('hidden');
+        if (speedDial) speedDial.classList.add('hidden');
+    } else if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
+        if (dock) dock.classList.remove('hidden');
+        if (btnDaily) btnDaily.classList.remove('hidden');
+        if (speedDial) speedDial.classList.remove('hidden');
+    }
+});

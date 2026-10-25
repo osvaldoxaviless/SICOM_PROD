@@ -182,7 +182,7 @@
   </div>
 
   <!-- SPEED DIAL: NÚCLEO DE CREACIÓN (abajo a la derecha) -->
-  <div id="speedDial" class="lector-hide fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
+  <div id="speedDial" class="lector-hide hidden sm:flex fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
       <!-- BOTÓN GATILLO -->
       <button id="speedDialTrigger" type="button" onclick="toggleSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Crear nuevo" class="w-12 h-12 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] flex items-center justify-center border border-[#fafafa] transition-colors focus:outline-none">
           <svg class="sd-plus w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -910,7 +910,7 @@
           <span class="hidden sm:inline">Mapa</span>
         </button>
         <button type="button" id="btnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Tablero Kanban de Prioridades (*1, *2, *3)">
-          <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           <span class="hidden sm:inline">Prioridades</span>
         </button>
         <button type="button" id="btnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Calendario mensual y semanal de entregas">
@@ -928,10 +928,11 @@
 
     <!-- CONTROLES Y FILTROS DERECHA -->
     <div class="flex items-center gap-1 sm:gap-1.5 relative justify-end shrink-0 py-1">
-      <!-- BOTÓN TAREAS DEL DÍA & NOTIFICACIONES (ESTILO INSTAGRAM: ARRIBA A LA DERECHA) -->
-      <button id="btnMobileTopDailyTasks" type="button" onclick="toggleDailyDrawer()" class="sm:hidden w-8 h-8 shrink-0 text-[#b8b3b0] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] flex items-center justify-center relative transition cursor-pointer" title="Notificaciones y Tareas">
-        <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-        <span id="mobileTopDailyAlertsBadge" class="absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+      <!-- BOTÓN FILTROS OPERATIVOS (MÓVIL Y ESCRITORIO - AL LADO DEL BUSCADOR) -->
+      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-0 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer relative" title="Filtros Operativos">
+          <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+          <span class="hidden lg:inline font-medium">Filtros</span>
+          <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 sm:static sm:top-auto sm:right-auto bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 sm:px-1.5 py-0.2 rounded-[2px] sm:ml-0.5 font-bold">1</span>
       </button>
 
       <!-- BOTÓN BÚSQUEDA MÓVIL (lg:hidden) -->
@@ -939,13 +940,6 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </button>
       <datalist id="projectsDatalist"></datalist>
-
-      <!-- BOTÓN FILTROS AVANZADOS (VISIBLE EN SM+) -->
-      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="hidden sm:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Filtros Operativos">
-          <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-          <span class="hidden lg:inline font-medium">Filtros</span>
-          <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5 font-semibold">1</span>
-      </button>
 
       <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA (FASE 2) - Visible en md: (en móvil está en menú 3 puntos) -->
       <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="audit-pmo-only hidden md:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Dashboard Ejecutivo & Matriz de Auditoría">
@@ -984,7 +978,7 @@
               </button>
               <button id="mobileMenuOptPriority" onclick="switchMainWorkspaceView('priority'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
                   <div class="flex items-center gap-2.5">
-                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                       <span>Tablero Prioridades</span>
                   </div>
                   <span id="mobileMenuIndicatorPriority" class="text-[#ee6018] text-xs hidden">●</span>
@@ -1060,7 +1054,7 @@
     </div>
   </header>
   
-  <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (ESTILO APP NATIVA / INSTAGRAM DOCK: sm:hidden) -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (DOCK ERGONÓMICO 5 PESTAÑAS: MAPA | PRIORIDADES | CALENDARIO | TAREAS | MÉTRICAS) -->
   <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#141211] border-t border-[#2d2a29] flex items-center justify-around z-40 select-none pb-safe">
     <!-- 1. MAPA -->
     <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group">
@@ -1069,9 +1063,9 @@
       <span id="mobileDockIndicatorMap" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5"></span>
     </button>
 
-    <!-- 2. PRIORIDADES -->
+    <!-- 2. PRIORIDADES (ÍCONO RAYO / MÁXIMA PRIORIDAD - DIFERENCIADO DE TAREAS) -->
     <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group">
-      <svg class="w-4 h-4 mb-0.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      <svg class="w-4 h-4 mb-0.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
       <span>Prioridades</span>
       <span id="mobileDockIndicatorPriority" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
     </button>
@@ -1083,22 +1077,21 @@
       <span id="mobileDockIndicatorTimeline" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
     </button>
 
-    <!-- 4. FILTROS -->
-    <button type="button" id="mobileBtnBottomFilters" onclick="toggleFilterDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Filtros Operativos">
-      <svg class="w-4 h-4 mb-0.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-      <span>Filtros</span>
-      <span id="mobileBottomFiltersBadge" class="hidden absolute top-0.5 right-3 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 rounded-[2px] font-bold">1</span>
+    <!-- 4. TAREAS (ÍCONO CHECKLIST / TAREAS DEL DÍA CON BADGE DE ALERTAS) -->
+    <button type="button" id="mobileBtnBottomDailyTasks" onclick="toggleDailyDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Tareas del Día y Alertas">
+      <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
+        <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span id="mobileBottomDailyAlertsBadge" class="absolute -top-1 -right-2 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 min-w-[13px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+      </div>
+      <span>Tareas</span>
+      <span id="mobileDockIndicatorTasks" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
     </button>
 
-    <!-- 5. PERFIL -->
-    <button type="button" id="mobileBtnBottomProfile" onclick="toggleConfigDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Centro de Control & Perfil">
-      <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
-        <div id="mobileUserAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[9px] font-semibold flex items-center justify-center">
-          --
-        </div>
-        <span id="mobileConnectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] absolute -top-0.5 -right-0.5 border border-[#141211]"></span>
-      </div>
-      <span>Perfil</span>
+    <!-- 5. MÉTRICAS (KPIS & DASHBOARD EJECUTIVO PARA EQUIPO DE CONSULTORÍA) -->
+    <button type="button" id="mobileBtnBottomMetrics" onclick="window.openMetricsOrDashboard()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Métricas y Dashboard de Consultoría">
+      <svg class="w-4 h-4 mb-0.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span>Métricas</span>
+      <span id="mobileDockIndicatorMetrics" class="w-1 h-1 rounded-full bg-[#3b82f6] mt-0.5 hidden"></span>
     </button>
   </nav>
   
@@ -1343,7 +1336,7 @@
     </div>
 
     <!-- INFOCARD: FACTORY HYBRID TACTICAL DISPATCH (#eeeeee HEADER ON #101010 CONTROL PANEL) -->
-    <div id="infoCard" class="absolute bottom-4 left-4 right-4 md:left-auto md:bottom-8 md:right-8 md:w-[410px] liquid-glass rounded-[10px] p-4 sm:p-5 hidden opacity-0 transition-opacity duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
+    <div id="infoCard" class="absolute bottom-16 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:bottom-8 md:right-8 md:w-[410px] liquid-glass rounded-[10px] p-4 sm:p-5 hidden opacity-0 transition-opacity duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
       
       <!-- FLASHLIT DISPATCH HEADER (#eeeeee Bone Card) -->
       <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none">
@@ -2912,7 +2905,7 @@
   </div>
 
   <!-- BANNER PROACTIVO PUSH (INVITACIÓN INICIAL A ACTIVAR EN TELÉFONO O CHROME) -->
-  <div id="pushPromptBanner" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md w-[calc(100%-2rem)] bg-[#141211] rounded-[8px] p-3.5 border border-[#ee6018]/50 flex items-center justify-between gap-3 animate-fade-in">
+  <div id="pushPromptBanner" class="hidden fixed bottom-16 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md w-[calc(100%-2rem)] bg-[#141211] rounded-[8px] p-3.5 border border-[#ee6018]/50 flex items-center justify-between gap-3 animate-fade-in">
     <div class="flex items-center gap-2.5 min-w-0">
       <span class="w-8 h-8 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] flex items-center justify-center shrink-0">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -3186,7 +3179,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261025_v971"></script>
+  <script type="module" src="app.js?v=20261025_v972"></script>
 
 </body>
 </html>

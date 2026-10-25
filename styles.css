@@ -1454,6 +1454,15 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     border-bottom: 1px solid #24211f !important;
 }
 
+/* Ocultamiento absoluto de botones y docks flotantes de escritorio en pantallas móviles */
+@media (max-width: 639px) {
+    #canvasToolsDock,
+    #btnDailyTasks,
+    #speedDial {
+        display: none !important;
+    }
+}
+
 #calendarDayModal > div {
     border-radius: var(--radius-cards) !important;
     box-shadow: none !important;
