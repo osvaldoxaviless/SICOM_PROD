@@ -8,8 +8,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SICOM">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(reg => console.log('✅ [PWA] Service Worker registrado en scope:', reg.scope))
+          .catch(err => console.warn('⚠️ [PWA] Fallo al registrar Service Worker:', err));
+      });
+    }
+  </script>
   <title>SICOM v9.3 — Terminal Control Surface</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -110,6 +121,15 @@
               </div>
               
               <button onclick="attemptLogin()" class="pill-btn w-full py-3.5 bg-[#101010] text-[#eeeeee] hover:bg-[#1d1a18] font-mono text-[12px] uppercase tracking-[-0.24px] mt-4">Iniciar Sesión →</button>
+
+              <!-- ACCIÓN RÁPIDA PWA / INSTALAR EN TELÉFONO -->
+              <div id="loginPwaInstallContainer" class="pt-3 border-t border-[#3d3a39]/20 flex items-center justify-between">
+                  <span class="font-mono text-[10px] text-[#4d4947] uppercase">Acceso Rápido Móvil</span>
+                  <button type="button" onclick="triggerPwaInstall()" class="px-2.5 py-1 rounded-[3px] bg-[#101010] hover:bg-[#1d1a18] text-[#eeeeee] hover:text-[#ee6018] border border-[#3d3a39] font-mono text-[10px] uppercase flex items-center gap-1.5 transition cursor-pointer">
+                      <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      <span>Instalar en Teléfono</span>
+                  </button>
+              </div>
           </div>
       </div>
   </div>
@@ -965,6 +985,13 @@
               <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                   Configuración y Perfil
+              </button>
+              <button id="mobileBtnInstallPwa" onclick="triggerPwaInstall(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] hover:text-[#ee6018] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-3">
+                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      <span id="mobileInstallPwaText">Instalar Software</span>
+                  </div>
+                  <span id="mobileInstallPwaBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018]">PWA</span>
               </button>
               <div class="h-px w-full bg-[#3d3a39] my-1"></div>
               <button onclick="logout(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
@@ -2978,6 +3005,76 @@
       </div>
   </div>
   
+  <!-- MODAL: GUÍA DE INSTALACIÓN PWA (MÓVIL & ESCRITORIO) -->
+  <div id="pwaInstallGuideModal" onclick="if(event.target === this) closePwaInstallGuideModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4 select-none">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-md overflow-hidden border border-[#3d3a39] relative">
+          <!-- CABECERA -->
+          <div class="p-4 border-b border-[#2d2a29] bg-[#161413] flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 flex items-center justify-center text-[#ee6018]">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </div>
+                  <div>
+                      <h3 class="font-mono text-xs sm:text-sm font-semibold text-[#fafafa] uppercase tracking-wider">
+                          Instalar SICOM como App
+                      </h3>
+                      <p class="text-[10px] text-[#8a8380] font-mono mt-0.5">
+                          Acceso instantáneo y pantalla completa
+                      </p>
+                  </div>
+              </div>
+              <button type="button" onclick="closePwaInstallGuideModal()" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+          </div>
+
+          <!-- CONTENIDO INFORMATIVO -->
+          <div class="p-4 sm:p-5 space-y-4">
+              <!-- Botón de instalación nativa si el navegador lo soporta -->
+              <div id="pwaNativePromptBox" class="hidden">
+                  <button type="button" onclick="executeNativePwaPrompt()" class="w-full py-2.5 px-3 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-xs font-bold uppercase transition flex items-center justify-center gap-2 cursor-pointer">
+                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      Instalar en mi Dispositivo Ahora
+                  </button>
+                  <p class="font-mono text-[9px] text-[#8a8380] text-center mt-1.5">El navegador abrirá el diálogo oficial de instalación.</p>
+              </div>
+
+              <!-- Instrucciones para Chrome / Android -->
+              <div class="bg-[#141211] p-3.5 rounded-[10px] border border-[#262321] space-y-2">
+                  <div class="flex items-center gap-2 text-[#ee6018] font-mono text-[11px] font-semibold uppercase">
+                      <span>🤖</span>
+                      <span>Google Chrome (Android)</span>
+                  </div>
+                  <ol class="font-mono text-[10px] text-[#b8b3b0] space-y-1.5 list-decimal list-inside leading-relaxed">
+                      <li>Toca los <strong class="text-[#eeeeee]">tres puntos (⋮)</strong> arriba a la derecha en Chrome.</li>
+                      <li>Selecciona <strong class="text-[#eeeeee]">"Instalar aplicación"</strong> o <strong class="text-[#eeeeee]">"Agregar a pantalla principal"</strong>.</li>
+                      <li>Confirma pulsando <strong class="text-[#ee6018]">"Instalar"</strong>.</li>
+                  </ol>
+              </div>
+
+              <!-- Instrucciones para iOS Safari -->
+              <div class="bg-[#141211] p-3.5 rounded-[10px] border border-[#262321] space-y-2">
+                  <div class="flex items-center gap-2 text-[#a0ca92] font-mono text-[11px] font-semibold uppercase">
+                      <span>🍏</span>
+                      <span>Safari (iPhone / iPad)</span>
+                  </div>
+                  <ol class="font-mono text-[10px] text-[#b8b3b0] space-y-1.5 list-decimal list-inside leading-relaxed">
+                      <li>Toca el botón <strong class="text-[#eeeeee]">Compartir (⎋)</strong> en la barra inferior.</li>
+                      <li>Baja y selecciona <strong class="text-[#eeeeee]">"Agregar a pantalla de inicio" (➕)</strong>.</li>
+                      <li>Toca <strong class="text-[#a0ca92]">"Agregar"</strong> arriba a la derecha.</li>
+                  </ol>
+              </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="p-3 bg-[#141211] border-t border-[#262321] flex justify-end">
+              <button type="button" onclick="closePwaInstallGuideModal()" class="px-3 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
+                  Entendido
+              </button>
+          </div>
+      </div>
+  </div>
+
   <!-- MODAL: AGENDA Y ENTREGAS DEL DÍA (CALENDARIO INTERACTIVO) -->
   <div id="calendarDayModal" onclick="if(event.target === this) closeCalendarDayModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border border-[#3d3a39] relative">
@@ -3028,7 +3125,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261025_v969"></script>
+  <script type="module" src="app.js?v=20261025_v970"></script>
 
 </body>
 </html>

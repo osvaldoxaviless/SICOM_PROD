@@ -15468,3 +15468,97 @@ document.addEventListener('click', function(e) {
 
     // Alias para compatibilidad
     window.renderTimelineBoard = window.renderCalendarView;
+
+// ==========================================================================
+// GESTOR DE INSTALACIÓN PWA & PROMPT DE NAVEGADOR
+// ==========================================================================
+window.deferredPwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredPwaPrompt = e;
+    console.log('✅ [PWA] Evento beforeinstallprompt capturado con éxito.');
+    const nativeBox = document.getElementById('pwaNativePromptBox');
+    if (nativeBox) nativeBox.classList.remove('hidden');
+    const installBadge = document.getElementById('mobileInstallPwaBadge');
+    if (installBadge) {
+        installBadge.textContent = 'LISTO';
+        installBadge.classList.add('text-[#ee6018]');
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    window.deferredPwaPrompt = null;
+    console.log('🎉 [PWA] ¡SICOM instalado con éxito en el dispositivo!');
+    const installText = document.getElementById('mobileInstallPwaText');
+    if (installText) installText.textContent = 'App Instalada';
+    const installBadge = document.getElementById('mobileInstallPwaBadge');
+    if (installBadge) {
+        installBadge.textContent = 'ACTIVA';
+        installBadge.classList.add('text-[#a0ca92]');
+    }
+});
+
+window.triggerPwaInstall = async function() {
+    if (window.deferredPwaPrompt) {
+        try {
+            window.deferredPwaPrompt.prompt();
+            const choiceResult = await window.deferredPwaPrompt.userChoice;
+            console.log('[PWA] Selección del usuario:', choiceResult.outcome);
+            if (choiceResult.outcome === 'accepted') {
+                window.deferredPwaPrompt = null;
+            }
+        } catch (err) {
+            console.warn('[PWA] Error en prompt nativo:', err);
+            window.openPwaInstallGuideModal();
+        }
+    } else {
+        window.openPwaInstallGuideModal();
+    }
+};
+
+window.executeNativePwaPrompt = function() {
+    window.closePwaInstallGuideModal();
+    if (window.deferredPwaPrompt) {
+        window.deferredPwaPrompt.prompt();
+    }
+};
+
+window.openPwaInstallGuideModal = function() {
+    const modal = document.getElementById('pwaInstallGuideModal');
+    if (!modal) return;
+    const nativeBox = document.getElementById('pwaNativePromptBox');
+    if (nativeBox) {
+        if (window.deferredPwaPrompt) {
+            nativeBox.classList.remove('hidden');
+        } else {
+            nativeBox.classList.add('hidden');
+        }
+    }
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+    });
+};
+
+window.closePwaInstallGuideModal = function() {
+    const modal = document.getElementById('pwaInstallGuideModal');
+    if (!modal) return;
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 150);
+};
+
+// Verificación si ya corre en modo standalone (PWA ya instalada)
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const installText = document.getElementById('mobileInstallPwaText');
+        if (installText) installText.textContent = 'App Instalada';
+        const installBadge = document.getElementById('mobileInstallPwaBadge');
+        if (installBadge) {
+            installBadge.textContent = 'ACTIVA';
+            installBadge.classList.add('text-[#a0ca92]');
+        }
+    });
+}
