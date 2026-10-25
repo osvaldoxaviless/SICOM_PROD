@@ -57,9 +57,9 @@ test('3. index.html: Acordeón de Proyectos Asignados cuenta con selector tácti
     assert(html.includes('id="dailyMyProjectsList"'), 'dailyMyProjectsList must exist');
 });
 
-// 4. Verificación de Cache Buster v966
-test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261024_v966', () => {
-    assert(html.includes('app.js?v=20261024_v966'), 'index.html must reference v966');
+// 4. Verificación de Cache Buster v967
+test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261024_v967', () => {
+    assert(html.includes('app.js?v=20261024_v967'), 'index.html must reference v967');
 });
 
 // 5. Verificación de Event Listener Guards en workspace

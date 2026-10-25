@@ -13,11 +13,12 @@ console.log('1. Botón de Tareas Diarias (#btnDailyTasks):');
 const hasBtnDaily = index.includes('id="btnDailyTasks"');
 const hasZ55 = /id="btnDailyTasks"[^>]*z-\[55\]/.test(index);
 const hasPEAuto = /id="btnDailyTasks"[^>]*pointer-events-auto/.test(index);
+const isBottomRight = /id="btnDailyTasks"[^>]*right-/.test(index);
 const hasDockPENone = /id="canvasToolsDock"[^>]*pointer-events-none/.test(index);
 const hasCSDClosedNone = styles.includes('#canvasToolsDock:not(.csd-open) .csd-items');
 
-if (hasBtnDaily && hasZ55 && hasPEAuto && hasDockPENone && hasCSDClosedNone) {
-    console.log('   ✅ [PASS] #btnDailyTasks posee z-[55], pointer-events-auto y el Speed Dial inactivo no bloquea clics');
+if (hasBtnDaily && hasZ55 && hasPEAuto && isBottomRight && hasDockPENone && hasCSDClosedNone) {
+    console.log('   ✅ [PASS] #btnDailyTasks reubicado abajo a la derecha sin colisión con el dock izquierdo, posee z-[55] y pointer-events-auto');
 } else {
     console.error('   ❌ [FAIL] Falló verificación del botón de tareas diarias');
     process.exit(1);
