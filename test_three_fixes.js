@@ -25,7 +25,7 @@ if (hasBtnDaily && hasZ55 && hasPEAuto && hasDockPENone && hasCSDClosedNone) {
 
 // Test 2: Priority Board trackpad / mouse wheel scroll
 console.log('2. Desplazamiento Mousepad en Tablero de Prioridades:');
-const guardCount = (app.match(/mainWorkspaceViewMode === 'priority' \|\| e\.target\.closest\('#priorityBoardView'\)/g) || []).length;
+const guardCount = (app.match(/mainWorkspaceViewMode === 'priority'[\s\S]*?e\.target\.closest\('#priorityBoardView'\)/g) || []).length;
 const hasBindScroll = app.includes('window.bindPriorityBoardScroll = function');
 const callsBindScroll = app.includes('window.bindPriorityBoardScroll()');
 

@@ -852,7 +852,7 @@
         <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">SICOM // STGT</span>
       </div>
 
-      <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES) -->
+      <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES | CRONOGRAMA) -->
       <div id="mainViewSwitcher" class="flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
         <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -861,6 +861,10 @@
         <button type="button" id="btnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Tablero Kanban de Prioridades (*1, *2, *3)">
           <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
           <span class="hidden sm:inline">Prioridades</span>
+        </button>
+        <button type="button" id="btnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Cronograma y Calendario de Entregas (Foco en Viernes)">
+          <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span class="hidden sm:inline">Cronograma</span>
         </button>
       </div>
     </div>
@@ -1102,6 +1106,53 @@
 
       <!-- CONTENEDOR DE COLUMNAS KANBAN -->
       <div id="priorityBoardColumns" class="flex-1 overflow-x-auto overflow-y-hidden p-4 sm:p-6 flex gap-4 items-start select-none scrollbar-thin">
+        <!-- Renderizado dinámico vía app.js -->
+      </div>
+    </div>
+
+    <!-- CRONOGRAMA Y CALENDARIO DE ENTREGAS (VISTA CRONOGRAMA A PANTALLA COMPLETA) -->
+    <div id="timelineBoardView" class="hidden absolute inset-0 z-20 bg-[#101010] flex flex-col overflow-hidden">
+      <!-- HEADER / CONTROLES DEL CRONOGRAMA -->
+      <div class="h-14 shrink-0 border-b border-[#24211f] bg-[#141211] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-3 select-none">
+        <!-- IZQUIERDA: TÍTULO Y CONTADOR -->
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#3b82f6] animate-pulse shrink-0"></span>
+            <span class="hidden sm:inline font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#eeeeee] truncate">Cronograma de Entregas</span>
+            <span class="sm:hidden font-mono text-xs font-semibold uppercase tracking-wider text-[#eeeeee]">Cronograma</span>
+          </div>
+          <span id="timelineCountBadge" class="font-mono text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#3b82f6] font-bold shrink-0">0 ENTREGAS</span>
+        </div>
+
+        <!-- CENTRO: SELECTOR DE MODO (VIERNES DE ENTREGA VS AUDITORÍA DOCS) -->
+        <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] shrink-0">
+          <button type="button" id="btnTimelineFriday" onclick="setTimelineFilterMode('friday')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Agrupar por semanas con foco en los Viernes de entrega">
+            <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="hidden sm:inline">Viernes de Entrega</span>
+          </button>
+          <button type="button" id="btnTimelineDocs" onclick="setTimelineFilterMode('docs')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Ver fechas compromiso de los 9 documentos base de auditoría">
+            <svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="hidden sm:inline">Compromisos Docs</span>
+          </button>
+        </div>
+
+        <!-- DERECHA: ACCIONES COMPLEMENTARIAS -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <!-- TAREAS DIARIAS Y NOTIFICACIONES -->
+          <button type="button" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+            <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            <span class="hidden sm:inline">Tareas</span>
+          </button>
+
+          <!-- FILTRO DE CONSULTOR RÁPIDO EN CRONOGRAMA -->
+          <select id="timelineConsultantFilter" onchange="window.setTimelineConsultantFilter(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#3b82f6] cursor-pointer max-w-[130px] sm:max-w-[170px] truncate">
+            <option value="ALL">👤 Todos los Consultores</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CONTENEDOR DE COLUMNAS DEL CRONOGRAMA -->
+      <div id="timelineBoardColumns" class="flex-1 overflow-x-auto overflow-y-hidden p-3 sm:p-6 flex gap-4 items-start select-none scrollbar-thin">
         <!-- Renderizado dinámico vía app.js -->
       </div>
     </div>
@@ -1556,18 +1607,28 @@
         </details>
       </div>
 
-      <!-- ACORDEÓN MIS PROYECTOS ASIGNADOS (MIGRADO AL PANEL DE TRABAJO) -->
+      <!-- ACORDEÓN MIS PROYECTOS ASIGNADOS (MIGRADO AL PANEL DE TRABAJO CON FILTRO TÁCTIL) -->
       <div id="dailyAssignedProjectsSection" class="shrink-0">
         <details id="dailyAssignedProjectsDetails" class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition" open>
           <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
-              <span class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Mis Proyectos Asignados</span>
+              <span id="dailyAssignedHeaderTitle" class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px] truncate">Proyectos Asignados</span>
               <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px] shrink-0">0 PROYECTOS</span>
             </div>
             <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
           </summary>
-          <div id="dailyMyProjectsList" class="p-2.5 space-y-2 border-t border-[#3d3a39]"></div>
+
+          <!-- BARRA DE SELECCIÓN RÁPIDA POR CONSULTOR -->
+          <div class="px-3 py-2 bg-[#141211] border-t border-b border-[#2d2a29] flex items-center gap-2">
+            <label for="dailyAssignedConsultantSelect" class="font-mono text-[9px] uppercase text-[#8a8380] shrink-0">Consultor:</label>
+            <select id="dailyAssignedConsultantSelect" onchange="window.handleAssignedConsultantChange(this.value)" class="flex-1 bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer truncate">
+              <option value="ME">⭐ Mis Proyectos</option>
+              <option value="ALL">🌐 Todos los Asignados</option>
+            </select>
+          </div>
+
+          <div id="dailyMyProjectsList" class="p-2.5 space-y-2"></div>
         </details>
       </div>
 
@@ -2829,7 +2890,7 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261024_v962"></script>
+  <script type="module" src="app.js?v=20261024_v963"></script>
 
 </body>
 </html>

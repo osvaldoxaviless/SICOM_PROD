@@ -2823,7 +2823,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     const ws = document.getElementById('workspace');
     if(ws) {
         ws.addEventListener('touchstart', (e) => {
-            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
+            if (mainWorkspaceViewMode === 'priority' || mainWorkspaceViewMode === 'timeline' || e.target.closest('#priorityBoardView') || e.target.closest('#timelineBoardView')) return;
             if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
             if (cameraAnimId) {
                 cancelAnimationFrame(cameraAnimId);
@@ -2850,7 +2850,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }, {passive: true});
 
         ws.addEventListener('touchmove', (e) => {
-            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
+            if (mainWorkspaceViewMode === 'priority' || mainWorkspaceViewMode === 'timeline' || e.target.closest('#priorityBoardView') || e.target.closest('#timelineBoardView')) return;
             if (isAnyDrawerActive() || e.target.closest('#infoCard')) return;
             if (e.touches.length === 1 && isTouchActive) { 
                 const dx = e.touches[0].clientX - touchStartX;
@@ -2946,7 +2946,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         ws.addEventListener('touchcancel', handleTouchEnd);
 
         ws.addEventListener('mousedown', (e) => { 
-            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
+            if (mainWorkspaceViewMode === 'priority' || mainWorkspaceViewMode === 'timeline' || e.target.closest('#priorityBoardView') || e.target.closest('#timelineBoardView')) return;
             if(e.target.closest('.interactive-node') || e.target.closest('#infoCard') || isAnyDrawerActive()) return; 
             if (cameraAnimId) {
                 cancelAnimationFrame(cameraAnimId);
@@ -2959,7 +2959,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.add('is-panning');
         }); 
         ws.addEventListener('mousemove', (e) => { 
-            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
+            if (mainWorkspaceViewMode === 'priority' || mainWorkspaceViewMode === 'timeline' || e.target.closest('#priorityBoardView') || e.target.closest('#timelineBoardView')) return;
             if(!isPanning) return; 
             translateX = e.clientX - startX; 
             translateY = e.clientY - startY; 
@@ -2976,7 +2976,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             ws.classList.remove('is-panning');
         }); 
         ws.addEventListener('wheel', (e) => { 
-            if (mainWorkspaceViewMode === 'priority' || e.target.closest('#priorityBoardView')) return;
+            if (mainWorkspaceViewMode === 'priority' || mainWorkspaceViewMode === 'timeline' || e.target.closest('#priorityBoardView') || e.target.closest('#timelineBoardView')) return;
             if(isAnyDrawerActive() || e.target.closest('#infoCard') || e.target.closest('#dailyDrawer')) return; 
             e.preventDefault(); 
             if (cameraAnimId) {
@@ -7213,24 +7213,31 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         mainWorkspaceViewMode = mode;
         const btnMap = document.getElementById('btnViewModeMap');
         const btnPrio = document.getElementById('btnViewModePriority');
+        const btnTimeline = document.getElementById('btnViewModeTimeline');
         const svgCanvas = document.getElementById('mindmapCanvas');
         const boardView = document.getElementById('priorityBoardView');
+        const timelineView = document.getElementById('timelineBoardView');
         const dock = document.getElementById('canvasToolsDock');
         const actFilterPill = document.getElementById('activeFilterPill');
         const btnDaily = document.getElementById('btnDailyTasks');
         const speedDial = document.getElementById('speedDial');
 
+        const setActiveTabStyle = (activeBtn) => {
+            const inact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
+            const act = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+            if (btnMap) btnMap.className = inact;
+            if (btnPrio) btnPrio.className = inact;
+            if (btnTimeline) btnTimeline.className = inact;
+            if (activeBtn) activeBtn.className = act;
+        };
+
         if (mode === 'priority') {
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
-            if (btnMap) {
-                btnMap.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            }
-            if (btnPrio) {
-                btnPrio.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
-            }
+            setActiveTabStyle(btnPrio);
             if (svgCanvas) svgCanvas.classList.add('hidden');
+            if (timelineView) timelineView.classList.add('hidden');
             if (dock) dock.classList.add('hidden');
             if (btnDaily) btnDaily.classList.add('hidden');
             if (speedDial) speedDial.classList.add('hidden');
@@ -7239,15 +7246,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 boardView.classList.remove('hidden');
                 window.renderPriorityBoard();
             }
+        } else if (mode === 'timeline') {
+            if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
+            if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
+            if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+            setActiveTabStyle(btnTimeline);
+            if (svgCanvas) svgCanvas.classList.add('hidden');
+            if (boardView) boardView.classList.add('hidden');
+            if (dock) dock.classList.add('hidden');
+            if (btnDaily) btnDaily.classList.add('hidden');
+            if (speedDial) speedDial.classList.add('hidden');
+            if (actFilterPill) actFilterPill.classList.add('hidden');
+            if (timelineView) {
+                timelineView.classList.remove('hidden');
+                if (typeof window.renderTimelineBoard === 'function') window.renderTimelineBoard();
+            }
         } else {
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
-            if (btnMap) {
-                btnMap.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
-            }
-            if (btnPrio) {
-                btnPrio.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            }
+            setActiveTabStyle(btnMap);
             if (boardView) boardView.classList.add('hidden');
+            if (timelineView) timelineView.classList.add('hidden');
             if (svgCanvas) svgCanvas.classList.remove('hidden');
             if (dock) dock.classList.remove('hidden');
             if (btnDaily) btnDaily.classList.remove('hidden');
@@ -10500,11 +10518,54 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
 };
 
 
-    // === RENDERIZADO DE PROYECTOS ASIGNADOS EN PANEL IZQUIERDO ===
+    // === RENDERIZADO DE PROYECTOS ASIGNADOS CON SELECTOR MULTI-CONSULTOR ===
+    let assignedProjectsFilter = 'ME';
+
+    window.handleAssignedConsultantChange = function(val) {
+        assignedProjectsFilter = val;
+        window.renderMyAssignedProjects();
+    };
+
+    window.populateAssignedConsultantsSelect = function() {
+        const sel = document.getElementById('dailyAssignedConsultantSelect');
+        if (!sel) return;
+
+        const counts = {};
+        const countProj = (p) => {
+            const cList = getProjectConsultants(p);
+            cList.forEach(c => { counts[c] = (counts[c] || 0) + 1; });
+        };
+        (appData.directProjects || []).forEach(p => countProj(p));
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => countProj(p)));
+
+        const myCount = counts[localAuthor] || 0;
+        const isLeadership = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
+
+        if (isLeadership && myCount === 0 && assignedProjectsFilter === 'ME') {
+            assignedProjectsFilter = 'ALL';
+        }
+
+        let html = `
+            <option value="ME" ${assignedProjectsFilter === 'ME' ? 'selected' : ''}>⭐ Mis Proyectos (${myCount})</option>
+            <option value="ALL" ${assignedProjectsFilter === 'ALL' ? 'selected' : ''}>🌐 Todos los Asignados</option>
+        `;
+
+        const sortedConsultants = Object.keys(consultants).sort();
+        sortedConsultants.forEach(cName => {
+            const cCount = counts[cName] || 0;
+            if (cCount > 0) {
+                html += `<option value="${escapeHtml(cName)}" ${assignedProjectsFilter === cName ? 'selected' : ''}>👤 ${escapeHtml(cName)} (${cCount})</option>`;
+            }
+        });
+
+        sel.innerHTML = html;
+    };
+
     window.renderMyAssignedProjects = function() {
         const pList = document.getElementById('dailyMyProjectsList');
         const pBadge = document.getElementById('dailyMyProjectsBadge');
         const pSec = document.getElementById('dailyAssignedProjectsSection');
+        const hTitle = document.getElementById('dailyAssignedHeaderTitle');
         if (!pList || !pBadge) return;
 
         if (currentNotifTab !== 'pending') {
@@ -10512,6 +10573,10 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             return;
         }
         if (pSec) pSec.classList.remove('hidden');
+
+        if (typeof window.populateAssignedConsultantsSelect === 'function') {
+            window.populateAssignedConsultantsSelect();
+        }
 
         const now = new Date();
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -10521,43 +10586,73 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             return new Date(y, m - 1, d) < todayMidnight; 
         };
 
-        let myProjects = [];
+        let filteredProjects = [];
         const checkProj = (proj, pType, parentName) => {
             const projCons = getProjectConsultants(proj);
-            if (projCons.includes(localAuthor)) {
-                myProjects.push({ ...proj, pType, parentName });
+            let match = false;
+            if (assignedProjectsFilter === 'ME') {
+                match = projCons.includes(localAuthor);
+            } else if (assignedProjectsFilter === 'ALL') {
+                match = projCons.length > 0;
+            } else {
+                match = projCons.includes(assignedProjectsFilter);
+            }
+            if (match) {
+                filteredProjects.push({ ...proj, pType, parentName, projCons });
             }
         };
 
         (appData.directProjects || []).forEach(p => checkProj(p, 'direct-project', appData.directHub ? appData.directHub.name : 'Directos'));
         (appData.modules || []).forEach(m => (m.projects || []).forEach(p => checkProj(p, 'project', m.name)));
 
-        pBadge.textContent = `${myProjects.length} PROYECTO${myProjects.length === 1 ? '' : 'S'}`;
+        pBadge.textContent = `${filteredProjects.length} PROYECTO${filteredProjects.length === 1 ? '' : 'S'}`;
+        if (hTitle) {
+            if (assignedProjectsFilter === 'ME') {
+                hTitle.textContent = 'Mis Proyectos Asignados';
+            } else if (assignedProjectsFilter === 'ALL') {
+                hTitle.textContent = 'Todos los Proyectos Asignados';
+            } else {
+                hTitle.textContent = `Proyectos de ${assignedProjectsFilter}`;
+            }
+        }
 
-        if (myProjects.length === 0) {
-            pList.innerHTML = `<div class="p-3 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">No tienes proyectos asignados</div>`;
+        if (filteredProjects.length === 0) {
+            const msg = assignedProjectsFilter === 'ME' 
+                ? 'No tienes proyectos asignados actualmente' 
+                : `Sin proyectos asignados para ${escapeHtml(assignedProjectsFilter)}`;
+            pList.innerHTML = `<div class="p-3 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">${msg}</div>`;
             return;
         }
 
-        myProjects.sort((a, b) => {
+        filteredProjects.sort((a, b) => {
             const aOver = isOver(a) ? 1 : 0;
             const bOver = isOver(b) ? 1 : 0;
             if (bOver !== aOver) return bOver - aOver;
+            const prioA = parseInt(a.priority, 10) || 99;
+            const prioB = parseInt(b.priority, 10) || 99;
+            if (prioA !== prioB) return prioA - prioB;
             return (a.progress || 0) - (b.progress || 0);
         });
 
-        pList.innerHTML = myProjects.map(proj => {
+        pList.innerHTML = filteredProjects.map(proj => {
             const over = isOver(proj);
             const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
             const sIco = isCompletedStatus(proj.status) ? '✓' : (proj.status === 'En Progreso' ? '⚡' : (proj.status === 'No Iniciado' ? '⏸' : '⏳'));
+            const prioVal = parseInt(proj.priority, 10) || 1;
+            const consDisplay = assignedProjectsFilter === 'ALL' && proj.projCons && proj.projCons.length > 0 
+                ? `<span class="text-[#ee6018] font-bold">👤 ${escapeHtml(proj.projCons.join(', '))}</span><span>·</span>` 
+                : '';
+
             return `
             <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="window.navigateToProjectFromNotif('${proj.pType}', '${proj.id}')">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
+                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018] shrink-0">* ${prioVal}</span>
                         <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
                     </div>
-                    <div class="flex items-center gap-2 font-mono text-[9px] text-[#8a8380] uppercase">
+                    <div class="flex items-center gap-2 font-mono text-[9px] text-[#8a8380] uppercase truncate">
+                        ${consDisplay}
                         <span class="truncate">${escapeHtml(proj.parentName || 'Directo')}</span>
                         <span>·</span>
                         <span>${sIco} ${proj.status || 'Pendiente'} (${proj.progress || 0}%)</span>
@@ -14772,3 +14867,270 @@ document.addEventListener('click', function(e) {
         if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
     }
 });
+
+    // === CRONOGRAMA Y CALENDARIO DE ENTREGAS (VISTA CRONOGRAMA) ===
+    let timelineFilterMode = 'friday'; // 'friday' (Semanas/Viernes) | 'docs' (Auditoría Docs)
+    let timelineConsultantFilter = 'ALL';
+
+    window.setTimelineFilterMode = function(mode) {
+        timelineFilterMode = mode;
+        const btnF = document.getElementById('btnTimelineFriday');
+        const btnD = document.getElementById('btnTimelineDocs');
+        const inact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
+        const act = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+        if (btnF) btnF.className = mode === 'friday' ? act : inact;
+        if (btnD) btnD.className = mode === 'docs' ? act : inact;
+        window.renderTimelineBoard();
+    };
+
+    window.setTimelineConsultantFilter = function(cVal) {
+        timelineConsultantFilter = cVal;
+        window.renderTimelineBoard();
+    };
+
+    window.bindTimelineBoardScroll = function() {
+        const tCols = document.getElementById('timelineBoardColumns');
+        if (!tCols || tCols.__wheelBound) return;
+        tCols.__wheelBound = true;
+
+        tCols.addEventListener('wheel', function(e) {
+            const innerScroll = e.target.closest('.overflow-y-auto');
+            if (innerScroll) {
+                const canScrollDown = e.deltaY > 0 && (innerScroll.scrollTop + innerScroll.clientHeight < innerScroll.scrollHeight - 1);
+                const canScrollUp = e.deltaY < 0 && (innerScroll.scrollTop > 1);
+                if (canScrollDown || canScrollUp) return;
+            }
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                tCols.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        }, { passive: false });
+    };
+
+    // Helper: Obtener el siguiente viernes de una fecha
+    function getNextFriday(d) {
+        const date = new Date(d);
+        const day = date.getDay();
+        const diff = (5 - day + 7) % 7;
+        date.setDate(date.getDate() + diff);
+        date.setHours(0,0,0,0);
+        return date;
+    }
+
+    function formatDateShort(d) {
+        if (!d || isNaN(d.getTime())) return '';
+        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        return `${days[d.getDay()]} ${d.getDate()}/${months[d.getMonth()]}`;
+    }
+
+    window.renderTimelineBoard = function() {
+        const boardContainer = document.getElementById('timelineBoardColumns');
+        const countBadge = document.getElementById('timelineCountBadge');
+        const cFilter = document.getElementById('timelineConsultantFilter');
+        if (!boardContainer) return;
+
+        // Llenar selector de consultores si está vacío
+        if (cFilter && cFilter.options.length <= 1) {
+            let htmlOpts = '<option value="ALL">👤 Todos los Consultores</option>';
+            Object.keys(consultants).sort().forEach(c => {
+                htmlOpts += `<option value="${escapeHtml(c)}">👤 ${escapeHtml(c)}</option>`;
+            });
+            cFilter.innerHTML = htmlOpts;
+            cFilter.value = timelineConsultantFilter;
+        }
+
+        const allProjs = [];
+        (appData.directProjects || []).forEach(p => {
+            allProjs.push({
+                ...p,
+                pType: 'direct-project',
+                parentName: (appData.directHub && appData.directHub.name) || 'Directos',
+                parentModId: 'hub-direct',
+                parentColor: (appData.directHub && appData.directHub.color) || '#f59e0b'
+            });
+        });
+        (appData.modules || []).forEach(m => {
+            (m.projects || []).forEach(p => {
+                allProjs.push({
+                    ...p,
+                    pType: 'project',
+                    parentName: m.name || 'Módulo',
+                    parentModId: m.id,
+                    parentColor: m.color || '#eeeeee'
+                });
+            });
+        });
+
+        // Filtrar por consultor si está activo
+        const filteredProjs = timelineConsultantFilter === 'ALL'
+            ? allProjs
+            : allProjs.filter(p => getProjectConsultants(p).includes(timelineConsultantFilter));
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const thisFriday = getNextFriday(today);
+        const nextFriday = new Date(thisFriday);
+        nextFriday.setDate(nextFriday.getDate() + 7);
+        const twoWeeksFriday = new Date(nextFriday);
+        twoWeeksFriday.setDate(twoWeeksFriday.getDate() + 7);
+
+        if (timelineFilterMode === 'friday') {
+            // MODO 1: VIERNES DE ENTREGA
+            const colOverdue = { id: 'overdue', label: '🔴 Retraso / Vencidos', color: '#ef4444', items: [] };
+            const colThisFriday = { id: 'thisFriday', label: `⚡ Viernes Actual (${formatDateShort(thisFriday)})`, color: '#ee6018', items: [] };
+            const colNextFriday = { id: 'nextFriday', label: `📅 Próximo Viernes (${formatDateShort(nextFriday)})`, color: '#3b82f6', items: [] };
+            const colTwoWeeks = { id: 'twoWeeks', label: `📌 En 2 Semanas (${formatDateShort(twoWeeksFriday)})`, color: '#8b5cf6', items: [] };
+            const colFuture = { id: 'future', label: '🗓️ Siguientes Semanas', color: '#10b981', items: [] };
+            const colNoDate = { id: 'noDate', label: '⚪ Sin Fecha Definida', color: '#6b7280', items: [] };
+
+            filteredProjs.forEach(p => {
+                if (!p.deadline) {
+                    colNoDate.items.push(p);
+                    return;
+                }
+                const [y, m, d] = p.deadline.split('-');
+                const dDate = new Date(y, m - 1, d);
+                dDate.setHours(0,0,0,0);
+
+                if (isCompletedStatus(p.status)) {
+                    return;
+                }
+
+                if (dDate < today) {
+                    colOverdue.items.push(p);
+                } else if (dDate <= thisFriday) {
+                    colThisFriday.items.push(p);
+                } else if (dDate <= nextFriday) {
+                    colNextFriday.items.push(p);
+                } else if (dDate <= twoWeeksFriday) {
+                    colTwoWeeks.items.push(p);
+                } else {
+                    colFuture.items.push(p);
+                }
+            });
+
+            const timelineCols = [colOverdue, colThisFriday, colNextFriday, colTwoWeeks, colFuture, colNoDate];
+            const totalScheduled = timelineCols.reduce((acc, c) => acc + c.items.length, 0);
+            if (countBadge) countBadge.textContent = `${totalScheduled} ENTREGAS`;
+
+            let htmlCols = '';
+            timelineCols.forEach(col => {
+                col.items.sort((a, b) => (parseInt(a.priority, 10) || 99) - (parseInt(b.priority, 10) || 99));
+
+                const cardsHtml = col.items.map(p => {
+                    const isSelected = currentSelection && currentSelection.id === p.id;
+                    const pCons = getProjectConsultants(p);
+                    const prioVal = parseInt(p.priority, 10) || 1;
+                    const comps = window.getProjectCompanies(p);
+                    const compBadges = comps.map(c => `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[9px]">${escapeHtml(c)}</span>`).join(' ');
+
+                    return `
+                    <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${col.color}" onclick="window.selectNode('${p.pType}', '${p.id}')">
+                      <div class="flex items-center justify-between gap-1">
+                        <div class="flex items-center gap-1.5">
+                          <span class="font-mono text-xs font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${prioVal}</span>
+                          <span class="font-mono text-[9px] text-[#a0ca92] uppercase font-semibold">${p.progress || 0}%</span>
+                        </div>
+                        <span class="font-mono text-[9px] text-[#b8b3b0] bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">⏱ ${p.deadline || 'Sin fecha'}</span>
+                      </div>
+                      <h4 class="text-xs sm:text-[13px] font-medium text-[#eeeeee] leading-snug line-clamp-2 group-hover:text-[#fafafa] transition">${escapeHtml(p.name)}</h4>
+                      <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#2d2a29]/80 font-mono text-[9px] text-[#8a8380]">
+                        <span class="truncate">${pCons.length > 0 ? '👤 ' + escapeHtml(pCons.join(', ')) : 'Sin asignar'}</span>
+                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                          <button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
+                        </div>
+                      </div>
+                    </div>`;
+                }).join('');
+
+                htmlCols += `
+                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
+                  <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${col.color}">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${col.color}"></span>
+                      <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${col.label}</h3>
+                    </div>
+                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${col.items.length}</span>
+                  </div>
+                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
+                    ${col.items.length > 0 ? cardsHtml : '<div class="p-6 text-center text-[#8a8380] font-mono text-xs uppercase">Sin entregas para este periodo</div>'}
+                  </div>
+                </div>`;
+            });
+
+            boardContainer.innerHTML = htmlCols;
+        } else {
+            // MODO 2: AUDITORÍA DOCS (COMPROMISOS DOCUMENTALES PMO)
+            const auditDocs = [
+                { key: 'propuesta', name: '01. Propuesta Técnica/Económica', color: '#ee6018' },
+                { key: 'contrato', name: '02. Contrato / Convenio', color: '#f59e0b' },
+                { key: 'requerimientos', name: '03. Requerimientos / Especificación', color: '#3b82f6' },
+                { key: 'pruebas', name: '04. Matriz de Pruebas / QA', color: '#8b5cf6' },
+                { key: 'liberacion', name: '05. Carta de Liberación / Acta', color: '#10b981' }
+            ];
+
+            let totalDocCommitments = 0;
+            let htmlCols = '';
+
+            auditDocs.forEach(dCat => {
+                const docItems = [];
+                filteredProjs.forEach(p => {
+                    const dObj = p.docs && p.docs[dCat.key];
+                    if (dObj && (dObj.fecha_compromiso || dObj.checked)) {
+                        docItems.push({
+                            project: p,
+                            doc: dObj,
+                            isDelivered: !!dObj.checked,
+                            commitDate: dObj.fecha_compromiso || 'Sin fecha'
+                        });
+                        totalDocCommitments++;
+                    }
+                });
+
+                const cardsHtml = docItems.map(item => {
+                    const p = item.project;
+                    const isSelected = currentSelection && currentSelection.id === p.id;
+                    const pCons = getProjectConsultants(p);
+
+                    return `
+                    <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${dCat.color}" onclick="window.selectNode('${p.pType}', '${p.id}')">
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] ${item.isDelivered ? 'bg-[#a0ca92]/20 text-[#a0ca92] border border-[#a0ca92]/40' : 'bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40'} font-bold">
+                          ${item.isDelivered ? '✓ ENTREGADO' : '⏳ PENDIENTE'}
+                        </span>
+                        <span class="font-mono text-[9px] text-[#b8b3b0] bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(item.commitDate)}</span>
+                      </div>
+                      <h4 class="text-xs sm:text-[13px] font-medium text-[#eeeeee] leading-snug line-clamp-2 group-hover:text-[#fafafa] transition">${escapeHtml(p.name)}</h4>
+                      <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#2d2a29]/80 font-mono text-[9px] text-[#8a8380]">
+                        <span class="truncate">${pCons.length > 0 ? '👤 ' + escapeHtml(pCons.join(', ')) : 'Sin asignar'}</span>
+                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                          <button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
+                        </div>
+                      </div>
+                    </div>`;
+                }).join('');
+
+                htmlCols += `
+                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
+                  <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${dCat.color}">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dCat.color}"></span>
+                      <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${dCat.name}</h3>
+                    </div>
+                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${docItems.length}</span>
+                  </div>
+                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
+                    ${docItems.length > 0 ? cardsHtml : '<div class="p-6 text-center text-[#8a8380] font-mono text-xs uppercase">Sin documentos comprometidos</div>'}
+                  </div>
+                </div>`;
+            });
+
+            if (countBadge) countBadge.textContent = `${totalDocCommitments} DOCUMENTOS`;
+            boardContainer.innerHTML = htmlCols;
+        }
+
+        if (typeof window.bindTimelineBoardScroll === 'function') {
+            window.bindTimelineBoardScroll();
+        }
+    };
