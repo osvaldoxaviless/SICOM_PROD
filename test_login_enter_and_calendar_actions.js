@@ -85,8 +85,8 @@ test('9. app.js: renderDailyTasks sincroniza calendarDailyAlertsBadge con total 
 });
 
 // 5. Cache buster
-test('10. index.html & tests: Cache buster actualizado a v=20261024_v965', () => {
-    assert(html.includes('app.js?v=20261024_v965'), 'index.html must reference v965');
+test('10. index.html & tests: Cache buster actualizado a v=20261024_v966', () => {
+    assert(html.includes('app.js?v=20261024_v966'), 'index.html must reference v966');
 });
 
 console.log(`\n====================================================`);

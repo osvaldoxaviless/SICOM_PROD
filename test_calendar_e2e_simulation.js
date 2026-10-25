@@ -58,6 +58,8 @@ const sandbox = {
     console: console,
     Date: Date,
     Math: Math,
+    setTimeout: setTimeout,
+    clearTimeout: clearTimeout,
     parseInt: parseInt,
     String: String,
     Array: Array,
@@ -244,15 +246,17 @@ test('6. Renderizado HTML Vista Semana: 7 columnas (Lunes a Domingo) con tarjeta
     assert(outputHtml.includes('Mapa ↗'), 'Botón para centrar en mapa presente');
 });
 
-// PRUEBA 7: Drill-Down al Tocar un Día de la Cuadrícula
-test('7. Interacción Drill-Down: Clic en día cambia a vista Semana centrada en esa fecha', () => {
+// PRUEBA 7: Interacción Focalizada: Clic en día abre Agenda del Día (#calendarDayModal)
+test('7. Interacción Focalizada: Clic en día abre Agenda del Día (#calendarDayModal) sin abandonar la vista de Mes', () => {
     sandbox.window.setCalendarViewMode('month');
     assert.strictEqual(vm.runInContext('calendarViewMode', sandbox), 'month');
 
     // Simular clic en el día 2026-10-23
     sandbox.window.onCalendarDayClick('2026-10-23');
-    assert.strictEqual(vm.runInContext('calendarViewMode', sandbox), 'week', 'Debe cambiar automáticamente a vista semanal');
-    assert.strictEqual(vm.runInContext('calendarDate.getDate()', sandbox), 23, 'La fecha activa debe ser el 23');
+    assert.strictEqual(vm.runInContext('calendarViewMode', sandbox), 'month', 'Debe mantenerse en vista de mes sin sacar al usuario');
+    assert.strictEqual(vm.runInContext('selectedCalendarDayStr', sandbox), '2026-10-23', 'selectedCalendarDayStr debe ser 2026-10-23');
+    assert(!mockDOM.getElementById('calendarDayModal').classList.contains('hidden'), 'calendarDayModal debe estar visible');
+    assert(mockDOM.getElementById('calDayModalTitle').textContent.includes('23'), 'Título del modal debe incluir el día 23');
 });
 
 // PRUEBA 8: Clic en Píldora abre Ficha Técnica sin Propagación de Eventos

@@ -1359,6 +1359,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K) y Cierre de Ventanas (Esc)
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            const calDayMod = document.getElementById('calendarDayModal');
+            if (calDayMod && !calDayMod.classList.contains('hidden')) {
+                if (typeof window.closeCalendarDayModal === 'function') window.closeCalendarDayModal();
+                return;
+            }
             const execMod = document.getElementById('executiveDashboardModal');
             if (execMod && !execMod.classList.contains('hidden')) {
                 window.closeExecutiveDashboard();
@@ -7267,6 +7272,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
             if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
+            if (typeof window.closeCalendarDayModal === 'function') window.closeCalendarDayModal();
             setActiveTabStyle(btnTimeline);
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (boardView) boardView.classList.add('hidden');
@@ -7274,6 +7280,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnDaily) btnDaily.classList.add('hidden');
             if (speedDial) speedDial.classList.add('hidden');
             if (actFilterPill) actFilterPill.classList.add('hidden');
+
+            // Segmentación por Rol al ingresar al Calendario
+            if (typeof currentUserRole !== 'undefined' && currentUserRole === 'Consultor' && typeof localAuthor !== 'undefined' && localAuthor) {
+                calendarConsultantFilter = localAuthor;
+            }
+
             if (timelineView) {
                 timelineView.classList.remove('hidden');
                 if (typeof window.renderTimelineBoard === 'function') window.renderTimelineBoard();
@@ -14972,11 +14984,167 @@ document.addEventListener('click', function(e) {
         window.selectNode(pType, id);
     };
 
+    let selectedCalendarDayStr = '';
+    let dayModalFilter = 'ALL';
+
+    window.openCalendarDayModal = function(dateStr) {
+        selectedCalendarDayStr = dateStr;
+        const modal = document.getElementById('calendarDayModal');
+        const titleEl = document.getElementById('calDayModalTitle');
+        const subTitleEl = document.getElementById('calDayModalSubtitle');
+        const sel = document.getElementById('calDayConsultantSelect');
+        if (!modal) return;
+
+        // Formatear fecha amigable
+        const [yStr, mStr, dStr] = dateStr.split('-');
+        const y = parseInt(yStr, 10);
+        const m = parseInt(mStr, 10) - 1;
+        const d = parseInt(dStr, 10);
+        const dObj = new Date(y, m, d);
+
+        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const dayName = days[dObj.getDay()];
+        const monthName = months[m];
+
+        if (titleEl) {
+            titleEl.textContent = `Agenda del ${dayName}, ${d} de ${monthName} de ${y}`;
+        }
+
+        // Segmentación por Rol para el modal
+        const isConsultant = (typeof currentUserRole !== 'undefined' ? currentUserRole : '') === 'Consultor';
+        if (isConsultant) {
+            dayModalFilter = (typeof localAuthor !== 'undefined' ? localAuthor : 'ALL');
+            if (subTitleEl) subTitleEl.textContent = `Tus compromisos y entregas asignadas para esta fecha`;
+        } else {
+            dayModalFilter = calendarConsultantFilter;
+            if (subTitleEl) subTitleEl.textContent = `Entregas del equipo, compromisos de auditoría y tareas`;
+        }
+
+        // Llenar selector de consultores para el modal
+        if (sel) {
+            let htmlOpts = '<option value="ALL">👤 Todos los Responsables</option>';
+            Object.keys(consultants).sort().forEach(c => {
+                htmlOpts += `<option value="${escapeHtml(c)}" ${dayModalFilter === c ? 'selected' : ''}>👤 ${escapeHtml(c)}</option>`;
+            });
+            sel.innerHTML = htmlOpts;
+            sel.value = dayModalFilter;
+        }
+
+        window.renderCalendarDayModalItems();
+
+        modal.classList.remove('hidden');
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+            });
+        } else {
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+    };
+
+    window.closeCalendarDayModal = function() {
+        const modal = document.getElementById('calendarDayModal');
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
+    };
+
+    window.filterCalendarDayModal = function(val) {
+        dayModalFilter = val;
+        window.renderCalendarDayModalItems();
+    };
+
+    window.renderCalendarDayModalItems = function() {
+        const listEl = document.getElementById('calDayItemsList');
+        const badgeEl = document.getElementById('calDayModalBadge');
+        if (!listEl) return;
+
+        const allEvents = getCalendarEvents();
+        let dayEvents = allEvents.filter(e => e.date === selectedCalendarDayStr);
+
+        if (dayModalFilter !== 'ALL') {
+            dayEvents = dayEvents.filter(e => e.consultants && e.consultants.includes(dayModalFilter));
+        }
+
+        if (badgeEl) {
+            badgeEl.textContent = `${dayEvents.length} ENTREGA${dayEvents.length === 1 ? '' : 'S'}`;
+        }
+
+        if (dayEvents.length === 0) {
+            listEl.innerHTML = `
+                <div class="py-12 px-4 flex flex-col items-center justify-center text-center bg-[#141211] border border-dashed border-[#2d2a29] rounded-[8px]">
+                    <span class="text-2xl mb-2">🗓️</span>
+                    <h4 class="font-mono text-xs uppercase text-[#eeeeee] mb-1">Sin entregas programadas</h4>
+                    <p class="text-[11px] text-[#8a8380] mb-4">No hay proyectos, documentos ni tareas asignadas con vencimiento en esta fecha.</p>
+                    <button type="button" onclick="window.addFastTaskForCalendarDay()" class="px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer">
+                        + Programar Tarea
+                    </button>
+                </div>`;
+            return;
+        }
+
+        dayEvents.sort((a, b) => a.priority - b.priority);
+
+        listEl.innerHTML = dayEvents.map(ev => {
+            const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
+            const statusClass = ev.isDone ? 'text-[#a0ca92] bg-[#a0ca92]/10 border-[#a0ca92]/30' : (ev.isOverdue ? 'text-[#ef4444] bg-[#ef4444]/10 border-[#ef4444]/30' : 'text-[#ee6018] bg-[#ee6018]/10 border-[#ee6018]/30');
+            const consStr = ev.consultants && ev.consultants.length > 0 ? ev.consultants.join(', ') : 'Sin asignar';
+            const typeLabel = ev.type === 'doc' ? 'Auditoría PMO' : 'Entrega Proyecto';
+
+            return `
+            <div class="bg-[#141211] border border-[#2d2a29] hover:border-[#eeeeee]/60 rounded-[8px] p-3.5 transition flex flex-col gap-2.5 shadow-sm" style="border-left: 3px solid ${ev.color}">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] border ${statusClass} font-semibold">${statusIcon} ${escapeHtml(ev.status)}</span>
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] hidden sm:inline">${typeLabel}</span>
+                    </div>
+                    <span class="font-mono text-[10px] text-[#a0ca92] font-bold">${ev.progress}% Avance</span>
+                </div>
+
+                <h4 class="text-sm font-medium text-[#eeeeee] leading-snug">${escapeHtml(ev.title)}</h4>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#24211f] font-mono text-[10px]">
+                    <div class="flex items-center gap-2 text-[#8a8380]">
+                        <span class="text-[#ee6018] font-semibold">👤 ${escapeHtml(consStr)}</span>
+                        <span>·</span>
+                        <span class="truncate">${escapeHtml(ev.parentName)}</span>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="closeCalendarDayModal(); window.selectNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer font-bold">
+                            Ficha Técnica ↗
+                        </button>
+                        <button type="button" onclick="closeCalendarDayModal(); window.jumpToMapNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[2px] bg-[#1d1a18] hover:bg-[#24211f] text-[#8a8380] hover:text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer">
+                            Mapa ↗
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    window.addFastTaskForCalendarDay = function() {
+        window.closeCalendarDayModal();
+        if (typeof window.openFastDailyTaskModal === 'function') {
+            window.openFastDailyTaskModal();
+            setTimeout(() => {
+                const dueIn = document.getElementById('fastTaskDueDate');
+                if (dueIn && selectedCalendarDayStr) {
+                    dueIn.value = selectedCalendarDayStr;
+                }
+            }, 100);
+        }
+    };
+
     window.onCalendarDayClick = function(dateStr, e) {
         if (e && e.target && e.target.closest('[data-cal-pill]')) return;
-        const [y, m, d] = dateStr.split('-');
-        calendarDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-        window.setCalendarViewMode('week');
+        window.openCalendarDayModal(dateStr);
     };
 
     function getCalendarEvents() {
@@ -15193,7 +15361,7 @@ document.addEventListener('click', function(e) {
 
                 if (dayEvents.length > maxDisplay) {
                     const remaining = dayEvents.length - maxDisplay;
-                    pillsHtml += `<div class="text-[8px] sm:text-[9px] font-mono text-[#ee6018] hover:underline px-1 cursor-pointer">+ ${remaining} más...</div>`;
+                    pillsHtml += `<div onclick="event.stopPropagation(); window.openCalendarDayModal('${gd.dateStr}')" class="text-[8px] sm:text-[9px] font-mono text-[#ee6018] hover:underline px-1 cursor-pointer font-bold">+ ${remaining} más...</div>`;
                 }
 
                 html += `

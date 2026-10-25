@@ -2936,7 +2936,57 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261024_v965"></script>
+  <!-- MODAL: AGENDA Y ENTREGAS DEL DÍA (CALENDARIO INTERACTIVO) -->
+  <div id="calendarDayModal" onclick="if(event.target === this) closeCalendarDayModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4 backdrop-blur-sm">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl relative">
+          <!-- CABECERA DE LA AGENDA DEL DÍA -->
+          <div class="p-4 sm:p-5 pr-14 border-b border-[#2d2a29] bg-[#161413] flex items-center justify-between gap-3 shrink-0">
+              <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] shrink-0"></span>
+                  <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                          <h3 id="calDayModalTitle" class="font-mono text-xs sm:text-sm font-semibold text-[#fafafa] uppercase tracking-wider truncate">
+                              Agenda del Día
+                          </h3>
+                          <span id="calDayModalBadge" class="font-mono text-[9px] px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
+                              0 ENTREGAS
+                          </span>
+                      </div>
+                      <p id="calDayModalSubtitle" class="text-[11px] text-[#8a8380] font-mono mt-0.5 truncate">
+                          Entregas, compromisos y tareas programadas
+                      </p>
+                  </div>
+              </div>
+
+              <!-- BOTÓN CERRAR -->
+              <button type="button" onclick="closeCalendarDayModal()" class="absolute top-3.5 right-3.5 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[4px] transition cursor-pointer" title="Cerrar (Esc)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+          </div>
+
+          <!-- BARRA DE FILTRO POR CONSULTOR DEL DÍA & ACCIÓN RÁPIDA -->
+          <div class="px-4 py-2.5 bg-[#141211] border-b border-[#24211f] flex flex-wrap items-center justify-between gap-2 shrink-0">
+              <div class="flex items-center gap-2" id="calDayConsultantFilterWrapper">
+                  <label for="calDayConsultantSelect" class="font-mono text-[10px] uppercase text-[#8a8380]">Responsable:</label>
+                  <select id="calDayConsultantSelect" onchange="window.filterCalendarDayModal(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[170px] truncate">
+                      <option value="ALL">👤 Todos los Responsables</option>
+                  </select>
+              </div>
+
+              <button type="button" onclick="window.addFastTaskForCalendarDay()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
+                  <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  <span>+ Añadir Tarea</span>
+              </button>
+          </div>
+
+          <!-- LISTA DE ENTREGAS Y TAREAS DEL DÍA -->
+          <div id="calDayItemsList" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-thin">
+              <!-- Renderizado dinámico vía app.js -->
+          </div>
+      </div>
+  </div>
+
+  <script type="module" src="app.js?v=20261024_v966"></script>
 
 </body>
 </html>
