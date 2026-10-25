@@ -826,9 +826,10 @@ body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget {
     }
 
     #loginOverlay {
-        align-items: flex-start !important;
+        align-items: center !important;
+        justify-content: center !important;
         overflow-y: auto !important;
-        padding: 1rem 0.5rem !important;
+        padding: 1rem 0.75rem !important;
     }
 
     #loginCard {
@@ -1507,4 +1508,92 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 #mobileMenuDropdown {
     box-shadow: none !important;
     border-radius: var(--radius-buttons) !important;
+}
+
+
+/* ==========================================================================
+   REGLAS CRÍTICAS ESTRUCTURALES Y PROTECCIÓN DE MODALES (INVIOLABLE BASE)
+   ========================================================================== */
+.hidden,
+[hidden] {
+    display: none !important;
+}
+
+/* Modales y pantallas emergentes garantizados ocultos cuando tienen .hidden */
+.fixed.inset-0.hidden,
+div[id$="Modal"].hidden,
+#manualModal.hidden,
+#taskFeedbackModal.hidden,
+#deleteConfirmModal.hidden,
+#passwordModal.hidden,
+#renameModal.hidden,
+#editConsultantModal.hidden,
+#globalTaskModal.hidden,
+#fastDailyTaskModal.hidden,
+#attendanceModal.hidden,
+#commissionModal.hidden,
+#vacationModal.hidden,
+#executiveDashboardModal.hidden,
+#pwaInstallGuideModal.hidden,
+#calendarDayModal.hidden,
+#loginOverlay.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Modales fijados en pantalla completa cuando están activos */
+#manualModal:not(.hidden),
+#taskFeedbackModal:not(.hidden),
+#deleteConfirmModal:not(.hidden),
+#passwordModal:not(.hidden),
+#renameModal:not(.hidden),
+#editConsultantModal:not(.hidden),
+#globalTaskModal:not(.hidden),
+#fastDailyTaskModal:not(.hidden),
+#attendanceModal:not(.hidden),
+#commissionModal:not(.hidden),
+#vacationModal:not(.hidden),
+#executiveDashboardModal:not(.hidden),
+#pwaInstallGuideModal:not(.hidden),
+#calendarDayModal:not(.hidden),
+#loginOverlay:not(.hidden) {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Sizing autónomo para la tarjeta de Login */
+#loginCard {
+    width: 100% !important;
+    max-width: 380px !important;
+    box-sizing: border-box !important;
+}
+
+#loginCard select,
+#loginCard input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    font-family: var(--font-geist-mono), monospace !important;
+}
+
+#loginCard button.pill-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 16px !important;
+    font-size: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
 }

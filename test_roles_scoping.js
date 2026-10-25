@@ -28,7 +28,7 @@ assert(html.includes('id="mobileBtnExecutiveDashboard"') && html.includes('audit
 assert(html.includes('id="acc-executive-metadata"') && html.includes('class="space-y-3 pt-2 border-t border-[#3d3a39]/60 hidden"'), 'Bloque acc-executive-metadata envuelto con hidden en Sección 01');
 assert(html.includes('<option value="Gestor de Proyectos">Gestor de Proyectos (PMO - Auditoría & Matriz)</option>'), 'Opción Gestor de Proyectos presente en selectores de operador');
 assert(html.includes('id="consRoleFilterBtn-Gestor de Proyectos"'), 'Pill de filtro de operadores para Gestor de Proyectos presente');
-assert(html.includes('app.js?v=20261025_v973'), 'Cache buster actualizado a v973');
+assert(html.includes('app.js?v=20261025_v974'), 'Cache buster actualizado a v974');
 assert(app.includes('"Admin": {"color": "#0071e3", "role": "Supremo"'), 'Perfil Admin (Supremo) garantizado en fallbackConsultants');
 assert(app.includes('"Gestor de Proyectos": {"color": "#3b82f6", "role": "Gestor de Proyectos"'), 'Perfil Gestor de Proyectos garantizado en fallbackConsultants');
 assert(app.includes('if (!consultants["Admin"])') && app.includes('if (!consultants["Gestor de Proyectos"])'), 'Sincronización permanente de Admin y Gestor de Proyectos en onSnapshot y fallback');

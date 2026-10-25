@@ -3,7 +3,7 @@
  * STGT Control Surface — Factory Design System
  */
 
-const SW_VERSION = '20261025_v2';
+const SW_VERSION = '20261025_v4';
 const STATIC_CACHE_NAME = `sicom-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA
@@ -51,11 +51,9 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(event.request.url);
 
-    // No interceptar peticiones a Firebase Firestore, Auth o APIs de backend
-    if (url.origin.includes('firestore.googleapis.com') ||
-        url.origin.includes('firebaseio.com') ||
-        url.origin.includes('identitytoolkit.googleapis.com') ||
-        url.pathname.startsWith('/api/')) {
+    // Si la petición es externa (CDNs de scripts, Google Fonts, APIs de Firebase, etc.), 
+    // NO interceptarla en el Service Worker. Dejar que el navegador la resuelva nativamente sin interferencias.
+    if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) {
         return;
     }
 
