@@ -14868,269 +14868,361 @@ document.addEventListener('click', function(e) {
     }
 });
 
-    // === CRONOGRAMA Y CALENDARIO DE ENTREGAS (VISTA CRONOGRAMA) ===
-    let timelineFilterMode = 'friday'; // 'friday' (Semanas/Viernes) | 'docs' (Auditoría Docs)
-    let timelineConsultantFilter = 'ALL';
+    // === CALENDARIO INTERACTIVO DE ENTREGAS (ESTILO GOOGLE CALENDAR) ===
+    let calendarDate = new Date(); // Fecha actual seleccionada
+    let calendarViewMode = 'month'; // 'month' | 'week'
+    let calendarConsultantFilter = 'ALL';
 
-    window.setTimelineFilterMode = function(mode) {
-        timelineFilterMode = mode;
-        const btnF = document.getElementById('btnTimelineFriday');
-        const btnD = document.getElementById('btnTimelineDocs');
-        const inact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-        const act = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
-        if (btnF) btnF.className = mode === 'friday' ? act : inact;
-        if (btnD) btnD.className = mode === 'docs' ? act : inact;
-        window.renderTimelineBoard();
+    window.calendarToday = function() {
+        calendarDate = new Date();
+        window.renderCalendarView();
     };
 
-    window.setTimelineConsultantFilter = function(cVal) {
-        timelineConsultantFilter = cVal;
-        window.renderTimelineBoard();
+    window.calendarPrev = function() {
+        if (calendarViewMode === 'month') {
+            calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1);
+        } else {
+            calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), calendarDate.getDate() - 7);
+        }
+        window.renderCalendarView();
     };
 
-    window.bindTimelineBoardScroll = function() {
-        const tCols = document.getElementById('timelineBoardColumns');
-        if (!tCols || tCols.__wheelBound) return;
-        tCols.__wheelBound = true;
+    window.calendarNext = function() {
+        if (calendarViewMode === 'month') {
+            calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1);
+        } else {
+            calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), calendarDate.getDate() + 7);
+        }
+        window.renderCalendarView();
+    };
 
-        tCols.addEventListener('wheel', function(e) {
-            const innerScroll = e.target.closest('.overflow-y-auto');
-            if (innerScroll) {
-                const canScrollDown = e.deltaY > 0 && (innerScroll.scrollTop + innerScroll.clientHeight < innerScroll.scrollHeight - 1);
-                const canScrollUp = e.deltaY < 0 && (innerScroll.scrollTop > 1);
-                if (canScrollDown || canScrollUp) return;
+    window.setCalendarViewMode = function(mode) {
+        calendarViewMode = mode;
+        const btnM = document.getElementById('btnCalModeMonth');
+        const btnW = document.getElementById('btnCalModeWeek');
+        const inact = "px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
+        const act = "px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+        if (btnM) btnM.className = mode === 'month' ? act : inact;
+        if (btnW) btnW.className = mode === 'week' ? act : inact;
+        window.renderCalendarView();
+    };
+
+    window.setCalendarConsultantFilter = function(cVal) {
+        calendarConsultantFilter = cVal;
+        window.renderCalendarView();
+    };
+
+    // Compatibilidad retroactiva
+    window.setTimelineConsultantFilter = window.setCalendarConsultantFilter;
+
+    window.onCalendarPillClick = function(pType, id, e) {
+        if (e) e.stopPropagation();
+        window.selectNode(pType, id);
+    };
+
+    window.onCalendarDayClick = function(dateStr, e) {
+        if (e && e.target && e.target.closest('[data-cal-pill]')) return;
+        const [y, m, d] = dateStr.split('-');
+        calendarDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        window.setCalendarViewMode('week');
+    };
+
+    function getCalendarEvents() {
+        const events = [];
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        const collectProject = (p, pType, parentName, modColor) => {
+            const pCons = getProjectConsultants(p);
+            if (calendarConsultantFilter !== 'ALL' && !pCons.includes(calendarConsultantFilter)) {
+                return;
             }
-            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                tCols.scrollLeft += e.deltaY;
-                e.preventDefault();
-            }
-        }, { passive: false });
-    };
 
-    // Helper: Obtener el siguiente viernes de una fecha
-    function getNextFriday(d) {
-        const date = new Date(d);
-        const day = date.getDay();
-        const diff = (5 - day + 7) % 7;
-        date.setDate(date.getDate() + diff);
-        date.setHours(0,0,0,0);
-        return date;
+            const dLine = (p.deadline || p.clientDeliveryDate || '').trim();
+            if (dLine && /^\d{4}-\d{2}-\d{2}$/.test(dLine)) {
+                const isDone = isCompletedStatus(p.status);
+                const isOver = !isDone && dLine < todayStr;
+                events.push({
+                    id: p.id,
+                    pType: pType,
+                    title: p.name || 'Proyecto sin nombre',
+                    date: dLine,
+                    type: 'project',
+                    priority: parseInt(p.priority, 10) || 1,
+                    status: p.status || 'No Iniciado',
+                    progress: p.progress || 0,
+                    consultants: pCons,
+                    parentName: parentName || 'Directos',
+                    color: modColor || '#ee6018',
+                    isDone: isDone,
+                    isOverdue: isOver
+                });
+            }
+
+            if (p.docs && typeof p.docs === 'object') {
+                Object.keys(p.docs).forEach(k => {
+                    const doc = p.docs[k];
+                    if (doc && doc.fecha_compromiso && /^\d{4}-\d{2}-\d{2}$/.test(doc.fecha_compromiso.trim())) {
+                        const cDate = doc.fecha_compromiso.trim();
+                        const isDocDone = !!doc.checked;
+                        const isDocOver = !isDocDone && cDate < todayStr;
+                        events.push({
+                            id: p.id,
+                            pType: pType,
+                            title: `📄 ${doc.nombre || 'Doc'}: ${p.name}`,
+                            date: cDate,
+                            type: 'doc',
+                            priority: parseInt(p.priority, 10) || 1,
+                            status: isDocDone ? 'Entregado' : 'Pendiente',
+                            progress: isDocDone ? 100 : 0,
+                            consultants: pCons,
+                            parentName: parentName || 'Directos',
+                            color: isDocDone ? '#a0ca92' : '#3b82f6',
+                            isDone: isDocDone,
+                            isOverdue: isDocOver
+                        });
+                    }
+                });
+            }
+        };
+
+        (appData.directProjects || []).forEach(p => collectProject(p, 'direct-project', (appData.directHub && appData.directHub.name) || 'Directos', '#f59e0b'));
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => collectProject(p, 'project', m.name, m.color)));
+
+        return events;
     }
 
-    function formatDateShort(d) {
-        if (!d || isNaN(d.getTime())) return '';
-        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-        return `${days[d.getDay()]} ${d.getDate()}/${months[d.getMonth()]}`;
+    function getMonthGridDays(year, month) {
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const prevMonthLastDay = new Date(year, month, 0);
+
+        const daysInMonth = lastDay.getDate();
+        const daysInPrevMonth = prevMonthLastDay.getDate();
+        const startDayIndex = (firstDay.getDay() + 6) % 7; // Lunes = 0
+
+        const days = [];
+
+        // Días del mes anterior
+        for (let i = startDayIndex - 1; i >= 0; i--) {
+            const d = daysInPrevMonth - i;
+            const prevMonth = month === 0 ? 11 : month - 1;
+            const prevYear = month === 0 ? year - 1 : year;
+            const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            days.push({ dayNumber: d, dateStr, isCurrentMonth: false, dayOfWeek: (days.length) % 7 });
+        }
+
+        // Días del mes actual
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            days.push({ dayNumber: d, dateStr, isCurrentMonth: true, dayOfWeek: (days.length) % 7 });
+        }
+
+        // Días del mes siguiente
+        const totalSlots = days.length <= 35 ? 35 : 42;
+        let nextDay = 1;
+        while (days.length < totalSlots) {
+            const nextMonth = month === 11 ? 0 : month + 1;
+            const nextYear = month === 11 ? year + 1 : year;
+            const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(nextDay).padStart(2, '0')}`;
+            days.push({ dayNumber: nextDay, dateStr, isCurrentMonth: false, dayOfWeek: (days.length) % 7 });
+            nextDay++;
+        }
+
+        return days;
     }
 
-    window.renderTimelineBoard = function() {
-        const boardContainer = document.getElementById('timelineBoardColumns');
+    function getWeekDays(date) {
+        const d = new Date(date);
+        const day = (d.getDay() + 6) % 7; // Lunes = 0
+        const monday = new Date(d);
+        monday.setDate(d.getDate() - day);
+        monday.setHours(0,0,0,0);
+
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const cur = new Date(monday);
+            cur.setDate(monday.getDate() + i);
+            const dateStr = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+            days.push({ dayNumber: cur.getDate(), dateStr, date: cur, dayOfWeek: i });
+        }
+        return days;
+    }
+
+    window.renderCalendarView = function() {
+        const container = document.getElementById('timelineBoardColumns');
         const countBadge = document.getElementById('timelineCountBadge');
         const cFilter = document.getElementById('timelineConsultantFilter');
-        if (!boardContainer) return;
+        const monthLabel = document.getElementById('calMonthYearLabel');
+        if (!container) return;
+
+        const monthsLong = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const y = calendarDate.getFullYear();
+        const m = calendarDate.getMonth();
+
+        if (monthLabel) {
+            if (calendarViewMode === 'month') {
+                monthLabel.textContent = `${monthsLong[m]} ${y}`;
+            } else {
+                const wDays = getWeekDays(calendarDate);
+                const firstD = wDays[0].dayNumber;
+                const lastD = wDays[6].dayNumber;
+                const lastM = wDays[6].date.getMonth();
+                monthLabel.textContent = `${firstD} - ${lastD} ${monthsLong[lastM].slice(0,3)} ${y}`;
+            }
+        }
 
         // Llenar selector de consultores si está vacío
         if (cFilter && cFilter.options.length <= 1) {
-            let htmlOpts = '<option value="ALL">👤 Todos los Consultores</option>';
+            let htmlOpts = '<option value="ALL">👤 Todos</option>';
             Object.keys(consultants).sort().forEach(c => {
                 htmlOpts += `<option value="${escapeHtml(c)}">👤 ${escapeHtml(c)}</option>`;
             });
             cFilter.innerHTML = htmlOpts;
-            cFilter.value = timelineConsultantFilter;
+            cFilter.value = calendarConsultantFilter;
         }
 
-        const allProjs = [];
-        (appData.directProjects || []).forEach(p => {
-            allProjs.push({
-                ...p,
-                pType: 'direct-project',
-                parentName: (appData.directHub && appData.directHub.name) || 'Directos',
-                parentModId: 'hub-direct',
-                parentColor: (appData.directHub && appData.directHub.color) || '#f59e0b'
-            });
-        });
-        (appData.modules || []).forEach(m => {
-            (m.projects || []).forEach(p => {
-                allProjs.push({
-                    ...p,
-                    pType: 'project',
-                    parentName: m.name || 'Módulo',
-                    parentModId: m.id,
-                    parentColor: m.color || '#eeeeee'
-                });
-            });
-        });
-
-        // Filtrar por consultor si está activo
-        const filteredProjs = timelineConsultantFilter === 'ALL'
-            ? allProjs
-            : allProjs.filter(p => getProjectConsultants(p).includes(timelineConsultantFilter));
+        const events = getCalendarEvents();
+        if (countBadge) {
+            countBadge.textContent = `${events.length} ENTREGA${events.length === 1 ? '' : 'S'}`;
+        }
 
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const thisFriday = getNextFriday(today);
-        const nextFriday = new Date(thisFriday);
-        nextFriday.setDate(nextFriday.getDate() + 7);
-        const twoWeeksFriday = new Date(nextFriday);
-        twoWeeksFriday.setDate(twoWeeksFriday.getDate() + 7);
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        if (timelineFilterMode === 'friday') {
-            // MODO 1: VIERNES DE ENTREGA
-            const colOverdue = { id: 'overdue', label: '🔴 Retraso / Vencidos', color: '#ef4444', items: [] };
-            const colThisFriday = { id: 'thisFriday', label: `⚡ Viernes Actual (${formatDateShort(thisFriday)})`, color: '#ee6018', items: [] };
-            const colNextFriday = { id: 'nextFriday', label: `📅 Próximo Viernes (${formatDateShort(nextFriday)})`, color: '#3b82f6', items: [] };
-            const colTwoWeeks = { id: 'twoWeeks', label: `📌 En 2 Semanas (${formatDateShort(twoWeeksFriday)})`, color: '#8b5cf6', items: [] };
-            const colFuture = { id: 'future', label: '🗓️ Siguientes Semanas', color: '#10b981', items: [] };
-            const colNoDate = { id: 'noDate', label: '⚪ Sin Fecha Definida', color: '#6b7280', items: [] };
-
-            filteredProjs.forEach(p => {
-                if (!p.deadline) {
-                    colNoDate.items.push(p);
-                    return;
-                }
-                const [y, m, d] = p.deadline.split('-');
-                const dDate = new Date(y, m - 1, d);
-                dDate.setHours(0,0,0,0);
-
-                if (isCompletedStatus(p.status)) {
-                    return;
-                }
-
-                if (dDate < today) {
-                    colOverdue.items.push(p);
-                } else if (dDate <= thisFriday) {
-                    colThisFriday.items.push(p);
-                } else if (dDate <= nextFriday) {
-                    colNextFriday.items.push(p);
-                } else if (dDate <= twoWeeksFriday) {
-                    colTwoWeeks.items.push(p);
-                } else {
-                    colFuture.items.push(p);
-                }
-            });
-
-            const timelineCols = [colOverdue, colThisFriday, colNextFriday, colTwoWeeks, colFuture, colNoDate];
-            const totalScheduled = timelineCols.reduce((acc, c) => acc + c.items.length, 0);
-            if (countBadge) countBadge.textContent = `${totalScheduled} ENTREGAS`;
-
-            let htmlCols = '';
-            timelineCols.forEach(col => {
-                col.items.sort((a, b) => (parseInt(a.priority, 10) || 99) - (parseInt(b.priority, 10) || 99));
-
-                const cardsHtml = col.items.map(p => {
-                    const isSelected = currentSelection && currentSelection.id === p.id;
-                    const pCons = getProjectConsultants(p);
-                    const prioVal = parseInt(p.priority, 10) || 1;
-                    const comps = window.getProjectCompanies(p);
-                    const compBadges = comps.map(c => `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[9px]">${escapeHtml(c)}</span>`).join(' ');
-
-                    return `
-                    <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${col.color}" onclick="window.selectNode('${p.pType}', '${p.id}')">
-                      <div class="flex items-center justify-between gap-1">
-                        <div class="flex items-center gap-1.5">
-                          <span class="font-mono text-xs font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${prioVal}</span>
-                          <span class="font-mono text-[9px] text-[#a0ca92] uppercase font-semibold">${p.progress || 0}%</span>
-                        </div>
-                        <span class="font-mono text-[9px] text-[#b8b3b0] bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">⏱ ${p.deadline || 'Sin fecha'}</span>
-                      </div>
-                      <h4 class="text-xs sm:text-[13px] font-medium text-[#eeeeee] leading-snug line-clamp-2 group-hover:text-[#fafafa] transition">${escapeHtml(p.name)}</h4>
-                      <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#2d2a29]/80 font-mono text-[9px] text-[#8a8380]">
-                        <span class="truncate">${pCons.length > 0 ? '👤 ' + escapeHtml(pCons.join(', ')) : 'Sin asignar'}</span>
-                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                          <button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
-                        </div>
-                      </div>
-                    </div>`;
-                }).join('');
-
-                htmlCols += `
-                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
-                  <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${col.color}">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${col.color}"></span>
-                      <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${col.label}</h3>
-                    </div>
-                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${col.items.length}</span>
-                  </div>
-                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-                    ${col.items.length > 0 ? cardsHtml : '<div class="p-6 text-center text-[#8a8380] font-mono text-xs uppercase">Sin entregas para este periodo</div>'}
-                  </div>
-                </div>`;
-            });
-
-            boardContainer.innerHTML = htmlCols;
-        } else {
-            // MODO 2: AUDITORÍA DOCS (COMPROMISOS DOCUMENTALES PMO)
-            const auditDocs = [
-                { key: 'propuesta', name: '01. Propuesta Técnica/Económica', color: '#ee6018' },
-                { key: 'contrato', name: '02. Contrato / Convenio', color: '#f59e0b' },
-                { key: 'requerimientos', name: '03. Requerimientos / Especificación', color: '#3b82f6' },
-                { key: 'pruebas', name: '04. Matriz de Pruebas / QA', color: '#8b5cf6' },
-                { key: 'liberacion', name: '05. Carta de Liberación / Acta', color: '#10b981' }
+        if (calendarViewMode === 'month') {
+            // === VISTA MENSUAL (CUADRÍCULA 7 COLUMNAS) ===
+            const gridDays = getMonthGridDays(y, m);
+            const dayHeaders = [
+                { name: 'LUN', full: 'Lunes' },
+                { name: 'MAR', full: 'Martes' },
+                { name: 'MIÉ', full: 'Miércoles' },
+                { name: 'JUE', full: 'Jueves' },
+                { name: 'VIE ★', full: 'Viernes', isFriday: true },
+                { name: 'SÁB', full: 'Sábado' },
+                { name: 'DOM', full: 'Domingo' }
             ];
 
-            let totalDocCommitments = 0;
-            let htmlCols = '';
+            let html = '<div class="flex-1 flex flex-col min-h-0 bg-[#101010]">';
+            
+            // Fila de encabezados de días
+            html += '<div class="grid grid-cols-7 border-b border-[#24211f] bg-[#141211] shrink-0">';
+            dayHeaders.forEach(dh => {
+                html += `
+                <div class="py-2 px-1 text-center font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider ${dh.isFriday ? 'text-[#ee6018] bg-[#ee6018]/10' : 'text-[#8a8380]'}">
+                    <span class="sm:hidden">${dh.name.slice(0, 1)}${dh.isFriday ? '★' : ''}</span>
+                    <span class="hidden sm:inline">${dh.name}</span>
+                </div>`;
+            });
+            html += '</div>';
 
-            auditDocs.forEach(dCat => {
-                const docItems = [];
-                filteredProjs.forEach(p => {
-                    const dObj = p.docs && p.docs[dCat.key];
-                    if (dObj && (dObj.fecha_compromiso || dObj.checked)) {
-                        docItems.push({
-                            project: p,
-                            doc: dObj,
-                            isDelivered: !!dObj.checked,
-                            commitDate: dObj.fecha_compromiso || 'Sin fecha'
-                        });
-                        totalDocCommitments++;
-                    }
+            // Cuadrícula de días
+            const numRows = gridDays.length / 7;
+            html += `<div class="flex-1 grid grid-cols-7 grid-rows-${numRows} min-h-0 border-b border-[#24211f] divide-x divide-y divide-[#24211f] overflow-y-auto">`;
+
+            gridDays.forEach(gd => {
+                const isToday = gd.dateStr === todayStr;
+                const isFriday = gd.dayOfWeek === 4;
+                const dayEvents = events.filter(e => e.date === gd.dateStr);
+
+                dayEvents.sort((a, b) => a.priority - b.priority);
+
+                let pillsHtml = '';
+                const maxDisplay = 3;
+                dayEvents.slice(0, maxDisplay).forEach(ev => {
+                    const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
+                    pillsHtml += `
+                    <div data-cal-pill="true" onclick="window.onCalendarPillClick('${ev.pType}', '${ev.id}', event)" class="group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#181615] hover:bg-[#252220] border border-[#2d2a29] hover:border-[#eeeeee] transition text-[9px] sm:text-[10px] font-mono cursor-pointer select-none truncate" style="border-left: 2px solid ${ev.color}" title="${escapeHtml(ev.title)} (${ev.status})">
+                      <span class="text-[8px] sm:text-[9px] shrink-0">${statusIcon}</span>
+                      <span class="truncate text-[#eeeeee] group-hover:text-[#fafafa]">${escapeHtml(ev.title)}</span>
+                      <span class="text-[#8a8380] text-[8px] shrink-0 hidden sm:inline">${ev.progress}%</span>
+                    </div>`;
                 });
 
-                const cardsHtml = docItems.map(item => {
-                    const p = item.project;
-                    const isSelected = currentSelection && currentSelection.id === p.id;
-                    const pCons = getProjectConsultants(p);
+                if (dayEvents.length > maxDisplay) {
+                    const remaining = dayEvents.length - maxDisplay;
+                    pillsHtml += `<div class="text-[8px] sm:text-[9px] font-mono text-[#ee6018] hover:underline px-1 cursor-pointer">+ ${remaining} más...</div>`;
+                }
 
-                    return `
-                    <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${dCat.color}" onclick="window.selectNode('${p.pType}', '${p.id}')">
-                      <div class="flex items-center justify-between gap-1">
-                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] ${item.isDelivered ? 'bg-[#a0ca92]/20 text-[#a0ca92] border border-[#a0ca92]/40' : 'bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40'} font-bold">
-                          ${item.isDelivered ? '✓ ENTREGADO' : '⏳ PENDIENTE'}
-                        </span>
-                        <span class="font-mono text-[9px] text-[#b8b3b0] bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(item.commitDate)}</span>
-                      </div>
-                      <h4 class="text-xs sm:text-[13px] font-medium text-[#eeeeee] leading-snug line-clamp-2 group-hover:text-[#fafafa] transition">${escapeHtml(p.name)}</h4>
-                      <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#2d2a29]/80 font-mono text-[9px] text-[#8a8380]">
-                        <span class="truncate">${pCons.length > 0 ? '👤 ' + escapeHtml(pCons.join(', ')) : 'Sin asignar'}</span>
-                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                          <button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
-                        </div>
-                      </div>
-                    </div>`;
-                }).join('');
-
-                htmlCols += `
-                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
-                  <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${dCat.color}">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dCat.color}"></span>
-                      <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${dCat.name}</h3>
-                    </div>
-                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${docItems.length}</span>
+                html += `
+                <div onclick="window.onCalendarDayClick('${gd.dateStr}', event)" class="flex flex-col p-1 sm:p-1.5 min-h-0 overflow-hidden ${gd.isCurrentMonth ? 'bg-[#121110]' : 'bg-[#0a0a09]'} ${isToday ? 'ring-1 ring-[#ee6018] ring-inset bg-[#1a1512]' : ''} hover:bg-[#181615] transition cursor-pointer group relative">
+                  <div class="flex items-center justify-between mb-1 shrink-0">
+                    <span class="${isToday ? 'w-5 h-5 rounded-full bg-[#ee6018] text-[#101010] font-bold flex items-center justify-center text-[10px]' : (gd.isCurrentMonth ? 'text-[#eeeeee] text-[10px] sm:text-[11px] font-mono' : 'text-[#55504d] text-[10px]')}">
+                      ${gd.dayNumber}
+                    </span>
+                    ${isFriday ? '<span class="hidden sm:inline font-mono text-[8px] text-[#ee6018] font-bold tracking-tight">VIE</span>' : ''}
+                    ${dayEvents.length > 0 ? `<span class="sm:hidden font-mono text-[8px] px-1 rounded-[2px] bg-[#1d1a18] text-[#ee6018] font-bold">${dayEvents.length}</span>` : ''}
                   </div>
-                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-                    ${docItems.length > 0 ? cardsHtml : '<div class="p-6 text-center text-[#8a8380] font-mono text-xs uppercase">Sin documentos comprometidos</div>'}
+                  <div class="flex-1 overflow-y-auto space-y-1 scrollbar-none">
+                    ${pillsHtml}
                   </div>
                 </div>`;
             });
 
-            if (countBadge) countBadge.textContent = `${totalDocCommitments} DOCUMENTOS`;
-            boardContainer.innerHTML = htmlCols;
-        }
+            html += '</div></div>';
+            container.innerHTML = html;
 
-        if (typeof window.bindTimelineBoardScroll === 'function') {
-            window.bindTimelineBoardScroll();
+        } else {
+            // === VISTA SEMANAL (7 COLUMNAS DETALLADAS) ===
+            const weekDays = getWeekDays(calendarDate);
+            const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+            let html = '<div class="flex-1 flex overflow-x-auto divide-x divide-[#24211f] bg-[#101010] p-2 sm:p-4 gap-2 sm:gap-3">';
+
+            weekDays.forEach(wd => {
+                const isToday = wd.dateStr === todayStr;
+                const isFriday = wd.dayOfWeek === 4;
+                const dayEvents = events.filter(e => e.date === wd.dateStr);
+                dayEvents.sort((a, b) => a.priority - b.priority);
+
+                let cardsHtml = '';
+                if (dayEvents.length === 0) {
+                    cardsHtml = `<div class="h-32 flex flex-col items-center justify-center text-center p-3 font-mono text-[10px] text-[#55504d] border border-dashed border-[#24211f] rounded-[6px]">Sin entregas</div>`;
+                } else {
+                    cardsHtml = dayEvents.map(ev => {
+                        const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
+                        const statusClass = ev.isDone ? 'text-[#a0ca92]' : (ev.isOverdue ? 'text-[#ef4444]' : 'text-[#ee6018]');
+                        const isSelected = currentSelection && currentSelection.id === ev.id;
+
+                        return `
+                        <div data-node-id="${ev.id}" onclick="window.selectNode('${ev.pType}', '${ev.id}')" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[6px] p-2.5 transition cursor-pointer flex flex-col gap-1.5 shadow-sm" style="border-left: 3px solid ${ev.color}">
+                          <div class="flex items-center justify-between gap-1">
+                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
+                            <span class="font-mono text-[9px] ${statusClass} font-semibold">${statusIcon} ${ev.status}</span>
+                          </div>
+                          <h4 class="text-xs font-medium text-[#eeeeee] leading-snug line-clamp-2 hover:text-[#fafafa]">${escapeHtml(ev.title)}</h4>
+                          <div class="flex items-center justify-between gap-1 pt-1 border-t border-[#2d2a29] font-mono text-[9px] text-[#8a8380]">
+                            <span class="truncate">${ev.consultants && ev.consultants.length > 0 ? '👤 ' + escapeHtml(ev.consultants.join(', ')) : 'Sin asignar'}</span>
+                            <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                              <button type="button" onclick="window.jumpToMapNode('${ev.pType}', '${ev.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
+                            </div>
+                          </div>
+                        </div>`;
+                    }).join('');
+                }
+
+                html += `
+                <div class="w-64 sm:w-72 shrink-0 bg-[#121110] border ${isToday ? 'border-[#ee6018]' : 'border-[#24211f]'} rounded-[8px] flex flex-col overflow-hidden shadow-lg">
+                  <div class="p-2.5 sm:p-3 bg-[#181615] border-b border-[#24211f] flex items-center justify-between ${isFriday ? 'border-t-2 border-t-[#ee6018]' : ''}">
+                    <div class="flex items-center gap-2">
+                      <span class="${isToday ? 'w-5 h-5 rounded-full bg-[#ee6018] text-[#101010] font-bold flex items-center justify-center text-[10px]' : 'font-mono text-xs font-semibold text-[#fafafa]'}">
+                        ${wd.dayNumber}
+                      </span>
+                      <span class="font-mono text-[11px] sm:text-xs font-semibold uppercase text-[#eeeeee]">${dayNames[wd.dayOfWeek]}</span>
+                      ${isFriday ? '<span class="font-mono text-[8px] px-1 py-0.5 rounded-[2px] bg-[#ee6018]/20 text-[#ee6018] font-bold">ENTREGA</span>' : ''}
+                    </div>
+                    <span class="font-mono text-[10px] px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] font-medium">${dayEvents.length}</span>
+                  </div>
+                  <div class="flex-1 overflow-y-auto p-2 sm:p-2.5 space-y-2 scrollbar-thin">
+                    ${cardsHtml}
+                  </div>
+                </div>`;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
         }
     };
+
+    // Alias para compatibilidad
+    window.renderTimelineBoard = window.renderCalendarView;
