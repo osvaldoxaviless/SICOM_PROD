@@ -4550,7 +4550,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (linkHref) {
                 // Píldora amarilla clickable según requerimiento Fase 2 (🎫 #[id] ↗)
                 cont.innerHTML = `
-                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-yellow-200 hover:bg-yellow-300 border border-yellow-400 text-yellow-900 font-medium font-mono text-[10px] px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition shadow-sm" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
+                <a href="${escapeHtml(linkHref)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="bg-yellow-200 hover:bg-yellow-300 border border-yellow-400 text-yellow-900 font-medium font-mono text-[10px] px-2.5 py-0.5 rounded-[3px] inline-flex items-center gap-1.5 transition" title="Abrir ticket ${escapeHtml(ticketDisplay)} en InvGate ↗">
                     <span>🎫</span>
                     <span class="truncate max-w-[120px]">${escapeHtml(ticketDisplay)}</span>
                     <span class="text-xs">↗</span>
@@ -6477,7 +6477,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       container.innerHTML = options.map(opt => {
         const isChecked = selSet.has(opt.id) || (opt.id === 'DIRECT' && selSet.has('hub-direct'));
         return `
-          <label class="sec-mod-toggle-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium shadow-sm' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" style="${isChecked ? `border-color: ${opt.color || '#ee6018'};` : ''}">
+          <label class="sec-mod-toggle-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" style="${isChecked ? `border-color: ${opt.color || '#ee6018'};` : ''}">
             <input type="checkbox" value="${escapeHtml(opt.id)}" class="${prefix}SecMod-chk sr-only" ${isChecked ? 'checked' : ''} onchange="window.handleSecondaryModuleCheckboxChange('${prefix}')">
             <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${opt.color}"></span>
             <span>${opt.icon} ${escapeHtml(opt.name)}</span>
@@ -6529,7 +6529,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       chipsCont.innerHTML = options.map(opt => {
         const isSel = (opt.id === current);
         return `
-          <button type="button" onclick="window.selectProjectBaseLocation('${prefix}', '${opt.id}')" class="loc-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] transition border ${isSel ? 'bg-[#eeeeee] text-[#101010] font-semibold border-[#eeeeee] shadow-sm' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" title="Asignar como módulo base">
+          <button type="button" onclick="window.selectProjectBaseLocation('${prefix}', '${opt.id}')" class="loc-chip inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] transition border ${isSel ? 'bg-[#eeeeee] text-[#101010] font-semibold border-[#eeeeee]' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}" title="Asignar como módulo base">
             <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${opt.color}"></span>
             <span>${opt.icon} ${escapeHtml(opt.name)}</span>
             ${isSel ? `<span class="text-[8px] px-1 py-0.2 rounded bg-[#101010]/20 text-[#101010] font-bold">BASE</span>` : ''}
@@ -6578,7 +6578,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const isChecked = selSet.has(comp);
         const style = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)' };
         return `
-          <label class="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border shadow-sm ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}">
+          <label class="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] cursor-pointer transition select-none border ${isChecked ? 'bg-[#ee6018]/15 border-[#ee6018] text-[#fafafa] font-medium' : 'bg-[#101010] border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] hover:border-[#4d4947]'}">
             <input type="checkbox" value="${escapeHtml(comp)}" class="${prefix}Comp-chk sr-only" ${isChecked ? 'checked' : ''} onchange="window.handleCompanyCheckboxChange('${prefix}')">
             <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${style.color || '#ee6018'}"></span>
             <span>${escapeHtml(comp)}</span>
@@ -7116,7 +7116,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     </div>
 
                     <!-- BOTÓN MASTER: VER TODOS LOS CONSULTORES (SIEMPRE VISIBLE ARRIBA) -->
-                    <button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="w-full px-3 py-2 rounded-[3px] border font-mono text-[11px] uppercase transition flex items-center justify-between select-none ${isAllAct ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018] font-semibold shadow-sm' : 'bg-[#161413] hover:bg-[#1d1a18] text-[#eeeeee] border-[#3d3a39]'}">
+                    <button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="w-full px-3 py-2 rounded-[3px] border font-mono text-[11px] uppercase transition flex items-center justify-between select-none ${isAllAct ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018] font-semibold' : 'bg-[#161413] hover:bg-[#1d1a18] text-[#eeeeee] border-[#3d3a39]'}">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full ${isAllAct ? 'bg-[#fafafa]' : 'bg-[#ee6018]'}"></span>
                             <span>🌐 Ver Todos los Consultores</span>
@@ -7245,7 +7245,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const setActiveTabStyle = (activeMode) => {
             // Conmutador de escritorio (Header)
             const dInact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            const dAct = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+            const dAct = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
             if (btnMap) btnMap.className = (activeMode === 'map') ? dAct : dInact;
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
@@ -7255,7 +7255,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
             const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
             const mInact = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            const mAct = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+            const mAct = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
             if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
             if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
             if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline') ? mAct : mInact;
@@ -7399,11 +7399,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const btnT = document.getElementById('btnGroupTier');
         if (btnC && btnT) {
             if (groupBy === 'consultant') {
-                btnC.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+                btnC.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
                 btnT.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
             } else {
                 btnC.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-                btnT.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+                btnT.className = "px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
             }
         }
         window.renderPriorityBoard();
@@ -7619,7 +7619,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 : (isOver ? 'border-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60');
 
             return `
-            <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${cardBorder} rounded-[8px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none shadow-md" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
+            <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${cardBorder} rounded-[10px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
               <div class="flex items-center justify-between gap-1.5 min-w-0">
                 <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
                   <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] shadow-inner" style="color: ${accentColor || '#ee6018'}">*${prioVal}</span>
@@ -7694,7 +7694,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const cardsHtml = cProjs.map(p => renderCard(p, cData.color)).join('');
 
                 htmlColumns += `
-                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
+                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[10px] flex flex-col max-h-full overflow-hidden">
                   <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${cData.color}">
                     <div class="flex items-center gap-2 min-w-0">
                       <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
@@ -7749,7 +7749,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const pct = matchingProjs.length > 0 ? Math.round((tierProjs.length / matchingProjs.length) * 100) : 0;
 
                 htmlColumns += `
-                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[8px] flex flex-col max-h-full overflow-hidden shadow-lg">
+                <div class="w-80 sm:w-88 shrink-0 bg-[#121110] border border-[#262321] rounded-[10px] flex flex-col max-h-full overflow-hidden">
                   <div class="p-3 bg-[#181615] border-b border-[#262321] flex items-center justify-between" style="border-left: 3px solid ${tier.color}">
                     <div class="flex items-center gap-2 min-w-0">
                       <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${tier.color}"></span>
@@ -14720,7 +14720,7 @@ window.renderExecutiveMatrixAndCharts = function() {
                 if (count > 0) {
                     matrixHtml += `
                     <td class="p-1 text-center">
-                        <button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}', estado: '${statusName}' })" class="px-2 py-0.5 rounded font-mono text-[10px] font-bold transition hover:scale-110 shadow-sm cursor-pointer" style="background-color: ${cat.bg}; color: ${cat.color}; border: 1px solid ${cat.color}60;" title="Filtrar ${comp} en ${statusName}">
+                        <button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}', estado: '${statusName}' })" class="px-2 py-0.5 rounded-[3px] font-mono text-[10px] font-bold transition hover:scale-110 cursor-pointer" style="background-color: ${cat.bg}; color: ${cat.color}; border: 1px solid ${cat.color}60;" title="Filtrar ${comp} en ${statusName}">
                             ${count}
                         </button>
                     </td>`;
@@ -14987,7 +14987,7 @@ document.addEventListener('click', function(e) {
         const btnM = document.getElementById('btnCalModeMonth');
         const btnW = document.getElementById('btnCalModeWeek');
         const inact = "px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-        const act = "px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm";
+        const act = "px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
         if (btnM) btnM.className = mode === 'month' ? act : inact;
         if (btnW) btnW.className = mode === 'week' ? act : inact;
         window.renderCalendarView();
@@ -15099,7 +15099,7 @@ document.addEventListener('click', function(e) {
 
         if (dayEvents.length === 0) {
             listEl.innerHTML = `
-                <div class="py-12 px-4 flex flex-col items-center justify-center text-center bg-[#141211] border border-dashed border-[#2d2a29] rounded-[8px]">
+                <div class="py-12 px-4 flex flex-col items-center justify-center text-center bg-[#141211] border border-dashed border-[#2d2a29] rounded-[10px]">
                     <span class="text-2xl mb-2">🗓️</span>
                     <h4 class="font-mono text-xs uppercase text-[#eeeeee] mb-1">Sin entregas programadas</h4>
                     <p class="text-[11px] text-[#8a8380] mb-4">No hay proyectos, documentos ni tareas asignadas con vencimiento en esta fecha.</p>
@@ -15119,7 +15119,7 @@ document.addEventListener('click', function(e) {
             const typeLabel = ev.type === 'doc' ? 'Auditoría PMO' : 'Entrega Proyecto';
 
             return `
-            <div class="bg-[#141211] border border-[#2d2a29] hover:border-[#eeeeee]/60 rounded-[8px] p-3.5 transition flex flex-col gap-2.5 shadow-sm" style="border-left: 3px solid ${ev.color}">
+            <div class="bg-[#141211] border border-[#2d2a29] hover:border-[#eeeeee]/60 rounded-[10px] p-3.5 transition flex flex-col gap-2.5" style="border-left: 3px solid ${ev.color}">
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
                         <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
@@ -15139,10 +15139,10 @@ document.addEventListener('click', function(e) {
                     </div>
 
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button type="button" onclick="closeCalendarDayModal(); window.selectNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer font-bold">
+                        <button type="button" onclick="closeCalendarDayModal(); window.selectNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer font-bold">
                             Ficha Técnica ↗
                         </button>
-                        <button type="button" onclick="closeCalendarDayModal(); window.jumpToMapNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[2px] bg-[#1d1a18] hover:bg-[#24211f] text-[#8a8380] hover:text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer">
+                        <button type="button" onclick="closeCalendarDayModal(); window.jumpToMapNode('${ev.pType}', '${ev.id}')" class="px-2 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#24211f] text-[#8a8380] hover:text-[#eeeeee] border border-[#3d3a39] transition cursor-pointer">
                             Mapa ↗
                         </button>
                     </div>
@@ -15374,7 +15374,7 @@ document.addEventListener('click', function(e) {
                 dayEvents.slice(0, maxDisplay).forEach(ev => {
                     const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
                     pillsHtml += `
-                    <div data-cal-pill="true" onclick="window.onCalendarPillClick('${ev.pType}', '${ev.id}', event)" class="group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#181615] hover:bg-[#252220] border border-[#2d2a29] hover:border-[#eeeeee] transition text-[9px] sm:text-[10px] font-mono cursor-pointer select-none truncate" style="border-left: 2px solid ${ev.color}" title="${escapeHtml(ev.title)} (${ev.status})">
+                    <div data-cal-pill="true" onclick="window.onCalendarPillClick('${ev.pType}', '${ev.id}', event)" class="group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#181615] hover:bg-[#252220] border border-[#2d2a29] hover:border-[#eeeeee] transition text-[9px] sm:text-[10px] font-mono cursor-pointer select-none truncate" style="border-left: 2px solid ${ev.color}" title="${escapeHtml(ev.title)} (${ev.status})">
                       <span class="text-[8px] sm:text-[9px] shrink-0">${statusIcon}</span>
                       <span class="truncate text-[#eeeeee] group-hover:text-[#fafafa]">${escapeHtml(ev.title)}</span>
                       <span class="text-[#8a8380] text-[8px] shrink-0 hidden sm:inline">${ev.progress}%</span>
@@ -15393,7 +15393,7 @@ document.addEventListener('click', function(e) {
                       ${gd.dayNumber}
                     </span>
                     ${isFriday ? '<span class="hidden sm:inline font-mono text-[8px] text-[#ee6018] font-bold tracking-tight">VIE</span>' : ''}
-                    ${dayEvents.length > 0 ? `<span class="sm:hidden font-mono text-[8px] px-1 rounded-[2px] bg-[#1d1a18] text-[#ee6018] font-bold">${dayEvents.length}</span>` : ''}
+                    ${dayEvents.length > 0 ? `<span class="sm:hidden font-mono text-[8px] px-1 rounded-[3px] bg-[#1d1a18] text-[#ee6018] font-bold">${dayEvents.length}</span>` : ''}
                   </div>
                   <div class="flex-1 overflow-y-auto space-y-1 scrollbar-none">
                     ${pillsHtml}
@@ -15419,7 +15419,7 @@ document.addEventListener('click', function(e) {
 
                 let cardsHtml = '';
                 if (dayEvents.length === 0) {
-                    cardsHtml = `<div class="h-32 flex flex-col items-center justify-center text-center p-3 font-mono text-[10px] text-[#55504d] border border-dashed border-[#24211f] rounded-[6px]">Sin entregas</div>`;
+                    cardsHtml = `<div class="h-32 flex flex-col items-center justify-center text-center p-3 font-mono text-[10px] text-[#55504d] border border-dashed border-[#24211f] rounded-[10px]">Sin entregas</div>`;
                 } else {
                     cardsHtml = dayEvents.map(ev => {
                         const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
@@ -15427,7 +15427,7 @@ document.addEventListener('click', function(e) {
                         const isSelected = currentSelection && currentSelection.id === ev.id;
 
                         return `
-                        <div data-node-id="${ev.id}" onclick="window.selectNode('${ev.pType}', '${ev.id}')" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[6px] p-2.5 transition cursor-pointer flex flex-col gap-1.5 shadow-sm" style="border-left: 3px solid ${ev.color}">
+                        <div data-node-id="${ev.id}" onclick="window.selectNode('${ev.pType}', '${ev.id}')" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[10px] p-2.5 transition cursor-pointer flex flex-col gap-1.5" style="border-left: 3px solid ${ev.color}">
                           <div class="flex items-center justify-between gap-1">
                             <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
                             <span class="font-mono text-[9px] ${statusClass} font-semibold">${statusIcon} ${ev.status}</span>
@@ -15436,7 +15436,7 @@ document.addEventListener('click', function(e) {
                           <div class="flex items-center justify-between gap-1 pt-1 border-t border-[#2d2a29] font-mono text-[9px] text-[#8a8380]">
                             <span class="truncate">${ev.consultants && ev.consultants.length > 0 ? '👤 ' + escapeHtml(ev.consultants.join(', ')) : 'Sin asignar'}</span>
                             <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                              <button type="button" onclick="window.jumpToMapNode('${ev.pType}', '${ev.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
+                              <button type="button" onclick="window.jumpToMapNode('${ev.pType}', '${ev.id}', event)" class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
                             </div>
                           </div>
                         </div>`;
@@ -15444,16 +15444,16 @@ document.addEventListener('click', function(e) {
                 }
 
                 html += `
-                <div class="w-64 sm:w-72 shrink-0 bg-[#121110] border ${isToday ? 'border-[#ee6018]' : 'border-[#24211f]'} rounded-[8px] flex flex-col overflow-hidden shadow-lg">
+                <div class="w-64 sm:w-72 shrink-0 bg-[#121110] border ${isToday ? 'border-[#ee6018]' : 'border-[#24211f]'} rounded-[10px] flex flex-col overflow-hidden">
                   <div class="p-2.5 sm:p-3 bg-[#181615] border-b border-[#24211f] flex items-center justify-between ${isFriday ? 'border-t-2 border-t-[#ee6018]' : ''}">
                     <div class="flex items-center gap-2">
                       <span class="${isToday ? 'w-5 h-5 rounded-full bg-[#ee6018] text-[#101010] font-bold flex items-center justify-center text-[10px]' : 'font-mono text-xs font-semibold text-[#fafafa]'}">
                         ${wd.dayNumber}
                       </span>
                       <span class="font-mono text-[11px] sm:text-xs font-semibold uppercase text-[#eeeeee]">${dayNames[wd.dayOfWeek]}</span>
-                      ${isFriday ? '<span class="font-mono text-[8px] px-1 py-0.5 rounded-[2px] bg-[#ee6018]/20 text-[#ee6018] font-bold">ENTREGA</span>' : ''}
+                      ${isFriday ? '<span class="font-mono text-[8px] px-1 py-0.5 rounded-[3px] bg-[#ee6018]/20 text-[#ee6018] font-bold">ENTREGA</span>' : ''}
                     </div>
-                    <span class="font-mono text-[10px] px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] font-medium">${dayEvents.length}</span>
+                    <span class="font-mono text-[10px] px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] font-medium">${dayEvents.length}</span>
                   </div>
                   <div class="flex-1 overflow-y-auto p-2 sm:p-2.5 space-y-2 scrollbar-thin">
                     ${cardsHtml}

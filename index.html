@@ -115,7 +115,7 @@
   </div>
 
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ABAJO A LA DERECHA, JUNTO AL SPEED DIAL DE CREACIÓN) -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] shadow-lg cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[2px] hidden">0</span>
   </button>
@@ -123,7 +123,7 @@
   <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
   <div id="canvasToolsDock" class="fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex flex-col-reverse items-start select-none pointer-events-none">
       <!-- BOTÓN GATILLO HERRAMIENTAS -->
-      <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group shadow-lg pointer-events-auto" title="Herramientas del Mapa Mental">
+      <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group pointer-events-auto" title="Herramientas del Mapa Mental">
           <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
       </button>
 
@@ -854,7 +854,7 @@
 
       <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES | CRONOGRAMA) -->
       <div id="mainViewSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
-        <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Vista de Arquitectura (Mapa Mental)">
+        <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
           <span class="hidden sm:inline">Mapa</span>
         </button>
@@ -912,7 +912,7 @@
           </button>
 
           <!-- MENÚ DESPLEGABLE MÓVIL -->
-          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#141211] border border-[#3d3a39] rounded-[8px] p-2 z-[99999] shadow-2xl flex-col gap-1 origin-top-right">
+          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#141211] border border-[#3d3a39] rounded-[3px] p-2 z-[99999] flex-col gap-1 origin-top-right">
               <!-- SECCIÓN VISTAS PRINCIPALES DEL SISTEMA -->
               <div class="px-3 py-1 text-[9px] font-mono uppercase tracking-[0.08em] text-[#8a8380] flex items-center justify-between border-b border-[#252220] mb-0.5">
                   <span>Vistas del Sistema</span>
@@ -978,7 +978,7 @@
       <div class="w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
 
       <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
-      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="h-8 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer shadow-sm" title="Centro de Control // Configuración & Perfil">
+      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="h-8 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer" title="Centro de Control // Configuración & Perfil">
         <div class="flex items-center gap-1.5">
           <!-- Ícono de Configuración / Engrane -->
           <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -999,7 +999,7 @@
   <!-- BARRA MÓVIL DEDICADA DE NAVEGACIÓN DE VISTAS (SOLO MÓVIL: sm:hidden) -->
   <nav id="mobileViewSwitcherBar" aria-label="Navegación de vistas móvil" class="sm:hidden w-full h-10 px-2.5 py-1 bg-[#141211] border-b border-[#252220] flex items-center justify-between shrink-0 z-30 select-none">
     <div class="grid grid-cols-3 gap-1.5 w-full bg-[#1b1918] p-0.5 rounded-[4px] border border-[#322f2d]">
-      <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm">
+      <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
         <span>Mapa</span>
       </button>
@@ -1110,13 +1110,13 @@
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CABECERA -->
           <div class="relative lector-hide" id="priorityCreateContainer">
-            <button type="button" id="priorityCreateTrigger" onclick="window.togglePriorityCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer shadow-sm" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
+            <button type="button" id="priorityCreateTrigger" onclick="window.togglePriorityCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
               <svg class="w-3.5 h-3.5 transition-transform duration-200" id="priorityCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
               <span class="hidden sm:inline">Nuevo</span>
               <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             
-            <div id="priorityCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[4px] shadow-2xl z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+            <div id="priorityCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
               <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Proyecto</span>
                 <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
@@ -1177,7 +1177,7 @@
 
         <!-- CENTRO: SELECTOR DE MODO [ MES | SEMANA ] -->
         <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] shrink-0">
-          <button type="button" id="btnCalModeMonth" onclick="window.setCalendarViewMode('month')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm">
+          <button type="button" id="btnCalModeMonth" onclick="window.setCalendarViewMode('month')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
             Mes
           </button>
           <button type="button" id="btnCalModeWeek" onclick="window.setCalendarViewMode('week')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
@@ -1203,13 +1203,13 @@
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CALENDARIO -->
           <div class="relative lector-hide" id="calendarCreateContainer">
-            <button type="button" id="calendarCreateTrigger" onclick="window.toggleCalendarCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer shadow-sm" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
+            <button type="button" id="calendarCreateTrigger" onclick="window.toggleCalendarCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
               <svg class="w-3.5 h-3.5 transition-transform duration-200" id="calendarCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
               <span class="hidden sm:inline">Nuevo</span>
               <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             
-            <div id="calendarCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[4px] shadow-2xl z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+            <div id="calendarCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
               <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Proyecto</span>
                 <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
@@ -1340,7 +1340,7 @@
                           </select>
                           
                           <!-- TOOLTIP POPOVER DEFINICIONES DE ESTATUS -->
-                          <div id="statusTooltipPopover" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-3 z-50 text-xs shadow-2xl space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                          <div id="statusTooltipPopover" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#101010] border border-[#3d3a39] rounded-[3px] p-3 z-50 text-xs space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
                               <div class="flex justify-between items-center border-b border-[#3d3a39] pb-1.5">
                                   <span class="font-mono text-[10px] uppercase text-[#eeeeee] font-semibold">Definiciones Oficiales STGT</span>
                                   <button type="button" onclick="toggleStatusTooltip(event)" class="text-[#8a8380] hover:text-[#eeeeee] text-xs">✕</button>
@@ -2843,7 +2843,7 @@
   
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (FASE 2) -->
   <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 backdrop-blur-sm">
-      <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           <!-- HEADER DEL DASHBOARD -->
           <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-3">
@@ -2979,8 +2979,8 @@
   </div>
   
   <!-- MODAL: AGENDA Y ENTREGAS DEL DÍA (CALENDARIO INTERACTIVO) -->
-  <div id="calendarDayModal" onclick="if(event.target === this) closeCalendarDayModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4 backdrop-blur-sm">
-      <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border border-[#3d3a39] shadow-2xl relative">
+  <div id="calendarDayModal" onclick="if(event.target === this) closeCalendarDayModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border border-[#3d3a39] relative">
           <!-- CABECERA DE LA AGENDA DEL DÍA -->
           <div class="p-4 sm:p-5 pr-14 border-b border-[#2d2a29] bg-[#161413] flex items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -3001,7 +3001,7 @@
               </div>
 
               <!-- BOTÓN CERRAR -->
-              <button type="button" onclick="closeCalendarDayModal()" class="absolute top-3.5 right-3.5 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[4px] transition cursor-pointer" title="Cerrar (Esc)">
+              <button type="button" onclick="closeCalendarDayModal()" class="absolute top-3.5 right-3.5 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar (Esc)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
           </div>
@@ -3028,7 +3028,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261024_v968"></script>
+  <script type="module" src="app.js?v=20261025_v969"></script>
 
 </body>
 </html>
