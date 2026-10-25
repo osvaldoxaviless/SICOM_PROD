@@ -94,7 +94,7 @@
                       Credencial de Acceso
                   </label>
                   <div class="relative">
-                      <input type="password" id="loginPasswordInput" placeholder="Ingresa contraseña" class="w-full liquid-input rounded-[3px] p-3 pr-10 text-sm">
+                      <input type="password" id="loginPasswordInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); attemptLogin(); }" placeholder="Ingresa contraseña" class="w-full liquid-input rounded-[3px] p-3 pr-10 text-sm">
                       <button type="button" onclick="togglePasswordVisibility('loginPasswordInput', 'eyeIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#4d4947] hover:text-[#101010] transition">
                           <svg id="eyeIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                       </button>
@@ -106,7 +106,7 @@
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                       Tu Nombre (Registro de Auditoría)
                   </label>
-                  <input type="text" id="loginLectorNameInput" placeholder="Ej. Ing. Roberto..." class="w-full liquid-input rounded-[3px] p-3 text-sm">
+                  <input type="text" id="loginLectorNameInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); attemptLogin(); }" placeholder="Ej. Ing. Roberto..." class="w-full liquid-input rounded-[3px] p-3 text-sm">
               </div>
               
               <button onclick="attemptLogin()" class="pill-btn w-full py-3.5 bg-[#101010] text-[#eeeeee] hover:bg-[#1d1a18] font-mono text-[12px] uppercase tracking-[-0.24px] mt-4">Iniciar Sesión →</button>
@@ -1143,14 +1143,57 @@
           </button>
         </div>
 
-        <!-- DERECHA: FILTRO DE CONSULTOR Y CONTADOR -->
+        <!-- DERECHA: ACCIONES DEL CALENDARIO (FILTRO, TAREAS Y + NUEVO) -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <select id="timelineConsultantFilter" onchange="window.setCalendarConsultantFilter(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] sm:text-[11px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[125px] sm:max-w-[160px] truncate">
+          <select id="timelineConsultantFilter" onchange="window.setCalendarConsultantFilter(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] sm:text-[11px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[115px] sm:max-w-[150px] truncate">
             <option value="ALL">👤 Todos</option>
           </select>
-          <span id="timelineCountBadge" class="hidden sm:inline-block font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
+          <span id="timelineCountBadge" class="hidden md:inline-block font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
             0 ENTREGAS
           </span>
+
+          <!-- TAREAS DIARIAS Y NOTIFICACIONES EN CALENDARIO -->
+          <button type="button" id="btnCalendarDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+            <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            <span class="hidden sm:inline">Tareas</span>
+            <span id="calendarDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+          </button>
+
+          <!-- BOTÓN + NUEVO DESPLEGABLE EN CALENDARIO -->
+          <div class="relative lector-hide" id="calendarCreateContainer">
+            <button type="button" id="calendarCreateTrigger" onclick="window.toggleCalendarCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer shadow-sm" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
+              <svg class="w-3.5 h-3.5 transition-transform duration-200" id="calendarCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
+              <span class="hidden sm:inline">Nuevo</span>
+              <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            
+            <div id="calendarCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[4px] shadow-2xl z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Nuevo Proyecto</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+              </button>
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Tarea por Proyecto</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+              </button>
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Nueva Tarea General</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+              </button>
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Solicitar Vacaciones</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+              </button>
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Registrar Comisión</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+              </button>
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => { const nm = document.getElementById('newModName'); if (nm) nm.focus(); }, 300)" class="supremo-only hidden px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+                <span>Nuevo Módulo</span>
+                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2893,7 +2936,7 @@
       </div>
   </div>
   
-  <script type="module" src="app.js?v=20261024_v964"></script>
+  <script type="module" src="app.js?v=20261024_v965"></script>
 
 </body>
 </html>

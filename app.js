@@ -1144,6 +1144,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     
     function shakeLogin() { document.getElementById('loginCard').style.transform = 'scale(0.98)'; setTimeout(() => document.getElementById('loginCard').style.transform = 'scale(1)', 150); }
 
+    // --- LOGIN ENTER KEY HANDLING ---
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const passInput = document.getElementById('loginPasswordInput');
+            const lectorInput = document.getElementById('loginLectorNameInput');
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay && !overlay.classList.contains('hidden')) {
+                if (document.activeElement === passInput || document.activeElement === lectorInput) {
+                    e.preventDefault();
+                    if (typeof window.attemptLogin === 'function') window.attemptLogin();
+                }
+            }
+        }
+    });
+
     
     window.openTaskFeedbackModal = function(taskId, taskType, projectId = null) {
         document.getElementById('feedbackTaskId').value = taskId;
@@ -7235,6 +7250,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
             setActiveTabStyle(btnPrio);
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
@@ -7250,6 +7266,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
             setActiveTabStyle(btnTimeline);
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (boardView) boardView.classList.add('hidden');
@@ -7263,6 +7280,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         } else {
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
             setActiveTabStyle(btnMap);
             if (boardView) boardView.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
@@ -7316,6 +7334,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.closePriorityCreateMenu = function() {
         const menu = document.getElementById('priorityCreateMenu');
         const trigger = document.getElementById('priorityCreateTrigger');
+        if (menu) menu.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    window.toggleCalendarCreateMenu = function() {
+        const menu = document.getElementById('calendarCreateMenu');
+        const trigger = document.getElementById('calendarCreateTrigger');
+        if (!menu) return;
+        const isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            menu.classList.add('hidden');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+    };
+
+    window.closeCalendarCreateMenu = function() {
+        const menu = document.getElementById('calendarCreateMenu');
+        const trigger = document.getElementById('calendarCreateTrigger');
         if (menu) menu.classList.add('hidden');
         if (trigger) trigger.setAttribute('aria-expanded', 'false');
     };
@@ -10737,12 +10776,21 @@ window.renderDailyTasks = function() {
         }
     }
     const pBadge = document.getElementById('priorityDailyAlertsBadge');
+    const calBadge = document.getElementById('calendarDailyAlertsBadge');
     if (pBadge) {
         if (alertBadgeTotal > 0) {
             pBadge.textContent = alertBadgeTotal;
             pBadge.classList.remove('hidden');
         } else {
             pBadge.classList.add('hidden');
+        }
+    }
+    if (calBadge) {
+        if (alertBadgeTotal > 0) {
+            calBadge.textContent = alertBadgeTotal;
+            calBadge.classList.remove('hidden');
+        } else {
+            calBadge.classList.add('hidden');
         }
     }
 
@@ -14865,6 +14913,10 @@ document.addEventListener('click', function(e) {
     const container = document.getElementById('priorityCreateContainer');
     if (container && !container.contains(e.target)) {
         if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
+    }
+    const calContainer = document.getElementById('calendarCreateContainer');
+    if (calContainer && !calContainer.contains(e.target)) {
+        if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
     }
 });
 
