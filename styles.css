@@ -247,6 +247,39 @@ select.bg-transparent.appearance-none {
     border-color: var(--color-ash-stroke) !important;
 }
 
+/* Reglas a prueba de fallos para la tarjeta de Login */
+#loginCard svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+}
+
+#loginCard #eyeIcon {
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+}
+
+#loginCard button#btnTogglePassword {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#loginPasswordLabel,
+#loginLectorNameDiv label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+
 /* Tarjetas Bone de Superficie Clara Factory (#eeeeee sobre fondo #101010) */
 .factory-bone-card {
     background-color: var(--color-bone) !important;

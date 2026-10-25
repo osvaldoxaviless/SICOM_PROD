@@ -85,8 +85,26 @@ test('9. app.js: renderDailyTasks sincroniza calendarDailyAlertsBadge con total 
 });
 
 // 5. Cache buster
-test('10. index.html & tests: Cache buster actualizado a v=20261025_v972', () => {
-    assert(html.includes('app.js?v=20261025_v972'), 'index.html must reference v972');
+test('10. index.html & tests: Cache buster actualizado a v=20261025_v973', () => {
+    assert(html.includes('app.js?v=20261025_v973'), 'index.html must reference v973');
+});
+
+// 6. Login UI Bulletproof Styling & Admin2026 Support
+test('11. styles.css: Reglas para SVG y labels en #loginCard evitan desborde gigante', () => {
+    const css = fs.readFileSync('styles.css', 'utf8');
+    assert(css.includes('#loginCard svg'), 'styles.css must have #loginCard svg rule');
+    assert(css.includes('max-width: 14px !important') || css.includes('width: 14px !important'), 'styles.css must constrain svg to 14px');
+    assert(css.includes('#loginCard button#btnTogglePassword'), 'styles.css must style eye button');
+});
+
+test('12. app.js: attemptLogin admite Admin2026 además de contraseña por defecto para Supremo / Admin', () => {
+    assert(app.includes('Admin2026'), 'app.js must support Admin2026 password');
+    assert(app.includes('admin2026Hash') || app.includes("pass === 'Admin2026'"), 'app.js must validate Admin2026 hash or string');
+});
+
+test('13. index.html: Botón Iniciar Sesión #btnLoginSubmit presente y estilizado', () => {
+    assert(html.includes('id="btnLoginSubmit"'), 'btnLoginSubmit must exist');
+    assert(html.includes('attemptLogin()'), 'btnLoginSubmit must call attemptLogin');
 });
 
 console.log(`\n====================================================`);
