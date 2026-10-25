@@ -57,9 +57,9 @@ test('3. index.html: Acordeón de Proyectos Asignados cuenta con selector tácti
     assert(html.includes('id="dailyMyProjectsList"'), 'dailyMyProjectsList must exist');
 });
 
-// 4. Verificación de Cache Buster v970
-test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261025_v970', () => {
-    assert(html.includes('app.js?v=20261025_v970'), 'index.html must reference v970');
+// 4. Verificación de Cache Buster v971
+test('4. index.html & test_roles_scoping.js: Cache buster actualizado a v=20261025_v971', () => {
+    assert(html.includes('app.js?v=20261025_v971'), 'index.html must reference v971');
 });
 
 // 5. Verificación de Event Listener Guards en workspace
@@ -164,9 +164,9 @@ test('10. Logic Test: Generación de 7 días continuos en vista semanal', () => 
     assert.strictEqual(week[6].dateStr, '2026-10-25', 'Domingo es 25 de Octubre');
 });
 
-// 13. Verificación de Navegación Móvil (Barra Segmentada y Menú 3 Puntos)
-test('13. index.html & app.js: Navegación móvil con barra segmentada (#mobileViewSwitcherBar) y menú 3 puntos', () => {
-    assert(html.includes('id="mobileViewSwitcherBar"'), 'mobileViewSwitcherBar must exist');
+// 13. Verificación de Navegación Móvil (Dock Inferior Estilo Instagram / Barra Móvil y Menú)
+test('13. index.html & app.js: Navegación móvil con dock inferior (#mobileBottomDock) y menú de vistas', () => {
+    assert(html.includes('id="mobileBottomDock"') || html.includes('id="mobileViewSwitcherBar"'), 'mobileBottomDock or mobileViewSwitcherBar must exist');
     assert(html.includes('id="mobileBtnViewModeMap"'), 'mobileBtnViewModeMap must exist');
     assert(html.includes('id="mobileBtnViewModePriority"'), 'mobileBtnViewModePriority must exist');
     assert(html.includes('id="mobileBtnViewModeTimeline"'), 'mobileBtnViewModeTimeline must exist');

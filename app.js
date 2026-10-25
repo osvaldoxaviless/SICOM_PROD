@@ -1628,6 +1628,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             avInit.style.borderColor = cColor + '66';
             avInit.style.backgroundColor = cColor + '1a';
         }
+        const mobAvInit = document.getElementById('mobileUserAvatarInitials');
+        if (mobAvInit) {
+            mobAvInit.textContent = initials;
+            mobAvInit.style.color = cColor;
+            mobAvInit.style.borderColor = cColor + '66';
+            mobAvInit.style.backgroundColor = cColor + '1a';
+        }
 
         const roleBadge = document.getElementById('userRoleBadgePill');
         if (roleBadge) {
@@ -7250,15 +7257,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
 
-            // Barra segmentada móvil (Sub-header)
+            // Barra de navegación inferior móvil (Estilo Dock / Instagram)
             const mBtnMap = document.getElementById('mobileBtnViewModeMap');
             const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
             const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
-            const mInact = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
-            const mAct = "py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
+            const mInact = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group";
+            const mAct = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group";
             if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
             if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
             if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline') ? mAct : mInact;
+
+            const dockIndMap = document.getElementById('mobileDockIndicatorMap');
+            const dockIndPrio = document.getElementById('mobileDockIndicatorPriority');
+            const dockIndTimeline = document.getElementById('mobileDockIndicatorTimeline');
+            if (dockIndMap) dockIndMap.classList.toggle('hidden', activeMode !== 'map');
+            if (dockIndPrio) dockIndPrio.classList.toggle('hidden', activeMode !== 'priority');
+            if (dockIndTimeline) dockIndTimeline.classList.toggle('hidden', activeMode !== 'timeline');
 
             // Menú desplegable móvil (3 puntos)
             const badge = document.getElementById('mobileMenuCurrentViewBadge');
@@ -7277,7 +7291,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
-            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu(); if (typeof window.closeMobileTopCreateMenu === 'function') window.closeMobileTopCreateMenu();
             setActiveTabStyle('priority');
             if (svgCanvas) svgCanvas.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
@@ -7293,7 +7307,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (typeof window.closeSpeedDial === 'function') window.closeSpeedDial();
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
-            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu(); if (typeof window.closeMobileTopCreateMenu === 'function') window.closeMobileTopCreateMenu();
             if (typeof window.closeCalendarDayModal === 'function') window.closeCalendarDayModal();
             setActiveTabStyle('timeline');
             if (svgCanvas) svgCanvas.classList.add('hidden');
@@ -7314,7 +7328,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
         } else {
             if (typeof window.closePriorityCreateMenu === 'function') window.closePriorityCreateMenu();
-            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
+            if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu(); if (typeof window.closeMobileTopCreateMenu === 'function') window.closeMobileTopCreateMenu();
             setActiveTabStyle('map');
             if (boardView) boardView.classList.add('hidden');
             if (timelineView) timelineView.classList.add('hidden');
@@ -7705,7 +7719,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${cProjs.length}</span>
                     </div>
                   </div>
-                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
+                  <div class="flex-1 overflow-y-auto p-3 pb-32 sm:pb-3 space-y-3 scrollbar-thin">
                     ${cardsHtml}
                   </div>
                 </div>`;
@@ -7760,7 +7774,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${tierProjs.length}</span>
                     </div>
                   </div>
-                  <div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
+                  <div class="flex-1 overflow-y-auto p-3 pb-32 sm:pb-3 space-y-3 scrollbar-thin">
                     ${cardsHtml}
                   </div>
                 </div>`;
@@ -10811,6 +10825,15 @@ window.renderDailyTasks = function() {
     }
     const pBadge = document.getElementById('priorityDailyAlertsBadge');
     const calBadge = document.getElementById('calendarDailyAlertsBadge');
+    const mobTopBadge = document.getElementById('mobileTopDailyAlertsBadge');
+    if (mobTopBadge) {
+        if (alertBadgeTotal > 0) {
+            mobTopBadge.textContent = alertBadgeTotal;
+            mobTopBadge.classList.remove('hidden');
+        } else {
+            mobTopBadge.classList.add('hidden');
+        }
+    }
     if (pBadge) {
         if (alertBadgeTotal > 0) {
             pBadge.textContent = alertBadgeTotal;
@@ -14950,7 +14973,7 @@ document.addEventListener('click', function(e) {
     }
     const calContainer = document.getElementById('calendarCreateContainer');
     if (calContainer && !calContainer.contains(e.target)) {
-        if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu();
+        if (typeof window.closeCalendarCreateMenu === 'function') window.closeCalendarCreateMenu(); if (typeof window.closeMobileTopCreateMenu === 'function') window.closeMobileTopCreateMenu();
     }
 });
 
@@ -15455,7 +15478,7 @@ document.addEventListener('click', function(e) {
                     </div>
                     <span class="font-mono text-[10px] px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] font-medium">${dayEvents.length}</span>
                   </div>
-                  <div class="flex-1 overflow-y-auto p-2 sm:p-2.5 space-y-2 scrollbar-thin">
+                  <div class="flex-1 overflow-y-auto p-2 sm:p-2.5 pb-28 sm:pb-2.5 space-y-2 scrollbar-thin">
                     ${cardsHtml}
                   </div>
                 </div>`;
@@ -15562,3 +15585,18 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
         }
     });
 }
+
+// ==========================================================================
+// MENÚ DE CREACIÓN RÁPIDA SUPERIOR MÓVIL
+// ==========================================================================
+window.toggleMobileTopCreateMenu = function(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('mobileTopCreateMenu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+};
+
+window.closeMobileTopCreateMenu = function() {
+    const menu = document.getElementById('mobileTopCreateMenu');
+    if (menu) menu.classList.add('hidden');
+};

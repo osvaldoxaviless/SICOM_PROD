@@ -354,7 +354,8 @@ header {
 #renameModal > div,
 #globalTaskModal > div,
 #fastDailyTaskModal > div,
-#mobileMenuDropdown {
+#mobileMenuDropdown,
+#mobileTopCreateMenu {
     border-radius: var(--radius-cards) !important;
     box-shadow: none !important;
     background-color: var(--color-obsidian-canvas) !important;
@@ -1447,7 +1448,8 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     background-color: var(--color-obsidian-canvas) !important;
 }
 
-#mobileViewSwitcherBar {
+#mobileViewSwitcherBar,
+#mobileBottomDock {
     background-color: #141211 !important;
     border-bottom: 1px solid #24211f !important;
 }

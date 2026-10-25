@@ -135,13 +135,13 @@
   </div>
 
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ABAJO A LA DERECHA, JUNTO AL SPEED DIAL DE CREACIÓN) -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] flex items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[2px] hidden">0</span>
   </button>
 
   <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
-  <div id="canvasToolsDock" class="fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex flex-col-reverse items-start select-none pointer-events-none">
+  <div id="canvasToolsDock" class="hidden sm:flex fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex-col-reverse items-start select-none pointer-events-none">
       <!-- BOTÓN GATILLO HERRAMIENTAS -->
       <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group pointer-events-auto" title="Herramientas del Mapa Mental">
           <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -863,10 +863,41 @@
       </button>
   </div>
 
-  <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER) -->
-  <header class="h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 z-40 relative gap-1.5 sm:gap-3">
+  <!-- TOP NAVIGATION BAR (FACTORY PERSISTENT HEADER — FORMATO ERGONÓMICO) -->
+  <header class="h-14 sm:h-16 shrink-0 border-b border-[#1d1a18] bg-[#101010] flex items-center justify-between px-2.5 sm:px-4 lg:px-6 z-40 relative gap-1.5 sm:gap-3">
     <!-- LOGO DE SISTEMA Y CONMUTADOR DE VISTAS (EXTREMO IZQUIERDO) -->
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <!-- BOTÓN + CREACIÓN RÁPIDA MÓVIL (ESTILO INSTAGRAM: ARRIBA A LA IZQUIERDA) -->
+      <div class="relative sm:hidden" id="mobileTopCreateContainer">
+        <button type="button" id="mobileTopCreateTrigger" onclick="toggleMobileTopCreateMenu(event)" class="w-8 h-8 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] flex items-center justify-center transition cursor-pointer" title="Crear nuevo proyecto, tarea o evento">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <!-- Menú desplegable creación móvil -->
+        <div id="mobileTopCreateMenu" class="hidden absolute left-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[99999] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <span>Nuevo Proyecto</span>
+            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+          </button>
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <span>Tarea por Proyecto</span>
+            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+          </button>
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <span>Nueva Tarea General</span>
+            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+          </button>
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <span>Solicitar Vacaciones</span>
+            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+          </button>
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <span>Registrar Comisión</span>
+            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- WORDMARK DE SISTEMA -->
       <div class="h-8 flex items-center gap-1.5 px-2.5 rounded-[3px] bg-[#161413] border border-[#3d3a39]">
         <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
         <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">SICOM // STGT</span>
@@ -897,14 +928,20 @@
 
     <!-- CONTROLES Y FILTROS DERECHA -->
     <div class="flex items-center gap-1 sm:gap-1.5 relative justify-end shrink-0 py-1">
+      <!-- BOTÓN TAREAS DEL DÍA & NOTIFICACIONES (ESTILO INSTAGRAM: ARRIBA A LA DERECHA) -->
+      <button id="btnMobileTopDailyTasks" type="button" onclick="toggleDailyDrawer()" class="sm:hidden w-8 h-8 shrink-0 text-[#b8b3b0] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] flex items-center justify-center relative transition cursor-pointer" title="Notificaciones y Tareas">
+        <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span id="mobileTopDailyAlertsBadge" class="absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+      </button>
+
       <!-- BOTÓN BÚSQUEDA MÓVIL (lg:hidden) -->
       <button id="searchBtnIcon" onclick="toggleSearch()" class="w-8 h-8 shrink-0 text-[#b8b3b0] hover:text-[#eeeeee] transition-all bg-[#1d1a18] hover:border-[#eeeeee] border border-[#3d3a39] rounded-[3px] lg:hidden flex items-center justify-center cursor-pointer" title="Buscar proyecto">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </button>
       <datalist id="projectsDatalist"></datalist>
 
-      <!-- BOTÓN FILTROS AVANZADOS (PROTAGONISTA) -->
-      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="h-8 shrink-0 flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Filtros Operativos">
+      <!-- BOTÓN FILTROS AVANZADOS (VISIBLE EN SM+) -->
+      <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="hidden sm:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-2 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Filtros Operativos">
           <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
           <span class="hidden lg:inline font-medium">Filtros</span>
           <span id="activeFiltersBadge" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px] ml-0.5 font-semibold">1</span>
@@ -1005,7 +1042,7 @@
       <div class="w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
 
       <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
-      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="h-8 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer" title="Centro de Control // Configuración & Perfil">
+      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="hidden sm:flex h-8 items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer" title="Centro de Control // Configuración & Perfil">
         <div class="flex items-center gap-1.5">
           <!-- Ícono de Configuración / Engrane -->
           <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -1023,22 +1060,46 @@
     </div>
   </header>
   
-  <!-- BARRA MÓVIL DEDICADA DE NAVEGACIÓN DE VISTAS (SOLO MÓVIL: sm:hidden) -->
-  <nav id="mobileViewSwitcherBar" aria-label="Navegación de vistas móvil" class="sm:hidden w-full h-10 px-2.5 py-1 bg-[#141211] border-b border-[#252220] flex items-center justify-between shrink-0 z-30 select-none">
-    <div class="grid grid-cols-3 gap-1.5 w-full bg-[#1b1918] p-0.5 rounded-[4px] border border-[#322f2d]">
-      <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-        <span>Mapa</span>
-      </button>
-      <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
-        <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-        <span>Prioridades</span>
-      </button>
-      <button type="button" id="mobileBtnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="py-1 px-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center justify-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
-        <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        <span>Calendario</span>
-      </button>
-    </div>
+  <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (ESTILO APP NATIVA / INSTAGRAM DOCK: sm:hidden) -->
+  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#141211] border-t border-[#2d2a29] flex items-center justify-around z-40 select-none pb-safe">
+    <!-- 1. MAPA -->
+    <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group">
+      <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      <span>Mapa</span>
+      <span id="mobileDockIndicatorMap" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5"></span>
+    </button>
+
+    <!-- 2. PRIORIDADES -->
+    <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group">
+      <svg class="w-4 h-4 mb-0.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      <span>Prioridades</span>
+      <span id="mobileDockIndicatorPriority" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
+    </button>
+
+    <!-- 3. CALENDARIO -->
+    <button type="button" id="mobileBtnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group">
+      <svg class="w-4 h-4 mb-0.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <span>Calendario</span>
+      <span id="mobileDockIndicatorTimeline" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
+    </button>
+
+    <!-- 4. FILTROS -->
+    <button type="button" id="mobileBtnBottomFilters" onclick="toggleFilterDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Filtros Operativos">
+      <svg class="w-4 h-4 mb-0.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+      <span>Filtros</span>
+      <span id="mobileBottomFiltersBadge" class="hidden absolute top-0.5 right-3 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 rounded-[2px] font-bold">1</span>
+    </button>
+
+    <!-- 5. PERFIL -->
+    <button type="button" id="mobileBtnBottomProfile" onclick="toggleConfigDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Centro de Control & Perfil">
+      <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
+        <div id="mobileUserAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[9px] font-semibold flex items-center justify-center">
+          --
+        </div>
+        <span id="mobileConnectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] absolute -top-0.5 -right-0.5 border border-[#141211]"></span>
+      </div>
+      <span>Perfil</span>
+    </button>
   </nav>
   
   <!-- BARRA DE BÚSQUEDA MÓVIL (lg:hidden, FLUJO NORMAL NO BLOQUEANTE) -->
@@ -1174,7 +1235,7 @@
       </div>
 
       <!-- CONTENEDOR DE COLUMNAS KANBAN -->
-      <div id="priorityBoardColumns" class="flex-1 overflow-x-auto overflow-y-hidden p-4 sm:p-6 flex gap-4 items-start select-none scrollbar-thin">
+      <div id="priorityBoardColumns" class="flex-1 overflow-x-auto overflow-y-hidden p-3 sm:p-6 pb-20 sm:pb-6 flex gap-3 sm:gap-4 items-start select-none scrollbar-thin">
         <!-- Renderizado dinámico vía app.js -->
       </div>
     </div>
@@ -3125,7 +3186,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261025_v970"></script>
+  <script type="module" src="app.js?v=20261025_v971"></script>
 
 </body>
 </html>
