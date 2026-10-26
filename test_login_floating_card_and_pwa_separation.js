@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 
 console.log('========================================================================');
-console.log('AUDITORÍA AUTOMATIZADA: TARJETA DE LOGIN FLOTANTE & DIFERENCIACIÓN MÓVIL/WEB (V975)');
+console.log('AUDITORÍA AUTOMATIZADA: TARJETA DE LOGIN FLOTANTE & DIFERENCIACIÓN MÓVIL/WEB (V976)');
 console.log('========================================================================\n');
 
 let passed = 0;
@@ -66,9 +66,9 @@ test('8. index.html & CSS: Proporciones de tarjeta idénticas a referencia visua
         'Badge oscuro STGT preservado');
 });
 
-test('9. Cache buster unificado en versión v=20261025_v975', () => {
-    assert(html.includes('styles.css?v=20261025_v975'), 'Falta v975 en styles.css');
-    assert(html.includes('app.js?v=20261025_v975'), 'Falta v975 en app.js');
+test('9. Cache buster unificado en versión v=20261025_v976', () => {
+    assert(html.includes('styles.css?v=20261025_v976'), 'Falta v976 en styles.css');
+    assert(html.includes('app.js?v=20261025_v976'), 'Falta v976 en app.js');
 });
 
 console.log(`\n====================================================`);
