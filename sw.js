@@ -3,7 +3,7 @@
  * STGT Control Surface — Factory Design System
  */
 
-const SW_VERSION = '20261026_v984';
+const SW_VERSION = '20261026_v985';
 const STATIC_CACHE_NAME = `sicom-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA
