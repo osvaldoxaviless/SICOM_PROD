@@ -1287,15 +1287,18 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 /* ==========================================================================
    TOPBAR FILTER & SEARCH REFINEMENTS (FACTORY UI)
    ========================================================================== */
-#btnTopFilterDrawer.has-active-filters {
+#btnTopFilterDrawer.has-active-filters,
+#mobileFilterTriggerBtn.has-active-filters {
     border-color: #ee6018 !important;
     background-color: rgba(238, 96, 24, 0.12) !important;
     color: #fafafa !important;
 }
-#btnTopFilterDrawer.has-active-filters svg {
+#btnTopFilterDrawer.has-active-filters svg,
+#mobileFilterTriggerBtn.has-active-filters svg {
     color: #ee6018 !important;
 }
-#activeFiltersBadge {
+#activeFiltersBadge,
+#mobileActiveFiltersBadge {
     box-shadow: none !important;
 }
 #desktopSearchInput:focus {

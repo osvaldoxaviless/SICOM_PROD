@@ -1767,6 +1767,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             mobAvInit.style.borderColor = cColor + '66';
             mobAvInit.style.backgroundColor = cColor + '1a';
         }
+        const mobBtn = document.getElementById('mobileMenuBtn');
+        if (mobBtn) {
+            mobBtn.style.borderColor = cColor + '66';
+            mobBtn.style.backgroundColor = cColor + '1a';
+        }
+        const mobMenuAvatar = document.getElementById('mobileMenuAvatarBadge');
+        if (mobMenuAvatar) {
+            mobMenuAvatar.textContent = initials;
+            mobMenuAvatar.style.color = cColor;
+            mobMenuAvatar.style.borderColor = cColor + '66';
+            mobMenuAvatar.style.backgroundColor = cColor + '26';
+        }
+        const mobMenuName = document.getElementById('mobileMenuUserName');
+        if (mobMenuName) mobMenuName.textContent = author;
+        const mobMenuRole = document.getElementById('mobileMenuUserRole');
+        if (mobMenuRole) mobMenuRole.textContent = role.toUpperCase();
 
         const roleBadge = document.getElementById('userRoleBadgePill');
         if (roleBadge) {
@@ -3526,10 +3542,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.toggleSearch = function() {
-        if (window.isMobileSearchOpen && window.isMobileSearchOpen()) {
-            window.closeMobileSearch(false);
-        } else {
-            window.openMobileSearch();
+        const inp = (window.innerWidth < 640 ? document.getElementById('searchInput') : document.getElementById('desktopSearchInput')) || document.getElementById('searchInput') || document.getElementById('desktopSearchInput');
+        if (inp) {
+            inp.focus();
+            if (inp.select) inp.select();
         }
     };
 
@@ -11658,16 +11674,16 @@ window.renderDailyTasks = function() {
         if (activeFilterBottleneck !== 'ALL') c++;
         if (showAllSecondaryLinks) c++;
         
-        const badge = document.getElementById('activeFiltersBadge');
-        if (badge) {
-            if (c > 0) { badge.textContent = c; badge.classList.remove('hidden'); }
-            else { badge.classList.add('hidden'); }
-        }
-        const topFilterBtn = document.getElementById('btnTopFilterDrawer');
-        if (topFilterBtn) {
-            if (c > 0) topFilterBtn.classList.add('has-active-filters');
-            else topFilterBtn.classList.remove('has-active-filters');
-        }
+        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge')].filter(Boolean);
+        badges.forEach(b => {
+            if (c > 0) { b.textContent = c; b.classList.remove('hidden'); }
+            else { b.classList.add('hidden'); }
+        });
+        const filterBtns = [document.getElementById('btnTopFilterDrawer'), document.getElementById('mobileFilterTriggerBtn')].filter(Boolean);
+        filterBtns.forEach(btn => {
+            if (c > 0) btn.classList.add('has-active-filters');
+            else btn.classList.remove('has-active-filters');
+        });
         
         if (isFocusMode) window.toggleFocusMode(); // Si usas filtros manuales, apaga el enfoque
         else window.renderMindMap();
@@ -11694,10 +11710,10 @@ window.renderDailyTasks = function() {
         document.body.classList.remove('show-all-sec-links');
         if (typeof window.updateSecondaryLinksBtnUI === 'function') window.updateSecondaryLinksBtnUI();
         
-        const badge = document.getElementById('activeFiltersBadge');
-        if (badge) badge.classList.add('hidden');
-        const topFilterBtn = document.getElementById('btnTopFilterDrawer');
-        if (topFilterBtn) topFilterBtn.classList.remove('has-active-filters');
+        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge')].filter(Boolean);
+        badges.forEach(b => b.classList.add('hidden'));
+        const filterBtns = [document.getElementById('btnTopFilterDrawer'), document.getElementById('mobileFilterTriggerBtn')].filter(Boolean);
+        filterBtns.forEach(btn => btn.classList.remove('has-active-filters'));
         const deskInp = document.getElementById('desktopSearchInput');
         if (deskInp) deskInp.value = '';
         const searchInp = document.getElementById('searchInput');
