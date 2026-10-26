@@ -1445,7 +1445,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             content.innerHTML = `
             <div class="border-b border-[#3d3a39] pb-3 mb-4">
                 <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPREMO</span>
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPREMO</span>
                     <span>Dirección General</span>
                 </h3>
                 <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura, configuración, usuarios, nómina y auditoría institucional del sistema STGT // SICOM.</p>
@@ -1496,7 +1496,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             content.innerHTML = `
             <div class="border-b border-[#3d3a39] pb-3 mb-4">
                 <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPERVISOR</span>
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPERVISOR</span>
                     <span>Coordinación de Operaciones</span>
                 </h3>
                 <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregas, seguimiento de asistencia y cumplimiento de tiempos del equipo.</p>
@@ -1535,7 +1535,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             content.innerHTML = `
             <div class="border-b border-[#3d3a39] pb-3 mb-4">
                 <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">LECTOR</span>
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">LECTOR</span>
                     <span>Auditoría y Supervisión Ejecutiva</span>
                 </h3>
                 <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // SICOM, con protección integral contra modificaciones accidentales.</p>
@@ -1566,7 +1566,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             content.innerHTML = `
             <div class="border-b border-[#3d3a39] pb-3 mb-4">
                 <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
-                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[2px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40">CONSULTOR</span>
+                    <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40">CONSULTOR</span>
                     <span>Operación y Ejecución</span>
                 </h3>
                 <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta avances con evidencias, registra tu asistencia y mantén al día tus entregas.</p>
@@ -2255,7 +2255,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const initial = cName.charAt(0).toUpperCase();
             return `
                 <button type="button" onclick="insertMention('${escapeHtml(cName)}', '${context}')" class="w-full text-left px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#3d3a39]/40 border border-[#3d3a39] hover:border-[#eeeeee] transition flex items-center gap-2 text-xs text-[#eeeeee]">
-                    <div class="w-4 h-4 rounded-[2px] flex items-center justify-center font-mono text-[9px] text-[#fafafa] shrink-0" style="background-color: ${col};">
+                    <div class="w-4 h-4 rounded-[3px] flex items-center justify-center font-mono text-[9px] text-[#fafafa] shrink-0" style="background-color: ${col};">
                         ${initial}
                     </div>
                     <span class="truncate text-[11px] text-[#eeeeee] flex-1">${escapeHtml(cName)}</span>
@@ -2579,20 +2579,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const tag = n.tag || 'comentario';
             let tagBadge = '';
             if (tag === 'acuerdo') {
-                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 flex items-center gap-1 shrink-0"><span>📌</span><span>Acuerdo</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[3px] font-mono text-[9px] uppercase bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 flex items-center gap-1 shrink-0"><span>📌</span><span>Acuerdo</span></span>`;
             } else if (tag === 'bloqueo') {
-                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>⚠️</span><span>Bloqueo</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[3px] font-mono text-[9px] uppercase bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>⚠️</span><span>Bloqueo</span></span>`;
             } else if (tag === 'entregable') {
-                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>🔗</span><span>Entregable</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[3px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>🔗</span><span>Entregable</span></span>`;
             } else {
-                tagBadge = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
+                tagBadge = `<span class="px-1.5 py-0.5 rounded-[3px] font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] flex items-center gap-1 shrink-0"><span>💬</span><span>Nota</span></span>`;
             }
 
             // Detección de si el usuario activo fue mencionado con @
             const isMentioned = localAuthor && window.isUserMentionedInText(n.text, localAuthor);
             let mentionTag = '';
             if (isMentioned) {
-                mentionTag = `<span class="px-1.5 py-0.5 rounded-[2px] font-mono text-[9px] uppercase bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>@</span><span>Te mencionaron</span></span>`;
+                mentionTag = `<span class="px-1.5 py-0.5 rounded-[3px] font-mono text-[9px] uppercase bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 flex items-center gap-1 shrink-0"><span>@</span><span>Te mencionaron</span></span>`;
             }
 
             // Formatear menciones con @Nombre dentro del texto
@@ -2627,11 +2627,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const readerChipsHtml = uniqueReaders.map(rName => {
                 const rCol = (consultants[rName] && consultants[rName].color) ? consultants[rName].color : '#8a8380';
                 const shortName = rName.split(' ')[0];
-                return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[9px]" title="${escapeHtml(rName)}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${rCol}"></span>${escapeHtml(shortName)}</span>`;
+                return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[9px]" title="${escapeHtml(rName)}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${rCol}"></span>${escapeHtml(shortName)}</span>`;
             }).join('');
 
             const pendingBadgeHtml = pendingCons.length > 0
-                ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#ee6018]/10 border border-[#ee6018]/30 text-[#ee6018] font-mono text-[9px]" title="Asignados pendientes de leer: ${escapeHtml(pendingCons.join(', '))}">⏳ Falta: ${escapeHtml(pendingCons.map(c => c.split(' ')[0]).join(', '))}</span>`
+                ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#ee6018]/10 border border-[#ee6018]/30 text-[#ee6018] font-mono text-[9px]" title="Asignados pendientes de leer: ${escapeHtml(pendingCons.join(', '))}">⏳ Falta: ${escapeHtml(pendingCons.map(c => c.split(' ')[0]).join(', '))}</span>`
                 : '';
 
             // Sección de acuse y auditoría
@@ -4489,17 +4489,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             let statusBadge = '';
             let boxUI = '';
             if (isPending) {
-                statusBadge = `<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase ml-2 shrink-0 mt-0.5">⏳ Validación</span>`;
+                statusBadge = `<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[3px] uppercase ml-2 shrink-0 mt-0.5">⏳ Validación</span>`;
                 if(isSuper) {
-                    boxUI = `<button onclick="toggleQuickTask('${t.id}')" class="h-4 w-4 rounded-[2px] border border-[#ee6018] bg-[#ee6018]/20 text-[#ee6018] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ee6018] hover:text-[#fafafa] transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`;
+                    boxUI = `<button onclick="toggleQuickTask('${t.id}')" class="h-4 w-4 rounded-[3px] border border-[#ee6018] bg-[#ee6018]/20 text-[#ee6018] flex items-center justify-center shrink-0 mt-0.5 hover:bg-[#ee6018] hover:text-[#fafafa] transition" title="Haz clic para aprobar"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`;
                 } else {
-                    boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#ee6018] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
+                    boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[3px] border-[#ee6018] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 cursor-pointer mt-0.5" title="Click para cancelar envío">`;
                 }
             } else if (isChecked) {
-                statusBadge = `<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] uppercase ml-2 shrink-0 mt-0.5">✓ Validada</span>`;
-                boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${isSuper ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}" ${!isSuper ? 'disabled' : ''}>`;
+                statusBadge = `<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px] uppercase ml-2 shrink-0 mt-0.5">✓ Validada</span>`;
+                boxUI = `<input type="checkbox" checked onchange="toggleQuickTask('${t.id}')" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${isSuper ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}" ${!isSuper ? 'disabled' : ''}>`;
             } else {
-                boxUI = `<input type="checkbox" onchange="toggleQuickTask('${t.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 ${checkCursor} mt-0.5" ${checkDisabled}>`;
+                boxUI = `<input type="checkbox" onchange="toggleQuickTask('${t.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 ${checkCursor} mt-0.5" ${checkDisabled}>`;
             }
 
             return `
@@ -4512,10 +4512,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     </div>
                     <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                        ${t.validatedDate ? `<span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[2px]">✓ ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
+                        ${t.validatedDate ? `<span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[3px]">✓ ${escapeHtml(t.validatedDate)}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>` : ''}
                         ${t.deadline ? `<span class="font-mono text-[9px] ${dateColor}">🎯 Límite: ${escapeHtml(t.deadline)}</span>` : ''}
-                        ${t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
-                        ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                        ${t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">👤 ${escapeHtml(t.assignee)}</span>` : ''}
+                        ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
                     ${t.feedback ? `<div class="mt-2 text-[10px] text-[#b8b3b0] bg-[#1d1a18] border border-[#3d3a39] p-2 rounded-[3px]">💬 ${escapeHtml(t.feedback)}</div>` : ''}
                 </div>
@@ -4879,14 +4879,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
 
             return `
-            <div class="bg-[#101010] p-3 rounded-[8px] border border-[#3d3a39] mb-2.5 space-y-2">
+            <div class="bg-[#101010] p-3 rounded-[10px] border border-[#3d3a39] mb-2.5 space-y-2">
                 <div class="flex justify-between items-start gap-2">
                     <label class="flex items-start gap-2.5 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
-                        <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
+                        <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
                         <span class="break-words whitespace-normal leading-relaxed group-hover:text-[#fafafa] transition" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
                     </label>
                     <label class="flex items-center gap-1 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer shrink-0 mt-0.5">
-                        <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
+                        <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
                     </label>
                 </div>
 
@@ -5148,7 +5148,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           modContainer.innerHTML = `
             <div class="w-full font-mono text-[10px] uppercase text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] px-3 py-2 rounded-[3px] flex items-center justify-between">
               <span class="flex items-center gap-1.5"><span>🔗</span> <b>${sharedProjs.length}</b> proyecto(s) vinculados</span>
-              <span class="text-[9px] text-[#b8b3b0] bg-[#101010] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">Multimódulo</span>
+              <span class="text-[9px] text-[#b8b3b0] bg-[#101010] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">Multimódulo</span>
             </div>
           `;
           const chipsWrap = document.createElement('div');
@@ -5234,7 +5234,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           baseModCont.classList.remove('hidden');
           const pPill = document.createElement('button');
           pPill.type = 'button';
-          pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#252220] border transition";
+          pPill.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#1d1a18] border transition";
           pPill.style.borderColor = primMod.color || '#3d3a39';
           pPill.title = "Módulo base donde se aloja el proyecto (clic para enfocar)";
           pPill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${primMod.color || '#eeeeee'}"></span>📦 ${escapeHtml(primMod.name)} <span class="text-[9px] text-[#8a8380] uppercase font-normal">(Base)</span>`;
@@ -6050,9 +6050,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleDateString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
 
             return `
-            <div class="p-1.5 bg-[#171513] border border-[#252220] rounded-[2px] flex items-center justify-between text-[10px] font-mono">
+            <div class="p-1.5 bg-[#171513] border border-[#252220] rounded-[3px] flex items-center justify-between text-[10px] font-mono">
                 <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="px-1 py-0.2 rounded-[2px] border text-[9px] uppercase font-bold ${badgeClass}">${m.type || 'MOVIMIENTO'}</span>
+                    <span class="px-1 py-0.2 rounded-[3px] border text-[9px] uppercase font-bold ${badgeClass}">${m.type || 'MOVIMIENTO'}</span>
                     <span class="text-[#eeeeee] truncate">${sign}${daysCount} d ${periodStr ? `(${escapeHtml(periodStr)})` : ''}</span>
                 </div>
                 <div class="flex items-center gap-2 text-[#8a8380] shrink-0">
@@ -6388,7 +6388,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
               <span class="text-[9px] font-mono text-[#8a8380] truncate max-w-[120px] hidden sm:inline">${escapeHtml(it.parentName)}</span>
-              <span class="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] group-hover:text-[#eeeeee]">${it.badge}</span>
+              <span class="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] group-hover:text-[#eeeeee]">${it.badge}</span>
             </div>
           </button>
         `;
@@ -6477,7 +6477,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const secBadge = document.getElementById(`${prefix}SecBadge`);
         if (secBadge) {
           secBadge.textContent = 'Ninguna';
-          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
         }
         return;
       }
@@ -6487,10 +6487,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const count = selSet.size;
         if (count === 0) {
           secBadge.textContent = 'Ninguna';
-          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
         } else {
           secBadge.textContent = `${count} ${count === 1 ? 'módulo' : 'módulos'}`;
-          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#fafafa] border border-[#ee6018]';
+          secBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/15 text-[#fafafa] border border-[#ee6018]';
         }
       }
 
@@ -6584,13 +6584,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const count = selSet.size;
         if (count === 0) {
           compBadge.textContent = '0';
-          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]';
         } else if (count <= 2) {
           compBadge.textContent = Array.from(selSet).join(', ');
-          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
         } else {
           compBadge.textContent = `${count} empresas`;
-          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
+          compBadge.className = 'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40';
         }
       }
 
@@ -6665,7 +6665,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
     window.populateConsultantSelects = function() {
       const all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
-      const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
+      const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[3px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
       document.getElementById('editConsultantsChecks').innerHTML = mkChk('editProjCons'); document.getElementById('newProjConsultantsChecks').innerHTML = mkChk('newProjCons');
     }
     let activeConsultantRoleFilter = 'ALL';
@@ -6847,11 +6847,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs font-medium text-[#eeeeee] truncate">${escapeHtml(n)}</span>
-                            <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] border ${roleBadgeStyle}">
+                            <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] border ${roleBadgeStyle}">
                                 ${roleIcon} ${escapeHtml(cData.role || 'Consultor')}
                             </span>
-                            ${cData.lead ? `<span class="font-mono text-[9px] text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/30 px-1.5 py-0.2 rounded-[2px]">Jefe: ${escapeHtml(cData.lead)}</span>` : ''}
-                            ${cData.employeeNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#101010] border border-[#3d3a39] px-1 py-0.2 rounded-[2px]">No. ${escapeHtml(cData.employeeNo)}</span>` : ''}
+                            ${cData.lead ? `<span class="font-mono text-[9px] text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/30 px-1.5 py-0.2 rounded-[3px]">Jefe: ${escapeHtml(cData.lead)}</span>` : ''}
+                            ${cData.employeeNo ? `<span class="font-mono text-[9px] text-[#8a8380] bg-[#101010] border border-[#3d3a39] px-1 py-0.2 rounded-[3px]">No. ${escapeHtml(cData.employeeNo)}</span>` : ''}
                         </div>
                         <p class="text-[10px] text-[#8a8380] truncate mt-0.5 font-normal">${escapeHtml(displayTitle)} ${cData.team ? `• ${escapeHtml(cData.team)}` : ''} ${cData.schedule ? `[${escapeHtml(cData.schedule)}]` : ''}</p>
                     </div>
@@ -6878,8 +6878,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cData.color}"></span>
                             ${pCount} ${pCount === 1 ? 'proyecto' : 'proyectos'}
                         </span>
-                        ${inValCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/30 flex items-center gap-1">⏳ ${inValCount} en validación</span>` : ''}
-                        ${overdueCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1">🚨 ${overdueCount} atrasados</span>` : ''}
+                        ${inValCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[3px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/30 flex items-center gap-1">⏳ ${inValCount} en validación</span>` : ''}
+                        ${overdueCount > 0 ? `<span class="px-1.5 py-0.2 rounded-[3px] bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/30 flex items-center gap-1">🚨 ${overdueCount} atrasados</span>` : ''}
                     </div>
                     <button type="button" onclick="window.filterConsultant('${jsArg(n)}')" class="text-[9px] uppercase text-[#8a8380] hover:text-[#eeeeee] transition font-mono flex items-center gap-1">
                         <span>Ver en el Mapa</span> <span>→</span>
@@ -7050,7 +7050,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 </div>
 
                 <div class="flex items-center justify-between text-[9px] font-mono mt-1.5 pt-1.5 border-t border-[#3d3a39]/60 text-[#8a8380] pl-6">
-                    <span class="px-1.5 py-0.2 rounded-[2px] border ${phaseStyle}">${escapeHtml(phase)}</span>
+                    <span class="px-1.5 py-0.2 rounded-[3px] border ${phaseStyle}">${escapeHtml(phase)}</span>
                     <span class="text-[#8a8380]">Validado en <b class="text-[#eeeeee]">${validatedIn}/${totalProjects}</b> proyectos (${pct}%)</span>
                 </div>
             </div>`;
@@ -7136,12 +7136,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     </div>
 
                     <!-- BOTÓN MASTER: VER TODOS LOS CONSULTORES (SIEMPRE VISIBLE ARRIBA) -->
-                    <button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="w-full px-3 py-2 rounded-[3px] border font-mono text-[11px] uppercase transition flex items-center justify-between select-none ${isAllAct ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018] font-semibold' : 'bg-[#161413] hover:bg-[#1d1a18] text-[#eeeeee] border-[#3d3a39]'}">
+                    <button type="button" onclick="window.setPriorityConsultantTab('ALL')" class="w-full px-3 py-2 rounded-[3px] border font-mono text-[11px] uppercase transition flex items-center justify-between select-none ${isAllAct ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018] font-semibold' : 'bg-[#101010] hover:bg-[#1d1a18] text-[#eeeeee] border-[#3d3a39]'}">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full ${isAllAct ? 'bg-[#fafafa]' : 'bg-[#ee6018]'}"></span>
                             <span>🌐 Ver Todos los Consultores</span>
                         </div>
-                        <span class="text-[10px] px-2 py-0.5 rounded-[2px] ${isAllAct ? 'bg-[#101010]/30 text-[#fafafa]' : 'bg-[#101010] text-[#ee6018] border border-[#3d3a39]'} font-semibold">${totalProjs}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-[3px] ${isAllAct ? 'bg-[#101010]/30 text-[#fafafa]' : 'bg-[#101010] text-[#ee6018] border border-[#3d3a39]'} font-semibold">${totalProjs}</span>
                     </button>
 
                     <!-- CUADRÍCULA DE CONSULTORES INDIVIDUALES -->
@@ -7155,7 +7155,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
                             <span class="font-mono text-[10px] uppercase truncate ${isAct ? 'text-[#eeeeee] font-medium' : 'text-[#b8b3b0]'}">${escapeHtml(g.cons)}</span>
                         </div>
-                        <span class="font-mono text-[9px] px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] shrink-0" style="color: ${isAct ? g.cData.color : '#8a8380'}">${g.projs.length}</span>
+                        <span class="font-mono text-[9px] px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] shrink-0" style="color: ${isAct ? g.cData.color : '#8a8380'}">${g.projs.length}</span>
                     </button>`;
                 });
 
@@ -7178,12 +7178,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const pComps = window.getProjectCompanies(p);
             const compBadges = pComps.map(comp => {
                 const st = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)', icon: '🏢' };
-                return `<span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] border truncate max-w-[90px]" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};" title="${escapeHtml(comp)}">${st.icon} ${escapeHtml(comp)}</span>`;
+                return `<span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] border truncate max-w-[90px]" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};" title="${escapeHtml(comp)}">${st.icon} ${escapeHtml(comp)}</span>`;
             }).join('');
             const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim().replace(/^#+/, '');
-            const tkBadge = tk ? `<span class="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-yellow-200 text-yellow-900 font-semibold border border-yellow-400 shrink-0">🎫 #${escapeHtml(tk)}</span>` : '';
+            const tkBadge = tk ? `<span class="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-yellow-200 text-yellow-900 font-semibold border border-yellow-400 shrink-0">🎫 #${escapeHtml(tk)}</span>` : '';
             const prioVal = parseInt(p.priority, 10) || 1;
-            return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]'} rounded-[10px] p-3.5 flex gap-3 transition-colors cursor-pointer group select-none" style="border-left: 3px solid ${over ? '#ee6018' : cData.color};" onclick="window.selectNode('${p.pType}', '${p.id}')"><div class="flex flex-col items-center shrink-0 w-9 pt-0.5" onclick="event.stopPropagation()"><div class="font-mono text-base font-bold text-center" style="color: ${cData.color}">*${prioVal}</div><div class="flex items-center mt-1 bg-[#101010] border border-[#3d3a39] rounded-[3px] overflow-hidden"><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', -1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition" title="Subir prioridad (ej. *2 ➔ *1)">▲</button><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', 1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition border-l border-[#3d3a39]" title="Bajar prioridad (ej. *1 ➔ *2)">▼</button></div></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-1 mb-1"><h4 class="text-sm font-normal text-[#eeeeee] leading-tight group-hover:text-[#fafafa] transition truncate">${over ? '⚠️ ' : ''}${escapeHtml(p.name)}</h4><div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()"><button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] hover:bg-[#ee6018] hover:text-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[8px] uppercase transition" title="Ver en el mapa">Mapa ↗</button></div></div><p class="font-mono text-[10px] text-[#8a8380] uppercase truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-1.5 mt-2">${tkBadge}${compBadges}<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0]">${sIco} ${p.status || 'Pendiente'} (${p.progress || 0}%)</span>${p.deadline ? `<span class="font-mono text-[9px] uppercase ${over ? 'text-[#ee6018] border-[#ee6018]/50' : 'text-[#b8b3b0] border-[#3d3a39]'} bg-[#101010] border px-2 py-0.5 rounded-[3px]">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
+            return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]'} rounded-[10px] p-3.5 flex gap-3 transition-colors cursor-pointer group select-none" style="border-left: 3px solid ${over ? '#ee6018' : cData.color};" onclick="window.selectNode('${p.pType}', '${p.id}')"><div class="flex flex-col items-center shrink-0 w-9 pt-0.5" onclick="event.stopPropagation()"><div class="font-mono text-base font-bold text-center" style="color: ${cData.color}">*${prioVal}</div><div class="flex items-center mt-1 bg-[#101010] border border-[#3d3a39] rounded-[3px] overflow-hidden"><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', -1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition" title="Subir prioridad (ej. *2 ➔ *1)">▲</button><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', 1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition border-l border-[#3d3a39]" title="Bajar prioridad (ej. *1 ➔ *2)">▼</button></div></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-1 mb-1"><h4 class="text-sm font-normal text-[#eeeeee] leading-tight group-hover:text-[#fafafa] transition truncate">${over ? '⚠️ ' : ''}${escapeHtml(p.name)}</h4><div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()"><button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] hover:bg-[#ee6018] hover:text-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[8px] uppercase transition" title="Ver en el mapa">Mapa ↗</button></div></div><p class="font-mono text-[10px] text-[#8a8380] uppercase truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-1.5 mt-2">${tkBadge}${compBadges}<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0]">${sIco} ${p.status || 'Pendiente'} (${p.progress || 0}%)</span>${p.deadline ? `<span class="font-mono text-[9px] uppercase ${over ? 'text-[#ee6018] border-[#ee6018]/50' : 'text-[#b8b3b0] border-[#3d3a39]'} bg-[#101010] border px-2 py-0.5 rounded-[3px]">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
         }).join('');
 
         let h = '';
@@ -7193,7 +7193,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         if (groups.length > 1 && activePriorityConsultantTab === 'ALL') {
             visibleGroups.forEach(g => {
-                h += `<div class="bg-[#141211] border border-[#3d3a39] rounded-[10px] overflow-hidden mb-3.5 block shrink-0">
+                h += `<div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden mb-3.5 block shrink-0">
                     <div class="flex items-center justify-between p-3.5 bg-[#1d1a18] border-b border-[#3d3a39]" style="border-left: 3px solid ${g.cData.color};">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${g.cData.color}"></span>
@@ -7376,12 +7376,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.highlightPriorityCard = function(id) {
         document.querySelectorAll('#priorityBoardColumns .priority-card-active').forEach(el => {
             el.classList.remove('priority-card-active', 'ring-2', 'ring-[#ee6018]', 'border-[#ee6018]');
-            el.classList.add('border-[#2d2a29]');
+            el.classList.add('border-[#3d3a39]');
         });
         const target = document.querySelector(`#priorityBoardColumns [data-node-id="${id}"]`);
         if (target) {
             target.classList.add('priority-card-active', 'ring-2', 'ring-[#ee6018]', 'border-[#ee6018]');
-            target.classList.remove('border-[#2d2a29]');
+            target.classList.remove('border-[#3d3a39]');
         }
     };
 
@@ -7633,27 +7633,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const comps = window.getProjectCompanies(p);
             const compBadges = comps.map(comp => {
                 const st = window.getCompanyStyle ? window.getCompanyStyle(comp) : { color: '#ee6018', bg: 'rgba(238,96,24,0.15)', border: 'rgba(238,96,24,0.3)', icon: '🏢' };
-                return `<span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] border truncate max-w-[90px]" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};" title="${escapeHtml(comp)}">${st.icon} ${escapeHtml(comp)}</span>`;
+                return `<span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] border truncate max-w-[90px]" style="background-color:${st.bg}; color:${st.color}; border-color:${st.border};" title="${escapeHtml(comp)}">${st.icon} ${escapeHtml(comp)}</span>`;
             }).join('');
 
             const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim().replace(/^#+/, '');
-            const tkBadge = tk ? `<span class="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-yellow-200 text-yellow-900 font-semibold border border-yellow-400 shrink-0">🎫 #${escapeHtml(tk)}</span>` : '';
+            const tkBadge = tk ? `<span class="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-yellow-200 text-yellow-900 font-semibold border border-yellow-400 shrink-0">🎫 #${escapeHtml(tk)}</span>` : '';
 
             const pCons = getProjectConsultants(p);
             const consPills = pCons.map(c => {
                 const cd = consultants[c];
                 const col = cd ? cd.color : '#b8b3b0';
-                return `<span class="inline-flex items-center gap-1 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] shrink-0"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>${escapeHtml(c)}</span>`;
+                return `<span class="inline-flex items-center gap-1 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] shrink-0"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>${escapeHtml(c)}</span>`;
             }).join('');
 
             const prioVal = parseInt(p.priority, 10) || 1;
             const isSelected = currentSelection && currentSelection.id === p.id;
             const cardBorder = isSelected 
                 ? 'border-[#ee6018] ring-2 ring-[#ee6018] bg-[#1c1917] priority-card-active' 
-                : (isOver ? 'border-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60');
+                : (isOver ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]/60');
 
             return `
-            <div data-node-id="${p.id}" class="bg-[#161413] hover:bg-[#1c1917] border ${cardBorder} rounded-[10px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
+            <div data-node-id="${p.id}" class="bg-[#101010] hover:bg-[#1c1917] border ${cardBorder} rounded-[10px] p-3 transition-all cursor-pointer group flex flex-col gap-2 select-none" style="border-left: 3px solid ${isOver ? '#ee6018' : (accentColor || '#3d3a39')}" onclick="window.selectNode('${p.pType}', '${p.id}')">
               <div class="flex items-center justify-between gap-1.5 min-w-0">
                 <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
                   <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] shadow-inner" style="color: ${accentColor || '#ee6018'}">*${prioVal}</span>
@@ -7665,7 +7665,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
                 <div class="flex items-center gap-1 overflow-hidden justify-end">
                   ${tkBadge}
-                  <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] truncate max-w-[110px]" title="${escapeHtml(p.status || 'Pendiente')}">${sIco} ${escapeHtml(p.status || 'Pendiente')}</span>
+                  <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] truncate max-w-[110px]" title="${escapeHtml(p.status || 'Pendiente')}">${sIco} ${escapeHtml(p.status || 'Pendiente')}</span>
                 </div>
               </div>
 
@@ -7674,12 +7674,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               </h4>
 
               <div class="flex flex-wrap items-center gap-1 text-[9px] font-mono text-[#8a8380]">
-                <span class="truncate max-w-[140px] px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#2d2a29] text-[#8a8380]" title="${escapeHtml(p.parentName)}">📁 ${escapeHtml(p.parentName)}</span>
+                <span class="truncate max-w-[140px] px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]" title="${escapeHtml(p.parentName)}">📁 ${escapeHtml(p.parentName)}</span>
                 ${compBadges}
                 ${priorityBoardGroupBy === 'tier' ? consPills : ''}
               </div>
 
-              <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#2d2a29]/80 mt-0.5">
+              <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#3d3a39]/80 mt-0.5">
                 <div class="flex items-center gap-1.5 min-w-0">
                   <div class="w-14 sm:w-16 h-1.5 bg-[#101010] rounded-full overflow-hidden border border-[#3d3a39] shrink-0">
                     <div class="h-full bg-[#10b981] rounded-full" style="width: ${p.progress || 0}%"></div>
@@ -7735,8 +7735,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${escapeHtml(consName)}</h3>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                      ${p1Count > 0 ? `<span class="font-mono text-[9px] px-2 py-0.5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-bold">🔥 ${p1Count} en *1</span>` : ''}
-                      <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${cProjs.length}</span>
+                      ${p1Count > 0 ? `<span class="font-mono text-[9px] px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-bold">🔥 ${p1Count} en *1</span>` : ''}
+                      <span class="font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${cProjs.length}</span>
                     </div>
                   </div>
                   <div class="flex-1 overflow-y-auto p-3 pb-32 sm:pb-3 space-y-3 scrollbar-thin">
@@ -7790,8 +7790,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                       <h3 class="font-mono text-xs font-semibold uppercase text-[#fafafa] truncate">${tier.label}</h3>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                      <span class="font-mono text-[9px] px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]">${pct}%</span>
-                      <span class="font-mono text-[10px] px-2 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${tierProjs.length}</span>
+                      <span class="font-mono text-[9px] px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]">${pct}%</span>
+                      <span class="font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-medium">${tierProjs.length}</span>
                     </div>
                   </div>
                   <div class="flex-1 overflow-y-auto p-3 pb-32 sm:pb-3 space-y-3 scrollbar-thin">
@@ -9475,8 +9475,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const isDel = (log.action || '').includes('Borró') || (log.action || '').includes('Eliminó');
             
             let tagBadge = '';
-            if (isVal) tagBadge = '<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] uppercase">Validación</span>';
-            else if (isRej || isDel) tagBadge = '<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase">Atención</span>';
+            if (isVal) tagBadge = '<span class="font-mono text-[8px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px] uppercase">Validación</span>';
+            else if (isRej || isDel) tagBadge = '<span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[3px] uppercase">Atención</span>';
 
             return `<div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 relative overflow-hidden group hover:border-[#4d4947] transition">
                 <div class="absolute left-0 top-0 bottom-0 w-1 opacity-90" style="background-color: ${col}"></div>
@@ -9484,7 +9484,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="text-[10px] text-[#8a8380] font-mono pl-1.5">${log.timestamp}</span>
                     <div class="flex items-center gap-1.5">
                         ${tagBadge}
-                        <button type="button" onclick="window.setHistoryAuthorFilter('${escapeHtml(log.by)}')" class="font-mono text-[9px] px-2 py-0.5 rounded-[2px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018] uppercase flex items-center gap-1 text-[#eeeeee] transition cursor-pointer" title="Clic para filtrar únicamente la actividad de ${escapeHtml(log.by)}">
+                        <button type="button" onclick="window.setHistoryAuthorFilter('${escapeHtml(log.by)}')" class="font-mono text-[9px] px-2 py-0.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] uppercase flex items-center gap-1 text-[#eeeeee] transition cursor-pointer" title="Clic para filtrar únicamente la actividad de ${escapeHtml(log.by)}">
                             <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${col}"></span>
                             <span>${escapeHtml(log.by)}</span>
                         </button>
@@ -9748,7 +9748,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (pBadge) pBadge.textContent = `${myProjects.length} PROYECTO${myProjects.length === 1 ? '' : 'S'}`;
             if (pList) {
                 if (myProjects.length === 0) {
-                    pList.innerHTML = `<div class="p-4 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#8a8380] uppercase">No hay proyectos asignados</div>`;
+                    pList.innerHTML = `<div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#8a8380] uppercase">No hay proyectos asignados</div>`;
                 } else {
                     myProjects.sort((a, b) => {
                         const aOver = isOver(a) ? 1 : 0;
@@ -9760,7 +9760,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         const over = isOver(proj);
                         const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
                         const sIco = isCompletedStatus(proj.status) ? '✅' : (proj.status === 'En Progreso' ? '🚀' : (proj.status === 'No Iniciado' ? '⏸️' : '⏳'));
-                        return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-3 transition flex items-center justify-between gap-3 cursor-pointer group" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
+                        return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[10px] p-3 transition flex items-center justify-between gap-3 cursor-pointer group" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
@@ -9788,11 +9788,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (tBadge) tBadge.textContent = `${myTasks.length} PENDIENTE${myTasks.length === 1 ? '' : 'S'}`;
             if (tList) {
                 if (myTasks.length === 0) {
-                    tList.innerHTML = `<div class="p-4 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#a0ca92] uppercase">✓ Todas tus tareas están al día</div>`;
+                    tList.innerHTML = `<div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#a0ca92] uppercase">✓ Todas tus tareas están al día</div>`;
                 } else {
                     tList.innerHTML = myTasks.map(({ proj, task }) => {
-                        return `<div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[8px] p-2.5 flex items-start gap-2.5">
-                            <input type="checkbox" onchange="window.toggleTaskFromDashboard('${proj.pType}', '${proj.id}', '${task.id}')" class="mt-0.5 rounded-[2px] border-[#3d3a39] bg-[#101010] text-[#a0ca92] focus:ring-[#a0ca92] h-3.5 w-3.5 cursor-pointer shrink-0">
+                        return `<div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] p-2.5 flex items-start gap-2.5">
+                            <input type="checkbox" onchange="window.toggleTaskFromDashboard('${proj.pType}', '${proj.id}', '${task.id}')" class="mt-0.5 rounded-[3px] border-[#3d3a39] bg-[#101010] text-[#a0ca92] focus:ring-[#a0ca92] h-3.5 w-3.5 cursor-pointer shrink-0">
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs text-[#eeeeee] leading-tight">${formatTaskTextWithTicket(task.text)}</p>
                                 <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380] mt-1">
@@ -10593,7 +10593,7 @@ window.updateNotifTabsUI = function() {
     };
     const inactiveTheme = 'bg-transparent border-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18]';
     const inactiveBadgeTheme = 'bg-[#101010] text-[#8a8380] border-[#3d3a39]';
-    const baseClasses = 'py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition border cursor-pointer';
+    const baseClasses = 'py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition border cursor-pointer';
 
     ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
         const btn = document.getElementById(`notifTabBtn-${t}`);
@@ -10602,7 +10602,7 @@ window.updateNotifTabsUI = function() {
         const isActive = (t === currentNotifTab);
         btn.className = `${baseClasses} ${isActive ? activeThemes[t] : inactiveTheme}`;
         if (badgeEl) {
-            badgeEl.className = `text-[9px] font-mono px-1 py-0.2 rounded-[2px] border ${isActive ? activeBadgeThemes[t] : inactiveBadgeTheme}`;
+            badgeEl.className = `text-[9px] font-mono px-1 py-0.2 rounded-[3px] border ${isActive ? activeBadgeThemes[t] : inactiveBadgeTheme}`;
         }
     });
 };
@@ -10741,7 +10741,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             const msg = assignedProjectsFilter === 'ME' 
                 ? 'No tienes proyectos asignados actualmente' 
                 : `Sin proyectos asignados para ${escapeHtml(assignedProjectsFilter)}`;
-            pList.innerHTML = `<div class="p-3 rounded-[6px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">${msg}</div>`;
+            pList.innerHTML = `<div class="p-3 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">${msg}</div>`;
             return;
         }
 
@@ -10765,11 +10765,11 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
                 : '';
 
             return `
-            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[8px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="window.navigateToProjectFromNotif('${proj.pType}', '${proj.id}')">
+            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[10px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="window.navigateToProjectFromNotif('${proj.pType}', '${proj.id}')">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
-                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018] shrink-0">* ${prioVal}</span>
+                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#ee6018] shrink-0">* ${prioVal}</span>
                         <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
                     </div>
                     <div class="flex items-center gap-2 font-mono text-[9px] text-[#8a8380] uppercase truncate">
@@ -10901,7 +10901,7 @@ window.renderDailyTasks = function() {
         if (alertsList.length === 0) {
             container.innerHTML = `
             <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#252220] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
+                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
                 <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja de Alertas Limpia</h3>
                 <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes menciones nuevas en foros ni proyectos en situación crítica.</p>
             </div>`;
@@ -10938,13 +10938,13 @@ window.renderDailyTasks = function() {
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-2">
                                     <h4 class="text-xs font-semibold text-[#fafafa] leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                    <span class="font-mono text-[9px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 px-1.5 py-0.5 rounded-[2px] uppercase shrink-0 font-bold">@ Mención</span>
+                                    <span class="font-mono text-[9px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 px-1.5 py-0.5 rounded-[3px] uppercase shrink-0 font-bold">@ Mención</span>
                                 </div>
                                 <div class="flex items-center gap-2 mt-1 text-[9px] text-[#8a8380] font-mono">
                                     <span>👤 Por: <b class="text-[#eeeeee]">${escapeHtml(a.author || (a.users && a.users[0]) || 'Consultor')}</b></span>
                                     ${a.date ? `<span>· ${escapeHtml(a.date)}</span>` : ''}
                                 </div>
-                                <div class="mt-2.5 p-2.5 rounded-[4px] bg-[#141211] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
+                                <div class="mt-2.5 p-2.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
                                     "${escapeHtml(a.noteText || a.reason)}"
                                 </div>
                                 <div class="flex items-center gap-2 mt-3 pt-2 border-t border-[#1d1a18]">
@@ -10952,7 +10952,7 @@ window.renderDailyTasks = function() {
                                         <span>Ir al Foro & Responder</span>
                                         <span>↗</span>
                                     </button>
-                                    <button type="button" onclick="event.stopPropagation(); window.confirmNoteReadDirect('${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#252220] text-[#b8b3b0] hover:text-[#fafafa] border border-[#3d3a39] font-mono uppercase text-[9px] transition">
+                                    <button type="button" onclick="event.stopPropagation(); window.confirmNoteReadDirect('${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#fafafa] border border-[#3d3a39] font-mono uppercase text-[9px] transition">
                                         <span>✓ Marcar Visto</span>
                                     </button>
                                 </div>
@@ -10980,12 +10980,12 @@ window.renderDailyTasks = function() {
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-2">
                                     <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39] shrink-0 uppercase">Mapa & Ficha ↗</span>` : ''}
+                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[3px] border border-[#3d3a39] shrink-0 uppercase">Mapa & Ficha ↗</span>` : ''}
                                 </div>
                                 <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
                                 <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
                                 <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-[#b8b3b0] font-mono">
-                                    <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
+                                    <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
                                 </div>
                             </div>
                         </div>
@@ -11037,7 +11037,7 @@ window.renderDailyTasks = function() {
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
                         <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
-                        <span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px] shrink-0">${tasks.length} PDTES</span>
+                        <span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">${tasks.length} PDTES</span>
                     </div>
                     <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
@@ -11062,7 +11062,7 @@ window.renderDailyTasks = function() {
 
                         return `
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] hover:border-[#4d4947] group transition" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
-                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[2px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
+                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
                             <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
                                 <span class="text-xs text-[#eeeeee] break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -11070,7 +11070,7 @@ window.renderDailyTasks = function() {
                                     ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
                                     ${t.deadline ? `<span class="text-[9px] text-[#ee6018] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
                                     ${t.fecha_compromiso ? `<span class="text-[9px] text-[#a0ca92] font-mono">📅 Compromiso: ${escapeHtml(t.fecha_compromiso)}</span>` : ''}
-                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#101010] text-[#8a8380] px-1.5 py-0.5 rounded-[2px] border border-[#3d3a39]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#101010] text-[#8a8380] px-1.5 py-0.5 rounded-[3px] border border-[#3d3a39]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
                                 </div>
                             </div>
                             ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] opacity-0 group-hover:opacity-100 transition p-1 shrink-0" title="Borrar tarea"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
@@ -11108,15 +11108,15 @@ window.renderDailyTasks = function() {
                 <div class="bg-[#101010] border border-[#ee6018]/60 rounded-[10px] p-3.5">
                     <div class="flex items-start justify-between gap-2">
                         <span class="text-xs text-[#eeeeee] font-normal break-words">${formatTaskTextWithTicket(t.text)}</span>
-                        <span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[2px] uppercase shrink-0">⏳ Validación</span>
+                        <span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[3px] uppercase shrink-0">⏳ Validación</span>
                     </div>
 
                     <div class="flex items-center gap-1.5 mt-2 flex-wrap">
                         <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                        <span class="text-[9px] text-[#eeeeee] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">👤 ${escapeHtml(t.assignee || 'Sin asignar')}</span>
-                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                        ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
-                        ${t.assignedBy ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
+                        <span class="text-[9px] text-[#eeeeee] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">👤 ${escapeHtml(t.assignee || 'Sin asignar')}</span>
+                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                        ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
+                        ${t.assignedBy ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
                     </div>
 
                     ${t.feedback ? `<div class="mt-2.5 text-[10px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] p-2.5 rounded-[3px] break-words">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
@@ -11179,7 +11179,7 @@ window.renderDailyTasks = function() {
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
                         <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)}</span>
-                        <span class="font-mono text-[9px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[2px] shrink-0">${tasks.length} HECHAS ✓</span>
+                        <span class="font-mono text-[9px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px] shrink-0">${tasks.length} HECHAS ✓</span>
                     </div>
                     <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
@@ -11188,13 +11188,13 @@ window.renderDailyTasks = function() {
                         const canRevert = isSuper || t.assignedBy === localAuthor;
                         return `
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-80 hover:opacity-100 transition">
-                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[2px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
+                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
                             <div class="flex flex-col flex-1 min-w-0">
                                 <span class="text-xs text-[#8a8380] line-through break-words">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                     <span class="font-mono text-[9px] uppercase text-[#b8b3b0] ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[2px]">✓ ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
+                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[3px]">✓ ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
                                 </div>
                                 ${t.feedback ? `<div class="mt-1.5 text-[10px] text-[#b8b3b0] bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39]">💬 ${escapeHtml(t.feedback)}</div>` : ''}
                             </div>
@@ -11971,7 +11971,7 @@ window.renderDailyTasks = function() {
             }
 
             return `<span class="inline-flex items-center gap-2 mx-6 shrink-0">
-                <span class="shrink-0 whitespace-nowrap px-2 py-0.5 w-auto rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border inline-block" style="flex-shrink: 0; white-space: nowrap; padding: 2px 8px; width: auto;">${escapeHtml(tagLabel)}</span>
+                <span class="shrink-0 whitespace-nowrap px-2 py-0.5 w-auto rounded-[3px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border inline-block" style="flex-shrink: 0; white-space: nowrap; padding: 2px 8px; width: auto;">${escapeHtml(tagLabel)}</span>
                 <span class="text-[#f5f5f4]">${escapeHtml(ann.text)}</span>
                 <span class="text-[#55504c] font-light select-none ml-2">//</span>
             </span>`;
@@ -12287,20 +12287,20 @@ window.renderDailyTasks = function() {
 
             const isExpired = Boolean(a.validTo && a.validTo < todayStr);
             const statusBadge = !a.active
-                ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#3d3a39] text-[#8a8380]">PAUSADO</span>'
+                ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[3px] bg-[#3d3a39] text-[#8a8380]">PAUSADO</span>'
                 : (isExpired
-                    ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30">VENCIDO</span>'
-                    : '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30">EMITIENDO</span>');
+                    ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[3px] bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30">VENCIDO</span>'
+                    : '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded-[3px] bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/30">EMITIENDO</span>');
 
             return `
-            <div class="p-3 bg-[#101010] border ${a.active && !isExpired ? 'border-[#3d3a39]' : 'border-[#252220] opacity-75'} rounded-[6px] space-y-2">
+            <div class="p-3 bg-[#101010] border ${a.active && !isExpired ? 'border-[#3d3a39]' : 'border-[#252220] opacity-75'} rounded-[10px] space-y-2">
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
-                        <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${tagLabel}</span>
+                        <span class="px-1.5 py-0.5 rounded-[3px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${tagLabel}</span>
                         ${statusBadge}
                     </div>
                     <div class="flex items-center gap-1">
-                        <button type="button" onclick="toggleAnnouncementActive('${a.id}')" class="p-1 px-2 rounded-[3px] font-mono text-[10px] uppercase transition ${a.active ? 'bg-[#1d1a18] text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220]' : 'bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40 hover:bg-[#ee6018] hover:text-white'}" title="${a.active ? 'Pausar emisión' : 'Activar emisión'}">
+                        <button type="button" onclick="toggleAnnouncementActive('${a.id}')" class="p-1 px-2 rounded-[3px] font-mono text-[10px] uppercase transition ${a.active ? 'bg-[#1d1a18] text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18]' : 'bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40 hover:bg-[#ee6018] hover:text-white'}" title="${a.active ? 'Pausar emisión' : 'Activar emisión'}">
                             ${a.active ? 'Pausar' : 'Activar'}
                         </button>
                         <button type="button" onclick="deleteAnnouncement('${a.id}')" class="p-1 text-[#8a8380] hover:text-[#ff453a] hover:bg-[#1d1a18] rounded-[3px] transition" title="Eliminar anuncio">
@@ -12638,21 +12638,21 @@ window.renderDailyTasks = function() {
                 const lockInfo = appData.attendanceLocks[periodKey];
                 const lockAuthor = lockInfo?.lockedBy || 'Osvaldo Avilés';
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Validada y cerrada por ${escapeHtml(lockAuthor)}">
+                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Validada y cerrada por ${escapeHtml(lockAuthor)}">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
                         VALIDADA & CERRADA
                     </span>
                 `;
             } else if (isPast) {
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena transcurrida (solo editable por Osvaldo Avilés)">
+                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena transcurrida (solo editable por Osvaldo Avilés)">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                         QUINCENA PASADA
                     </span>
                 `;
             } else {
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena en curso abierta para registro">
+                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena en curso abierta para registro">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span>
                         QUINCENA EN CURSO
                     </span>
@@ -12666,14 +12666,14 @@ window.renderDailyTasks = function() {
             if (isMaster) {
                 if (!isLocked) {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
                             <svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                             <span>Validar y Cerrar</span>
                         </button>
                     `;
                 } else {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Reabrir quincena para permitir modificaciones">
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Reabrir quincena para permitir modificaciones">
                             <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                             <span>Reabrir Quincena</span>
                         </button>
@@ -12761,7 +12761,7 @@ window.renderDailyTasks = function() {
         activeAttendanceTeamFilter = team;
         document.querySelectorAll('.att-team-pill').forEach(btn => {
             btn.classList.remove('bg-[#fafafa]', 'text-[#101010]', 'border-[#fafafa]');
-            btn.classList.add('text-[#8a8380]', 'bg-[#161413]', 'border-[#3d3a39]');
+            btn.classList.add('text-[#8a8380]', 'bg-[#101010]', 'border-[#3d3a39]');
         });
         
         const activeBtn = (team === 'ALL') ? document.getElementById('attTeamBtn-ALL') :
@@ -12770,7 +12770,7 @@ window.renderDailyTasks = function() {
                           (team.includes('Coordinación') ? document.getElementById('attTeamBtn-Coord') :
                           (team.includes('Gerencia') ? document.getElementById('attTeamBtn-Gerencia') : null))));
         if (activeBtn) {
-            activeBtn.classList.remove('text-[#8a8380]', 'bg-[#161413]', 'border-[#3d3a39]');
+            activeBtn.classList.remove('text-[#8a8380]', 'bg-[#101010]', 'border-[#3d3a39]');
             activeBtn.classList.add('bg-[#fafafa]', 'text-[#101010]', 'border-[#fafafa]');
         }
         window.renderAttendanceTable();
@@ -13060,7 +13060,7 @@ window.renderDailyTasks = function() {
 
         let html = `
         <!-- Indicador táctil móvil -->
-        <div class="md:hidden mb-2.5 px-3 py-1.5 rounded-[3px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
+        <div class="md:hidden mb-2.5 px-3 py-1.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
             <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Desliza la tabla para ver todos los días</span>
             <button type="button" onclick="setAttendanceViewTab('consultant')" class="text-[#fafafa] hover:text-[#ee6018] underline font-medium">Ver en Vertical ➔</button>
         </div>
@@ -13068,8 +13068,8 @@ window.renderDailyTasks = function() {
         <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]" style="-webkit-overflow-scrolling: touch;">
             <table class="min-w-[1100px] w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="bg-[#161413] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
-                        <th class="p-2.5 sm:p-3 relative md:sticky md:left-0 bg-[#161413] z-20 w-[140px] sm:w-[190px] md:min-w-[210px] border-r border-[#3d3a39]">Colaborador</th>
+                    <tr class="bg-[#101010] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
+                        <th class="p-2.5 sm:p-3 relative md:sticky md:left-0 bg-[#101010] z-20 w-[140px] sm:w-[190px] md:min-w-[210px] border-r border-[#3d3a39]">Colaborador</th>
                         <th class="p-2 sm:p-3 min-w-[75px] sm:min-w-[95px] border-r border-[#3d3a39] text-center">Horario</th>
                         ${workDays.map(wd => `
                             <th class="p-2 text-center min-w-[110px] sm:min-w-[125px] border-r border-[#3d3a39] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
@@ -13125,23 +13125,23 @@ window.renderDailyTasks = function() {
             });
 
             let summaryHtml = '';
-            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d com</span> `;
-            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d vac</span> `;
-            if (stgtCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[9px] uppercase font-medium">${stgtCount} ofi</span> `;
-            if (homeCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29] font-mono text-[9px] uppercase font-medium">${homeCount} home</span>`;
+            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d com</span> `;
+            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d vac</span> `;
+            if (stgtCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[9px] uppercase font-medium">${stgtCount} ofi</span> `;
+            if (homeCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#8a8380] border border-[#3d3a39] font-mono text-[9px] uppercase font-medium">${homeCount} home</span>`;
             if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px] uppercase">Laborando</span>`;
 
             html += `
-                <tr class="hover:bg-[#141211] transition-colors border-b border-[#1d1a18]">
+                <tr class="hover:bg-[#101010] transition-colors border-b border-[#1d1a18]">
                     <td class="p-2 sm:p-3 relative md:sticky md:left-0 bg-[#101010] z-10 border-r border-[#3d3a39] w-[140px] sm:w-[190px] md:min-w-[210px]">
                         <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
+                            <div class="w-6 h-6 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div class="min-w-0 truncate">
                                 <div class="flex items-center gap-1.5 truncate">
                                     <span class="font-normal text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
-                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8.5px] text-[#8a8380] bg-[#161413] border border-[#3d3a39] px-1 rounded-[2px]">${empNo}</span>` : ''}
+                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8.5px] text-[#8a8380] bg-[#101010] border border-[#3d3a39] px-1 rounded-[3px]">${empNo}</span>` : ''}
                                 </div>
                                 <div class="text-[9.5px] text-[#8a8380] truncate font-mono">
                                     ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981] font-mono">${escapeHtml(lead.split(' ')[0])}</span>
@@ -13183,7 +13183,7 @@ window.renderDailyTasks = function() {
             aux.innerHTML = `
                 <div class="flex items-center gap-1.5">
                     <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Colaborador:</span>
-                    <select onchange="changeConsultantView(this.value)" class="bg-[#161413] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                    <select onchange="changeConsultantView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
                         ${(isMaster || isLead)
                             ? list.map(c => `<option value="${escapeHtml(c)}" ${c === curC ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')
                             : `<option value="${escapeHtml(curC)}" selected>${escapeHtml(curC)} (Personal)</option>`
@@ -13218,16 +13218,16 @@ window.renderDailyTasks = function() {
         let html = `
         <div class="max-w-3xl mx-auto space-y-3">
             <!-- TARJETA CABECERA DEL COLABORADOR -->
-            <div class="bg-[#161413] border border-[#3d3a39] rounded-[8px] p-3.5 sm:p-4 space-y-3">
+            <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 sm:p-4 space-y-3">
                 <div class="flex items-center justify-between gap-3 flex-wrap">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-[4px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-xs text-[#fafafa] font-bold shrink-0">
+                        <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-xs text-[#fafafa] font-bold shrink-0">
                             ${curC.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h3 class="font-normal text-sm text-[#fafafa]">${escapeHtml(curC)}</h3>
-                                <span class="px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380]">N° ${escapeHtml(empNo)}</span>
+                                <span class="px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380]">N° ${escapeHtml(empNo)}</span>
                             </div>
                             <div class="text-[11px] text-[#8a8380] font-mono truncate">
                                 ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981]">${escapeHtml(lead)}</span>
@@ -13242,23 +13242,23 @@ window.renderDailyTasks = function() {
 
                 <!-- CONTADORES RESUMEN QUINCENAL (FACTORY KPIS) -->
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-[#252220]">
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
                         <div class="font-mono text-base font-medium text-[#ee6018]">${commCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Comisiones (PT)</div>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
-                        <div class="font-mono text-base font-medium text-[#101010] bg-[#eeeeee] rounded-[2px] inline-block px-2">${vacCount}</div>
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
+                        <div class="font-mono text-base font-medium text-[#101010] bg-[#eeeeee] rounded-[3px] inline-block px-2">${vacCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380] mt-0.5">Vacaciones (VA)</div>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
                         <div class="font-mono text-base font-medium text-[#ffffff]">${stgtCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Oficina STGT</div>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
                         <div class="font-mono text-base font-medium text-[#8a8380]">${distCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Home Office</div>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#2d2a29] text-center">
+                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
                         <div class="font-mono text-base font-medium text-[#ff453a]">${medCount + faltaCount}</div>
                         <div class="font-mono text-[9px] uppercase text-[#8a8380]">Permisos / Falta</div>
                     </div>
@@ -13300,7 +13300,7 @@ window.renderDailyTasks = function() {
             }
 
             html += `
-                <div class="p-3 rounded-[6px] bg-[#161413] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-3">
+                <div class="p-3 rounded-[10px] bg-[#101010] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-12 text-center shrink-0">
                             <div class="font-mono text-xs font-semibold text-[#eeeeee] uppercase">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
@@ -13312,7 +13312,7 @@ window.renderDailyTasks = function() {
                                 <button type="button" onclick="${clickAction}" class="att-cell py-1 px-2 rounded-[3px] font-mono text-[10.5px] uppercase ${chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
                                     ${escapeHtml(label)}
                                 </button>
-                                ${isToday ? '<span class="px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 font-mono text-[8.5px] uppercase font-bold">HOY</span>' : ''}
+                                ${isToday ? '<span class="px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 font-mono text-[8.5px] uppercase font-bold">HOY</span>' : ''}
                             </div>
                             ${extraInfo}
                         </div>
@@ -13320,7 +13320,7 @@ window.renderDailyTasks = function() {
 
                     <div class="shrink-0">
                         ${editCheck.allowed
-                            ? `<button type="button" onclick="${clickAction}" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition flex items-center gap-1">
+                            ? `<button type="button" onclick="${clickAction}" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition flex items-center gap-1">
                                  <span>Cambiar</span>
                                  <svg class="w-3 h-3 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                </button>`
@@ -13360,7 +13360,7 @@ window.renderDailyTasks = function() {
             aux.innerHTML = `
                 <div class="flex items-center gap-1.5">
                     <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Fecha:</span>
-                    <select onchange="changeDailyDateView(this.value)" class="bg-[#161413] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                    <select onchange="changeDailyDateView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
                         ${workDays.map(w => `
                             <option value="${w.dateStr}" ${w.dateStr === curDate ? 'selected' : ''}>${w.dowName} ${String(w.dayNum).padStart(2, '0')} de ${monthName}</option>
                         `).join('')}
@@ -13401,17 +13401,17 @@ window.renderDailyTasks = function() {
         let html = `
         <div class="max-w-3xl mx-auto space-y-4">
             <!-- CABECERA DEL DÍA -->
-            <div class="bg-[#161413] border border-[#3d3a39] rounded-[8px] p-3.5 sm:p-4 flex items-center justify-between gap-3 flex-wrap">
+            <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 sm:p-4 flex items-center justify-between gap-3 flex-wrap">
                 <div>
                     <div class="font-mono text-sm font-semibold text-[#eeeeee] uppercase">${curWd.dowName} ${String(curWd.dayNum).padStart(2, '0')} DE ${monthName.toUpperCase()} DE 2026</div>
                     <div class="text-[11px] text-[#8a8380] font-mono">Resumen de asignaciones y ubicaciones del equipo</div>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.stgt.length} Oficina STGT</span>
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29]">${groups.homeOffice.length} Home Office</span>
-                    <span class="px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
-                    ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
-                    ${groups.otros.length ? `<span class="px-2 py-0.5 rounded-[2px] bg-[#2a1717] text-[#ff453a] border border-[#ff453a]/40">${groups.otros.length} Incid</span>` : ''}
+                    <span class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.stgt.length} Oficina STGT</span>
+                    <span class="px-2 py-0.5 rounded-[3px] bg-[#101010] text-[#8a8380] border border-[#3d3a39]">${groups.homeOffice.length} Home Office</span>
+                    <span class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
+                    ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
+                    ${groups.otros.length ? `<span class="px-2 py-0.5 rounded-[3px] bg-[#2a1717] text-[#ff453a] border border-[#ff453a]/40">${groups.otros.length} Incid</span>` : ''}
                 </div>
             </div>
 
@@ -13436,9 +13436,9 @@ window.renderDailyTasks = function() {
                     : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
 
                 sHtml += `
-                    <div class="p-2.5 rounded-[4px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-2.5">
+                    <div class="p-2.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between gap-2.5">
                         <div class="flex items-center gap-2 min-w-0">
-                            <div class="w-7 h-7 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
+                            <div class="w-7 h-7 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
                                 ${it.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div class="min-w-0">
@@ -14754,8 +14754,8 @@ window.renderExecutiveMatrixAndCharts = function() {
         let matrixHtml = `
         <table class="w-full border-collapse text-left font-mono text-[10px]">
             <thead>
-                <tr class="border-b border-[#3d3a39] bg-[#161413] text-[#8a8380] uppercase">
-                    <th class="p-2 sm:p-2.5 sticky left-0 bg-[#161413] z-10 min-w-[200px]">Estatus STGT</th>
+                <tr class="border-b border-[#3d3a39] bg-[#101010] text-[#8a8380] uppercase">
+                    <th class="p-2 sm:p-2.5 sticky left-0 bg-[#101010] z-10 min-w-[200px]">Estatus STGT</th>
                     ${companies.map(c => `<th class="p-2 text-center min-w-[42px]">${c}</th>`).join('')}
                     <th class="p-2 text-center bg-[#1d1a18] text-[#ee6018] min-w-[50px]">TOTAL</th>
                 </tr>
@@ -14769,7 +14769,7 @@ window.renderExecutiveMatrixAndCharts = function() {
             let rowTotal = 0;
             matrixHtml += `
             <tr class="border-b border-[#252220] hover:bg-[#1d1a18]/60 transition">
-                <td class="p-2 sm:p-2.5 sticky left-0 bg-[#141211] z-10 flex items-center gap-2 font-medium">
+                <td class="p-2 sm:p-2.5 sticky left-0 bg-[#101010] z-10 flex items-center gap-2 font-medium">
                     <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cat.color}"></span>
                     <span class="truncate" style="color: ${cat.text}">${statusName}</span>
                 </td>`;
@@ -14804,8 +14804,8 @@ window.renderExecutiveMatrixAndCharts = function() {
 
         // Fila Total Columnas
         matrixHtml += `
-            <tr class="border-t-2 border-[#3d3a39] bg-[#161413] font-bold text-[#fafafa]">
-                <td class="p-2.5 sticky left-0 bg-[#161413] z-10 text-[#ee6018]">TOTAL POR EMPRESA</td>
+            <tr class="border-t-2 border-[#3d3a39] bg-[#101010] font-bold text-[#fafafa]">
+                <td class="p-2.5 sticky left-0 bg-[#101010] z-10 text-[#ee6018]">TOTAL POR EMPRESA</td>
                 ${companies.map(comp => {
                     const cTot = allProjs.filter(p => {
                         return (p.empresa === comp) || (Array.isArray(p.companies) && p.companies.includes(comp));
@@ -14934,7 +14934,7 @@ window.renderExecutiveTable = function() {
     let tableHtml = `
     <table class="w-full border-collapse text-left font-mono text-xs">
         <thead>
-            <tr class="border-b border-[#3d3a39] bg-[#161413] text-[#8a8380] uppercase text-[10px]">
+            <tr class="border-b border-[#3d3a39] bg-[#101010] text-[#8a8380] uppercase text-[10px]">
                 <th class="p-3 w-10 text-center">#</th>
                 <th class="p-3">Estatus</th>
                 <th class="p-3">Empresa</th>
@@ -14971,7 +14971,7 @@ window.renderExecutiveTable = function() {
                 </span>
             </td>
             <td class="p-3 font-semibold text-[#fafafa] whitespace-nowrap">
-                <span class="px-2 py-0.5 rounded bg-[#161413] border border-[#3d3a39] text-[10px]">${escapeHtml(pEmp)}</span>
+                <span class="px-2 py-0.5 rounded bg-[#101010] border border-[#3d3a39] text-[10px]">${escapeHtml(pEmp)}</span>
             </td>
             <td class="p-3 text-[#b8b3b0] text-[11px] truncate max-w-[140px]" title="${escapeHtml(p.moduleName)}">
                 ${escapeHtml(p.moduleName)}
@@ -15165,7 +15165,7 @@ document.addEventListener('click', function(e) {
 
         if (dayEvents.length === 0) {
             listEl.innerHTML = `
-                <div class="py-12 px-4 flex flex-col items-center justify-center text-center bg-[#141211] border border-dashed border-[#2d2a29] rounded-[10px]">
+                <div class="py-12 px-4 flex flex-col items-center justify-center text-center bg-[#101010] border border-dashed border-[#3d3a39] rounded-[10px]">
                     <span class="text-2xl mb-2">🗓️</span>
                     <h4 class="font-mono text-xs uppercase text-[#eeeeee] mb-1">Sin entregas programadas</h4>
                     <p class="text-[11px] text-[#8a8380] mb-4">No hay proyectos, documentos ni tareas asignadas con vencimiento en esta fecha.</p>
@@ -15185,19 +15185,19 @@ document.addEventListener('click', function(e) {
             const typeLabel = ev.type === 'doc' ? 'Auditoría PMO' : 'Entrega Proyecto';
 
             return `
-            <div class="bg-[#141211] border border-[#2d2a29] hover:border-[#eeeeee]/60 rounded-[10px] p-3.5 transition flex flex-col gap-2.5" style="border-left: 3px solid ${ev.color}">
+            <div class="bg-[#101010] border border-[#3d3a39] hover:border-[#eeeeee]/60 rounded-[10px] p-3.5 transition flex flex-col gap-2.5" style="border-left: 3px solid ${ev.color}">
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
-                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
-                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] border ${statusClass} font-semibold">${statusIcon} ${escapeHtml(ev.status)}</span>
-                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] hidden sm:inline">${typeLabel}</span>
+                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] border ${statusClass} font-semibold">${statusIcon} ${escapeHtml(ev.status)}</span>
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] hidden sm:inline">${typeLabel}</span>
                     </div>
                     <span class="font-mono text-[10px] text-[#a0ca92] font-bold">${ev.progress}% Avance</span>
                 </div>
 
                 <h4 class="text-sm font-medium text-[#eeeeee] leading-snug">${escapeHtml(ev.title)}</h4>
 
-                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#24211f] font-mono text-[10px]">
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#3d3a39] font-mono text-[10px]">
                     <div class="flex items-center gap-2 text-[#8a8380]">
                         <span class="text-[#ee6018] font-semibold">👤 ${escapeHtml(consStr)}</span>
                         <span>·</span>
@@ -15414,7 +15414,7 @@ document.addEventListener('click', function(e) {
             let html = '<div class="flex-1 flex flex-col min-h-0 bg-[#101010]">';
             
             // Fila de encabezados de días
-            html += '<div class="grid grid-cols-7 border-b border-[#24211f] bg-[#141211] shrink-0">';
+            html += '<div class="grid grid-cols-7 border-b border-[#3d3a39] bg-[#101010] shrink-0">';
             dayHeaders.forEach(dh => {
                 html += `
                 <div class="py-2 px-1 text-center font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider ${dh.isFriday ? 'text-[#ee6018] bg-[#ee6018]/10' : 'text-[#8a8380]'}">
@@ -15426,7 +15426,7 @@ document.addEventListener('click', function(e) {
 
             // Cuadrícula de días
             const numRows = gridDays.length / 7;
-            html += `<div class="flex-1 grid grid-cols-7 grid-rows-${numRows} min-h-0 border-b border-[#24211f] divide-x divide-y divide-[#24211f] overflow-y-auto">`;
+            html += `<div class="flex-1 grid grid-cols-7 grid-rows-${numRows} min-h-0 border-b border-[#3d3a39] divide-x divide-y divide-[#24211f] overflow-y-auto">`;
 
             gridDays.forEach(gd => {
                 const isToday = gd.dateStr === todayStr;
@@ -15440,7 +15440,7 @@ document.addEventListener('click', function(e) {
                 dayEvents.slice(0, maxDisplay).forEach(ev => {
                     const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
                     pillsHtml += `
-                    <div data-cal-pill="true" onclick="window.onCalendarPillClick('${ev.pType}', '${ev.id}', event)" class="group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#181615] hover:bg-[#252220] border border-[#2d2a29] hover:border-[#eeeeee] transition text-[9px] sm:text-[10px] font-mono cursor-pointer select-none truncate" style="border-left: 2px solid ${ev.color}" title="${escapeHtml(ev.title)} (${ev.status})">
+                    <div data-cal-pill="true" onclick="window.onCalendarPillClick('${ev.pType}', '${ev.id}', event)" class="group flex items-center justify-between gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#181615] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] transition text-[9px] sm:text-[10px] font-mono cursor-pointer select-none truncate" style="border-left: 2px solid ${ev.color}" title="${escapeHtml(ev.title)} (${ev.status})">
                       <span class="text-[8px] sm:text-[9px] shrink-0">${statusIcon}</span>
                       <span class="truncate text-[#eeeeee] group-hover:text-[#fafafa]">${escapeHtml(ev.title)}</span>
                       <span class="text-[#8a8380] text-[8px] shrink-0 hidden sm:inline">${ev.progress}%</span>
@@ -15485,7 +15485,7 @@ document.addEventListener('click', function(e) {
 
                 let cardsHtml = '';
                 if (dayEvents.length === 0) {
-                    cardsHtml = `<div class="h-32 flex flex-col items-center justify-center text-center p-3 font-mono text-[10px] text-[#55504d] border border-dashed border-[#24211f] rounded-[10px]">Sin entregas</div>`;
+                    cardsHtml = `<div class="h-32 flex flex-col items-center justify-center text-center p-3 font-mono text-[10px] text-[#55504d] border border-dashed border-[#3d3a39] rounded-[10px]">Sin entregas</div>`;
                 } else {
                     cardsHtml = dayEvents.map(ev => {
                         const statusIcon = ev.isDone ? '✓' : (ev.isOverdue ? '🔴' : '⚡');
@@ -15493,13 +15493,13 @@ document.addEventListener('click', function(e) {
                         const isSelected = currentSelection && currentSelection.id === ev.id;
 
                         return `
-                        <div data-node-id="${ev.id}" onclick="window.selectNode('${ev.pType}', '${ev.id}')" class="bg-[#161413] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018]' : 'border-[#2d2a29] hover:border-[#eeeeee]/60'} rounded-[10px] p-2.5 transition cursor-pointer flex flex-col gap-1.5" style="border-left: 3px solid ${ev.color}">
+                        <div data-node-id="${ev.id}" onclick="window.selectNode('${ev.pType}', '${ev.id}')" class="bg-[#101010] hover:bg-[#1c1917] border ${isSelected ? 'border-[#ee6018] ring-2 ring-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]/60'} rounded-[10px] p-2.5 transition cursor-pointer flex flex-col gap-1.5" style="border-left: 3px solid ${ev.color}">
                           <div class="flex items-center justify-between gap-1">
-                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
+                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#ee6018]">* ${ev.priority}</span>
                             <span class="font-mono text-[9px] ${statusClass} font-semibold">${statusIcon} ${ev.status}</span>
                           </div>
                           <h4 class="text-xs font-medium text-[#eeeeee] leading-snug line-clamp-2 hover:text-[#fafafa]">${escapeHtml(ev.title)}</h4>
-                          <div class="flex items-center justify-between gap-1 pt-1 border-t border-[#2d2a29] font-mono text-[9px] text-[#8a8380]">
+                          <div class="flex items-center justify-between gap-1 pt-1 border-t border-[#3d3a39] font-mono text-[9px] text-[#8a8380]">
                             <span class="truncate">${ev.consultants && ev.consultants.length > 0 ? '👤 ' + escapeHtml(ev.consultants.join(', ')) : 'Sin asignar'}</span>
                             <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
                               <button type="button" onclick="window.jumpToMapNode('${ev.pType}', '${ev.id}', event)" class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#ee6018] hover:text-[#101010] text-[#b8b3b0] transition" title="Ver en el mapa">Mapa ↗</button>
@@ -15510,8 +15510,8 @@ document.addEventListener('click', function(e) {
                 }
 
                 html += `
-                <div class="w-64 sm:w-72 shrink-0 bg-[#121110] border ${isToday ? 'border-[#ee6018]' : 'border-[#24211f]'} rounded-[10px] flex flex-col overflow-hidden">
-                  <div class="p-2.5 sm:p-3 bg-[#181615] border-b border-[#24211f] flex items-center justify-between ${isFriday ? 'border-t-2 border-t-[#ee6018]' : ''}">
+                <div class="w-64 sm:w-72 shrink-0 bg-[#121110] border ${isToday ? 'border-[#ee6018]' : 'border-[#3d3a39]'} rounded-[10px] flex flex-col overflow-hidden">
+                  <div class="p-2.5 sm:p-3 bg-[#181615] border-b border-[#3d3a39] flex items-center justify-between ${isFriday ? 'border-t-2 border-t-[#ee6018]' : ''}">
                     <div class="flex items-center gap-2">
                       <span class="${isToday ? 'w-5 h-5 rounded-full bg-[#ee6018] text-[#101010] font-bold flex items-center justify-center text-[10px]' : 'font-mono text-xs font-semibold text-[#fafafa]'}">
                         ${wd.dayNumber}

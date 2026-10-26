@@ -1475,8 +1475,8 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 
 #mobileViewSwitcherBar,
 #mobileBottomDock {
-    background-color: #141211 !important;
-    border-bottom: 1px solid #24211f !important;
+    background-color: var(--color-obsidian-canvas) !important;
+    border-bottom: 1px solid var(--color-ash-stroke) !important;
 }
 
 /* Ocultamiento absoluto de botones y docks flotantes de escritorio en pantallas móviles */
