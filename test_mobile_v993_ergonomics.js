@@ -90,9 +90,9 @@ test('6. styles.css: infoCard acoplado a la derecha en modo horizontal (landscap
 
 // 7. Sincronización de cache buster
 test('7. index.html, styles.css & sw.js: Versión sincronizada en todo el sistema', () => {
-    assert(html.includes('app.js?v=20261026_v993') || html.includes('app.js?v=20261026_v994'), 'index.html points to current app.js');
-    assert(html.includes('styles.css?v=20261026_v993') || html.includes('styles.css?v=20261026_v994'), 'index.html points to current styles.css');
-    assert(sw.includes('20261026_v993') || sw.includes('20261026_v994'), 'sw.js SW_VERSION is synced');
+    assert(/app\.js\?v=20261026_v99[3-9]/.test(html), 'index.html points to current app.js');
+    assert(/styles\.css\?v=20261026_v99[3-9]/.test(html), 'index.html points to current styles.css');
+    assert(/20261026_v99[3-9]/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log(`\n====================================================`);

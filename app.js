@@ -1208,6 +1208,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const modal = document.getElementById('taskFeedbackModal');
         modal.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('taskFeedbackModal');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
     };
 
@@ -1730,6 +1731,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const modal = document.getElementById('manualModal');
         modal.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('manualModal');
         setTimeout(() => { modal.classList.remove('opacity-0'); modal.children[0].style.transform = 'scale(1)'; }, 10);
     }
     
@@ -3333,6 +3335,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (isPriorityDrawerOpen) window.closePriorityDrawer(); 
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
         isDrawerOpen = true; 
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('configDrawer'); 
         window.populateGlobalEditSelector(); 
         if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
         if (currentSelection && currentSelection.id && currentUserRole !== 'Lector') {
@@ -3805,6 +3808,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         const modal = document.getElementById('globalTaskModal');
         modal.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('globalTaskModal');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
     };
     window.openGlobalTaskModal = window.openProjectTaskModal;
@@ -5859,6 +5863,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const btnDaily = document.getElementById('btnDailyTasks');
       if (btnDaily) btnDaily.classList.add('hidden');
       card.classList.remove('hidden'); 
+      if (typeof window.pushNavigationState === 'function') window.pushNavigationState('infoCard'); 
       card.scrollTop = 0;
       requestAnimationFrame(() => {
         if (card) card.scrollTop = 0;
@@ -6165,6 +6170,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             : 'Nueva contraseña personalizada...';
         const modal = document.getElementById('passwordModal');
         modal.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('passwordModal');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
     }
     window.closePasswordModal = function() {
@@ -6412,6 +6418,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const m = document.getElementById('editConsultantModal');
         if (m) {
             m.classList.remove('hidden');
+            if (typeof window.pushNavigationState === 'function') window.pushNavigationState('editConsultantModal');
             setTimeout(() => m.classList.remove('opacity-0'), 10);
         }
     };
@@ -7637,6 +7644,102 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
+    // === SISTEMA DE GESTOS ANDROID & HISTORIAL DE NAVEGACIÓN (SAMSUNG S24 ULTRA) ===
+    let _isSelfNavigatingBack = false;
+
+    window.pushNavigationState = function(stateName) {
+        try {
+            history.pushState({ eosaPanel: stateName, time: Date.now() }, '');
+        } catch(e) {}
+    };
+
+    window.initNavigationGestures = function() {
+        try {
+            history.replaceState({ eosaPanel: 'root', view: 'map' }, '');
+        } catch(e) {}
+
+        window.addEventListener('popstate', function(e) {
+            if (_isSelfNavigatingBack) {
+                _isSelfNavigatingBack = false;
+                return;
+            }
+
+            // 1. Modales emergentes secundarios (comisión, vacaciones, día de calendario, confirmaciones, dashboards)
+            const subModals = [
+                { id: 'commissionModal', close: () => typeof window.closeCommissionModal === 'function' && window.closeCommissionModal() },
+                { id: 'vacationModal', close: () => typeof window.closeVacationModal === 'function' && window.closeVacationModal() },
+                { id: 'calendarDayModal', close: () => typeof window.closeCalendarDayModal === 'function' && window.closeCalendarDayModal() },
+                { id: 'executiveDashboardModal', close: () => typeof window.closeExecutiveDashboard === 'function' && window.closeExecutiveDashboard() },
+                { id: 'pwaInstallGuideModal', close: () => typeof window.closePwaInstallGuide === 'function' && window.closePwaInstallGuide() },
+                { id: 'projectModal', close: () => typeof window.closeModal === 'function' && window.closeModal() },
+                { id: 'editConsultantModal', close: () => typeof window.closeEditConsultantModal === 'function' && window.closeEditConsultantModal() },
+                { id: 'globalTaskModal', close: () => typeof window.closeGlobalTaskModal === 'function' && window.closeGlobalTaskModal() },
+                { id: 'taskFeedbackModal', close: () => typeof window.closeTaskFeedbackModal === 'function' && window.closeTaskFeedbackModal() },
+                { id: 'manualModal', close: () => typeof window.closeManual === 'function' && window.closeManual() },
+                { id: 'passwordModal', close: () => typeof window.closePasswordModal === 'function' && window.closePasswordModal() }
+            ];
+
+            for (const m of subModals) {
+                const el = document.getElementById(m.id);
+                if (el && !el.classList.contains('hidden')) {
+                    m.close();
+                    return;
+                }
+            }
+
+            // 2. Menú de creación móvil superior
+            const mobileTopMenu = document.getElementById('mobileTopCreateMenu');
+            if (mobileTopMenu && !mobileTopMenu.classList.contains('hidden')) {
+                if (typeof window.closeMobileTopCreateMenu === 'function') window.closeMobileTopCreateMenu();
+                return;
+            }
+
+            // 3. Ficha de proyecto seleccionada (infoCard)
+            const infoCard = document.getElementById('infoCard');
+            if (infoCard && !infoCard.classList.contains('hidden')) {
+                if (typeof window.closeInfoCardSafe === 'function') {
+                    window.closeInfoCardSafe();
+                }
+                return;
+            }
+
+            // 4. Cajones laterales (Explorar, Tareas, Configuración)
+            if (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen) {
+                if (typeof window.closeFilterDrawer === 'function') window.closeFilterDrawer();
+                return;
+            }
+            if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) {
+                if (typeof window.closeDailyDrawer === 'function') window.closeDailyDrawer();
+                return;
+            }
+            if (typeof isDrawerOpen !== 'undefined' && isDrawerOpen) {
+                if (typeof window.closeConfigDrawer === 'function') window.closeConfigDrawer();
+                return;
+            }
+
+            // 5. Modal de Rol & Prenómina (attendanceModal)
+            const attM = document.getElementById('attendanceModal');
+            if (attM && !attM.classList.contains('hidden')) {
+                if (typeof window.closeAttendanceModal === 'function') window.closeAttendanceModal();
+                return;
+            }
+
+            // 6. Si estamos en Calendario o Prioridades, regresar al Mapa Mental principal
+            if (typeof mainWorkspaceViewMode !== 'undefined' && mainWorkspaceViewMode !== 'map') {
+                if (typeof window.switchMainWorkspaceView === 'function') {
+                    window.switchMainWorkspaceView('map');
+                }
+                return;
+            }
+
+            // 7. Si ya estamos en la raíz del mapa, re-empujar el estado para que un siguiente swipe no salga de la app accidentalmente
+            try {
+                history.pushState({ eosaPanel: 'root', view: 'map' }, '');
+            } catch(e) {}
+        });
+    };
+    try { window.initNavigationGestures(); } catch(e) {}
+
     // === GESTOR GLOBAL DE ESTADO DE NAVEGACIÓN EN EL DOCK INFERIOR MÓVIL (5 ACCESOS PERMANENTES) ===
     window.syncMobileDockState = function(activeMode) {
         if (!activeMode) activeMode = mainWorkspaceViewMode || 'map';
@@ -7674,6 +7777,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.switchMainWorkspaceView = function(mode) {
         mainWorkspaceViewMode = mode;
+        try {
+            sessionStorage.setItem('sicom_active_view_mode', mode);
+        } catch(e) {}
+        if (mode !== 'map' && typeof window.pushNavigationState === 'function') {
+            window.pushNavigationState('view_' + mode);
+        }
         const btnMap = document.getElementById('btnViewModeMap');
         const btnPrio = document.getElementById('btnViewModePriority');
         const btnTimeline = document.getElementById('btnViewModeTimeline');
@@ -7953,9 +8062,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.renderPriorityBoard = function() {
-        const boardContainer = document.getElementById('priorityBoardColumns');
-        const countBadge = document.getElementById('priorityBoardCountBadge');
-        if (!boardContainer) return;
+        try {
+            const boardContainer = document.getElementById('priorityBoardColumns');
+            const countBadge = document.getElementById('priorityBoardCountBadge');
+            if (!boardContainer) return;
+
+            if (!appData || !Array.isArray(appData.modules) || appData.modules.length === 0) {
+                try { if (typeof loadLocalFallback === 'function') loadLocalFallback(); } catch(e) {}
+            }
 
         const allProjs = [];
         (appData.directProjects || []).forEach(p => {
@@ -8232,6 +8346,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         boardContainer.innerHTML = htmlColumns;
         if (typeof window.bindPriorityBoardScroll === 'function') window.bindPriorityBoardScroll();
+        } catch (err) {
+            console.error('⚠️ [Prioridades] Error al renderizar tablero:', err);
+        }
     };
 
     window.renderMindMap = function() {
@@ -10362,6 +10479,7 @@ window.toggleDailyDrawer = function() {
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('tasks');
+            if (typeof window.pushNavigationState === 'function') window.pushNavigationState('dailyDrawer');
             
             // Ocultar botones flotantes para que no traslapen el drawer
             const dock = document.getElementById('canvasToolsDock');
@@ -11460,6 +11578,7 @@ window.renderDailyTasks = function() {
             document.getElementById('filterDrawer').classList.remove('translate-x-full');
             isFilterDrawerOpen = true;
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('explore');
+            if (typeof window.pushNavigationState === 'function') window.pushNavigationState('filterDrawer');
             window.populateAdvFilters();
             if (typeof window.updateFocusModeBtnUI === 'function') window.updateFocusModeBtnUI();
             const indExplore = document.getElementById('mobileDockIndicatorExplore');
@@ -11906,6 +12025,28 @@ window.renderDailyTasks = function() {
         if (isPriorityDrawerOpen) window.renderPriorityDrawer();
         setTimeout(() => window.recenterCanvas(), 40);
         if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+    };
+
+    // === APLICAR FILTROS Y REGRESAR AL MAPA MENTAL (BOTÓN BUSCAR EN EXPLORAR) ===
+    window.applyFiltersAndGoToMap = function() {
+        if (typeof window.closeFilterDrawer === 'function') {
+            window.closeFilterDrawer();
+        }
+        if (typeof mainWorkspaceViewMode !== 'undefined' && mainWorkspaceViewMode !== 'map') {
+            window.switchMainWorkspaceView('map');
+        } else {
+            if (typeof window.renderMindMap === 'function') window.renderMindMap();
+            if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+            setTimeout(() => {
+                if (typeof window.recenterCanvas === 'function') {
+                    window.recenterCanvas(0);
+                    setTimeout(() => { try { window.recenterCanvas(350); } catch(e){} }, 40);
+                }
+            }, 50);
+            if (typeof window.syncMobileDockState === 'function') {
+                window.syncMobileDockState('map');
+            }
+        }
     };
 
     // === PASTILLA FLOTANTE DE FILTRO ACTIVO EN EL CANVAS (FACTORY UI) ===
@@ -12968,6 +13109,7 @@ window.renderDailyTasks = function() {
         m.classList.remove('hidden');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
         if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('attendance');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('attendanceModal');
 
         if (window.innerWidth < 768) {
             window.setAttendanceViewTab('consultant');
@@ -13891,6 +14033,7 @@ window.renderDailyTasks = function() {
         window.updateCommissionLeadPreview();
 
         m.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('commissionModal');
         setTimeout(() => {
             m.classList.remove('opacity-0');
             if (reasonEl) reasonEl.focus();
@@ -14069,6 +14212,7 @@ window.renderDailyTasks = function() {
         window.calculateVacationDays();
 
         m.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('vacationModal');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
     };
 
@@ -15495,6 +15639,7 @@ document.addEventListener('click', function(e) {
         window.renderCalendarDayModalItems();
 
         modal.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('calendarDayModal');
         if (typeof requestAnimationFrame === 'function') {
             requestAnimationFrame(() => {
                 modal.classList.remove('opacity-0');
@@ -15731,11 +15876,16 @@ document.addEventListener('click', function(e) {
     }
 
     window.renderCalendarView = function() {
-        const container = document.getElementById('timelineBoardColumns');
-        const countBadge = document.getElementById('timelineCountBadge');
-        const cFilter = document.getElementById('timelineConsultantFilter');
-        const monthLabel = document.getElementById('calMonthYearLabel');
-        if (!container) return;
+        try {
+            const container = document.getElementById('timelineBoardColumns');
+            const countBadge = document.getElementById('timelineCountBadge');
+            const cFilter = document.getElementById('timelineConsultantFilter');
+            const monthLabel = document.getElementById('calMonthYearLabel');
+            if (!container) return;
+
+            if (!appData || !Array.isArray(appData.modules) || appData.modules.length === 0) {
+                try { if (typeof loadLocalFallback === 'function') loadLocalFallback(); } catch(e) {}
+            }
 
         const monthsLong = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const y = calendarDate.getFullYear();
@@ -15903,6 +16053,9 @@ document.addEventListener('click', function(e) {
             html += '</div>';
             container.innerHTML = html;
         }
+        } catch (err) {
+            console.error('⚠️ [Calendario] Error al renderizar vista:', err);
+        }
     };
 
     // Alias para compatibilidad
@@ -16009,7 +16162,11 @@ window.toggleMobileTopCreateMenu = function(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById('mobileTopCreateMenu');
     if (!menu) return;
+    const isOpening = menu.classList.contains('hidden');
     menu.classList.toggle('hidden');
+    if (isOpening && typeof window.pushNavigationState === 'function') {
+        window.pushNavigationState('mobileTopCreateMenu');
+    }
 };
 
 window.closeMobileTopCreateMenu = function() {
@@ -16041,3 +16198,17 @@ window.addEventListener('resize', function() {
         if (speedDial) speedDial.classList.remove('hidden');
     }
 });
+
+// Restaurar automáticamente vista previa (Calendario, Prioridades o Mapa) tras recarga o actualización PWA
+(function restorePreviousViewMode() {
+    try {
+        const saved = sessionStorage.getItem('sicom_active_view_mode');
+        if (saved && (saved === 'timeline' || saved === 'priority')) {
+            setTimeout(() => {
+                if (typeof window.switchMainWorkspaceView === 'function') {
+                    window.switchMainWorkspaceView(saved);
+                }
+            }, 100);
+        }
+    } catch(e) {}
+})();

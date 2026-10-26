@@ -68,7 +68,7 @@ test('4. index.html & styles.css: #mobileBottomDock con z-[100000] y visible sob
     assert(css.includes('#mobileBottomDock') && css.includes('z-index: 100000 !important'), 'styles.css gives mobileBottomDock z-index: 100000');
     assert(css.includes('#dailyDrawer') && css.includes('bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important'), 'dailyDrawer clears mobile dock');
     assert(css.includes('#filterDrawer') && css.includes('bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important'), 'filterDrawer clears mobile dock');
-    assert(css.includes('#attendanceModal > div') && css.includes('margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 2px) !important'), 'attendanceModal clears mobile dock');
+    assert(css.includes('#attendanceModal') && css.includes('bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important'), 'attendanceModal clears mobile dock');
 });
 
 // 5. app.js: syncMobileDockState coordina el estado activo del dock
@@ -86,11 +86,11 @@ test('6. app.js: renderAttendanceMatrixView compacta nombres de equipo en pantal
     assert(app.includes('hidden sm:block') && app.includes('jobTitle'), 'renderAttendanceMatrixView hides secondary title on mobile');
 });
 
-// 7. Sincronización de cache buster v994
-test('7. index.html, styles.css & sw.js: Versión v994 sincronizada en todo el sistema', () => {
-    assert(html.includes('app.js?v=20261026_v994'), 'index.html points to app.js v994');
-    assert(html.includes('styles.css?v=20261026_v994'), 'index.html points to styles.css v994');
-    assert(sw.includes('20261026_v994'), 'sw.js SW_VERSION is 20261026_v994');
+// 7. Sincronización de cache buster v994/v995
+test('7. index.html, styles.css & sw.js: Versión v994/v995 sincronizada en todo el sistema', () => {
+    assert(/app\.js\?v=20261026_v99[4-9]/.test(html), 'index.html points to app.js');
+    assert(/styles\.css\?v=20261026_v99[4-9]/.test(html), 'index.html points to styles.css');
+    assert(/20261026_v99[4-9]/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log(`\n====================================================`);

@@ -18,6 +18,11 @@
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
           refreshing = true;
+          try {
+            if (typeof mainWorkspaceViewMode !== 'undefined') {
+              sessionStorage.setItem('sicom_active_view_mode', mainWorkspaceViewMode);
+            }
+          } catch(e) {}
           window.location.reload();
         }
       });
@@ -72,7 +77,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v994">
+  <link rel="stylesheet" href="styles.css?v=20261026_v995">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -651,18 +656,18 @@
               <!-- Renderizado dinámico desde app.js -->
           </div>
 
-          <!-- FOOTER / LEYENDA FACTORY DE CÓDIGOS OFICIALES RH (COMPACTO) -->
-          <div class="py-1.5 px-3 sm:px-4 border-t border-[#1d1a18] bg-[#121110] flex flex-wrap items-center justify-between gap-2 text-[9.5px] font-mono shrink-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="text-[#8a8380] uppercase text-[9px]">Leyenda:</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO MÉDICO</span>
+          <!-- FOOTER / LEYENDA FACTORY DE CÓDIGOS OFICIALES RH (COMPACTO Y VISIBLE EN MÓVIL) -->
+          <div class="py-1.5 px-3 sm:px-4 border-t border-[#1d1a18] bg-[#121110] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 text-[9px] sm:text-[9.5px] font-mono shrink-0 select-none">
+              <div class="flex items-center gap-1 overflow-x-auto scrollbar-none whitespace-nowrap py-0.5 max-w-full">
+                  <span class="text-[#8a8380] uppercase text-[8.5px] sm:text-[9px] shrink-0">Leyenda:</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39] shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39] shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO</span>
               </div>
-              <div id="attPermNotice" class="text-[#8a8380] text-[9.5px] truncate">
+              <div id="attPermNotice" class="text-[#ee6018] sm:text-[#8a8380] text-[9px] sm:text-[9.5px] font-mono leading-tight py-0.5 font-medium truncate sm:truncate-none" title="Estado de auditoría y validación de la quincena">
                   💡 Edición autorizada únicamente para: Miguel Barbosa, Rafael Romero y Osvaldo Avilés.
               </div>
           </div>
@@ -1973,8 +1978,15 @@
             </button>
         </div>
     </div>
-    <div class="p-5 border-t border-[#1d1a18] bg-[#101010]">
-        <button onclick="resetAdvFilters()" class="pill-btn w-full py-3 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#eeeeee] hover:text-[#101010] font-mono uppercase text-[11px] transition border border-[#3d3a39]">Limpiar Filtros</button>
+    <div class="p-3.5 sm:p-4 border-t border-[#1d1a18] bg-[#101010] flex items-center gap-2.5">
+        <button type="button" onclick="resetAdvFilters()" class="flex-1 py-2.5 px-3 bg-[#1d1a18] hover:bg-[#252220] active:bg-[#2e2a28] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[10px] sm:text-[11px] transition rounded-[3px] border border-[#3d3a39] flex items-center justify-center gap-1.5 cursor-pointer" title="Restablecer todos los filtros aplicados">
+            <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>Limpiar Filtros</span>
+        </button>
+        <button type="button" id="btnFilterApplyAndSearch" onclick="window.applyFiltersAndGoToMap()" class="flex-1 py-2.5 px-3 bg-[#ee6018] hover:bg-[#d85514] active:bg-[#c24c12] text-[#101010] font-bold font-mono uppercase text-[10px] sm:text-[11px] transition rounded-[3px] shadow flex items-center justify-center gap-1.5 cursor-pointer" title="Aplicar filtros y ver resultados en el Mapa Mental">
+            <svg class="w-3.5 h-3.5 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>Buscar</span>
+        </button>
     </div>
   </div>
 
@@ -3366,7 +3378,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v994"></script>
+  <script type="module" src="app.js?v=20261026_v995"></script>
 
 </body>
 </html>
