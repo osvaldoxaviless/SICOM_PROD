@@ -12648,23 +12648,23 @@ window.renderDailyTasks = function() {
                 const lockInfo = appData.attendanceLocks[periodKey];
                 const lockAuthor = lockInfo?.lockedBy || 'Osvaldo Avilés';
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Validada y cerrada por ${escapeHtml(lockAuthor)}">
+                    <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#a0ca92]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 whitespace-nowrap" title="Validada y cerrada por ${escapeHtml(lockAuthor)}">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
-                        VALIDADA & CERRADA
+                        VALIDADA
                     </span>
                 `;
             } else if (isPast) {
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena transcurrida (solo editable por Osvaldo Avilés)">
+                    <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 whitespace-nowrap" title="Quincena transcurrida (solo editable por Osvaldo Avilés)">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-                        QUINCENA PASADA
+                        PASADA
                     </span>
                 `;
             } else {
                 badgeCont.innerHTML = `
-                    <span class="px-2 py-1 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider flex items-center gap-1.5" title="Quincena en curso abierta para registro">
+                    <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#eeeeee] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 whitespace-nowrap" title="Quincena en curso abierta para registro">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span>
-                        QUINCENA EN CURSO
+                        EN CURSO
                     </span>
                 `;
             }
@@ -12676,16 +12676,16 @@ window.renderDailyTasks = function() {
             if (isMaster) {
                 if (!isLocked) {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] flex items-center gap-1 transition whitespace-nowrap" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
                             <svg class="w-3 h-3 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                            <span>Validar y Cerrar</span>
+                            <span>Validar</span>
                         </button>
                     `;
                 } else {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1 transition" title="Reabrir quincena para permitir modificaciones">
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] flex items-center gap-1 transition whitespace-nowrap" title="Reabrir quincena para permitir modificaciones">
                             <svg class="w-3 h-3 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                            <span>Reabrir Quincena</span>
+                            <span>Reabrir</span>
                         </button>
                     `;
                 }
@@ -12815,10 +12815,10 @@ window.renderDailyTasks = function() {
 
         if (window.innerWidth < 480) {
             left = Math.max(12, (window.innerWidth - 260) / 2);
-            top = Math.min(window.innerHeight - 310, Math.max(60, rect.bottom + 4));
+            top = Math.min(window.innerHeight - 360, Math.max(60, rect.bottom + 4));
         } else {
-            top = Math.min(window.innerHeight - 280, Math.max(10, top));
-            left = Math.min(window.innerWidth - 250, Math.max(10, left));
+            top = Math.min(window.innerHeight - 365, Math.max(10, top));
+            left = Math.min(window.innerWidth - 275, Math.max(10, left));
         }
 
         popover.style.top = `${top}px`;
@@ -13077,27 +13077,27 @@ window.renderDailyTasks = function() {
 
         let html = `
         <!-- Indicador táctil móvil -->
-        <div class="md:hidden mb-1.5 px-2.5 py-1 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between text-[9.5px] font-mono text-[#8a8380]">
+        <div class="md:hidden mb-1 px-2.5 py-1 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between text-[9.5px] font-mono text-[#8a8380] shrink-0">
             <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Desliza la tabla para ver todos los días</span>
             <button type="button" onclick="setAttendanceViewTab('consultant')" class="text-[#fafafa] hover:text-[#ee6018] underline font-medium">Ver en Vertical ➔</button>
         </div>
 
-        <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]" style="-webkit-overflow-scrolling: touch;">
-            <table class="min-w-[820px] w-full text-left border-collapse text-xs">
+        <div class="att-matrix-wrap overflow-x-auto w-full h-full rounded-[3px] border border-[#3d3a39]" style="-webkit-overflow-scrolling: touch;">
+            <table class="att-matrix-table min-w-[780px] md:min-w-0 w-full h-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="bg-[#141211] border-b border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380] uppercase tracking-[-0.24px]">
-                        <th class="py-1.5 px-2.5 sticky top-0 left-0 bg-[#141211] z-30 w-[160px] sm:w-[175px] min-w-[160px] max-w-[185px] border-r border-[#3d3a39]">Colaborador / Equipo</th>
+                    <tr class="bg-[#141211] border-b border-[#3d3a39] font-mono text-[9px] text-[#8a8380] uppercase tracking-[-0.24px]">
+                        <th class="py-1 px-2 sticky top-0 left-0 bg-[#141211] z-30 border-r border-[#3d3a39]">Colaborador / Equipo</th>
                         ${workDays.map((wd, idx) => {
                             const isMonday = wd.dowName === 'Lun' && idx > 0;
                             const isToday = wd.dateStr === todayStr;
                             return `
-                            <th class="py-1.5 px-1 text-center min-w-[68px] sm:min-w-[76px] sticky top-0 bg-[#141211] z-20 border-r border-[#2d2a29] ${isMonday ? 'att-week-divider border-l-2 border-l-[#5a5553]' : ''}">
-                                <div class="font-semibold text-[10px] leading-tight ${isToday ? 'text-[#ee6018]' : 'text-[#eeeeee]'}">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
-                                <div class="text-[8.5px] text-[#8a8380] lowercase font-mono leading-none mt-0.5">${monthName.substring(0, 3)}</div>
+                            <th class="py-1 px-0.5 text-center sticky top-0 bg-[#141211] z-20 border-r border-[#2d2a29] ${isMonday ? 'att-week-divider border-l-2 border-l-[#5a5553]' : ''}">
+                                <div class="font-semibold text-[9.5px] leading-tight ${isToday ? 'text-[#ee6018]' : 'text-[#eeeeee]'}">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                                <div class="text-[8px] text-[#8a8380] lowercase font-mono leading-none">${monthName.substring(0, 3)}</div>
                             </th>
                             `;
                         }).join('')}
-                        <th class="py-1.5 px-2 min-w-[92px] w-[100px] sticky top-0 bg-[#141211] z-20 text-center text-[#eeeeee]">Resumen</th>
+                        <th class="py-1 px-1.5 sticky top-0 bg-[#141211] z-20 text-center text-[#eeeeee]">Resumen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#1d1a18]">
@@ -13134,11 +13134,11 @@ window.renderDailyTasks = function() {
                     ? `openCellStatusPopover(event, '${jsArg(cName)}', '${wd.dateStr}')`
                     : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
                 const cursorStyle = editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default opacity-85';
-                const cellTitle = editCheck.allowed ? `${escapeHtml(cellInfo.label)} (Clic para cambiar)` : `${escapeHtml(cellInfo.label)} (${escapeHtml(editCheck.reason)})`;
+                const cellTitle = editCheck.allowed ? `${escapeHtml(cellInfo.label)} (Clic para editar)` : `${escapeHtml(cellInfo.label)} (${escapeHtml(editCheck.reason)})`;
 
                 cellsHtml += `
-                    <td class="py-1 px-1 border-r border-[#1d1a18] text-center ${isMonday ? 'att-week-divider border-l-2 border-l-[#3d3a39]' : ''}">
-                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1 px-1 rounded-[3px] font-mono text-[9.5px] leading-tight flex items-center justify-center ${cellInfo.chipClass} ${cursorStyle}" title="${cellTitle}">
+                    <td class="py-0.5 px-0.5 border-r border-[#1d1a18] text-center align-middle ${isMonday ? 'att-week-divider border-l-2 border-l-[#3d3a39]' : ''}">
+                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1 px-0.5 rounded-[3px] font-mono text-[9px] leading-tight flex items-center justify-center ${cellInfo.chipClass} ${cursorStyle}" title="${cellTitle}">
                             <span class="truncate">${escapeHtml(cellInfo.label)}</span>
                         </button>
                     </td>
@@ -13146,33 +13146,33 @@ window.renderDailyTasks = function() {
             });
 
             let summaryHtml = '';
-            if (ptCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[8.5px] uppercase font-medium" title="${ptCount} día(s) en comisión">${ptCount}PT</span>`;
-            if (vaCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[8.5px] uppercase font-medium" title="${vaCount} día(s) de vacaciones">${vaCount}VA</span>`;
-            if (stgtCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[8.5px] uppercase font-medium" title="${stgtCount} día(s) en Oficina STGT">${stgtCount}OF</span>`;
-            if (homeCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#3d3a39] font-mono text-[8.5px] uppercase font-medium" title="${homeCount} día(s) en Home Office">${homeCount}HO</span>`;
-            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[9px] uppercase">—</span>`;
+            if (ptCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[8px] uppercase font-medium" title="${ptCount} día(s) en comisión">${ptCount}PT</span>`;
+            if (vaCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[8px] uppercase font-medium" title="${vaCount} día(s) de vacaciones">${vaCount}VA</span>`;
+            if (stgtCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[8px] uppercase font-medium" title="${stgtCount} día(s) en Oficina STGT">${stgtCount}OF</span>`;
+            if (homeCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#3d3a39] font-mono text-[8px] uppercase font-medium" title="${homeCount} día(s) en Home Office">${homeCount}HO</span>`;
+            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[8.5px] uppercase">—</span>`;
 
             html += `
                 <tr class="hover:bg-[#161413] transition-colors border-b border-[#1d1a18]">
-                    <td class="py-1 px-2 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39] w-[160px] sm:w-[175px] min-w-[160px] max-w-[185px]" title="${escapeHtml(cName)} · ${escapeHtml(jobTitle)} · Horario: ${escapeHtml(schedule)}">
+                    <td class="py-0.5 px-2 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39] align-middle" title="${escapeHtml(cName)} · ${escapeHtml(jobTitle)} · Horario: ${escapeHtml(schedule)}">
                         <div class="flex items-center gap-1.5">
-                            <div class="w-5 h-5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[8.5px] text-[#eeeeee] shrink-0">
+                            <div class="w-5 h-5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[8px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div class="min-w-0 flex-1 truncate">
                                 <div class="flex items-center gap-1 truncate leading-tight">
-                                    <span class="font-medium text-[#eeeeee] truncate text-[11px]">${escapeHtml(cName)}</span>
-                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8px] text-[#8a8380] bg-[#161413] border border-[#2d2a29] px-1 rounded-[2px] shrink-0">${empNo}</span>` : ''}
+                                    <span class="font-medium text-[#eeeeee] truncate text-[10.5px]">${escapeHtml(cName)}</span>
+                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[7.5px] text-[#8a8380] bg-[#161413] border border-[#2d2a29] px-1 rounded-[2px] shrink-0">${empNo}</span>` : ''}
                                 </div>
-                                <div class="text-[8.5px] text-[#8a8380] truncate font-mono leading-tight">
+                                <div class="text-[8px] text-[#8a8380] truncate font-mono leading-tight">
                                     ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> <span class="text-[#10b981]">${escapeHtml(lead.split(' ')[0])}</span>
                                 </div>
                             </div>
                         </div>
                     </td>
                     ${cellsHtml}
-                    <td class="py-1 px-1.5 text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center gap-1">
+                    <td class="py-0.5 px-1 text-center whitespace-nowrap align-middle">
+                        <div class="flex items-center justify-center gap-0.5">
                             ${summaryHtml}
                         </div>
                     </td>
@@ -13201,7 +13201,7 @@ window.renderDailyTasks = function() {
             aux.innerHTML = `
                 <div class="flex items-center gap-1.5">
                     <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Colaborador:</span>
-                    <select onchange="changeConsultantView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                    <select onchange="changeConsultantView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10.5px] px-2 py-0.5 rounded-[3px] outline-none cursor-pointer">
                         ${(isMaster || isLead)
                             ? list.map(c => `<option value="${escapeHtml(c)}" ${c === curC ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')
                             : `<option value="${escapeHtml(curC)}" selected>${escapeHtml(curC)} (Personal)</option>`
@@ -13234,61 +13234,52 @@ window.renderDailyTasks = function() {
         const todayStr = new Date().toISOString().slice(0, 10);
 
         let html = `
-        <div class="max-w-3xl mx-auto space-y-3">
-            <!-- TARJETA CABECERA DEL COLABORADOR -->
-            <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 sm:p-4 space-y-3">
-                <div class="flex items-center justify-between gap-3 flex-wrap">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-xs text-[#fafafa] font-bold shrink-0">
-                            ${curC.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
-                        </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="font-normal text-sm text-[#fafafa]">${escapeHtml(curC)}</h3>
-                                <span class="px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380]">N° ${escapeHtml(empNo)}</span>
-                            </div>
-                            <div class="text-[11px] text-[#8a8380] font-mono truncate">
-                                ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981]">${escapeHtml(lead)}</span>
-                            </div>
-                        </div>
+        <div class="att-consultant-fit">
+            <!-- FRANJA SUPERIOR COMPACTA: PERFIL + KPIS INTEGRADOS EN 1 SOLA LÍNEA -->
+            <div class="bg-[#141211] border border-[#3d3a39] rounded-[6px] px-3 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[11px] text-[#fafafa] font-bold shrink-0">
+                        ${curC.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                     </div>
-                    <div class="text-right font-mono text-[10px] text-[#8a8380]">
-                        <div>Horario: <span class="text-[#eeeeee]">${escapeHtml(schedule)}</span></div>
-                        <div class="text-[9.5px] text-[#8a8380]">${escapeHtml(team)}</div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap leading-tight">
+                            <h3 class="font-medium text-xs text-[#fafafa]">${escapeHtml(curC)}</h3>
+                            <span class="px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] font-mono text-[8.5px] text-[#8a8380]">N° ${escapeHtml(empNo)}</span>
+                            <span class="hidden sm:inline font-mono text-[9.5px] text-[#8a8380]">· ${escapeHtml(team)}</span>
+                        </div>
+                        <div class="text-[10px] text-[#8a8380] font-mono truncate leading-tight mt-0.5">
+                            ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981]">${escapeHtml(lead)}</span> <span class="text-[#3d3a39]">·</span> Horario: <span class="text-[#eeeeee]">${escapeHtml(schedule)}</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- CONTADORES RESUMEN QUINCENAL (FACTORY KPIS) -->
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-[#252220]">
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
-                        <div class="font-mono text-base font-medium text-[#ee6018]">${commCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Comisiones (PT)</div>
+                <!-- CONTADORES RESUMEN QUINCENAL INLINE -->
+                <div class="flex items-center gap-1.5 flex-wrap font-mono">
+                    <div class="bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39] flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-[#ee6018]">${commCount}</span>
+                        <span class="text-[8.5px] uppercase text-[#8a8380]">Comisiones (PT)</span>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
-                        <div class="font-mono text-base font-medium text-[#101010] bg-[#eeeeee] rounded-[3px] inline-block px-2">${vacCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380] mt-0.5">Vacaciones (VA)</div>
+                    <div class="bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39] flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-[#101010] bg-[#eeeeee] rounded-[2px] px-1.5 leading-tight">${vacCount}</span>
+                        <span class="text-[8.5px] uppercase text-[#8a8380]">Vacaciones (VA)</span>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
-                        <div class="font-mono text-base font-medium text-[#ffffff]">${stgtCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Oficina STGT</div>
+                    <div class="bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39] flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-[#ffffff]">${stgtCount}</span>
+                        <span class="text-[8.5px] uppercase text-[#8a8380]">Oficina STGT</span>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
-                        <div class="font-mono text-base font-medium text-[#8a8380]">${distCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Home Office</div>
+                    <div class="bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39] flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-[#b8b3b0]">${distCount}</span>
+                        <span class="text-[8.5px] uppercase text-[#8a8380]">Home Office</span>
                     </div>
-                    <div class="bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39] text-center">
-                        <div class="font-mono text-base font-medium text-[#ff453a]">${medCount + faltaCount}</div>
-                        <div class="font-mono text-[9px] uppercase text-[#8a8380]">Permisos / Falta</div>
+                    <div class="bg-[#101010] px-2.5 py-1 rounded-[3px] border border-[#3d3a39] flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-[#ff453a]">${medCount + faltaCount}</span>
+                        <span class="text-[8.5px] uppercase text-[#8a8380]">Permisos / Falta</span>
                     </div>
                 </div>
             </div>
 
-            <!-- LISTA VERTICAL DE DÍAS HÁBILES DE LA QUINCENA -->
-            <div class="space-y-2">
-                <div class="flex items-center justify-between px-1 text-[10px] font-mono text-[#8a8380] uppercase">
-                    <span>Días de la Quincena (${workDays.length} hábiles)</span>
-                    <span>Toca en un día para cambiar</span>
-                </div>
+            <!-- CUADRÍCULA FULL-FIT DE DÍAS HÁBILES DE LA QUINCENA (OCUPA 100% ANCHO Y ALTO) -->
+            <div class="att-consultant-grid">
         `;
 
         workDays.forEach(wd => {
@@ -13314,33 +13305,33 @@ window.renderDailyTasks = function() {
 
             let extraInfo = '';
             if (dayRecord && dayRecord.client) {
-                extraInfo = `<div class="text-[10px] text-[#ee6018] font-mono mt-0.5">📍 Cliente: <strong>${escapeHtml(dayRecord.client)}</strong> ${dayRecord.reason ? `— ${escapeHtml(dayRecord.reason)}` : ''}</div>`;
+                extraInfo = `<span class="text-[9.5px] text-[#ee6018] font-mono truncate">📍 <strong>${escapeHtml(dayRecord.client)}</strong> ${dayRecord.reason ? `— ${escapeHtml(dayRecord.reason)}` : ''}</span>`;
             }
 
             html += `
-                <div class="p-3 rounded-[10px] bg-[#101010] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-12 text-center shrink-0">
-                            <div class="font-mono text-xs font-semibold text-[#eeeeee] uppercase">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
-                            <div class="font-mono text-[9px] text-[#8a8380] uppercase">${monthName.substring(0, 3)}</div>
+                <div class="px-3 py-1.5 rounded-[6px] bg-[#121110] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-2.5 min-h-0">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div class="w-11 text-center shrink-0">
+                            <div class="font-mono text-[11px] font-semibold ${isToday ? 'text-[#ee6018]' : 'text-[#eeeeee]'} uppercase leading-tight">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                            <div class="font-mono text-[8.5px] text-[#8a8380] uppercase leading-none mt-0.5">${monthName.substring(0, 3)}</div>
                         </div>
-                        <div class="h-8 w-px bg-[#2d2a29] shrink-0"></div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <button type="button" onclick="${clickAction}" class="att-cell py-1 px-2 rounded-[3px] font-mono text-[10.5px] uppercase ${chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
-                                    ${escapeHtml(label)}
-                                </button>
-                                ${isToday ? '<span class="px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 font-mono text-[8.5px] uppercase font-bold">HOY</span>' : ''}
-                            </div>
+                        <div class="h-6 w-px bg-[#2d2a29] shrink-0"></div>
+                        <div class="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+                            <!-- BADGE INFORMATIVO ESTÁTICO (SIN ONCLICK) -->
+                            <span class="att-cell py-1 px-2 rounded-[3px] font-mono text-[10px] uppercase ${chipClass} cursor-default select-none pointer-events-none">
+                                ${escapeHtml(label)}
+                            </span>
+                            ${isToday ? '<span class="px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 font-mono text-[8px] uppercase font-bold">HOY</span>' : ''}
                             ${extraInfo}
                         </div>
                     </div>
 
+                    <!-- ÚNICO PUNTO DE EDICIÓN: BOTÓN EDITAR -->
                     <div class="shrink-0">
                         ${editCheck.allowed
-                            ? `<button type="button" onclick="${clickAction}" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition flex items-center gap-1">
-                                 <span>Cambiar</span>
-                                 <svg class="w-3 h-3 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            ? `<button type="button" onclick="${clickAction}" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] hover:text-[#101010] font-mono text-[9.5px] uppercase transition flex items-center gap-1 cursor-pointer">
+                                 <span>Editar</span>
+                                 <svg class="w-3 h-3 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                </button>`
                             : `<span class="text-[#8a8380] font-mono text-[10px] flex items-center gap-1" title="${escapeHtml(editCheck.reason)}">🔒</span>`
                         }
@@ -13378,7 +13369,7 @@ window.renderDailyTasks = function() {
             aux.innerHTML = `
                 <div class="flex items-center gap-1.5">
                     <span class="text-[#8a8380] uppercase text-[9.5px] hidden sm:inline">Fecha:</span>
-                    <select onchange="changeDailyDateView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[11px] px-2 py-1 rounded-[3px] outline-none cursor-pointer">
+                    <select onchange="changeDailyDateView(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10.5px] px-2 py-0.5 rounded-[3px] outline-none cursor-pointer">
                         ${workDays.map(w => `
                             <option value="${w.dateStr}" ${w.dateStr === curDate ? 'selected' : ''}>${w.dowName} ${String(w.dayNum).padStart(2, '0')} de ${monthName}</option>
                         `).join('')}
@@ -13392,8 +13383,7 @@ window.renderDailyTasks = function() {
             stgt: [],
             homeOffice: [],
             comision: [],
-            vacaciones: [],
-            otros: []
+            vacacionesOtros: []
         };
 
         list.forEach(cName => {
@@ -13409,70 +13399,87 @@ window.renderDailyTasks = function() {
                 chipClass: cellInfo.chipClass
             };
 
-            if (cellInfo.type === 'vacaciones') groups.vacaciones.push(item);
+            if (cellInfo.type === 'vacaciones' || cellInfo.type === 'medico' || cellInfo.type === 'falta') groups.vacacionesOtros.push(item);
             else if (cellInfo.type === 'comision' || cellInfo.type === 'afr' || cellInfo.type === 'odm') groups.comision.push(item);
-            else if (cellInfo.type === 'medico' || cellInfo.type === 'falta') groups.otros.push(item);
             else if (cellInfo.type === 'home_office') groups.homeOffice.push(item);
             else groups.stgt.push(item);
         });
 
         let html = `
-        <div class="max-w-3xl mx-auto space-y-4">
-            <!-- CABECERA DEL DÍA -->
-            <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3.5 sm:p-4 flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                    <div class="font-mono text-sm font-semibold text-[#eeeeee] uppercase">${curWd.dowName} ${String(curWd.dayNum).padStart(2, '0')} DE ${monthName.toUpperCase()} DE 2026</div>
-                    <div class="text-[11px] text-[#8a8380] font-mono">Resumen de asignaciones y ubicaciones del equipo</div>
+        <div class="att-daily-fit">
+            <!-- CABECERA COMPACTA DEL DÍA (1 SOLA LÍNEA) -->
+            <div class="bg-[#141211] border border-[#3d3a39] rounded-[6px] px-3 py-2 flex items-center justify-between gap-2 flex-wrap shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
+                    <span class="font-mono text-xs font-semibold text-[#eeeeee] uppercase">${curWd.dowName} ${String(curWd.dayNum).padStart(2, '0')} DE ${monthName.toUpperCase()} DE 2026</span>
+                    <span class="hidden sm:inline text-[10.5px] text-[#8a8380] font-mono">— Distribución operativa del equipo (${list.length} integrantes)</span>
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
+                <div class="flex items-center gap-1.5 flex-wrap text-[9.5px] font-mono">
                     <span class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]">${groups.stgt.length} Oficina STGT</span>
                     <span class="px-2 py-0.5 rounded-[3px] bg-[#101010] text-[#8a8380] border border-[#3d3a39]">${groups.homeOffice.length} Home Office</span>
-                    <span class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Com</span>
-                    ${groups.vacaciones.length ? `<span class="px-2 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff]">${groups.vacaciones.length} Vac</span>` : ''}
-                    ${groups.otros.length ? `<span class="px-2 py-0.5 rounded-[3px] bg-[#2a1717] text-[#ff453a] border border-[#ff453a]/40">${groups.otros.length} Incid</span>` : ''}
+                    <span class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40">${groups.comision.length} Comisión (PT)</span>
+                    <span class="px-2 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium">${groups.vacacionesOtros.length} Vac / Incid</span>
                 </div>
             </div>
 
-            <!-- SECCIONES POR UBICACIÓN -->
+            <!-- TABLERO DE 4 COLUMNAS FULL-FIT (OCUPA 100% ANCHO Y ALTO DE LA PANTALLA) -->
+            <div class="att-daily-grid">
         `;
 
-        function renderGroupSection(title, colorDot, items, chipClass) {
-            if (!items.length) return '';
+        function renderGroupColumn(title, colorDot, items) {
             let sHtml = `
-            <div class="space-y-1.5">
-                <div class="flex items-center gap-2 px-1 font-mono text-[10px] uppercase text-[#8a8380]">
-                    <span class="w-1.5 h-1.5 rounded-full ${colorDot}"></span>
-                    <span>${title} (${items.length})</span>
+            <div class="bg-[#121110] border border-[#2d2a29] rounded-[6px] p-2.5 flex flex-col min-h-0 h-full">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#252220] font-mono text-[10px] uppercase text-[#eeeeee] shrink-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full ${colorDot}"></span>
+                        <span class="font-medium">${title}</span>
+                    </div>
+                    <span class="px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] text-[9px]">${items.length}</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
             `;
 
-            items.forEach(it => {
-                const editCheck = window.canUserEditAttendanceCell(it.name, curDate, periodKey);
-                const clickAction = editCheck.allowed
-                    ? `openCellStatusPopover(event, '${jsArg(it.name)}', '${curDate}')`
-                    : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
-
+            if (!items.length) {
                 sHtml += `
-                    <div class="p-2.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between gap-2.5">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <div class="w-7 h-7 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
-                                ${it.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
-                            </div>
-                            <div class="min-w-0">
-                                <div class="font-normal text-xs text-[#eeeeee] truncate">${escapeHtml(it.name)}</div>
-                                <div class="text-[9.5px] text-[#8a8380] font-mono truncate">${escapeHtml(it.meta.jobTitle || 'Consultor')}</div>
-                                ${it.record.client ? `<div class="text-[9.5px] text-[#ee6018] font-mono truncate">📍 ${escapeHtml(it.record.client)}</div>` : ''}
-                            </div>
-                        </div>
-                        <div class="shrink-0">
-                            <button type="button" onclick="${clickAction}" class="att-cell py-1 px-1.5 rounded-[3px] font-mono text-[9.5px] uppercase ${it.chipClass} ${editCheck.allowed ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'}">
-                                ${escapeHtml(it.status)}
-                            </button>
-                        </div>
+                    <div class="h-full min-h-[80px] flex items-center justify-center border border-dashed border-[#252220] rounded-[4px] p-3 text-center">
+                        <span class="font-mono text-[9.5px] text-[#5a5553] uppercase">Sin colaboradores en esta modalidad</span>
                     </div>
                 `;
-            });
+            } else {
+                items.forEach(it => {
+                    const editCheck = window.canUserEditAttendanceCell(it.name, curDate, periodKey);
+                    const clickAction = editCheck.allowed
+                        ? `openCellStatusPopover(event, '${jsArg(it.name)}', '${curDate}')`
+                        : `window.showToast('${escapeHtml(editCheck.reason)}', true)`;
+
+                    sHtml += `
+                        <div class="p-2 rounded-[4px] bg-[#101010] border border-[#3d3a39] hover:border-[#4d4947] transition flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0 flex-1">
+                                <div class="w-6 h-6 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[8.5px] text-[#eeeeee] shrink-0">
+                                    ${it.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-medium text-[11px] text-[#eeeeee] truncate leading-tight">${escapeHtml(it.name)}</div>
+                                    <div class="text-[9px] text-[#8a8380] font-mono truncate leading-tight">${escapeHtml(it.meta.jobTitle || 'Consultor')}</div>
+                                    <div class="mt-1 flex items-center gap-1 flex-wrap">
+                                        <span class="att-cell py-0.5 px-1.5 rounded-[2px] font-mono text-[8.5px] uppercase ${it.chipClass} cursor-default select-none pointer-events-none">${escapeHtml(it.status)}</span>
+                                        ${it.record.client ? `<span class="text-[8.5px] text-[#ee6018] font-mono truncate">📍 ${escapeHtml(it.record.client)}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="shrink-0">
+                                ${editCheck.allowed
+                                    ? `<button type="button" onclick="${clickAction}" class="px-2 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] hover:text-[#101010] font-mono text-[9px] uppercase transition flex items-center gap-0.5 cursor-pointer">
+                                         <span>Editar</span>
+                                         <svg class="w-2.5 h-2.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                       </button>`
+                                    : `<span class="text-[#8a8380] font-mono text-[9.5px]" title="${escapeHtml(editCheck.reason)}">🔒</span>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+            }
 
             sHtml += `
                 </div>
@@ -13481,13 +13488,14 @@ window.renderDailyTasks = function() {
             return sHtml;
         }
 
-        html += renderGroupSection('En Oficina STGT', 'bg-[#fafafa]', groups.stgt, 'att-chip-stgt');
-        html += renderGroupSection('En Home Office (A distancia)', 'bg-[#8a8380]', groups.homeOffice, 'att-chip-distancia');
-        html += renderGroupSection('En Comisión (PT)', 'bg-[#ee6018]', groups.comision, 'att-chip-comision');
-        html += renderGroupSection('Vacaciones (VA)', 'bg-[#ffffff]', groups.vacaciones, 'att-chip-vacaciones');
-        html += renderGroupSection('Permiso Médico / Otros', 'bg-[#ff453a]', groups.otros, 'att-chip-medico');
+        html += renderGroupColumn('En Oficina STGT', 'bg-[#fafafa]', groups.stgt);
+        html += renderGroupColumn('Home Office', 'bg-[#8a8380]', groups.homeOffice);
+        html += renderGroupColumn('En Comisión (PT)', 'bg-[#ee6018]', groups.comision);
+        html += renderGroupColumn('Vacaciones / Incid.', 'bg-[#a0ca92]', groups.vacacionesOtros);
 
-        html += `</div>`;
+        html += `
+            </div>
+        </div>`;
         container.innerHTML = html;
     }
 
