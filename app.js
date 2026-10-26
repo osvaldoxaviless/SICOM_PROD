@@ -3174,6 +3174,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         } else if (currentUserRole !== 'Lector') {
             window.switchTab('new');
         }
+        if (typeof window.renderDrawerRecentProjects === 'function') {
+            window.renderDrawerRecentProjects();
+        }
         window.applyRolePermissions();
     }
     window.closeConfigDrawer = function() { document.getElementById('configDrawer').classList.add('translate-x-full'); isDrawerOpen = false; }
@@ -3188,6 +3191,53 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     }
     window.closePriorityDrawer = function() { document.getElementById('priorityDrawer').classList.add('translate-x-full'); isPriorityDrawerOpen = false; }
     window.openFastCreateProject = function() { window.openConfigDrawer(); window.switchTab('new'); window.setCreateType('project'); setTimeout(() => document.getElementById('newProjName').focus(), 300); }
+
+    window.toggleDrawerAdminMenu = function() {
+        const menu = document.getElementById('drawerAdminMenuDropdown');
+        if (!menu) return;
+        menu.classList.toggle('hidden');
+    };
+
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('drawerAdminTabsWrapper');
+        const menu = document.getElementById('drawerAdminMenuDropdown');
+        if (wrapper && menu && !wrapper.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    window.renderDrawerRecentProjects = function() {
+        const cont = document.getElementById('drawerRecentProjectsList');
+        if (!cont) return;
+
+        const allProjs = (typeof window.getAllProjectsFlat === 'function') ? window.getAllProjectsFlat() : [];
+        if (allProjs.length === 0) {
+            cont.innerHTML = '<div class="text-[10px] text-[#8a8380] italic py-1 text-center">Sin requerimientos registrados</div>';
+            return;
+        }
+
+        const recent = allProjs.slice(-4).reverse();
+        cont.innerHTML = recent.map(p => {
+            const emp = p.empresa || (p.companies && p.companies[0]) || 'STGT';
+            const pType = p.isDirect ? 'direct-project' : 'project';
+            const normStatus = (typeof window.normalizeProjectStatus === 'function') ? window.normalizeProjectStatus(p.status) : p.status;
+            const cat = (window.STGT_STATUS_CATALOG && window.STGT_STATUS_CATALOG[normStatus]) || { color: '#ee6018', bg: 'rgba(238,96,24,0.1)' };
+
+            return `
+            <div onclick="window.selectNode('${pType}', '${p.id}')" class="flex items-center justify-between p-2 rounded-[6px] hover:bg-[#201c1a] cursor-pointer transition group border border-transparent hover:border-[#3d3a39]">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="px-1.5 py-0.2 rounded bg-[#101010] border border-[#3d3a39] text-[#ee6018] text-[9px] font-bold shrink-0 font-mono">${escapeHtml(emp)}</span>
+                    <span class="text-[#eeeeee] group-hover:text-white truncate text-[11px] font-sans font-medium">${escapeHtml(p.name)}</span>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0 font-mono text-[10px] text-[#8a8380]">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cat.color}"></span>
+                    <span class="text-[#fafafa] font-bold">${p.progress || 0}%</span>
+                    <span class="group-hover:text-[#ee6018] transition font-bold text-xs ml-0.5">↗</span>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
     
     window.switchTab = function(tabId) {
       if (tabId === 'history' && currentUserRole !== 'Supremo' && currentUserRole !== 'Supervisor' && currentUserRole !== 'Gestor de Proyectos') {
@@ -6228,6 +6278,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.populateGlobalEditSelector = function() {
+        if (typeof window.renderDrawerRecentProjects === "function") window.renderDrawerRecentProjects();
       const s = document.getElementById('globalEditSelector'); 
       if (!s) return;
       s.innerHTML = `<option value="" class="bg-black text-gray-400">-- Selecciona en el mapa --</option><optgroup label="Núcleo" class="text-white bg-white/10"><option value="core|sicom" class="bg-black text-white">🌐 SICOM</option><option value="direct-hub|hub-direct" class="bg-black text-white">⚡ ${escapeHtml(appData.directHub ? appData.directHub.name : 'PROYECTOS DIRECTOS SICOM')}</option></optgroup>`;
