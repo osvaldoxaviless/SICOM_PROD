@@ -120,7 +120,7 @@
                   <input type="text" id="loginLectorNameInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); attemptLogin(); }" placeholder="Ej. Ing. Roberto..." class="w-full liquid-input rounded-[3px] p-3 text-sm">
               </div>
               
-              <button id="btnLoginSubmit" type="button" onclick="attemptLogin()" class="pill-btn w-full py-3.5 bg-[#101010] text-[#eeeeee] hover:bg-[#1d1a18] active:bg-[#252220] font-mono text-[12px] uppercase tracking-[-0.24px] mt-4 flex items-center justify-center gap-2 cursor-pointer font-medium border border-[#101010] shadow-sm">Iniciar Sesión →</button>
+              <button id="btnLoginSubmit" type="button" onclick="attemptLogin()" class="pill-btn w-full py-3.5 bg-[#101010] text-[#eeeeee] hover:bg-[#1d1a18] active:bg-[#1d1a18] font-mono text-[12px] uppercase tracking-[-0.24px] mt-4 flex items-center justify-center gap-2 cursor-pointer font-medium border border-[#101010] ">Iniciar Sesión →</button>
 
               <!-- ACCIÓN RÁPIDA PWA / INSTALAR EN TELÉFONO -->
               <div id="loginPwaInstallContainer" class="pt-3 border-t border-[#3d3a39]/20 hidden sm:flex items-center justify-between">
@@ -137,7 +137,7 @@
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ABAJO A LA DERECHA, JUNTO AL SPEED DIAL DE CREACIÓN) -->
   <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-      <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[2px] hidden">0</span>
+      <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[3px] hidden">0</span>
   </button>
 
   <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
@@ -151,31 +151,31 @@
       <div class="csd-items pointer-events-auto flex flex-col-reverse items-start gap-2 pb-2.5" role="menu" aria-label="Herramientas del mapa">
           <!-- GUÍA RÁPIDA / MANUAL -->
           <button type="button" id="btnManual" role="menuitem" onclick="closeCanvasSpeedDial(); openManual()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Guía Rápida de Uso">
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></span>
               <span>Manual y Guía</span>
           </button>
 
           <!-- VÍNCULOS MULTIMÓDULO -->
           <button type="button" id="btnToggleSecondaryLinksDock" role="menuitem" onclick="closeCanvasSpeedDial(); toggleSecondaryLinks()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Alternar visualización de vínculos entre módulos">
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#38bdf8] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#38bdf8] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></span>
               <span>Vínculos multimódulo</span>
           </button>
 
           <!-- MODO ENFOQUE -->
           <button type="button" id="btnFocusMode" role="menuitem" onclick="closeCanvasSpeedDial(); toggleFocusMode()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Modo Enfoque: Ver proyectos en riesgo">
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></span>
               <span>Modo Enfoque</span>
           </button>
 
           <!-- COLAPSAR / EXPANDIR MÓDULOS -->
           <button type="button" id="btnToggleCollapseAll" role="menuitem" onclick="closeCanvasSpeedDial(); toggleAllModulesCollapse()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Alternar entre vista compacta y vista completa">
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg></span>
               <span id="textCollapseAll">Colapsar módulos</span>
           </button>
 
           <!-- CENTRAR MAPA -->
           <button type="button" id="canvasZoomWidget" role="menuitem" onclick="closeCanvasSpeedDial(); recenterCanvas()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex cursor-pointer" title="Centrar y reajustar zoom del mapa">
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></span>
               <span>Centrar mapa</span>
           </button>
       </div>
@@ -193,37 +193,37 @@
           <!-- REGISTRAR COMISIÓN (Jefatura Autorizada) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openCommissionModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Registrar comisión
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
           </button>
 
           <!-- SOLICITAR VACACIONES (Todos) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openVacationModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Solicitar vacaciones
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
           </button>
 
           <!-- NUEVA TAREA DIARIA (Todos menos lector) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastDailyTaskModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Nueva tarea general
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
           </button>
 
           <!-- TAREA POR PROYECTO -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openProjectTaskModal()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Tarea por proyecto
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
           </button>
 
           <!-- NUEVO PROYECTO (Todos) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openFastCreateProject()" class="sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Nuevo proyecto
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
           </button>
 
           <!-- NUEVO MÓDULO (Solo Supremo) -->
           <button type="button" role="menuitem" onclick="closeSpeedDial(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => document.getElementById('newModName').focus(), 300)" class="supremo-only hidden sd-item rounded-[3px] px-3.5 py-2 items-center gap-3 text-[#eeeeee] text-[11px] font-mono uppercase whitespace-nowrap flex">
               Nuevo módulo
-              <span class="w-6 h-6 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
+              <span class="w-6 h-6 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
           </button>
       </div>
   </div>
@@ -359,7 +359,7 @@
               </div>
 
               <!-- JERARQUÍA Y EQUIPO -->
-              <div class="p-3 bg-[#141211] border border-[#3d3a39] rounded-[4px] space-y-3">
+              <div class="p-3 bg-[#101010] border border-[#3d3a39] rounded-[3px] space-y-3">
                   <div class="flex items-center gap-1.5">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
                       <span class="font-mono text-[10px] uppercase text-[#10b981] font-medium">Jerarquía y Célula de Trabajo</span>
@@ -403,19 +403,19 @@
                   <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Días habituales de Home Office (A distancia)</label>
                   <div class="flex items-center gap-1.5 flex-wrap">
                       <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
-                          <input type="checkbox" id="editConsHo1" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Lun
+                          <input type="checkbox" id="editConsHo1" class="rounded-[3px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Lun
                       </label>
                       <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
-                          <input type="checkbox" id="editConsHo2" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mar
+                          <input type="checkbox" id="editConsHo2" class="rounded-[3px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mar
                       </label>
                       <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
-                          <input type="checkbox" id="editConsHo3" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mié
+                          <input type="checkbox" id="editConsHo3" class="rounded-[3px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Mié
                       </label>
                       <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
-                          <input type="checkbox" id="editConsHo4" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Jue
+                          <input type="checkbox" id="editConsHo4" class="rounded-[3px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Jue
                       </label>
                       <label class="flex items-center gap-1 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px] font-mono text-[10px] text-[#eeeeee] cursor-pointer select-none hover:border-[#a0ca92]">
-                          <input type="checkbox" id="editConsHo5" class="rounded-[2px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Vie
+                          <input type="checkbox" id="editConsHo5" class="rounded-[3px] bg-[#1d1a18] border-[#3d3a39] text-[#a0ca92] focus:ring-0"> Vie
                       </label>
                   </div>
               </div>
@@ -538,20 +538,20 @@
                   <div>
                       <div class="flex items-center gap-2">
                           <h2 class="font-mono text-xs sm:text-sm font-normal text-[#eeeeee] uppercase tracking-[-0.24px]">Rol de Asistencia & Prenómina</h2>
-                          <span class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider">FOPR-RHU-02-02 Ver. 4</span>
+                          <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider">FOPR-RHU-02-02 Ver. 4</span>
                       </div>
                       <p class="text-[11px] text-[#8a8380]">Control quincenal de comisiones (PT), vacaciones (VA), oficina y home office</p>
                   </div>
               </div>
 
               <!-- BOTÓN CERRAR ARRIBA A LA DERECHA (PUNTO DE SALIDA VISIBLE E INTUITIVO) -->
-              <button type="button" onclick="closeAttendanceModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#161413] border border-[#3d3a39] hover:border-[#8a8380] rounded-[4px] transition z-30 flex items-center justify-center cursor-pointer shadow-sm" title="Cerrar ventana (Esc)">
+              <button type="button" onclick="closeAttendanceModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer " title="Cerrar ventana (Esc)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
 
               <!-- SELECTOR DE QUINCENA / PERIODO -->
               <div class="flex items-center gap-2 flex-wrap">
-                  <div class="flex items-center gap-1 bg-[#161413] border border-[#3d3a39] rounded-[3px] p-1 text-xs">
+                  <div class="flex items-center gap-1 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-1 text-xs">
                       <select id="attSelMonth" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-xs px-2 py-1 outline-none cursor-pointer">
                           <option value="1">Enero</option>
                           <option value="2">Febrero</option>
@@ -577,7 +577,7 @@
                       </select>
                   </div>
 
-                  <button type="button" onclick="setAttendanceCurrentPeriod()" class="p-1.5 px-2.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition" title="Ir a la quincena actual de hoy">
+                  <button type="button" onclick="setAttendanceCurrentPeriod()" class="p-1.5 px-2.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition" title="Ir a la quincena actual de hoy">
                       Hoy
                   </button>
 
@@ -586,12 +586,12 @@
                   <div id="attValidationButtonContainer" class="flex items-center"></div>
 
                   <!-- BOTONES ACCIÓN FACTORY (CHROME NEUTRO MONOCROMO) -->
-                  <button type="button" onclick="openCommissionModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
+                  <button type="button" onclick="openCommissionModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                       <span>+ Comisión</span>
                   </button>
 
-                  <button type="button" onclick="openVacationModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
+                  <button type="button" onclick="openVacationModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
                       <span>+ Vacaciones</span>
                   </button>
@@ -605,8 +605,8 @@
           </div>
 
           <!-- BARRA DE PESTAÑAS / VISTAS DEL ROL (FACTORY VIEW SWITCHER) -->
-          <div class="px-3 sm:px-5 py-2 bg-[#141211] border-b border-[#2d2a29] flex flex-wrap items-center justify-between gap-2 shrink-0 select-none">
-              <div class="flex items-center gap-1 p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px]">
+          <div class="px-3 sm:px-5 py-2 bg-[#101010] border-b border-[#3d3a39] flex flex-wrap items-center justify-between gap-2 shrink-0 select-none">
+              <div class="flex items-center gap-1 p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
                   <button type="button" id="attTabBtn-matrix" onclick="setAttendanceViewTab('matrix')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono text-[10px] sm:text-[10.5px] uppercase transition flex items-center gap-1.5 bg-[#fafafa] text-[#101010] font-medium" title="Vista de matriz general quincenal">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                       <span>Matriz General</span>
@@ -631,10 +631,10 @@
               <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-thin py-0.5">
                   <span class="font-mono text-[10px] text-[#8a8380] uppercase mr-1">Equipo:</span>
                   <button type="button" onclick="setAttendanceTeamFilter('ALL')" id="attTeamBtn-ALL" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition bg-[#fafafa] text-[#101010] border border-[#fafafa]">Todos</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Manuel Gutiérrez')" id="attTeamBtn-Manuel" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] border border-[#3d3a39]">Eq. Manuel G.</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Carlos Islas')" id="attTeamBtn-Carlos" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] border border-[#3d3a39]">Eq. Carlos I.</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Coordinación')" id="attTeamBtn-Coord" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] border border-[#3d3a39]">Eq. Coordinación</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Gerencia')" id="attTeamBtn-Gerencia" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] border border-[#3d3a39]">Eq. Gerencia</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Manuel Gutiérrez')" id="attTeamBtn-Manuel" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Manuel G.</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Carlos Islas')" id="attTeamBtn-Carlos" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Carlos I.</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Coordinación')" id="attTeamBtn-Coord" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Coordinación</button>
+                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Gerencia')" id="attTeamBtn-Gerencia" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Gerencia</button>
               </div>
 
               <div id="attSubbarControls" class="flex items-center gap-2">
@@ -651,12 +651,12 @@
           <div class="p-3 px-4 sm:px-5 border-t border-[#1d1a18] bg-[#121110] flex flex-wrap items-center justify-between gap-2 text-[10.5px] font-mono shrink-0">
               <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-[#8a8380] uppercase text-[9.5px]">Leyenda:</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#161413] text-[#8a8380] border border-[#2d2a29]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE (A DISTANCIA)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO MÉDICO</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE (A DISTANCIA)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO MÉDICO</span>
               </div>
               <div id="attPermNotice" class="text-[#8a8380] text-[10px]">
                   💡 Edición autorizada únicamente para: Miguel Barbosa, Rafael Romero y Osvaldo Avilés.
@@ -678,14 +678,14 @@
           <div class="space-y-3.5 mb-5 text-xs">
               <div>
                   <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Consultor / Colaborador</label>
-                  <select id="commConsultant" onchange="updateCommissionLeadPreview()" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
+                  <select id="commConsultant" onchange="updateCommissionLeadPreview()" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
                       <!-- Dinámico -->
                   </select>
               </div>
 
               <div>
                   <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Empresa / Cliente Destino</label>
-                  <select id="commClient" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
+                  <select id="commClient" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
                       <option value="Autobuses Flecha Roja (AFR)">Autobuses Flecha Roja (AFR)</option>
                       <option value="Ómnibus de México (ODM)">Ómnibus de México (ODM)</option>
                       <option value="ABM">ABM</option>
@@ -699,17 +699,17 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Inicio</label>
-                      <input type="date" id="commStartDate" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
+                      <input type="date" id="commStartDate" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
                   </div>
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Fin</label>
-                      <input type="date" id="commEndDate" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
+                      <input type="date" id="commEndDate" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
                   </div>
               </div>
 
               <div>
                   <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Motivo / Justificación de la Comisión</label>
-                  <textarea id="commReason" rows="2" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none" placeholder="Ej. Pruebas de cobro y validación de versión en terminal..."></textarea>
+                  <textarea id="commReason" rows="2" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none" placeholder="Ej. Pruebas de cobro y validación de versión en terminal..."></textarea>
               </div>
 
               <!-- PREVISUALIZACIÓN DE ENRUTAMIENTO DE ALERTA -->
@@ -748,29 +748,29 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Colaborador</label>
-                      <select id="vacConsultant" onchange="updateVacationConsultantInfo()" class="w-full bg-[#161413] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
+                      <select id="vacConsultant" onchange="updateVacationConsultantInfo()" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs appearance-none text-[#eeeeee] cursor-pointer outline-none">
                           <!-- Dinámico -->
                       </select>
                   </div>
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">No. de Empleado (RH)</label>
-                      <input type="text" id="vacEmployeeNo" class="w-full bg-[#161413] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#8a8380] font-mono outline-none" readonly>
+                      <input type="text" id="vacEmployeeNo" class="w-full bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#8a8380] font-mono outline-none" readonly>
                   </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Puesto Registrado</label>
-                      <input type="text" id="vacJobTitle" class="w-full bg-[#161413] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#8a8380] outline-none" readonly>
+                      <input type="text" id="vacJobTitle" class="w-full bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#8a8380] outline-none" readonly>
                   </div>
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Jefe Inmediato (Firma)</label>
-                      <input type="text" id="vacLeadName" class="w-full bg-[#161413] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono outline-none" readonly>
+                      <input type="text" id="vacLeadName" class="w-full bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-2.5 text-xs text-[#eeeeee] font-mono outline-none" readonly>
                   </div>
               </div>
 
               <!-- CÁLCULO DE DÍAS Y FECHAS -->
-              <div class="p-3 bg-[#161413] border border-[#3d3a39] rounded-[3px] space-y-3">
+              <div class="p-3 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] space-y-3">
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                           <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Desde el día</label>
@@ -816,48 +816,48 @@
   </div>
 
   <!-- POPOVER FLOTANTE: SELECTOR RÁPIDO DE ESTADO DE ASISTENCIA EN CELDA (FACTORY POPUP) -->
-  <div id="cellStatusPopover" class="fixed z-[99999] hidden bg-[#161413] border border-[#3d3a39] rounded-[3px] p-1.5 w-64 flex flex-col gap-0.5 text-xs select-none shadow-none">
-      <div class="px-2 py-1.5 border-b border-[#2d2a29] font-mono text-[9px] uppercase text-[#8a8380] flex justify-between items-center tracking-[-0.24px]">
+  <div id="cellStatusPopover" class="fixed z-[99999] hidden bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-1.5 w-64 flex flex-col gap-0.5 text-xs select-none shadow-none">
+      <div class="px-2 py-1.5 border-b border-[#3d3a39] font-mono text-[9px] uppercase text-[#8a8380] flex justify-between items-center tracking-[-0.24px]">
           <span id="popoverCellTitle" class="truncate pr-1">Cambiar Estado</span>
           <button onclick="closeCellStatusPopover()" class="hover:text-white font-mono text-xs shrink-0">✕</button>
       </div>
       <!-- MODALIDADES DE TRABAJO ORDINARIO: HOME OFFICE Y OFICINA STGT -->
-      <button onclick="selectCellStatus('Home Office')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('Home Office')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380] group-hover:bg-[#eeeeee]"></span> Home Office (A distancia)</span>
           <span class="text-[9px] text-[#8a8380] group-hover:text-[#eeeeee]">Remoto</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('Asiste a oficina STGT')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Asiste a oficina STGT</span>
           <span class="text-[9px] text-[#8a8380] group-hover:text-[#eeeeee]">Presencial</span>
       </button>
       <div class="my-0.5 border-t border-[#252220]"></div>
-      <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('En comisión')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> En comisión (PT)</span>
           <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#ee6018]">Detallar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina AFR')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('Asiste a oficina AFR')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Oficina AFR (Flecha Roja)</span>
           <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#ee6018]">Detallar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Asiste a oficina ODM')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('Asiste a oficina ODM')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Oficina ODM (Ómnibus)</span>
           <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-[#ee6018]">Detallar ➔</span>
       </button>
       <div class="my-0.5 border-t border-[#252220]"></div>
-      <button onclick="selectCellStatus('Vacaciones')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
+      <button onclick="selectCellStatus('Vacaciones')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] transition group">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> Vacaciones (VA)</span>
           <span class="text-[9px] font-mono text-[#8a8380] group-hover:text-white">Solicitar ➔</span>
       </button>
-      <button onclick="selectCellStatus('Permiso médico')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.24px] transition">
+      <button onclick="selectCellStatus('Permiso médico')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.24px] transition">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> Permiso Médico (PM)</span>
           <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
-      <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
+      <button onclick="selectCellStatus('Falta')" class="text-left px-2 py-1.5 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[10px] text-[#ee6018] uppercase tracking-[-0.24px] transition">
           <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Falta (FA)</span>
           <span class="text-[9px] text-[#5a5553]">Directo</span>
       </button>
       <div class="my-0.5 border-t border-[#252220]"></div>
-      <button onclick="selectCellStatus('Normal')" class="text-left px-2 py-1 rounded-[2px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[9px] text-[#5a5553] hover:text-[#8a8380] uppercase tracking-[-0.24px] transition" title="Restablecer al horario semanal predeterminado">
+      <button onclick="selectCellStatus('Normal')" class="text-left px-2 py-1 rounded-[3px] hover:bg-[#1d1a18] flex items-center justify-between font-mono text-[9px] text-[#5a5553] hover:text-[#8a8380] uppercase tracking-[-0.24px] transition" title="Restablecer al horario semanal predeterminado">
           <span>Restablecer horario base</span>
           <span>Limpiar</span>
       </button>
@@ -873,38 +873,38 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
         </button>
         <!-- Menú desplegable creación móvil -->
-        <div id="mobileTopCreateMenu" class="hidden absolute left-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[99999] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
-          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+        <div id="mobileTopCreateMenu" class="hidden absolute left-0 top-full mt-1.5 w-60 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] z-[99999] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
             <span>Nuevo Proyecto</span>
-            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+            <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
           </button>
-          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
             <span>Tarea por Proyecto</span>
-            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+            <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
           </button>
-          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
             <span>Nueva Tarea General</span>
-            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+            <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
           </button>
-          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
             <span>Solicitar Vacaciones</span>
-            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+            <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
           </button>
-          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+          <button type="button" role="menuitem" onclick="closeMobileTopCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
             <span>Registrar Comisión</span>
-            <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+            <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
           </button>
         </div>
       </div>
 
       <!-- WORDMARK DE SISTEMA -->
-      <div class="h-8 flex items-center gap-1.5 px-2.5 rounded-[3px] bg-[#161413] border border-[#3d3a39]">
+      <div class="h-8 flex items-center gap-1.5 px-2.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39]">
         <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
         <span class="font-mono text-[11px] font-medium tracking-[0.08em] text-[#eeeeee]">SICOM // STGT</span>
       </div>
 
       <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES | CRONOGRAMA) -->
-      <div id="mainViewSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] shrink-0">
+      <div id="mainViewSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] shrink-0">
         <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
           <span class="hidden sm:inline">Mapa</span>
@@ -923,7 +923,7 @@
     <!-- BUSCADOR INTEGRADO EN ESCRITORIO (lg:flex, oculto en móvil y landscape móvil) -->
     <div class="hidden lg:flex items-center relative flex-1 max-w-xs xl:max-w-sm">
       <svg class="w-4 h-4 text-[#8a8380] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR PROYECTO... (Ctrl+K)" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-9 pr-3 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+      <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR PROYECTO... (Ctrl+K)" class="w-full bg-[#1d1a18] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-9 pr-3 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
     </div>
 
     <!-- CONTROLES Y FILTROS DERECHA -->
@@ -932,7 +932,7 @@
       <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-0 sm:px-2.5 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer relative" title="Filtros Operativos">
           <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
           <span class="hidden lg:inline font-medium">Filtros</span>
-          <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 sm:static sm:top-auto sm:right-auto bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 sm:px-1.5 py-0.2 rounded-[2px] sm:ml-0.5 font-bold">1</span>
+          <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 sm:static sm:top-auto sm:right-auto bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 sm:px-1.5 py-0.2 rounded-[3px] sm:ml-0.5 font-bold">1</span>
       </button>
 
       <!-- BOTÓN BÚSQUEDA MÓVIL (lg:hidden) -->
@@ -963,7 +963,7 @@
           </button>
 
           <!-- MENÚ DESPLEGABLE MÓVIL -->
-          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#141211] border border-[#3d3a39] rounded-[3px] p-2 z-[99999] flex-col gap-1 origin-top-right">
+          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-64 bg-[#101010] border border-[#3d3a39] rounded-[3px] p-2 z-[99999] flex-col gap-1 origin-top-right">
               <!-- SECCIÓN VISTAS PRINCIPALES DEL SISTEMA -->
               <div class="px-3 py-1 text-[9px] font-mono uppercase tracking-[0.08em] text-[#8a8380] flex items-center justify-between border-b border-[#252220] mb-0.5">
                   <span>Vistas del Sistema</span>
@@ -1022,7 +1022,7 @@
                       <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                       <span id="mobileInstallPwaText">Instalar Software</span>
                   </div>
-                  <span id="mobileInstallPwaBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018]">PWA</span>
+                  <span id="mobileInstallPwaBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018]">PWA</span>
               </button>
               <div class="h-px w-full bg-[#3d3a39] my-1"></div>
               <button onclick="logout(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
@@ -1036,12 +1036,12 @@
       <div class="w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
 
       <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO) -->
-      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="hidden sm:flex h-8 items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer" title="Centro de Control // Configuración & Perfil">
+      <button id="userProfilePillBtn" onclick="toggleConfigDrawer()" class="hidden sm:flex h-8 items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer" title="Centro de Control // Configuración & Perfil">
         <div class="flex items-center gap-1.5">
           <!-- Ícono de Configuración / Engrane -->
           <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
-          <div id="userAvatarInitials" class="w-5 h-5 rounded-[2px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
+          <div id="userAvatarInitials" class="w-5 h-5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
             --
           </div>
         </div>
@@ -1055,7 +1055,7 @@
   </header>
   
   <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (DOCK ERGONÓMICO 5 PESTAÑAS: MAPA | PRIORIDADES | CALENDARIO | TAREAS | MÉTRICAS) -->
-  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#141211] border-t border-[#2d2a29] flex items-center justify-around z-40 select-none pb-safe">
+  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#101010] border-t border-[#3d3a39] flex items-center justify-around z-40 select-none pb-safe">
     <!-- 1. MAPA -->
     <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group">
       <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -1081,7 +1081,7 @@
     <button type="button" id="mobileBtnBottomDailyTasks" onclick="toggleDailyDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Tareas del Día y Alertas">
       <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
         <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-        <span id="mobileBottomDailyAlertsBadge" class="absolute -top-1 -right-2 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 min-w-[13px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+        <span id="mobileBottomDailyAlertsBadge" class="absolute -top-1 -right-2 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 min-w-[13px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">0</span>
       </div>
       <span>Tareas</span>
       <span id="mobileDockIndicatorTasks" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
@@ -1096,7 +1096,7 @@
   </nav>
   
   <!-- BARRA DE BÚSQUEDA MÓVIL (lg:hidden, FLUJO NORMAL NO BLOQUEANTE) -->
-  <div id="mobileSearchDrawer" class="hidden lg:hidden w-full bg-[#161413] border-b border-[#3d3a39] px-3 py-2 z-40 items-center gap-2 shrink-0">
+  <div id="mobileSearchDrawer" class="hidden lg:hidden w-full bg-[#1d1a18] border-b border-[#3d3a39] px-3 py-2 z-40 items-center gap-2 shrink-0">
     <div class="relative flex-1 flex items-center">
       <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." autocomplete="off" class="w-full bg-[#101010] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
@@ -1108,9 +1108,9 @@
   </div>
 
   <!-- MARQUESINA / BANNER DE ANUNCIOS Y COMUNICADOS GLOBALES (FACTORY TICKER) -->
-  <div id="announcementTickerBar" class="hidden relative z-30 w-full bg-[#141211] border-b border-[#2d2a29] px-3 py-1.5 flex items-center justify-between gap-3 text-xs overflow-hidden select-none">
+  <div id="announcementTickerBar" class="hidden relative z-30 w-full bg-[#101010] border-b border-[#3d3a39] px-3 py-1.5 flex items-center justify-between gap-3 text-xs overflow-hidden select-none">
     <!-- Etiqueta de aviso a la izquierda -->
-    <div class="flex items-center gap-2 shrink-0 z-10 bg-[#141211] pr-2.5 border-r border-[#2d2a29]">
+    <div class="flex items-center gap-2 shrink-0 z-10 bg-[#101010] pr-2.5 border-r border-[#3d3a39]">
       <span class="relative flex h-2 w-2">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ee6018] opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2 w-2 bg-[#ee6018]"></span>
@@ -1126,7 +1126,7 @@
     </div>
 
     <!-- Controles rápidos a la derecha -->
-    <div class="flex items-center gap-1.5 shrink-0 z-10 bg-[#141211] pl-2 border-l border-[#2d2a29]">
+    <div class="flex items-center gap-1.5 shrink-0 z-10 bg-[#101010] pl-2 border-l border-[#3d3a39]">
       <!-- Botón Pausa / Reanudar -->
       <button type="button" id="btnTickerPause" onclick="toggleTickerPause()" class="p-1 rounded-[3px] text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] transition flex items-center justify-center" title="Pausar / Reanudar movimiento">
         <svg id="iconTickerPause" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/></svg>
@@ -1151,7 +1151,7 @@
     <!-- TABLERO KANBAN DE PRIORIDADES A PANTALLA COMPLETA (VISTA PRIORIDADES) -->
     <div id="priorityBoardView" class="hidden absolute inset-0 z-20 bg-[#101010] flex flex-col overflow-hidden">
       <!-- HEADER / CONTROLES DEL TABLERO -->
-      <div class="h-14 shrink-0 border-b border-[#24211f] bg-[#141211] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-3 select-none">
+      <div class="h-14 shrink-0 border-b border-[#3d3a39] bg-[#101010] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-3 select-none">
         <!-- IZQUIERDA: TÍTULO Y CONTADOR -->
         <div class="flex items-center gap-2 sm:gap-3 min-w-0">
           <div class="flex items-center gap-1.5 sm:gap-2">
@@ -1163,8 +1163,8 @@
         </div>
 
         <!-- CENTRO: SELECTOR DE AGRUPACIÓN (CONSULTOR VS TIER) -->
-        <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] shrink-0">
-          <button type="button" id="btnGroupConsultant" onclick="setPriorityBoardGroupBy('consultant')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer shadow-sm" title="Agrupar proyectos por consultor responsable">
+        <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] shrink-0">
+          <button type="button" id="btnGroupConsultant" onclick="setPriorityBoardGroupBy('consultant')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer " title="Agrupar proyectos por consultor responsable">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span class="hidden sm:inline">Por Consultor</span>
           </button>
@@ -1177,16 +1177,16 @@
         <!-- DERECHA: ACCIONES COMPLEMENTARIAS DEL TABLERO DE PRIORIDADES -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- LISTA LATERAL COMPACTA -->
-          <button type="button" onclick="togglePriorityDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
+          <button type="button" onclick="togglePriorityDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
             <svg class="w-3.5 h-3.5 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h7"/></svg>
             <span class="hidden sm:inline">Lista Lateral</span>
           </button>
 
           <!-- TAREAS DIARIAS Y NOTIFICACIONES (ANOTAR TAREA / ALERTAS) -->
-          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
             <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="hidden sm:inline">Tareas</span>
-            <span id="priorityDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+            <span id="priorityDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">0</span>
           </button>
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CABECERA -->
@@ -1197,30 +1197,30 @@
               <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             
-            <div id="priorityCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <div id="priorityCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Proyecto</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Tarea por Proyecto</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nueva Tarea General</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Solicitar Vacaciones</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Registrar Comisión</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => { const nm = document.getElementById('newModName'); if (nm) nm.focus(); }, 300)" class="supremo-only hidden px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closePriorityCreateMenu(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => { const nm = document.getElementById('newModName'); if (nm) nm.focus(); }, 300)" class="supremo-only hidden px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Módulo</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
               </button>
             </div>
           </div>
@@ -1236,11 +1236,11 @@
     <!-- CALENDARIO DE ENTREGAS (VISTA GOOGLE CALENDAR A PANTALLA COMPLETA) -->
     <div id="timelineBoardView" class="hidden absolute inset-0 z-20 bg-[#101010] flex flex-col overflow-hidden">
       <!-- HEADER MINIMALISTA Y ELEGANTE DEL CALENDARIO -->
-      <div class="h-14 shrink-0 border-b border-[#24211f] bg-[#141211] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 select-none">
+      <div class="h-14 shrink-0 border-b border-[#3d3a39] bg-[#101010] px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 select-none">
         
         <!-- IZQUIERDA: HOY Y NAVEGADOR DE MES/AÑO -->
         <div class="flex items-center gap-1.5 sm:gap-2">
-          <button type="button" onclick="window.calendarToday()" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] sm:text-[11px] uppercase transition cursor-pointer" title="Ir al día de hoy">
+          <button type="button" onclick="window.calendarToday()" class="px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] sm:text-[11px] uppercase transition cursor-pointer" title="Ir al día de hoy">
             Hoy
           </button>
           <div class="flex items-center bg-[#101010] border border-[#3d3a39] rounded-[3px] overflow-hidden">
@@ -1257,7 +1257,7 @@
         </div>
 
         <!-- CENTRO: SELECTOR DE MODO [ MES | SEMANA ] -->
-        <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[4px] shrink-0">
+        <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] shrink-0">
           <button type="button" id="btnCalModeMonth" onclick="window.setCalendarViewMode('month')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
             Mes
           </button>
@@ -1276,10 +1276,10 @@
           </span>
 
           <!-- TAREAS DIARIAS Y NOTIFICACIONES EN CALENDARIO -->
-          <button type="button" id="btnCalendarDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+          <button type="button" id="btnCalendarDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
             <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="hidden sm:inline">Tareas</span>
-            <span id="calendarDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[2px] font-bold hidden">0</span>
+            <span id="calendarDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">0</span>
           </button>
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CALENDARIO -->
@@ -1290,30 +1290,30 @@
               <svg class="w-3 h-3 text-[#555] hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             
-            <div id="calendarCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#161413] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+            <div id="calendarCreateMenu" class="hidden absolute right-0 top-full mt-1.5 w-60 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] z-[75] py-1 text-[#eeeeee] font-mono text-[11px] uppercase flex flex-col" role="menu">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastCreateProject()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Proyecto</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openProjectTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Tarea por Proyecto</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#eeeeee] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openFastDailyTaskModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nueva Tarea General</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openVacationModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Solicitar Vacaciones</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#a0ca92] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openCommissionModal()" class="px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Registrar Comisión</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#ee6018] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
               </button>
-              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => { const nm = document.getElementById('newModName'); if (nm) nm.focus(); }, 300)" class="supremo-only hidden px-3.5 py-2 hover:bg-[#252220] flex items-center justify-between text-left transition cursor-pointer">
+              <button type="button" role="menuitem" onclick="window.closeCalendarCreateMenu(); openConfigDrawer(); switchTab('new'); setCreateType('module'); setTimeout(() => { const nm = document.getElementById('newModName'); if (nm) nm.focus(); }, 300)" class="supremo-only hidden px-3.5 py-2 hover:bg-[#1d1a18] flex items-center justify-between text-left transition cursor-pointer">
                 <span>Nuevo Módulo</span>
-                <span class="w-5 h-5 rounded-[2px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
+                <span class="w-5 h-5 rounded-[3px] flex items-center justify-center bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></span>
               </button>
             </div>
           </div>
@@ -1330,7 +1330,7 @@
     <div id="activeFilterPill" class="hidden pointer-events-auto absolute top-4 left-4 sm:left-6 z-[35] flex items-center gap-2 px-3 py-1.5 rounded-[3px] bg-[#1d1a18] border border-[#ee6018]/60 text-[#eeeeee] font-mono text-[11px] transition-all">
       <span class="w-2 h-2 rounded-full bg-[#ee6018] inline-block animate-pulse shrink-0"></span>
       <span id="activeFilterPillText" class="text-[#fafafa] font-medium tracking-[-0.2px]">Filtro Activo</span>
-      <button type="button" onclick="window.clearActiveFilterPill()" class="ml-1 px-1.5 py-0.5 rounded-[2px] bg-[#3d3a39]/70 hover:bg-[#ee6018] text-[#eeeeee] hover:text-[#101010] transition text-[9px] uppercase tracking-wider font-mono flex items-center gap-1 cursor-pointer" title="Restablecer a vista completa">
+      <button type="button" onclick="window.clearActiveFilterPill()" class="ml-1 px-1.5 py-0.5 rounded-[3px] bg-[#3d3a39]/70 hover:bg-[#ee6018] text-[#eeeeee] hover:text-[#101010] transition text-[9px] uppercase tracking-wider font-mono flex items-center gap-1 cursor-pointer" title="Restablecer a vista completa">
         <span>Restablecer</span> <span class="text-[11px] leading-none">✕</span>
       </button>
     </div>
@@ -1345,7 +1345,7 @@
             <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] shrink-0"></span>
             <span id="infoType" class="font-mono text-[11px] tracking-[-0.24px] uppercase text-[#4d4947] font-medium shrink-0">TIPO</span>
             <!-- BADGE DIR. GENERAL (FASE 2) -->
-            <span id="infoDirGeneralBadge" class="hidden bg-[#ef4444] text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded-[3px] uppercase tracking-wider animate-pulse items-center gap-1 shadow-sm shrink-0">⚠️ DIR. GENERAL</span>
+            <span id="infoDirGeneralBadge" class="hidden bg-[#ef4444] text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded-[3px] uppercase tracking-wider animate-pulse items-center gap-1  shrink-0">⚠️ DIR. GENERAL</span>
             <!-- TICKET DEL PROYECTO ENFRENTE DE PROYECTO -->
             <div id="infoTicketContainer" class="hidden items-center gap-1.5 min-w-0"></div>
           </div>
@@ -1542,11 +1542,11 @@
                   <div class="pt-2 border-t border-[#3d3a39]/60 space-y-2">
                       <div class="flex items-center justify-between gap-2">
                           <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#eeeeee] uppercase cursor-pointer select-none">
-                              <input type="checkbox" id="quickEditRelevanteAltaDir" onchange="silentSaveInfoCard()" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                              <input type="checkbox" id="quickEditRelevanteAltaDir" onchange="silentSaveInfoCard()" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
                               <span>⭐ Relevante Alta Dir.</span>
                           </label>
                           <label class="flex items-center gap-1.5 font-mono text-[10px] text-[#eeeeee] uppercase cursor-pointer select-none">
-                              <input type="checkbox" id="quickEditRelevanteStgt" onchange="silentSaveInfoCard()" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                              <input type="checkbox" id="quickEditRelevanteStgt" onchange="silentSaveInfoCard()" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
                               <span>⚡ Relevante STGT</span>
                           </label>
                       </div>
@@ -1588,7 +1588,7 @@
               <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/25 transition">
                   <div class="flex items-center gap-2">
                       <span class="font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px]">02 // Tareas del Proyecto</span>
-                      <span id="badge-acc-tasks" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[2px]">0</span>
+                      <span id="badge-acc-tasks" class="hidden bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1.5 py-0.2 rounded-[3px]">0</span>
                   </div>
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
@@ -1596,7 +1596,7 @@
                   <div id="quickTasksList" class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
                   
                   <!-- FORMULARIO DE NUEVA TAREA -->
-                  <div class="bg-[#101010] border border-[#3d3a39] rounded-[6px] p-3 space-y-2.5 lector-hide" id="quickTaskInputBlock">
+                  <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3 space-y-2.5 lector-hide" id="quickTaskInputBlock">
                       <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase flex items-center gap-1.5">
                           <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                           Nueva Tarea del Proyecto
@@ -1641,7 +1641,7 @@
                   <div id="quickDocsContainer" class="space-y-2.5 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
                   <input type="hidden" id="quickEditProgress" value="0">
                   <div id="quickSliderContainer" class="hidden mt-3">
-                      <input type="range" id="quickEditSlider" min="0" max="100" value="0" oninput="document.getElementById('quickEditProgress').value=this.value; document.getElementById('quickEditProgressLabel').textContent=this.value+'%'; const pp = document.getElementById('infoProgressPill'); if(pp) pp.textContent=this.value+'%'; silentSaveInfoCard();" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[2px] appearance-none cursor-pointer">
+                      <input type="range" id="quickEditSlider" min="0" max="100" value="0" oninput="document.getElementById('quickEditProgress').value=this.value; document.getElementById('quickEditProgressLabel').textContent=this.value+'%'; const pp = document.getElementById('infoProgressPill'); if(pp) pp.textContent=this.value+'%'; silentSaveInfoCard();" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[3px] appearance-none cursor-pointer">
                   </div>
               </div>
           </details>
@@ -1654,7 +1654,7 @@
                   <div class="flex items-center gap-2">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                       <span class="font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px]">04 // Foro y Bitácora Técnica</span>
-                      <span id="infoNotesBadge" class="hidden ml-1 px-2 py-0.5 font-mono text-[10px] rounded-[2px] bg-[#101010] text-[#eeeeee] border border-[#3d3a39]">0</span>
+                      <span id="infoNotesBadge" class="hidden ml-1 px-2 py-0.5 font-mono text-[10px] rounded-[3px] bg-[#101010] text-[#eeeeee] border border-[#3d3a39]">0</span>
                   </div>
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
@@ -1690,7 +1690,7 @@
 
                       <div class="flex items-center justify-between pt-0.5">
                           <span class="font-mono text-[9px] text-[#8a8380] hidden sm:inline-flex items-center gap-1">
-                              <kbd class="px-1.5 py-0.5 bg-[#101010] rounded-[2px] border border-[#3d3a39] text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-[#101010] rounded-[2px] border border-[#3d3a39] text-[9px] font-mono">Enter</kbd>
+                              <kbd class="px-1.5 py-0.5 bg-[#101010] rounded-[3px] border border-[#3d3a39] text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-[#101010] rounded-[3px] border border-[#3d3a39] text-[9px] font-mono">Enter</kbd>
                           </span>
                           <button type="button" onclick="addProjectNote('info')" class="ml-auto px-3.5 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] rounded-[3px] transition flex items-center gap-1.5 shrink-0">
                               <span>Publicar →</span>
@@ -1726,25 +1726,25 @@
 
     <!-- PESTAÑAS DE CONTROL COMPACTAS (1 FILA FACTORY) -->
     <div class="p-2 border-b border-[#1d1a18] bg-[#101010] shrink-0">
-      <div class="grid grid-cols-4 gap-1 p-1 bg-[#161413] rounded-[3px] border border-[#3d3a39]">
-        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
+      <div class="grid grid-cols-4 gap-1 p-1 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39]">
+        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
           <span class="truncate">Alertas & @</span>
-          <span id="notifTabCount-alerts" class="text-[9px] font-mono px-1 py-0.2 rounded-[2px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
+          <span id="notifTabCount-alerts" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition bg-[#eeeeee] text-[#101010] font-medium">
+        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition bg-[#eeeeee] text-[#101010] font-medium">
           <span class="truncate">Pendientes</span>
-          <span id="notifTabCount-pending" class="text-[9px] font-mono px-1 py-0.2 rounded-[2px] bg-[#101010] text-[#eeeeee]">0</span>
+          <span id="notifTabCount-pending" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
+        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
           <span class="truncate">Validación</span>
-          <span id="notifTabCount-validation" class="text-[9px] font-mono px-1 py-0.2 rounded-[2px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">0</span>
+          <span id="notifTabCount-validation" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="py-1.5 px-1 rounded-[2px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
+        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
           <span class="truncate">Hechas</span>
-          <span id="notifTabCount-completed" class="text-[9px] font-mono px-1 py-0.2 rounded-[2px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39]">0</span>
+          <span id="notifTabCount-completed" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39]">0</span>
         </button>
       </div>
     </div>
@@ -1783,13 +1783,13 @@
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
               <span id="dailyAssignedHeaderTitle" class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px] truncate">Proyectos Asignados</span>
-              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[2px] shrink-0">0 PROYECTOS</span>
+              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">0 PROYECTOS</span>
             </div>
             <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
           </summary>
 
           <!-- BARRA DE SELECCIÓN RÁPIDA POR CONSULTOR -->
-          <div class="px-3 py-2 bg-[#141211] border-t border-b border-[#2d2a29] flex items-center gap-2">
+          <div class="px-3 py-2 bg-[#101010] border-t border-b border-[#3d3a39] flex items-center gap-2">
             <label for="dailyAssignedConsultantSelect" class="font-mono text-[9px] uppercase text-[#8a8380] shrink-0">Consultor:</label>
             <select id="dailyAssignedConsultantSelect" onchange="window.handleAssignedConsultantChange(this.value)" class="flex-1 bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer truncate">
               <option value="ME">⭐ Mis Proyectos</option>
@@ -1891,7 +1891,7 @@
     </div>
 
     <!-- TARJETA DE PERFIL ACTIVO (FACTORY OPERATOR DISPATCH) -->
-    <div class="px-6 py-3.5 bg-[#141211] border-b border-[#1d1a18] flex items-center justify-between gap-3 shrink-0">
+    <div class="px-6 py-3.5 bg-[#101010] border-b border-[#1d1a18] flex items-center justify-between gap-3 shrink-0">
       <div class="flex items-center gap-3 min-w-0">
         <div id="drawerAvatarInitials" class="w-9 h-9 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-sm font-semibold flex items-center justify-center shrink-0">
           --
@@ -1930,13 +1930,13 @@
     <!-- Pestañas con Estética Terminal -->
     <div class="px-5 py-3.5 bg-[#101010] border-b border-[#1d1a18] shrink-0">
         <div class="flex p-1 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39] overflow-x-auto scrollbar-thin gap-1">
-          <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] bg-white/10 text-white transition">Tablero</button>
-          <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn supervisor-up hidden flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Editar</button>
-          <button onclick="switchTab('new')" id="tabBtn-new" class="tab-btn lector-hide flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Nuevo</button>
-          <button onclick="switchTab('history')" id="tabBtn-history" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Historial</button>
-          <button onclick="switchTab('announcements')" id="tabBtn-announcements" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Anuncios</button>
-          <button onclick="switchTab('consultants')" id="tabBtn-consultants" class="tab-btn supremo-only hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Equipo</button>
-          <button onclick="switchTab('docs')" id="tabBtn-docs" class="tab-btn supremo-only hidden flex-1 min-w-[82px] py-1.5 text-[10px] font-mono uppercase rounded-[2px] text-gray-400 hover:text-white transition">Docs Base</button>
+          <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] bg-white/10 text-white transition">Tablero</button>
+          <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn supervisor-up hidden flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Editar</button>
+          <button onclick="switchTab('new')" id="tabBtn-new" class="tab-btn lector-hide flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Nuevo</button>
+          <button onclick="switchTab('history')" id="tabBtn-history" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Historial</button>
+          <button onclick="switchTab('announcements')" id="tabBtn-announcements" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Anuncios</button>
+          <button onclick="switchTab('consultants')" id="tabBtn-consultants" class="tab-btn supremo-only hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Equipo</button>
+          <button onclick="switchTab('docs')" id="tabBtn-docs" class="tab-btn supremo-only hidden flex-1 min-w-[82px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Docs Base</button>
         </div>
     </div>
 
@@ -1950,11 +1950,11 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                 <h3 id="dashSectionTitle" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">Métricas Ejecutivas & KPIs</h3>
               </div>
-              <span id="dashTelemetryBadge" class="font-mono text-[10px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">● LIVE TELEMETRY</span>
+              <span id="dashTelemetryBadge" class="font-mono text-[10px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">● LIVE TELEMETRY</span>
            </div>
 
            <!-- SELECTOR DE PERSPECTIVA (Solo visible para Administradores / Supervisores) -->
-           <div id="dashScopeSelectorContainer" class="hidden bg-[#1d1a18] p-2.5 rounded-[6px] border border-[#3d3a39] flex items-center justify-between gap-3">
+           <div id="dashScopeSelectorContainer" class="hidden bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] flex items-center justify-between gap-3">
              <div class="flex items-center gap-2">
                <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.2px]">Perspectiva:</label>
@@ -2002,7 +2002,7 @@
                      <p id="dashOverdueLabel" class="font-mono text-[11px] text-[#ee6018] group-hover:text-[#ff7836] uppercase tracking-[-0.24px] transition-colors">Vencidos</p>
                      <div class="flex items-center gap-1.5">
                        <span class="text-[10px] text-[#ee6018] group-hover:text-white transition-colors font-mono font-bold">↗</span>
-                       <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[2px] group-hover:border-[#ee6018] group-hover:bg-[#ee6018] group-hover:text-white transition-colors" id="dashOverdueBadge">0</span>
+                       <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[3px] group-hover:border-[#ee6018] group-hover:bg-[#ee6018] group-hover:text-white transition-colors" id="dashOverdueBadge">0</span>
                      </div>
                   </div>
                   <div class="mt-3">
@@ -2039,7 +2039,7 @@
                  </div>
                  <p class="text-[28px] font-normal text-[#101010] tracking-[-0.04em] leading-none font-mono" id="dashGlobalText">0%</p>
               </div>
-              <div class="w-full h-2 bg-[#101010]/15 rounded-[2px] overflow-hidden">
+              <div class="w-full h-2 bg-[#101010]/15 rounded-[3px] overflow-hidden">
                   <div id="dashGlobalBar" class="h-full bg-[#101010] transition-all duration-500 ease-out" style="width: 0%"></div>
               </div>
            </div>
@@ -2053,7 +2053,7 @@
                        <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Carga de Trabajo y Recursos</h4>
                        <p class="text-[11px] text-[#8a8380] mt-0.5">Completados, En tiempo y En riesgo por consultor</p>
                     </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">CAPACIDAD</span>
+                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">CAPACIDAD</span>
                  </div>
                  <div class="w-full h-[220px]">
                     <canvas id="consultantChart"></canvas>
@@ -2067,7 +2067,7 @@
                        <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Avance por Módulo de Negocio</h4>
                        <p class="text-[11px] text-[#8a8380] mt-0.5">% de progreso promedio por módulo</p>
                     </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">MÓDULOS</span>
+                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">MÓDULOS</span>
                  </div>
                  <div class="w-full h-[200px]">
                     <canvas id="moduleChart"></canvas>
@@ -2081,7 +2081,7 @@
                        <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Estado del Portafolio</h4>
                        <p class="text-[11px] text-[#8a8380] mt-0.5">Distribución general de iniciativas</p>
                     </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">ESTATUS</span>
+                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">ESTATUS</span>
                  </div>
                  <div class="w-full h-[220px] flex justify-center">
                     <canvas id="statusChart"></canvas>
@@ -2091,7 +2091,7 @@
 
            <!-- RESUMEN OPERATIVO PERSONAL DEL CONSULTOR (FLUJO CENTRALIZADO) -->
            <div id="dashConsultantContainer" class="hidden">
-              <div class="p-4 rounded-[8px] border border-[#3d3a39] bg-[#141211] flex items-center justify-between gap-3">
+              <div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#101010] flex items-center justify-between gap-3">
                  <div class="flex items-center gap-2.5 min-w-0">
                     <span class="w-2 h-2 rounded-full bg-[#ee6018] shrink-0"></span>
                     <div>
@@ -2119,18 +2119,18 @@
             </div>
 
             <!-- CARD DE ELEMENTO ACTIVO SELECCIONADO (Se muestra cuando hay elemento activo) -->
-            <div id="editCurrentActiveDisplay" class="hidden p-2.5 rounded-[6px] bg-[#161413] border border-[#3d3a39] flex items-center justify-between gap-3">
+            <div id="editCurrentActiveDisplay" class="hidden p-2.5 rounded-[10px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-between gap-3">
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <span id="editActiveDot" class="w-2.5 h-2.5 rounded-full shrink-0"></span>
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-2 mb-0.5">
-                    <span id="editActiveTypeTag" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]">PROYECTO</span>
+                    <span id="editActiveTypeTag" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380]">PROYECTO</span>
                     <span id="editActiveParentModule" class="font-mono text-[9px] uppercase text-[#ee6018] truncate"></span>
                   </div>
                   <h4 id="editActiveItemTitle" class="text-sm font-medium text-[#eeeeee] truncate">Nombre</h4>
                 </div>
               </div>
-              <button type="button" onclick="focusEditSearch()" class="shrink-0 font-mono text-[9px] uppercase px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition" title="Buscar otro elemento">
+              <button type="button" onclick="focusEditSearch()" class="shrink-0 font-mono text-[9px] uppercase px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] transition" title="Buscar otro elemento">
                 ✕ Cambiar
               </button>
             </div>
@@ -2138,11 +2138,11 @@
             <!-- BUSCADOR PREDICTIVO EN TIEMPO REAL (Se oculta al haber elemento activo para evitar duplicidad) -->
             <div id="editSearchBoxWrapper" class="relative">
               <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input type="text" id="editSearchInput" oninput="handleEditLiveSearch(this.value)" onfocus="handleEditSearchFocus()" placeholder="Buscar proyecto o módulo..." autocomplete="off" class="w-full bg-[#161413] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+              <input type="text" id="editSearchInput" oninput="handleEditLiveSearch(this.value)" onfocus="handleEditSearchFocus()" placeholder="Buscar proyecto o módulo..." autocomplete="off" class="w-full bg-[#1d1a18] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2.5 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
               <button type="button" id="btnClearEditSearch" onclick="clearEditSearch()" class="hidden absolute right-2.5 top-2.5 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar">✕</button>
 
               <!-- PANEL FLOTANTE DE RESULTADOS PREDICTIVOS -->
-              <div id="editSearchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#141211] border border-[#3d3a39] rounded-[6px] z-50 max-h-64 overflow-y-auto scrollbar-thin p-1 space-y-1"></div>
+              <div id="editSearchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#101010] border border-[#3d3a39] rounded-[10px] z-50 max-h-64 overflow-y-auto scrollbar-thin p-1 space-y-1"></div>
             </div>
 
             <!-- ELEMENTO SELECT OCULTO PARA COMPATIBILIDAD 100% -->
@@ -2153,7 +2153,7 @@
           
           <div id="editFormArea" class="hidden space-y-4 pt-3 border-t border-[#1d1a18]">
             <div class="flex justify-between items-center">
-              <span id="editTypeBadge" class="font-mono text-[10px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2.5 py-1 rounded-[2px] border border-[#3d3a39]">TIPO</span>
+              <span id="editTypeBadge" class="font-mono text-[10px] uppercase text-[#eeeeee] bg-[#1d1a18] px-2.5 py-1 rounded-[3px] border border-[#3d3a39]">TIPO</span>
               <button id="btnDeleteElement" onclick="requestDeleteCurrentSelection()" class="font-mono uppercase text-[10px] text-[#ee6018] hover:bg-[#ee6018] hover:text-[#fafafa] flex items-center gap-1.5 bg-[#1d1a18] px-3 py-1.5 rounded-[3px] transition border border-[#ee6018]/40 supremo-only hidden">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Eliminar
               </button>
@@ -2166,12 +2166,12 @@
             
             <div id="editProjectFields" class="space-y-3 hidden">
               <!-- ACORDEÓN: MÓDULO BASE -->
-              <details id="editDetailsBaseModule" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <details id="editDetailsBaseModule" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
                 <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                     <span class="text-[#b8b3b0] tracking-wider">Módulo Base:</span>
-                    <span id="editProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+                    <span id="editProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
                   </div>
                   <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
@@ -2182,12 +2182,12 @@
               </details>
 
               <!-- ACORDEÓN: SINERGIAS MULTIMÓDULO -->
-              <details id="editDetailsSecondaryModules" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <details id="editDetailsSecondaryModules" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
                 <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                   <div class="flex items-center gap-2 min-w-0">
                     <span>🔗</span>
                     <span class="text-[#b8b3b0] tracking-wider">Sinergias:</span>
-                    <span id="editProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
+                    <span id="editProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
                   </div>
                   <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
@@ -2197,12 +2197,12 @@
               </details>
 
               <!-- ACORDEÓN: EMPRESAS -->
-              <details id="editDetailsCompanies" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+              <details id="editDetailsCompanies" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
                 <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                   <div class="flex items-center gap-2 min-w-0">
                     <span>🏢</span>
                     <span class="text-[#b8b3b0] tracking-wider">Empresas:</span>
-                    <span id="editProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
+                    <span id="editProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
                   </div>
                   <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
@@ -2273,7 +2273,7 @@
                      <div id="editDocsContainer" class="space-y-2.5 max-h-72 overflow-y-auto scrollbar-thin pr-1"></div>
                      <input type="hidden" id="editProgress" value="0">
                      <div id="editSliderContainer" class="hidden mt-4">
-                        <input type="range" id="editSlider" min="0" max="100" value="0" oninput="document.getElementById('editProgress').value=this.value; document.getElementById('editProgressLabel').textContent=this.value+'%';" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[2px] appearance-none cursor-pointer">
+                        <input type="range" id="editSlider" min="0" max="100" value="0" oninput="document.getElementById('editProgress').value=this.value; document.getElementById('editProgressLabel').textContent=this.value+'%';" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[3px] appearance-none cursor-pointer">
                      </div>
                   </div>
               </div>
@@ -2291,7 +2291,7 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between mb-1">
                     <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block">Foro y Bitácora Técnica</label>
-                    <span id="editNotesBadge" class="hidden px-2 py-0.5 font-mono text-[10px] rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">0</span>
+                    <span id="editNotesBadge" class="hidden px-2 py-0.5 font-mono text-[10px] rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">0</span>
                 </div>
                 <div id="editNotesHistory" class="bg-[#1d1a18] border border-[#3d3a39] p-3.5 rounded-[10px] flex flex-col gap-2 max-h-56 overflow-y-auto scrollbar-thin mb-2 hidden"></div>
                 <div class="space-y-2.5 pt-1">
@@ -2321,7 +2321,7 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-[9px] text-[#8a8380] hidden sm:inline-flex items-center gap-1">
-                            <kbd class="px-1.5 py-0.5 bg-[#1d1a18] rounded-[2px] border border-[#3d3a39] text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-[#1d1a18] rounded-[2px] border border-[#3d3a39] text-[9px] font-mono">Enter</kbd>
+                            <kbd class="px-1.5 py-0.5 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39] text-[9px] font-mono">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39] text-[9px] font-mono">Enter</kbd>
                         </span>
                         <button type="button" onclick="addProjectNote('edit')" class="ml-auto px-4 py-2 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] rounded-[3px] transition flex items-center gap-1.5 shrink-0">
                             <span>Publicar →</span>
@@ -2359,18 +2359,18 @@
         <!-- NUEVO -->
         <div id="tab-new" class="tab-content hidden space-y-5">
           <div class="flex bg-[#1d1a18] p-1 rounded-[3px] border border-[#3d3a39] mb-6 gap-1">
-            <button onclick="setCreateType('project')" id="btnCreateTypeProject" class="flex-1 py-2.5 font-mono uppercase text-[11px] rounded-[2px] bg-white/10 text-white transition">Proyectos</button>
-            <button onclick="setCreateType('module')" id="btnCreateTypeModule" class="flex-1 py-2.5 font-mono uppercase text-[11px] rounded-[2px] text-gray-400 hover:text-white transition supremo-only hidden">Módulos</button>
+            <button onclick="setCreateType('project')" id="btnCreateTypeProject" class="flex-1 py-2.5 font-mono uppercase text-[11px] rounded-[3px] bg-white/10 text-white transition">Proyectos</button>
+            <button onclick="setCreateType('module')" id="btnCreateTypeModule" class="flex-1 py-2.5 font-mono uppercase text-[11px] rounded-[3px] text-gray-400 hover:text-white transition supremo-only hidden">Módulos</button>
           </div>
           
           <div id="createProjectForm" class="space-y-3">
             <!-- ACORDEÓN: MÓDULO BASE -->
-            <details id="newDetailsBaseModule" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+            <details id="newDetailsBaseModule" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
               <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                 <div class="flex items-center gap-2 min-w-0">
                   <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                   <span class="text-[#b8b3b0] tracking-wider">Módulo Base:</span>
-                  <span id="newProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
+                  <span id="newProjLocActiveBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39]">BASE</span>
                 </div>
                 <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
@@ -2381,12 +2381,12 @@
             </details>
 
             <!-- ACORDEÓN: SINERGIAS MULTIMÓDULO -->
-            <details id="newDetailsSecondaryModules" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+            <details id="newDetailsSecondaryModules" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
               <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                 <div class="flex items-center gap-2 min-w-0">
                   <span>🔗</span>
                   <span class="text-[#b8b3b0] tracking-wider">Sinergias:</span>
-                  <span id="newProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
+                  <span id="newProjSecBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]">Ninguna</span>
                 </div>
                 <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
@@ -2396,12 +2396,12 @@
             </details>
 
             <!-- ACORDEÓN: EMPRESAS -->
-            <details id="newDetailsCompanies" class="group bg-[#161413] border border-[#3d3a39] rounded-[6px] overflow-hidden transition">
+            <details id="newDetailsCompanies" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
               <summary class="cursor-pointer p-2.5 font-mono uppercase text-[10px] text-[#eeeeee] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1f1c1a]">
                 <div class="flex items-center gap-2 min-w-0">
                   <span>🏢</span>
                   <span class="text-[#b8b3b0] tracking-wider">Empresas:</span>
-                  <span id="newProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
+                  <span id="newProjCompBadge" class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#3d3a39]">0</span>
                 </div>
                 <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
@@ -2519,7 +2519,7 @@
                 <div class="pt-2 border-t border-[#3d3a39]">
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase">Filtrar por Persona / Operador</label>
-                        <span id="histAuthorActiveBadge" class="hidden font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">1 Activo</span>
+                        <span id="histAuthorActiveBadge" class="hidden font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">1 Activo</span>
                     </div>
                     <div id="historyAuthorsPillsList" class="flex gap-1.5 overflow-x-auto scrollbar-thin pb-1"></div>
                 </div>
@@ -2533,7 +2533,7 @@
 
                 <div class="flex items-center justify-between text-[10px] text-[#8a8380] pt-2 border-t border-[#3d3a39] font-mono uppercase">
                     <span id="historyFilterLabel">Mostrando todos los registros</span>
-                    <span id="historyCountBadge" class="bg-[#101010] px-2 py-0.5 rounded-[2px] text-[#eeeeee] border border-[#3d3a39]">0 registros</span>
+                    <span id="historyCountBadge" class="bg-[#101010] px-2 py-0.5 rounded-[3px] text-[#eeeeee] border border-[#3d3a39]">0 registros</span>
                 </div>
             </div>
             <div id="historyListContainer" class="space-y-2.5"></div>
@@ -2546,14 +2546,14 @@
         <!-- ANUNCIOS & COMUNICADOS OPERATIVOS (SUPERVISOR & SUPREMO) -->
         <div id="tab-announcements" class="tab-content hidden space-y-5">
           <!-- CABECERA DE SECCIÓN -->
-          <div class="bg-[#141211] border border-[#3d3a39] rounded-[10px] p-4 space-y-2.5">
+          <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-4 space-y-2.5">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
                 <h4 class="font-mono text-xs uppercase tracking-wider text-[#eeeeee]">Marquesina & Reglas de Avisos</h4>
               </div>
               <div class="flex items-center gap-1.5">
-                <button type="button" onclick="testPreviewTicker()" class="text-[10px] font-mono uppercase px-2 py-1 bg-[#1d1a18] hover:bg-[#252220] text-[#eeeeee] border border-[#3d3a39] hover:border-[#ee6018] rounded-[3px] transition flex items-center gap-1.5" title="Actualizar marquesina y mostrarla">
+                <button type="button" onclick="testPreviewTicker()" class="text-[10px] font-mono uppercase px-2 py-1 bg-[#1d1a18] hover:bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] hover:border-[#ee6018] rounded-[3px] transition flex items-center gap-1.5" title="Actualizar marquesina y mostrarla">
                   <svg class="w-3 h-3 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                   <span>Ver Marquesina</span>
                 </button>
@@ -2569,7 +2569,7 @@
           </div>
 
           <!-- BANNER DE PRUEBA ACTIVA EN MARQUESINA (DISMISSIBLE) -->
-          <div id="testModeBanner" class="hidden p-3 bg-[#ee6018]/15 border border-[#ee6018]/50 rounded-[8px] flex items-center justify-between gap-3 text-xs">
+          <div id="testModeBanner" class="hidden p-3 bg-[#ee6018]/15 border border-[#ee6018]/50 rounded-[10px] flex items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 text-[#ee6018] font-mono text-[11px]">
               <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
               <span id="testModeBannerText">MODO PRUEBA ACTIVO EN MARQUESINA</span>
@@ -2590,10 +2590,10 @@
             </div>
 
             <!-- Regla Quincena (Días 10 al 15) -->
-            <div class="p-3.5 bg-[#101010] border border-[#3d3a39] rounded-[6px] space-y-2.5">
+            <div class="p-3.5 bg-[#101010] border border-[#3d3a39] rounded-[10px] space-y-2.5">
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40">DÍAS 10 AL 15</span>
+                  <span class="px-1.5 py-0.5 rounded-[3px] text-[9px] font-mono uppercase font-bold bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40">DÍAS 10 AL 15</span>
                   <span class="font-mono text-[11px] text-[#eeeeee] font-medium">Aviso de Formatos de Vacaciones</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -2610,7 +2610,7 @@
               <div class="pt-2 border-t border-[#1d1a18] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono">
                 <div class="flex items-center gap-2">
                   <label class="flex items-center gap-1.5 cursor-pointer text-[#b8b3b0] hover:text-[#eeeeee]">
-                    <input type="checkbox" id="chkForceBiweekly" onchange="toggleForceBiweeklyRule(this.checked)" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                    <input type="checkbox" id="chkForceBiweekly" onchange="toggleForceBiweeklyRule(this.checked)" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
                     <span>Emitir ahora en marquesina</span>
                   </label>
                 </div>
@@ -2625,10 +2625,10 @@
             </div>
 
             <!-- Regla Fin de Mes (Días 25 al fin de mes) -->
-            <div class="p-3.5 bg-[#101010] border border-[#3d3a39] rounded-[6px] space-y-2.5">
+            <div class="p-3.5 bg-[#101010] border border-[#3d3a39] rounded-[10px] space-y-2.5">
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono uppercase font-bold bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40">DÍAS 25 AL FIN DE MES</span>
+                  <span class="px-1.5 py-0.5 rounded-[3px] text-[9px] font-mono uppercase font-bold bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40">DÍAS 25 AL FIN DE MES</span>
                   <span class="font-mono text-[11px] text-[#eeeeee] font-medium">Vacaciones + Indicadores de Proyectos</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -2645,7 +2645,7 @@
               <div class="pt-2 border-t border-[#1d1a18] flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono">
                 <div class="flex items-center gap-2">
                   <label class="flex items-center gap-1.5 cursor-pointer text-[#b8b3b0] hover:text-[#eeeeee]">
-                    <input type="checkbox" id="chkForceMonthEnd" onchange="toggleForceMonthEndRule(this.checked)" class="rounded-[2px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
+                    <input type="checkbox" id="chkForceMonthEnd" onchange="toggleForceMonthEndRule(this.checked)" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-3.5 w-3.5">
                     <span>Emitir ahora en marquesina</span>
                   </label>
                 </div>
@@ -2662,7 +2662,7 @@
 
           <!-- FORMULARIO PLEGABLE: NUEVO ANUNCIO PERSONALIZADO -->
           <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition" id="detailsNewAnnouncement">
-            <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#252220]">
+            <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1d1a18]">
               <span class="flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> + Publicar Nuevo Anuncio Manual
               </span>
@@ -2698,7 +2698,7 @@
           <div class="space-y-2.5">
             <div class="flex items-center justify-between font-mono text-[11px] uppercase text-[#8a8380] px-1">
               <span>Anuncios Registrados</span>
-              <span id="announcementsCountBadge" class="bg-[#101010] px-2 py-0.5 rounded-[2px] text-[#eeeeee] border border-[#3d3a39]">0 activos</span>
+              <span id="announcementsCountBadge" class="bg-[#101010] px-2 py-0.5 rounded-[3px] text-[#eeeeee] border border-[#3d3a39]">0 activos</span>
             </div>
             <div id="announcementsListContainer" class="space-y-2"></div>
             <div id="announcementsEmptyState" class="text-center py-10 opacity-50 hidden">
@@ -2712,7 +2712,7 @@
         <div id="tab-consultants" class="tab-content hidden space-y-5">
           <!-- FORMULARIO PLEGABLE: NUEVO OPERADOR -->
           <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
-            <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#252220]">
+            <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1d1a18]">
               <span class="flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> + Registrar Nuevo Operador
               </span>
@@ -2750,14 +2750,14 @@
                   </div>
                   <!-- Pastillas de Colores Factory -->
                   <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                      <button type="button" onclick="setNewConsultantColor('#ee6018')" class="w-4 h-4 rounded-[2px] bg-[#ee6018] border border-[#3d3a39] hover:scale-115 transition" title="Naranja Industrial"></button>
-                      <button type="button" onclick="setNewConsultantColor('#0071e3')" class="w-4 h-4 rounded-[2px] bg-[#0071e3] border border-[#3d3a39] hover:scale-115 transition" title="Azul Cobalto"></button>
-                      <button type="button" onclick="setNewConsultantColor('#30d158')" class="w-4 h-4 rounded-[2px] bg-[#30d158] border border-[#3d3a39] hover:scale-115 transition" title="Verde Esmeralda"></button>
-                      <button type="button" onclick="setNewConsultantColor('#ffd60a')" class="w-4 h-4 rounded-[2px] bg-[#ffd60a] border border-[#3d3a39] hover:scale-115 transition" title="Amarillo Táctico"></button>
-                      <button type="button" onclick="setNewConsultantColor('#bf5af2')" class="w-4 h-4 rounded-[2px] bg-[#bf5af2] border border-[#3d3a39] hover:scale-115 transition" title="Púrpura Neón"></button>
-                      <button type="button" onclick="setNewConsultantColor('#ff375f')" class="w-4 h-4 rounded-[2px] bg-[#ff375f] border border-[#3d3a39] hover:scale-115 transition" title="Magenta"></button>
-                      <button type="button" onclick="setNewConsultantColor('#ff9f0a')" class="w-4 h-4 rounded-[2px] bg-[#ff9f0a] border border-[#3d3a39] hover:scale-115 transition" title="Ámbar"></button>
-                      <button type="button" onclick="setNewConsultantColor('#5ac8fa')" class="w-4 h-4 rounded-[2px] bg-[#5ac8fa] border border-[#3d3a39] hover:scale-115 transition" title="Cian Eléctrico"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ee6018')" class="w-4 h-4 rounded-[3px] bg-[#ee6018] border border-[#3d3a39] hover:scale-115 transition" title="Naranja Industrial"></button>
+                      <button type="button" onclick="setNewConsultantColor('#0071e3')" class="w-4 h-4 rounded-[3px] bg-[#0071e3] border border-[#3d3a39] hover:scale-115 transition" title="Azul Cobalto"></button>
+                      <button type="button" onclick="setNewConsultantColor('#30d158')" class="w-4 h-4 rounded-[3px] bg-[#30d158] border border-[#3d3a39] hover:scale-115 transition" title="Verde Esmeralda"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ffd60a')" class="w-4 h-4 rounded-[3px] bg-[#ffd60a] border border-[#3d3a39] hover:scale-115 transition" title="Amarillo Táctico"></button>
+                      <button type="button" onclick="setNewConsultantColor('#bf5af2')" class="w-4 h-4 rounded-[3px] bg-[#bf5af2] border border-[#3d3a39] hover:scale-115 transition" title="Púrpura Neón"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ff375f')" class="w-4 h-4 rounded-[3px] bg-[#ff375f] border border-[#3d3a39] hover:scale-115 transition" title="Magenta"></button>
+                      <button type="button" onclick="setNewConsultantColor('#ff9f0a')" class="w-4 h-4 rounded-[3px] bg-[#ff9f0a] border border-[#3d3a39] hover:scale-115 transition" title="Ámbar"></button>
+                      <button type="button" onclick="setNewConsultantColor('#5ac8fa')" class="w-4 h-4 rounded-[3px] bg-[#5ac8fa] border border-[#3d3a39] hover:scale-115 transition" title="Cian Eléctrico"></button>
                   </div>
               </div>
               <button onclick="registerConsultant()" class="pill-btn w-full py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] mt-1">Registrar Operador →</button>
@@ -2771,7 +2771,7 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-[#30d158]"></span>
                     <h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Operadores Activos</h3>
                 </div>
-                <span id="consultantsCountBadge" class="bg-[#1d1a18] text-[#eeeeee] font-mono text-[10px] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">0</span>
+                <span id="consultantsCountBadge" class="bg-[#1d1a18] text-[#eeeeee] font-mono text-[10px] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">0</span>
             </div>
 
             <div class="relative">
@@ -2797,7 +2797,7 @@
         <div id="tab-docs" class="tab-content hidden space-y-5">
            <!-- FORMULARIO PLEGABLE: NUEVO DOCUMENTO BASE -->
            <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
-             <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#252220]">
+             <summary class="cursor-pointer p-3.5 font-mono uppercase text-[11px] text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#1d1a18]">
                <span class="flex items-center gap-2">
                  <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> + Nuevo Documento Base (ISO)
                </span>
@@ -2827,7 +2827,7 @@
                        <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
                        <h3 class="font-mono text-[11px] text-[#b8b3b0] uppercase">Requisitos Normativos Actuales</h3>
                    </div>
-                   <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">⠿ Arrastra para reordenar</span>
+                   <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#8a8380] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">⠿ Arrastra para reordenar</span>
                </div>
                <div id="registeredDocsList" class="space-y-2"></div>
            </div>
@@ -2864,7 +2864,7 @@
 
             <div class="flex items-center justify-between">
               <h4 class="font-mono text-[10px] text-[#8a8380] uppercase">Exportación y Respaldo</h4>
-              <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[2px] border border-[#3d3a39]">● NUBE ACTIVA</span>
+              <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">● NUBE ACTIVA</span>
             </div>
             
             <div class="grid grid-cols-2 gap-2">
@@ -2905,7 +2905,7 @@
   </div>
 
   <!-- BANNER PROACTIVO PUSH (INVITACIÓN INICIAL A ACTIVAR EN TELÉFONO O CHROME) -->
-  <div id="pushPromptBanner" class="hidden fixed bottom-16 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md w-[calc(100%-2rem)] bg-[#141211] rounded-[8px] p-3.5 border border-[#ee6018]/50 flex items-center justify-between gap-3 animate-fade-in">
+  <div id="pushPromptBanner" class="hidden fixed bottom-16 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] max-w-md w-[calc(100%-2rem)] bg-[#101010] rounded-[10px] p-3.5 border border-[#ee6018]/50 flex items-center justify-between gap-3 animate-fade-in">
     <div class="flex items-center gap-2.5 min-w-0">
       <span class="w-8 h-8 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] flex items-center justify-center shrink-0">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -2923,7 +2923,7 @@
 
   
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (FASE 2) -->
-  <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 backdrop-blur-sm">
+  <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 ">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           <!-- HEADER DEL DASHBOARD -->
           <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
@@ -2932,19 +2932,19 @@
                   <div>
                       <div class="flex items-center gap-2">
                           <h2 class="font-mono text-xs sm:text-sm font-semibold text-[#eeeeee] uppercase tracking-[-0.24px]">Dashboard Ejecutivo & Auditoría</h2>
-                          <span class="px-1.5 py-0.5 rounded-[2px] bg-[#101010] text-[#3b82f6] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider font-semibold">FOPR-OFP-01-01</span>
+                          <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#3b82f6] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider font-semibold">FOPR-OFP-01-01</span>
                       </div>
                       <p class="text-[11px] text-[#8a8380]">Control integral de requerimientos, matriz cruzada por empresas y auditoría de documentos base</p>
                   </div>
               </div>
 
               <!-- BOTÓN CERRAR -->
-              <button type="button" onclick="closeExecutiveDashboard()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#161413] border border-[#3d3a39] hover:border-[#8a8380] rounded-[4px] transition z-30 flex items-center justify-center cursor-pointer shadow-sm" title="Cerrar ventana (Esc)">
+              <button type="button" onclick="closeExecutiveDashboard()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer " title="Cerrar ventana (Esc)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
 
               <!-- SELECTOR DE SUB-PESTAÑAS -->
-              <div class="flex items-center gap-1.5 bg-[#161413] border border-[#3d3a39] rounded-[4px] p-1">
+              <div class="flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-1">
                   <button type="button" id="btnTabExecCharts" onclick="switchExecutiveTab('charts')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold">
                       📊 Gráficos y Matriz
                   </button>
@@ -2962,7 +2962,7 @@
                   <!-- FILA 1: 3 GRÁFICOS DE INSTRUMENTO -->
                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       <!-- Gráfica 1: Agrupación por Paquete -->
-                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
                           <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
                               <span class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider font-semibold">Agrupación Requerimientos</span>
                               <span class="font-mono text-[9px] text-[#8a8380] uppercase">Por Paquete</span>
@@ -2973,7 +2973,7 @@
                       </div>
 
                       <!-- Gráfica 2: Tipo de Propuesta -->
-                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
                           <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
                               <span class="font-mono text-[10px] text-[#3b82f6] uppercase tracking-wider font-semibold">Tipo de Propuesta</span>
                               <span class="font-mono text-[9px] text-[#8a8380] uppercase">Distribución</span>
@@ -2984,7 +2984,7 @@
                       </div>
 
                       <!-- Gráfica 3: Estatus de Requerimientos + Mini Tabla -->
-                      <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
                           <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
                               <span class="font-mono text-[10px] text-[#a0ca92] uppercase tracking-wider font-semibold">Estatus Requerimientos</span>
                               <span id="execTotalReqCount" class="font-mono text-[10px] text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded border border-[#3d3a39]">0 Total</span>
@@ -2999,11 +2999,11 @@
                   </div>
 
                   <!-- FILA 2: MATRIZ CRUZADA 9x21 -->
-                  <div class="bg-[#141211] p-4 rounded-[8px] border border-[#3d3a39]">
+                  <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39]">
                       <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-[#3d3a39]">
                           <div class="flex items-center gap-2">
                               <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
-                              <h3 class="font-mono text-xs uppercase text-[#fafafa] font-semibold tracking-[-0.2px]">Requerimientos por Empresas (Matriz Cruzada 9 Estatus × 21 Empresas)</h3>
+                              <h3 class="font-mono text-xs uppercase text-[#fafafa] font-normal tracking-[-0.24px] tracking-[-0.2px]">Requerimientos por Empresas (Matriz Cruzada 9 Estatus × 21 Empresas)</h3>
                           </div>
                           <div class="text-[10px] font-mono text-[#8a8380]">
                               💡 Haz clic en cualquier número para activar <span class="text-[#3b82f6] font-semibold">Drill-Down</span> en Tablas de Control
@@ -3016,7 +3016,7 @@
               <!-- ================= SUB-PESTAÑA 2: TABLAS DE CONTROL ================= -->
               <div id="execSubtabTables" class="hidden space-y-4">
                   <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA + PILLS DE FILTRO RÁPIDO -->
-                  <div class="bg-[#141211] p-3.5 rounded-[8px] border border-[#3d3a39] flex flex-wrap items-center justify-between gap-3">
+                  <div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] flex flex-wrap items-center justify-between gap-3">
                       <!-- Pills Filtros Rápidos -->
                       <div class="flex items-center gap-1.5 flex-wrap">
                           <button type="button" onclick="setExecutivePreset('ALL')" id="execPill_ALL" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#3d3a39] text-[#fafafa] font-semibold">
@@ -3050,7 +3050,7 @@
                   </div>
 
                   <!-- CONTENEDOR DE LA TABLA EJECUTIVA -->
-                  <div class="bg-[#141211] rounded-[8px] border border-[#3d3a39] overflow-hidden">
+                  <div class="bg-[#101010] rounded-[10px] border border-[#3d3a39] overflow-hidden">
                       <div id="execTableContainer" class="overflow-x-auto scrollbar-thin max-h-[560px]"></div>
                   </div>
               </div>
@@ -3063,13 +3063,13 @@
   <div id="pwaInstallGuideModal" onclick="if(event.target === this) closePwaInstallGuideModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4 select-none">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-md overflow-hidden border border-[#3d3a39] relative">
           <!-- CABECERA -->
-          <div class="p-4 border-b border-[#2d2a29] bg-[#161413] flex items-center justify-between">
+          <div class="p-4 border-b border-[#3d3a39] bg-[#1d1a18] flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 flex items-center justify-center text-[#ee6018]">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                   </div>
                   <div>
-                      <h3 class="font-mono text-xs sm:text-sm font-semibold text-[#fafafa] uppercase tracking-wider">
+                      <h3 class="font-mono text-xs sm:text-sm font-normal tracking-[-0.24px] text-[#fafafa] uppercase tracking-wider">
                           Instalar SICOM como App
                       </h3>
                       <p class="text-[10px] text-[#8a8380] font-mono mt-0.5">
@@ -3077,7 +3077,7 @@
                       </p>
                   </div>
               </div>
-              <button type="button" onclick="closePwaInstallGuideModal()" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar">
+              <button type="button" onclick="closePwaInstallGuideModal()" class="p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
           </div>
@@ -3094,7 +3094,7 @@
               </div>
 
               <!-- Instrucciones para Chrome / Android -->
-              <div class="bg-[#141211] p-3.5 rounded-[10px] border border-[#262321] space-y-2">
+              <div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] space-y-2">
                   <div class="flex items-center gap-2 text-[#ee6018] font-mono text-[11px] font-semibold uppercase">
                       <span>🤖</span>
                       <span>Google Chrome (Android)</span>
@@ -3107,7 +3107,7 @@
               </div>
 
               <!-- Instrucciones para iOS Safari -->
-              <div class="bg-[#141211] p-3.5 rounded-[10px] border border-[#262321] space-y-2">
+              <div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] space-y-2">
                   <div class="flex items-center gap-2 text-[#a0ca92] font-mono text-[11px] font-semibold uppercase">
                       <span>🍏</span>
                       <span>Safari (iPhone / iPad)</span>
@@ -3121,8 +3121,8 @@
           </div>
 
           <!-- FOOTER -->
-          <div class="p-3 bg-[#141211] border-t border-[#262321] flex justify-end">
-              <button type="button" onclick="closePwaInstallGuideModal()" class="px-3 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
+          <div class="p-3 bg-[#101010] border-t border-[#3d3a39] flex justify-end">
+              <button type="button" onclick="closePwaInstallGuideModal()" class="px-3 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
                   Entendido
               </button>
           </div>
@@ -3133,15 +3133,15 @@
   <div id="calendarDayModal" onclick="if(event.target === this) closeCalendarDayModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-4">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border border-[#3d3a39] relative">
           <!-- CABECERA DE LA AGENDA DEL DÍA -->
-          <div class="p-4 sm:p-5 pr-14 border-b border-[#2d2a29] bg-[#161413] flex items-center justify-between gap-3 shrink-0">
+          <div class="p-4 sm:p-5 pr-14 border-b border-[#3d3a39] bg-[#1d1a18] flex items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-2.5 min-w-0">
                   <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] shrink-0"></span>
                   <div class="min-w-0">
                       <div class="flex items-center gap-2">
-                          <h3 id="calDayModalTitle" class="font-mono text-xs sm:text-sm font-semibold text-[#fafafa] uppercase tracking-wider truncate">
+                          <h3 id="calDayModalTitle" class="font-mono text-xs sm:text-sm font-normal tracking-[-0.24px] text-[#fafafa] uppercase tracking-wider truncate">
                               Agenda del Día
                           </h3>
-                          <span id="calDayModalBadge" class="font-mono text-[9px] px-1.5 py-0.5 rounded-[2px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
+                          <span id="calDayModalBadge" class="font-mono text-[9px] px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
                               0 ENTREGAS
                           </span>
                       </div>
@@ -3152,13 +3152,13 @@
               </div>
 
               <!-- BOTÓN CERRAR -->
-              <button type="button" onclick="closeCalendarDayModal()" class="absolute top-3.5 right-3.5 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar (Esc)">
+              <button type="button" onclick="closeCalendarDayModal()" class="absolute top-3.5 right-3.5 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] transition cursor-pointer" title="Cerrar (Esc)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
           </div>
 
           <!-- BARRA DE FILTRO POR CONSULTOR DEL DÍA & ACCIÓN RÁPIDA -->
-          <div class="px-4 py-2.5 bg-[#141211] border-b border-[#24211f] flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div class="px-4 py-2.5 bg-[#101010] border-b border-[#3d3a39] flex flex-wrap items-center justify-between gap-2 shrink-0">
               <div class="flex items-center gap-2" id="calDayConsultantFilterWrapper">
                   <label for="calDayConsultantSelect" class="font-mono text-[10px] uppercase text-[#8a8380]">Responsable:</label>
                   <select id="calDayConsultantSelect" onchange="window.filterCalendarDayModal(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[170px] truncate">
@@ -3166,7 +3166,7 @@
                   </select>
               </div>
 
-              <button type="button" onclick="window.addFastTaskForCalendarDay()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
+              <button type="button" onclick="window.addFastTaskForCalendarDay()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer">
                   <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                   <span>+ Añadir Tarea</span>
               </button>
