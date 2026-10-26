@@ -1330,10 +1330,10 @@
     </div>
 
     <!-- INFOCARD: FACTORY HYBRID TACTICAL DISPATCH (#eeeeee HEADER ON #101010 CONTROL PANEL) -->
-    <div id="infoCard" class="absolute bottom-16 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:bottom-8 md:right-8 md:w-[410px] liquid-glass rounded-[10px] p-4 sm:p-5 hidden opacity-0 transition-opacity duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
+    <div id="infoCard" class="absolute bottom-16 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:top-3 md:bottom-3 md:right-3 md:w-[48vw] md:min-w-[540px] md:max-w-[760px] 2xl:max-w-[840px] md:max-h-none md:h-[calc(100%-1.5rem)] liquid-glass-panel border border-[#3d3a39] shadow-2xl rounded-[10px] p-4 sm:p-5 md:p-6 hidden opacity-0 transition-all duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
       
       <!-- FLASHLIT DISPATCH HEADER (#eeeeee Bone Card) -->
-      <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none">
+      <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none sticky top-0 z-20">
         <div class="flex justify-between items-center mb-2.5">
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] shrink-0"></span>
@@ -1512,7 +1512,7 @@
                   <!-- RESPONSABLES EXPANDIDOS (FASE 2) -->
                   <div class="pt-2 border-t border-[#3d3a39]/60">
                       <span class="block font-mono text-[9px] text-[#8a8380] uppercase tracking-wider mb-2">Responsables del Proyecto</span>
-                      <div class="grid grid-cols-2 gap-2">
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           <div>
                               <label class="block font-mono text-[9px] text-[#b8b3b0] mb-0.5 uppercase">Líder Proyecto</label>
                               <select id="quickEditLiderProyecto" onchange="silentSaveInfoCard()" class="w-full liquid-input rounded-[3px] p-1.5 text-xs text-[#eeeeee] focus:outline-none appearance-none cursor-pointer"></select>
@@ -1587,7 +1587,7 @@
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39]">
-                  <div id="quickTasksList" class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
+                  <div id="quickTasksList" class="space-y-2 max-h-48 md:max-h-72 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
                   
                   <!-- FORMULARIO DE NUEVA TAREA -->
                   <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3 space-y-2.5 lector-hide" id="quickTaskInputBlock">
@@ -1632,7 +1632,7 @@
                   </div>
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39]">
-                  <div id="quickDocsContainer" class="space-y-2.5 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
+                  <div id="quickDocsContainer" class="space-y-2.5 max-h-60 md:max-h-80 overflow-y-auto scrollbar-thin pr-1"></div>
                   <input type="hidden" id="quickEditProgress" value="0">
                   <div id="quickSliderContainer" class="hidden mt-3">
                       <input type="range" id="quickEditSlider" min="0" max="100" value="0" oninput="document.getElementById('quickEditProgress').value=this.value; document.getElementById('quickEditProgressLabel').textContent=this.value+'%'; const pp = document.getElementById('infoProgressPill'); if(pp) pp.textContent=this.value+'%'; silentSaveInfoCard();" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[3px] appearance-none cursor-pointer">
@@ -1653,7 +1653,7 @@
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39] space-y-3">
-                  <div id="infoNotes" class="flex flex-col gap-2 max-h-60 overflow-y-auto scrollbar-thin pr-1"></div>
+                  <div id="infoNotes" class="flex flex-col gap-2 max-h-60 md:max-h-80 overflow-y-auto scrollbar-thin pr-1"></div>
                   
                   <div class="lector-hide pt-2.5 border-t border-[#3d3a39] space-y-2.5">
                       <div class="flex items-center justify-between gap-1 flex-wrap">
@@ -2801,6 +2801,27 @@
                         </div>
                     </div>
                 </details>
+            </div>
+
+            <!-- TARJETA: SEGURIDAD Y CIERRE POR INACTIVIDAD -->
+            <div class="p-3 rounded-[8px] bg-[#181513] border border-[#2e2a28] space-y-2">
+                <div class="flex items-center justify-between border-b border-[#252220] pb-1.5">
+                    <span class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                        <span>⏱️</span>
+                        <span>Cierre por Inactividad</span>
+                    </span>
+                    <span id="sessionTimeoutStatusBadge" class="font-mono text-[9px] uppercase bg-[#12100f] text-[#10b981] px-2 py-0.5 rounded-[3px] border border-[#2e2a28]">1 Hora</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="drawerSessionTimeoutSelect" onchange="window.setSessionTimeoutSetting(this.value)" class="flex-1 bg-[#12100f] border border-[#2e2a28] rounded-[4px] py-1.5 px-2.5 text-xs text-[#eeeeee] font-mono focus:outline-none focus:border-[#ee6018] cursor-pointer">
+                        <option value="15">15 Minutos</option>
+                        <option value="30">30 Minutos</option>
+                        <option value="60" selected>60 Minutos (1 Hora) — Predeterminado</option>
+                        <option value="240">4 Horas (Media Jornada)</option>
+                        <option value="480">8 Horas (Turno Completo)</option>
+                        <option value="0">Nunca cerrar en este equipo</option>
+                    </select>
+                </div>
             </div>
         </div>
       </div>

@@ -1484,16 +1484,69 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         setTimeout(() => { location.reload(); }, 500); 
     };
 
-    // --- SISTEMA DE CIERRE DE SESIÓN POR INACTIVIDAD (10 MIN) ---
+    // --- SISTEMA CONFIGURABLE DE CIERRE DE SESIÓN POR INACTIVIDAD ---
     let inactivityTimeout;
+
+    window.getInactivityTimeoutMinutes = function() {
+        const saved = localStorage.getItem('sicom_inactivity_timeout');
+        if (saved !== null) {
+            const num = parseInt(saved, 10);
+            if (!isNaN(num)) return num; // 0 = Nunca, o cantidad de minutos
+        }
+        return 60; // Predeterminado ergonómico: 60 minutos (1 hora)
+    };
+
+    window.setSessionTimeoutSetting = function(val) {
+        const mins = parseInt(val, 10);
+        localStorage.setItem('sicom_inactivity_timeout', mins);
+        window.syncSessionTimeoutUI();
+        resetInactivityTimeout();
+        
+        let label = `${mins} min`;
+        if (mins === 0) label = 'Desactivado (Nunca)';
+        else if (mins === 60) label = '1 hora';
+        else if (mins === 240) label = '4 horas';
+        else if (mins === 480) label = '8 horas';
+        window.showToast(`● Cierre por inactividad: ${label}`, false);
+    };
+
+    window.syncSessionTimeoutUI = function() {
+        const mins = window.getInactivityTimeoutMinutes();
+        const sel = document.getElementById('drawerSessionTimeoutSelect');
+        if (sel) sel.value = String(mins);
+        const badge = document.getElementById('sessionTimeoutStatusBadge');
+        if (badge) {
+            if (mins === 0) {
+                badge.textContent = '● Siempre Activo';
+                badge.className = 'font-mono text-[9px] uppercase bg-[#12100f] text-[#3b82f6] px-2 py-0.5 rounded-[3px] border border-[#2e2a28]';
+            } else if (mins <= 30) {
+                badge.textContent = `${mins} Min`;
+                badge.className = 'font-mono text-[9px] uppercase bg-[#12100f] text-[#ee6018] px-2 py-0.5 rounded-[3px] border border-[#2e2a28]';
+            } else {
+                const label = mins === 60 ? '1 Hora' : (mins / 60) + ' Horas';
+                badge.textContent = label;
+                badge.className = 'font-mono text-[9px] uppercase bg-[#12100f] text-[#10b981] px-2 py-0.5 rounded-[3px] border border-[#2e2a28]';
+            }
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => { if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); });
+    } else {
+        setTimeout(() => { if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); }, 150);
+    }
+
     function resetInactivityTimeout() {
         clearTimeout(inactivityTimeout);
-        if (localAuthor) {
+        const mins = window.getInactivityTimeoutMinutes();
+        if (mins > 0 && localAuthor) {
+            const ms = mins * 60 * 1000;
             inactivityTimeout = setTimeout(() => {
-                logActivity('logout', 'Control de Accesos', 'Cierre de sesión automático por inactividad (10 min)', localAuthor);
+                const label = mins >= 60 ? (mins / 60) + 'h' : mins + 'min';
+                logActivity('logout', 'Control de Accesos', `Cierre de sesión automático por inactividad (${label})`, localAuthor);
                 window.saveData(false);
                 window.logout();
-            }, 600000); // 10 minutos (600,000 ms)
+            }, ms);
         }
     }
     // Eventos que reinician el temporizador
@@ -3157,7 +3210,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         
         if (isDesktop) {
             if (isDrawerOpen) availableWidth -= 480;
-            else if (!document.getElementById('infoCard').classList.contains('hidden')) availableWidth -= 400;
+            else {
+                const card = document.getElementById('infoCard');
+                if (card && !card.classList.contains('hidden')) {
+                    const cardW = card.offsetWidth || Math.min(Math.max(window.innerWidth * 0.48, 540), 760);
+                    availableWidth -= (cardW + 24);
+                }
+            }
         } else {
             if (!document.getElementById('infoCard').classList.contains('hidden')) availableHeight -= (rect.height * 0.42);
         }
@@ -3235,6 +3294,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
         isDrawerOpen = true; 
         window.populateGlobalEditSelector(); 
+        if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
         if (currentSelection && currentSelection.id && currentUserRole !== 'Lector') {
             window.switchTab('edit');
         } else if (currentUserRole !== 'Lector') {
