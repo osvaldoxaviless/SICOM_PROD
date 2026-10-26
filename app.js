@@ -1721,17 +1721,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         document.querySelectorAll('.audit-pmo-only').forEach(el => {
             if(canAudit) {
-                if (el.id === 'btnTopExecutiveDashboard') {
-                    el.classList.remove('hidden');
-                    el.classList.add('hidden', 'md:flex');
-                } else {
-                    el.classList.remove('hidden');
-                }
+                el.classList.remove('hidden');
             } else {
                 el.classList.add('hidden');
-                if (el.id === 'btnTopExecutiveDashboard') el.classList.remove('md:flex');
             }
         });
+
+        // El botón de Dashboard & Auditoría es accesible para todos los consultores y administradores en escritorio
+        const btnTopExec = document.getElementById('btnTopExecutiveDashboard');
+        if (btnTopExec) {
+            btnTopExec.classList.remove('hidden');
+            btnTopExec.classList.add('hidden', 'md:flex');
+        }
 
         const execMetaBlock = document.getElementById('acc-executive-metadata');
         if (execMetaBlock) {
@@ -3168,7 +3169,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('configDrawer').classList.remove('translate-x-full'); 
         isDrawerOpen = true; 
         window.populateGlobalEditSelector(); 
-        window.renderDashboard();
+        if (currentSelection && currentSelection.id && currentUserRole !== 'Lector') {
+            window.switchTab('edit');
+        } else if (currentUserRole !== 'Lector') {
+            window.switchTab('new');
+        }
         window.applyRolePermissions();
     }
     window.closeConfigDrawer = function() { document.getElementById('configDrawer').classList.add('translate-x-full'); isDrawerOpen = false; }
@@ -3212,7 +3217,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           }
       }
       if(tabId === 'new') window.populateNewProjectLocationSelect(); 
-      if(tabId === 'dashboard') window.renderDashboard();
+      if(tabId === 'dashboard') {
+          if (typeof window.openExecutiveDashboard === 'function') window.openExecutiveDashboard('charts');
+          return;
+      }
       if(tabId === 'history') window.renderHistory();
       if(tabId === 'announcements' && typeof window.renderAnnouncementsManager === 'function') window.renderAnnouncementsManager();
       if(tabId === 'consultants') window.renderRegisteredConsultantsList();
@@ -9563,40 +9571,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     window.renderDashboard = function() {
-        const dashTab = document.getElementById('tab-dashboard');
-        if (!isDrawerOpen || (dashTab && dashTab.classList.contains('hidden'))) return;
-
-        const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
-        let targetConsultant = null;
-
+        // Selector de perspectiva
         const scopeContainer = document.getElementById('dashScopeSelectorContainer');
         const scopeSel = document.getElementById('dashScopeSelect');
+        let targetConsultant = null;
 
-        if (isSuper) {
-            if (scopeContainer) {
-                scopeContainer.classList.remove('hidden');
-                const curVal = scopeSel ? scopeSel.value : 'GLOBAL';
-                if (scopeSel) {
-                    scopeSel.innerHTML = '<option value="GLOBAL">🌐 Visión Global (Empresa Completa)</option>';
-                    Object.keys(consultants).sort().forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.textContent = `👤 Resumen de: ${c}`;
-                        if (c === curVal) opt.selected = true;
-                        scopeSel.appendChild(opt);
-                    });
-                }
-                if (scopeSel && scopeSel.value !== 'GLOBAL') {
-                    targetConsultant = scopeSel.value;
-                }
+        if (scopeSel) {
+            const curVal = scopeSel.value || 'GLOBAL';
+            if (scopeSel.options.length <= 1) {
+                scopeSel.innerHTML = '<option value="GLOBAL">🌐 Visión Global (Empresa Completa)</option>';
+                Object.keys(consultants || {}).sort().forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = `👤 Resumen de: ${c}`;
+                    if (c === curVal) opt.selected = true;
+                    scopeSel.appendChild(opt);
+                });
             }
-        } else {
-            if (scopeContainer) scopeContainer.classList.add('hidden');
-            targetConsultant = localAuthor;
+            if (scopeSel.value !== 'GLOBAL') {
+                targetConsultant = scopeSel.value;
+            }
         }
 
-        // Títulos según rol
-        const drawerTitle = document.getElementById('configDrawerTitle');
+        // Títulos según perspectiva
         const sectionTitle = document.getElementById('dashSectionTitle');
         const telemetryBadge = document.getElementById('dashTelemetryBadge');
         const globalTitle = document.getElementById('dashGlobalTitle');
@@ -9607,17 +9604,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const docsLbl = document.getElementById('dashDocsLabel');
 
         if (targetConsultant) {
-            if (drawerTitle) drawerTitle.textContent = isSuper ? `Resumen Operativo // ${targetConsultant}` : `Mi Resumen Operativo // ${localAuthor}`;
-            if (sectionTitle) sectionTitle.textContent = isSuper ? `Rendimiento de ${targetConsultant}` : 'Mi Rendimiento & Carga de Trabajo';
+            if (sectionTitle) sectionTitle.textContent = `Rendimiento de ${targetConsultant}`;
             if (telemetryBadge) telemetryBadge.textContent = '● RESUMEN PERSONAL';
-            if (globalTitle) globalTitle.textContent = isSuper ? `Avance de ${targetConsultant}` : 'Mi Avance Ponderado Personal';
+            if (globalTitle) globalTitle.textContent = `Avance de ${targetConsultant}`;
             if (totalUnit) totalUnit.textContent = 'MIS PROY';
             if (slaLbl) slaLbl.textContent = 'Mi SLA en Plazo';
             if (riskLbl) riskLbl.textContent = 'Mis Proyectos ≤ 72h';
             if (overLbl) overLbl.textContent = 'Mis Vencidos';
             if (docsLbl) docsLbl.textContent = 'Mis Docs Validados';
         } else {
-            if (drawerTitle) drawerTitle.textContent = 'Centro de Control // SICOM';
             if (sectionTitle) sectionTitle.textContent = 'Métricas Ejecutivas & KPIs';
             if (telemetryBadge) telemetryBadge.textContent = '● LIVE TELEMETRY';
             if (globalTitle) globalTitle.textContent = 'Avance Ponderado Global';
@@ -9628,14 +9623,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (docsLbl) docsLbl.textContent = 'Docs Normativos';
         }
 
-        let t = 0, c = 0, p = 0, pend = 0, noIni = 0, o = 0, totalProg = 0;
+        let t = 0, c = 0, p = 0, o = 0, totalProg = 0;
         let withDeadline = 0;
         let riskCount = 0;
         let totalDocsRequired = 0, totalDocsChecked = 0;
-        let consStats = {};
-        let moduleStats = [];
-        let myProjects = [];
-        let myTasks = [];
 
         const now = new Date();
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -9669,7 +9660,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const tally = (proj) => {
             const projCons = getProjectConsultants(proj);
             const isAssignedToTarget = targetConsultant ? projCons.includes(targetConsultant) : true;
-            
             if (targetConsultant && !isAssignedToTarget) return;
 
             t++; 
@@ -9683,38 +9673,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             if (isCompletedStatus(proj.status)) c++; 
             else if (proj.status === 'En Progreso') p++; 
-            else if (proj.status === 'No Iniciado') noIni++; 
-            else pend++; 
 
             countDocs(proj);
-
-            if (targetConsultant) {
-                myProjects.push(proj);
-                if (Array.isArray(proj.tasks)) {
-                    proj.tasks.forEach(task => {
-                        if (!task.done && (task.assignee === targetConsultant || (!task.assignee && projCons.includes(targetConsultant)))) {
-                            myTasks.push({ proj, task });
-                        }
-                    });
-                }
-            } else {
-                projCons.forEach(cons => { 
-                    if (!consStats[cons]) {
-                        consStats[cons] = { completed: 0, inProgress: 0, overdue: 0 };
-                    }
-                    if (isCompletedStatus(proj.status)) {
-                        consStats[cons].completed++;
-                    } else if (over) {
-                        consStats[cons].overdue++;
-                    } else {
-                        consStats[cons].inProgress++;
-                    }
-                }); 
-            }
         };
 
-        (appData.directProjects || []).forEach(proj => { proj.pType = 'direct-project'; proj.parentName = appData.directHub ? appData.directHub.name : 'Directos'; tally(proj); }); 
-        (appData.modules || []).forEach(m => (m.projects || []).forEach(proj => { proj.pType = 'project'; proj.parentName = m.name; tally(proj); }));
+        (appData.directProjects || []).forEach(proj => { proj.pType = 'direct-project'; tally(proj); }); 
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(proj => { proj.pType = 'project'; tally(proj); }));
 
         // 1. KPI Cálculos
         const slaRate = withDeadline > 0 ? Math.max(0, Math.round(((withDeadline - o) / withDeadline) * 100)) : 100;
@@ -9744,212 +9708,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const elGlobalBar = document.getElementById('dashGlobalBar'); if (elGlobalBar) elGlobalBar.style.width = `${avgGlobal}%`;
         const elGlobalText = document.getElementById('dashGlobalText'); if (elGlobalText) elGlobalText.textContent = `${avgGlobal}%`;
-
-        const chartsCont = document.getElementById('dashChartsContainer');
-        const consCont = document.getElementById('dashConsultantContainer');
-
-        if (targetConsultant) {
-            if (chartsCont) chartsCont.classList.add('hidden');
-            if (consCont) consCont.classList.remove('hidden');
-
-            // Renderizar Mis Proyectos
-            const pList = document.getElementById('dashMyProjectsList');
-            const pBadge = document.getElementById('dashMyProjectsBadge');
-            if (pBadge) pBadge.textContent = `${myProjects.length} PROYECTO${myProjects.length === 1 ? '' : 'S'}`;
-            if (pList) {
-                if (myProjects.length === 0) {
-                    pList.innerHTML = `<div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#8a8380] uppercase">No hay proyectos asignados</div>`;
-                } else {
-                    myProjects.sort((a, b) => {
-                        const aOver = isOver(a) ? 1 : 0;
-                        const bOver = isOver(b) ? 1 : 0;
-                        if (bOver !== aOver) return bOver - aOver;
-                        return (a.progress || 0) - (b.progress || 0);
-                    });
-                    pList.innerHTML = myProjects.map(proj => {
-                        const over = isOver(proj);
-                        const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
-                        const sIco = isCompletedStatus(proj.status) ? '✅' : (proj.status === 'En Progreso' ? '🚀' : (proj.status === 'No Iniciado' ? '⏸️' : '⏳'));
-                        return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[10px] p-3 transition flex items-center justify-between gap-3 cursor-pointer group" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
-                                    <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
-                                </div>
-                                <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380]">
-                                    <span>📦 ${escapeHtml(proj.parentName || 'Directo')}</span>
-                                    <span>•</span>
-                                    <span>${sIco} ${proj.status || 'Pendiente'} (${proj.progress || 0}%)</span>
-                                    ${proj.deadline ? `<span>•</span><span class="${over ? 'text-[#ee6018]' : ''}">📅 ${proj.deadline}</span>` : ''}
-                                </div>
-                            </div>
-                            <div class="shrink-0 flex items-center gap-2">
-                                <span class="font-mono text-xs text-[#eeeeee]">${proj.progress || 0}%</span>
-                                <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#eeeeee] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5l7 7-7 7"/></svg>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-            }
-
-            // Renderizar Mis Tareas
-            const tList = document.getElementById('dashMyTasksList');
-            const tBadge = document.getElementById('dashMyTasksBadge');
-            if (tBadge) tBadge.textContent = `${myTasks.length} PENDIENTE${myTasks.length === 1 ? '' : 'S'}`;
-            if (tList) {
-                if (myTasks.length === 0) {
-                    tList.innerHTML = `<div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-xs text-[#a0ca92] uppercase">✓ Todas tus tareas están al día</div>`;
-                } else {
-                    tList.innerHTML = myTasks.map(({ proj, task }) => {
-                        return `<div class="bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] p-2.5 flex items-start gap-2.5">
-                            <input type="checkbox" onchange="window.toggleTaskFromDashboard('${proj.pType}', '${proj.id}', '${task.id}')" class="mt-0.5 rounded-[3px] border-[#3d3a39] bg-[#101010] text-[#a0ca92] focus:ring-[#a0ca92] h-3.5 w-3.5 cursor-pointer shrink-0">
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs text-[#eeeeee] leading-tight">${formatTaskTextWithTicket(task.text)}</p>
-                                <div class="flex items-center gap-2 font-mono text-[9px] uppercase text-[#8a8380] mt-1">
-                                    <span class="truncate cursor-pointer hover:text-[#eeeeee]" onclick="window.closeConfigDrawer(); window.showInfoCard('${proj.pType}', '${proj.id}')">📁 ${escapeHtml(proj.name)}</span>
-                                    ${task.deadline ? `<span>•</span><span>📅 ${task.deadline}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-            }
-        } else {
-            if (chartsCont) chartsCont.classList.remove('hidden');
-            if (consCont) consCont.classList.add('hidden');
-
-            // Estadísticas por módulo
-            if (appData.directProjects && appData.directProjects.length > 0) {
-                const mProg = appData.directProjects.reduce((acc, x) => acc + (x.progress || 0), 0);
-                moduleStats.push({
-                    name: appData.directHub.name || 'Proyectos Directos',
-                    count: appData.directProjects.length,
-                    avg: Math.round(mProg / appData.directProjects.length),
-                    color: appData.directHub.color || '#35aee8'
-                });
-            }
-            (appData.modules || []).forEach(m => {
-                const projs = m.projects || [];
-                if (projs.length > 0) {
-                    const mProg = projs.reduce((acc, x) => acc + (x.progress || 0), 0);
-                    moduleStats.push({
-                        name: m.name,
-                        count: projs.length,
-                        avg: Math.round(mProg / projs.length),
-                        color: m.color || '#0071e3'
-                    });
-                }
-            });
-
-            // 3. Gráfica 1: Balance de Carga por Consultor (Stacked Bar)
-            const ctxCons = document.getElementById('consultantChart')?.getContext('2d');
-            if (ctxCons) {
-                if (window.consultantChartInstance) window.consultantChartInstance.destroy();
-                
-                const cLabels = Object.keys(consStats).sort((a, b) => {
-                    const totalA = consStats[a].completed + consStats[a].inProgress + consStats[a].overdue;
-                    const totalB = consStats[b].completed + consStats[b].inProgress + consStats[b].overdue;
-                    return totalB - totalA;
-                });
-
-                const dataDone = cLabels.map(l => consStats[l].completed);
-                const dataProg = cLabels.map(l => consStats[l].inProgress);
-                const dataOver = cLabels.map(l => consStats[l].overdue);
-
-                window.consultantChartInstance = new Chart(ctxCons, {
-                    type: 'bar',
-                    data: {
-                        labels: cLabels,
-                        datasets: [
-                            { label: 'Completados', data: dataDone, backgroundColor: '#a0ca92', borderRadius: 2, stack: 'carga' },
-                            { label: 'En Tiempo', data: dataProg, backgroundColor: '#eeeeee', borderRadius: 2, stack: 'carga' },
-                            { label: 'Vencidos', data: dataOver, backgroundColor: '#ee6018', borderRadius: 2, stack: 'carga' }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
-                        },
-                        scales: {
-                            x: { stacked: true, ticks: { color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { display: false } },
-                            y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } }
-                        }
-                    }
-                });
-            }
-
-            // 4. Gráfica 2: Rendimiento por Módulo de Negocio (Horizontal Bar)
-            const ctxMod = document.getElementById('moduleChart')?.getContext('2d');
-            if (ctxMod) {
-                if (window.moduleChartInstance) window.moduleChartInstance.destroy();
-                
-                moduleStats.sort((a, b) => b.avg - a.avg);
-                const mLabels = moduleStats.map(m => m.name.length > 24 ? m.name.substring(0, 22) + '…' : m.name);
-                const mData = moduleStats.map(m => m.avg);
-                const mColors = moduleStats.map(m => m.color || '#ee6018');
-
-                window.moduleChartInstance = new Chart(ctxMod, {
-                    type: 'bar',
-                    data: {
-                        labels: mLabels,
-                        datasets: [{
-                            label: 'Avance %',
-                            data: mData,
-                            backgroundColor: mColors,
-                            borderRadius: 2
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (ctx) => ` Avance: ${ctx.parsed.x}% (${moduleStats[ctx.dataIndex]?.count || 0} proyectos)`
-                                }
-                            }
-                        },
-                        scales: {
-                            x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#8a8380', font: { size: 9, family: "'Geist Mono', monospace" } }, grid: { color: '#1d1a18' } },
-                            y: { ticks: { color: '#eeeeee', font: { size: 9.5, family: "'Geist Mono', monospace" } }, grid: { display: false } }
-                        }
-                    }
-                });
-            }
-
-            // 5. Gráfica 3: Estado General del Portafolio (Doughnut)
-            const ctxStatus = document.getElementById('statusChart')?.getContext('2d');
-            if (ctxStatus) {
-                if (window.statusChartInstance) window.statusChartInstance.destroy();
-                window.statusChartInstance = new Chart(ctxStatus, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Completados', 'En Progreso', 'Pendientes', 'No Iniciados', 'Vencidos'],
-                        datasets: [{
-                            data: [c, p, pend, noIni, o],
-                            backgroundColor: ['#a0ca92', '#eeeeee', '#8a8380', '#4d4947', '#ee6018'],
-                            borderWidth: 0,
-                            hoverOffset: 3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#b8b3b0', font: { size: 9, family: "'Geist Mono', monospace" }, boxWidth: 8, padding: 8 } }
-                        },
-                        cutout: '74%'
-                    }
-                });
-            }
-        }
     };
 
-    // === DRILL-DOWN INTERACTIVO DE KPIs DEL TABLERO ===
+        // === DRILL-DOWN INTERACTIVO DE KPIs DEL TABLERO ===
     window._lastDrillDownIndex = window._lastDrillDownIndex || { overdue: 0, risk: 0 };
 
     window.drillDownKpi = function(type) {
@@ -14518,31 +14279,48 @@ window.renderDailyTasks = function() {
 
 
 // ==========================================================================
-// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN (FASE 2)
-// MATRIZ FOPR-OFP-01-01 / GRÁFICAS DE INSTRUMENTO / TABLAS DE CONTROL
+// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN INTEGRADO
+// MATRIZ FOPR-OFP-01-01 / LIVE KPIS / TABLAS DE CONTROL MULTICRITERIO
 // ==========================================================================
 
-let execChartPaquetes = null;
-let execChartPropuestas = null;
 let execChartEstatus = null;
 let currentExecutiveTab = 'charts';
 
 let executiveTableFilter = {
     empresa: 'ALL',
     estado: 'ALL',
+    consultor: 'ALL',
     paquete: 'ALL',
     tipo_propuesta: 'ALL',
     preset: 'ALL',
     search: ''
 };
 
+const STGT_COMPANIES_MAP = {
+    'AFR': 'Autobuses Flecha Roja',
+    'ZIN': 'Zina-Bus',
+    'TEO': 'Teoloyucan',
+    'AVM': 'Autobuses Valle del Mezquital',
+    'ODM': 'Ómnibus de México',
+    'STGT': 'Soluciones Tecnológicas (STGT)',
+    'CETRAM': 'CETRAM',
+    'ODA': 'ODA',
+    'ACAM': 'Acambay',
+    'SATEL': 'Satélite',
+    'SIG': 'SIG',
+    'CSP': 'CSP',
+    'TDN': 'TDN',
+    'OVN': 'OVN',
+    'ORO': 'Oro',
+    'MOD': 'MOD',
+    'TMT': 'TMT',
+    'SGC': 'SGC',
+    'CGT': 'CGT',
+    'SLLP': 'San Luis Potosí',
+    'CAE': 'CAE'
+};
+
 window.openExecutiveDashboard = function(tabName) {
-    if (typeof window.canManageAuditAndStrategy === 'function' && !window.canManageAuditAndStrategy()) {
-        if (typeof window.showToast === 'function') {
-            window.showToast("🔒 Acceso exclusivo para Gestor de Proyectos y Administrador Supremo.", true);
-        }
-        return;
-    }
     const modal = document.getElementById('executiveDashboardModal');
     if (!modal) return;
     modal.classList.remove('hidden');
@@ -14556,15 +14334,11 @@ window.closeExecutiveDashboard = function() {
     const modal = document.getElementById('executiveDashboardModal');
     if (!modal) return;
     
-    // Destrucción estricta de instancias Chart.js para evitar memory leaks
+    // Destrucción estricta de instancias Chart.js
     if (typeof Chart !== 'undefined' && Chart.getChart) {
-        ['execChartPaquetesCanvas', 'execChartPropuestasCanvas', 'execChartEstatusCanvas'].forEach(id => {
-            const cv = document.getElementById(id);
-            if (cv) Chart.getChart(cv)?.destroy();
-        });
+        const cv = document.getElementById('execChartEstatusCanvas');
+        if (cv) Chart.getChart(cv)?.destroy();
     }
-    if (execChartPaquetes) { execChartPaquetes.destroy(); execChartPaquetes = null; }
-    if (execChartPropuestas) { execChartPropuestas.destroy(); execChartPropuestas = null; }
     if (execChartEstatus) { execChartEstatus.destroy(); execChartEstatus = null; }
 
     modal.classList.add('opacity-0');
@@ -14582,23 +14356,24 @@ window.switchExecutiveTab = function(tabName) {
 
     if (tabName === 'charts') {
         if (btnCharts) {
-            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold";
+            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold cursor-pointer";
         }
         if (btnTables) {
-            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]";
+            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer";
         }
         if (subCharts) subCharts.classList.remove('hidden');
         if (subTables) subTables.classList.add('hidden');
         window.renderExecutiveMatrixAndCharts();
     } else {
         if (btnCharts) {
-            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]";
+            btnCharts.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer";
         }
         if (btnTables) {
-            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold";
+            btnTables.className = "px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold cursor-pointer";
         }
         if (subCharts) subCharts.classList.add('hidden');
         if (subTables) subTables.classList.remove('hidden');
+        window.populateExecutiveFilterDropdowns();
         window.renderExecutiveTable();
     }
 };
@@ -14617,12 +14392,16 @@ window.getAllProjectsFlat = function() {
 };
 
 window.renderExecutiveMatrixAndCharts = function() {
+    // 1. Renderizar KPIs y telemetría superior
+    if (typeof window.renderDashboard === 'function') {
+        window.renderDashboard();
+    }
+
     const allProjs = window.getAllProjectsFlat();
-    
     const countBadge = document.getElementById('execTotalReqCount');
     if (countBadge) countBadge.textContent = `${allProjs.length} Total`;
 
-    // 1. Gráfica de Paquetes
+    // 2. Agrupación por Paquete (Compacto & Elegante)
     const paqCounts = { 'Paquete 1': 0, 'Paquete 2': 0, 'Paquete 3': 0, 'Paquete 4': 0, 'Sin paquete': 0 };
     allProjs.forEach(p => {
         const paq = p.paquete || 'Sin paquete';
@@ -14630,42 +14409,37 @@ window.renderExecutiveMatrixAndCharts = function() {
         else paqCounts['Sin paquete']++;
     });
 
-    const canvasPaq = document.getElementById('execChartPaquetesCanvas');
-    const ctxPaq = canvasPaq?.getContext('2d');
-    if (typeof Chart !== 'undefined' && Chart.getChart && canvasPaq) { Chart.getChart(canvasPaq)?.destroy(); }
-    if (ctxPaq) {
-        if (execChartPaquetes) { execChartPaquetes.destroy(); execChartPaquetes = null; }
-        execChartPaquetes = new Chart(ctxPaq, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(paqCounts),
-                datasets: [{
-                    label: 'Requerimientos',
-                    data: Object.values(paqCounts),
-                    backgroundColor: ['#ee6018', '#f97316', '#fb923c', '#fdba74', '#78716c'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#8a8380', font: { size: 10 } }, grid: { display: false } },
-                    y: { ticks: { color: '#8a8380', font: { size: 10 }, stepSize: 1 }, grid: { color: '#252220' } }
-                },
-                onClick: (evt, elements) => {
-                    if (elements.length > 0) {
-                        const idx = elements[0].index;
-                        const label = Object.keys(paqCounts)[idx];
-                        window.setExecutiveDrillDown({ paquete: label });
-                    }
-                }
-            }
-        });
+    const paqContainer = document.getElementById('execPaquetesContainer');
+    if (paqContainer) {
+        const total = allProjs.length || 1;
+        const paqColors = {
+            'Paquete 1': '#ee6018',
+            'Paquete 2': '#f97316',
+            'Paquete 3': '#fb923c',
+            'Paquete 4': '#fdba74',
+            'Sin paquete': '#6b7280'
+        };
+        paqContainer.innerHTML = Object.keys(paqCounts).map(paq => {
+            const count = paqCounts[paq];
+            const pct = Math.round((count / total) * 100);
+            const col = paqColors[paq] || '#8a8380';
+            return `
+            <div onclick="window.setExecutiveDrillDown({ paquete: '${paq}' })" class="p-1.5 rounded hover:bg-[#1d1a18] cursor-pointer transition group" title="Filtrar por ${paq}">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[#eeeeee] group-hover:text-white transition font-medium text-[10px] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${col}"></span>
+                        ${paq}
+                    </span>
+                    <span class="text-[#8a8380] text-[9px]"><strong class="text-[#fafafa] font-bold">${count}</strong> (${pct}%)</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#181513] border border-[#3d3a39] rounded-[2px] overflow-hidden">
+                    <div class="h-full rounded-[2px] transition-all duration-300" style="width: ${pct}%; background-color: ${col};"></div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
-    // 2. Gráfica de Tipo de Propuesta
+    // 3. Tipo de Propuesta (Compacto & Elegante)
     const propCounts = { 'Mantenimiento': 0, 'Servicio Administrado': 0, 'Venta': 0, 'Innovación': 0 };
     allProjs.forEach(p => {
         const prop = p.tipo_propuesta || 'Mantenimiento';
@@ -14673,42 +14447,36 @@ window.renderExecutiveMatrixAndCharts = function() {
         else propCounts['Mantenimiento']++;
     });
 
-    const canvasProp = document.getElementById('execChartPropuestasCanvas');
-    const ctxProp = canvasProp?.getContext('2d');
-    if (typeof Chart !== 'undefined' && Chart.getChart && canvasProp) { Chart.getChart(canvasProp)?.destroy(); }
-    if (ctxProp) {
-        if (execChartPropuestas) { execChartPropuestas.destroy(); execChartPropuestas = null; }
-        execChartPropuestas = new Chart(ctxProp, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(propCounts),
-                datasets: [{
-                    label: 'Propuestas',
-                    data: Object.values(propCounts),
-                    backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#a855f7'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#8a8380', font: { size: 10 } }, grid: { display: false } },
-                    y: { ticks: { color: '#8a8380', font: { size: 10 }, stepSize: 1 }, grid: { color: '#252220' } }
-                },
-                onClick: (evt, elements) => {
-                    if (elements.length > 0) {
-                        const idx = elements[0].index;
-                        const label = Object.keys(propCounts)[idx];
-                        window.setExecutiveDrillDown({ tipo_propuesta: label });
-                    }
-                }
-            }
-        });
+    const propContainer = document.getElementById('execPropuestasContainer');
+    if (propContainer) {
+        const total = allProjs.length || 1;
+        const propColors = {
+            'Mantenimiento': '#3b82f6',
+            'Servicio Administrado': '#60a5fa',
+            'Venta': '#93c5fd',
+            'Innovación': '#a855f7'
+        };
+        propContainer.innerHTML = Object.keys(propCounts).map(prop => {
+            const count = propCounts[prop];
+            const pct = Math.round((count / total) * 100);
+            const col = propColors[prop] || '#3b82f6';
+            return `
+            <div onclick="window.setExecutiveDrillDown({ tipo_propuesta: '${prop}' })" class="p-1.5 rounded hover:bg-[#1d1a18] cursor-pointer transition group" title="Filtrar por ${prop}">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[#eeeeee] group-hover:text-white transition font-medium text-[10px] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${col}"></span>
+                        ${prop}
+                    </span>
+                    <span class="text-[#8a8380] text-[9px]"><strong class="text-[#fafafa] font-bold">${count}</strong> (${pct}%)</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#181513] border border-[#3d3a39] rounded-[2px] overflow-hidden">
+                    <div class="h-full rounded-[2px] transition-all duration-300" style="width: ${pct}%; background-color: ${col};"></div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
-    // 3. Gráfica de Estatus Oficiales (Doughnut) + Tabla Lateral
+    // 4. Gráfica de Estatus Oficiales (Doughnut) + Tabla Lateral
     const statusKeys = Object.keys(window.STGT_STATUS_CATALOG);
     const statusCounts = {};
     statusKeys.forEach(k => statusCounts[k] = 0);
@@ -14773,7 +14541,7 @@ window.renderExecutiveMatrixAndCharts = function() {
         }).join('');
     }
 
-    // 4. Renderizar Matriz Cruzada 9x21
+    // 5. Renderizar Matriz Cruzada 9x21 FOPR-OFP-01-01
     const companies = ['AFR', 'ZIN', 'TEO', 'AVM', 'ODM', 'STGT', 'CETRAM', 'ODA', 'ACAM', 'SATEL', 'SIG', 'CSP', 'TDN', 'OVN', 'ORO', 'MOD', 'TMT', 'SGC', 'CGT', 'SLLP', 'CAE'];
     const matrixCont = document.getElementById('execMatrixContainer');
     if (matrixCont) {
@@ -14781,8 +14549,8 @@ window.renderExecutiveMatrixAndCharts = function() {
         <table class="w-full border-collapse text-left font-mono text-[10px]">
             <thead>
                 <tr class="border-b border-[#3d3a39] bg-[#101010] text-[#8a8380] uppercase">
-                    <th class="p-2 sm:p-2.5 sticky left-0 bg-[#101010] z-10 min-w-[200px]">Estatus STGT</th>
-                    ${companies.map(c => `<th class="p-2 text-center min-w-[42px]">${c}</th>`).join('')}
+                    <th class="p-2 sm:p-2.5 sticky left-0 bg-[#101010] z-10 min-w-[190px]">Estatus STGT</th>
+                    ${companies.map(c => `<th class="p-2 text-center min-w-[42px] cursor-help" title="${STGT_COMPANIES_MAP[c] || c}">${c}</th>`).join('')}
                     <th class="p-2 text-center bg-[#1d1a18] text-[#ee6018] min-w-[50px]">TOTAL</th>
                 </tr>
             </thead>
@@ -14790,7 +14558,7 @@ window.renderExecutiveMatrixAndCharts = function() {
         `;
 
         // Calcular celdas
-        statusKeys.forEach((statusName, sIdx) => {
+        statusKeys.forEach((statusName) => {
             const cat = window.STGT_STATUS_CATALOG[statusName];
             let rowTotal = 0;
             matrixHtml += `
@@ -14823,7 +14591,7 @@ window.renderExecutiveMatrixAndCharts = function() {
 
             matrixHtml += `
                 <td class="p-2 text-center bg-[#1d1a18] font-bold text-[#fafafa]">
-                    ${rowTotal > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ estado: '${statusName}' })" class="hover:text-[#ee6018] transition">${rowTotal}</button>` : '0'}
+                    ${rowTotal > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ estado: '${statusName}' })" class="hover:text-[#ee6018] transition cursor-pointer font-bold">${rowTotal}</button>` : '0'}
                 </td>
             </tr>`;
         });
@@ -14837,7 +14605,7 @@ window.renderExecutiveMatrixAndCharts = function() {
                         return (p.empresa === comp) || (Array.isArray(p.companies) && p.companies.includes(comp));
                     }).length;
                     return `<td class="p-2 text-center ${cTot > 0 ? 'text-[#fafafa]' : 'text-[#8a8380]'}">
-                        ${cTot > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}' })" class="hover:text-[#ee6018] transition">${cTot}</button>` : '0'}
+                        ${cTot > 0 ? `<button type="button" onclick="window.setExecutiveDrillDown({ empresa: '${comp}' })" class="hover:text-[#ee6018] transition cursor-pointer font-bold">${cTot}</button>` : '0'}
                     </td>`;
                 }).join('')}
                 <td class="p-2 text-center bg-[#1d1a18] text-[#ee6018] text-xs font-bold">${allProjs.length}</td>
@@ -14849,29 +14617,95 @@ window.renderExecutiveMatrixAndCharts = function() {
     }
 };
 
-window.setExecutiveDrillDown = function(patchFilter) {
-    executiveTableFilter = { ...executiveTableFilter, ...patchFilter };
+window.populateExecutiveFilterDropdowns = function() {
+    const allProjs = window.getAllProjectsFlat();
     
-    // Actualizar píldora de filtro activo
-    const pillCont = document.getElementById('execActiveDrillDownPill');
-    const pillText = document.getElementById('execActiveDrillDownText');
-    if (pillCont && pillText) {
-        const parts = [];
-        if (executiveTableFilter.empresa !== 'ALL') parts.push(executiveTableFilter.empresa);
-        if (executiveTableFilter.estado !== 'ALL') parts.push(executiveTableFilter.estado);
-        if (executiveTableFilter.paquete !== 'ALL') parts.push(executiveTableFilter.paquete);
-        if (executiveTableFilter.tipo_propuesta !== 'ALL') parts.push(executiveTableFilter.tipo_propuesta);
-        
-        if (parts.length > 0) {
-            pillText.textContent = `Filtro: ${parts.join(' + ')}`;
-            pillCont.classList.remove('hidden');
-            pillCont.classList.add('inline-flex');
-        } else {
-            pillCont.classList.add('hidden');
-            pillCont.classList.remove('inline-flex');
-        }
+    // Empresa
+    const selEmp = document.getElementById('execFilterEmpresa');
+    if (selEmp && selEmp.options.length <= 1) {
+        const companies = ['AFR', 'ZIN', 'TEO', 'AVM', 'ODM', 'STGT', 'CETRAM', 'ODA', 'ACAM', 'SATEL', 'SIG', 'CSP', 'TDN', 'OVN', 'ORO', 'MOD', 'TMT', 'SGC', 'CGT', 'SLLP', 'CAE'];
+        companies.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = `${c} - ${STGT_COMPANIES_MAP[c] || c}`;
+            selEmp.appendChild(opt);
+        });
     }
 
+    // Estatus
+    const selEst = document.getElementById('execFilterEstado');
+    if (selEst && selEst.options.length <= 1 && window.STGT_STATUS_CATALOG) {
+        Object.keys(window.STGT_STATUS_CATALOG).forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            selEst.appendChild(opt);
+        });
+    }
+
+    // Consultor
+    const selCons = document.getElementById('execFilterConsultor');
+    if (selCons && selCons.options.length <= 1 && typeof consultants !== 'undefined') {
+        Object.keys(consultants).sort().forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            selCons.appendChild(opt);
+        });
+    }
+
+    // Sincronizar valores actuales
+    if (selEmp) selEmp.value = executiveTableFilter.empresa;
+    if (selEst) selEst.value = executiveTableFilter.estado;
+    if (selCons) selCons.value = executiveTableFilter.consultor;
+    const selPaq = document.getElementById('execFilterPaquete');
+    if (selPaq) selPaq.value = executiveTableFilter.paquete;
+    const selProp = document.getElementById('execFilterTipoPropuesta');
+    if (selProp) selProp.value = executiveTableFilter.tipo_propuesta;
+};
+
+window.handleExecutiveDropdownFilter = function() {
+    const selEmp = document.getElementById('execFilterEmpresa');
+    const selEst = document.getElementById('execFilterEstado');
+    const selCons = document.getElementById('execFilterConsultor');
+    const selPaq = document.getElementById('execFilterPaquete');
+    const selProp = document.getElementById('execFilterTipoPropuesta');
+
+    executiveTableFilter.empresa = selEmp ? selEmp.value : 'ALL';
+    executiveTableFilter.estado = selEst ? selEst.value : 'ALL';
+    executiveTableFilter.consultor = selCons ? selCons.value : 'ALL';
+    executiveTableFilter.paquete = selPaq ? selPaq.value : 'ALL';
+    executiveTableFilter.tipo_propuesta = selProp ? selProp.value : 'ALL';
+
+    window.updateExecutiveDrillDownPill();
+    window.renderExecutiveTable();
+};
+
+window.updateExecutiveDrillDownPill = function() {
+    const pillCont = document.getElementById('execActiveDrillDownPill');
+    const pillText = document.getElementById('execActiveDrillDownText');
+    if (!pillCont || !pillText) return;
+
+    const parts = [];
+    if (executiveTableFilter.empresa !== 'ALL') parts.push(executiveTableFilter.empresa);
+    if (executiveTableFilter.estado !== 'ALL') parts.push(executiveTableFilter.estado);
+    if (executiveTableFilter.consultor !== 'ALL') parts.push(executiveTableFilter.consultor);
+    if (executiveTableFilter.paquete !== 'ALL') parts.push(executiveTableFilter.paquete);
+    if (executiveTableFilter.tipo_propuesta !== 'ALL') parts.push(executiveTableFilter.tipo_propuesta);
+    
+    if (parts.length > 0) {
+        pillText.textContent = `Filtro: ${parts.join(' + ')}`;
+        pillCont.classList.remove('hidden');
+        pillCont.classList.add('inline-flex');
+    } else {
+        pillCont.classList.add('hidden');
+        pillCont.classList.remove('inline-flex');
+    }
+};
+
+window.setExecutiveDrillDown = function(patchFilter) {
+    executiveTableFilter = { ...executiveTableFilter, ...patchFilter };
+    window.updateExecutiveDrillDownPill();
     window.switchExecutiveTab('tables');
 };
 
@@ -14879,11 +14713,13 @@ window.clearExecutiveDrillDown = function() {
     executiveTableFilter = {
         empresa: 'ALL',
         estado: 'ALL',
+        consultor: 'ALL',
         paquete: 'ALL',
         tipo_propuesta: 'ALL',
         preset: 'ALL',
         search: ''
     };
+    
     const pillCont = document.getElementById('execActiveDrillDownPill');
     if (pillCont) {
         pillCont.classList.add('hidden');
@@ -14891,6 +14727,8 @@ window.clearExecutiveDrillDown = function() {
     }
     const sInput = document.getElementById('execSearchInput');
     if (sInput) sInput.value = '';
+
+    window.populateExecutiveFilterDropdowns();
     window.setExecutivePreset('ALL');
 };
 
@@ -14919,18 +14757,25 @@ window.renderExecutiveTable = function() {
     const cont = document.getElementById('execTableContainer');
     if (!cont) return;
 
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const in72Hours = new Date(todayMidnight.getTime() + (3 * 24 * 60 * 60 * 1000));
+
     const filtered = allProjs.filter(p => {
         const normStatus = window.normalizeProjectStatus(p.status);
         const pEmp = p.empresa || (p.companies && p.companies[0]) || '';
         const pPaq = p.paquete || 'Sin paquete';
         const pProp = p.tipo_propuesta || 'Mantenimiento';
+        const pCons = (typeof getProjectConsultants === 'function') ? getProjectConsultants(p) : (p.consultants || []);
 
         const matchesEmpresa = (p.empresa === executiveTableFilter.empresa) || (Array.isArray(p.companies) && p.companies.includes(executiveTableFilter.empresa));
         if (executiveTableFilter.empresa !== 'ALL' && !matchesEmpresa) return false;
         if (executiveTableFilter.estado !== 'ALL' && normStatus !== executiveTableFilter.estado) return false;
+        if (executiveTableFilter.consultor !== 'ALL' && !pCons.includes(executiveTableFilter.consultor)) return false;
         if (executiveTableFilter.paquete !== 'ALL' && pPaq !== executiveTableFilter.paquete) return false;
         if (executiveTableFilter.tipo_propuesta !== 'ALL' && pProp !== executiveTableFilter.tipo_propuesta) return false;
 
+        // Presets rápidos
         if (executiveTableFilter.preset === 'retraso_stgt' && normStatus !== 'Retraso STGT') return false;
         if (executiveTableFilter.preset === 'alta_dir' && !p.es_relevante_alta_direccion) return false;
         if (executiveTableFilter.preset === 'stgt' && !p.es_relevante_stgt) return false;
@@ -14939,7 +14784,19 @@ window.renderExecutiveTable = function() {
             const hasAuditDoc = Object.values(docs).some(d => d.fecha_compromiso);
             if (!hasAuditDoc) return false;
         }
+        if (executiveTableFilter.preset === 'vencidos') {
+            if (!p.deadline || isCompletedStatus(p.status)) return false;
+            const [y, m, d] = p.deadline.split('-');
+            if (new Date(y, m - 1, d) >= todayMidnight) return false;
+        }
+        if (executiveTableFilter.preset === 'riesgo') {
+            if (!p.deadline || isCompletedStatus(p.status)) return false;
+            const [y, m, d] = p.deadline.split('-');
+            const dDate = new Date(y, m - 1, d);
+            if (!(dDate >= todayMidnight && dDate <= in72Hours && (p.progress || 0) < 80)) return false;
+        }
 
+        // Búsqueda de texto libre
         if (executiveTableFilter.search) {
             const q = executiveTableFilter.search;
             const textToSearch = [
@@ -14952,8 +14809,14 @@ window.renderExecutiveTable = function() {
         return true;
     });
 
+    // Contador de resultados
+    const resCount = document.getElementById('execFilterResultCount');
+    if (resCount) {
+        resCount.textContent = `Mostrando ${filtered.length} de ${allProjs.length} reqs`;
+    }
+
     if (filtered.length === 0) {
-        cont.innerHTML = `<div class="p-8 text-center text-[#8a8380] font-mono text-xs uppercase">No se encontraron requerimientos con los filtros activos.</div>`;
+        cont.innerHTML = `<div class="p-8 text-center text-[#8a8380] font-mono text-xs uppercase">No se encontraron requerimientos con los filtros activos. <button type="button" onclick="window.clearExecutiveDrillDown()" class="text-[#3b82f6] underline ml-1 hover:text-white">Restablecer filtros</button></div>`;
         return;
     }
 
@@ -14966,8 +14829,8 @@ window.renderExecutiveTable = function() {
                 <th class="p-3">Empresa</th>
                 <th class="p-3">Aplicativo</th>
                 <th class="p-3 min-w-[220px]">Requerimiento</th>
-                <th class="p-3 min-w-[160px]">Responsables</th>
-                <th class="p-3 min-w-[200px]">Observaciones</th>
+                <th class="p-3 min-w-[150px]">Responsables</th>
+                <th class="p-3 min-w-[190px]">Observaciones & Comercial</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-[#252220]">
@@ -14997,7 +14860,7 @@ window.renderExecutiveTable = function() {
                 </span>
             </td>
             <td class="p-3 font-semibold text-[#fafafa] whitespace-nowrap">
-                <span class="px-2 py-0.5 rounded bg-[#101010] border border-[#3d3a39] text-[10px]">${escapeHtml(pEmp)}</span>
+                <span class="px-2 py-0.5 rounded bg-[#101010] border border-[#3d3a39] text-[10px] cursor-help" title="${STGT_COMPANIES_MAP[pEmp] || pEmp}">${escapeHtml(pEmp)}</span>
             </td>
             <td class="p-3 text-[#b8b3b0] text-[11px] truncate max-w-[140px]" title="${escapeHtml(p.moduleName)}">
                 ${escapeHtml(p.moduleName)}
@@ -15014,8 +14877,12 @@ window.renderExecutiveTable = function() {
             </td>
             <td class="p-3 text-[11px]">
                 <div class="flex flex-col gap-1">
-                    ${p.es_relevante_alta_direccion ? '<span class="text-[#eab308] text-[9px] font-semibold">⭐ Relevante Alta Dir</span>' : ''}
-                    ${p.es_relevante_stgt ? '<span class="text-[#60a5fa] text-[9px] font-semibold">⚡ Relevante STGT</span>' : ''}
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        ${p.paquete && p.paquete !== 'Sin paquete' ? `<span class="text-[#ee6018] border border-[#ee6018]/40 bg-[#ee6018]/10 px-1 py-0.2 rounded text-[9px]">${escapeHtml(p.paquete)}</span>` : ''}
+                        ${p.tipo_propuesta ? `<span class="text-[#60a5fa] border border-[#60a5fa]/40 bg-[#60a5fa]/10 px-1 py-0.2 rounded text-[9px]">${escapeHtml(p.tipo_propuesta)}</span>` : ''}
+                        ${p.es_relevante_alta_direccion ? '<span class="text-[#eab308] text-[9px] font-semibold">⭐ Alta Dir</span>' : ''}
+                        ${p.es_relevante_stgt ? '<span class="text-[#60a5fa] text-[9px] font-semibold">⚡ STGT</span>' : ''}
+                    </div>
                     <span class="text-[#b8b3b0] text-[10px] italic line-clamp-2">${escapeHtml(p.observacion_ejecutiva || 'Sin observaciones')}</span>
                 </div>
             </td>
@@ -15674,11 +15541,8 @@ window.closeMobileTopCreateMenu = function() {
 // MÉTRICAS & KPIS EN DOCK MÓVIL (CONSULTORÍA STGT)
 // ==========================================================================
 window.openMetricsOrDashboard = function() {
-    if (typeof window.canManageAuditAndStrategy === 'function' && window.canManageAuditAndStrategy()) {
-        if (typeof window.openExecutiveDashboard === 'function') window.openExecutiveDashboard();
-    } else {
-        if (typeof window.openConfigDrawer === 'function') window.openConfigDrawer();
-        if (typeof window.switchTab === 'function') window.switchTab('dashboard');
+    if (typeof window.openExecutiveDashboard === 'function') {
+        window.openExecutiveDashboard('charts');
     }
 };
 

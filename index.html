@@ -62,7 +62,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261025_v978">
+  <link rel="stylesheet" href="styles.css?v=20261026_v979">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -935,10 +935,10 @@
       </button>
       <datalist id="projectsDatalist"></datalist>
 
-      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA (FASE 2) - Visible en md: (en móvil está en menú 3 puntos) -->
-      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="audit-pmo-only hidden md:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Dashboard Ejecutivo & Matriz de Auditoría">
+      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA - Visible en md: (en móvil en dock y menú) -->
+      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="hidden md:flex h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2.5 font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer" title="Dashboard Ejecutivo, KPIs y Matriz de Auditoría">
           <svg class="w-4 h-4 text-[#3b82f6] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          <span class="hidden lg:inline font-medium">Matriz & Auditoría</span>
+          <span class="hidden lg:inline font-medium">Dashboard & Auditoría</span>
       </button>
 
       <!-- BOTÓN ROL Y PRENÓMINA (Visible en md: / landscape) -->
@@ -1003,9 +1003,9 @@
                   <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   Rol & Prenómina
               </button>
-              <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="audit-pmo-only hidden w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+              <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                  Matriz & Auditoría
+                  Dashboard & Auditoría
               </button>
               <button onclick="toggleConfigDrawer(); toggleMobileMenu()" class="w-full text-left px-3.5 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -1924,8 +1924,7 @@
     <!-- Pestañas con Estética Terminal -->
     <div class="px-5 py-3.5 bg-[#101010] border-b border-[#1d1a18] shrink-0">
         <div class="flex p-1 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39] overflow-x-auto scrollbar-thin gap-1">
-          <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] bg-white/10 text-white transition">Tablero</button>
-          <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn supervisor-up hidden flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Editar</button>
+          <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn supervisor-up hidden flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] bg-[#eeeeee] text-[#101010] transition">Editar</button>
           <button onclick="switchTab('new')" id="tabBtn-new" class="tab-btn lector-hide flex-1 min-w-[68px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Nuevo</button>
           <button onclick="switchTab('history')" id="tabBtn-history" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Historial</button>
           <button onclick="switchTab('announcements')" id="tabBtn-announcements" class="tab-btn supervisor-up hidden flex-1 min-w-[76px] py-1.5 text-[10px] font-mono uppercase rounded-[3px] text-gray-400 hover:text-white transition">Anuncios</button>
@@ -1937,172 +1936,8 @@
     <div class="flex-1 overflow-y-auto p-6 scrollbar-thin flex flex-col justify-between">
       <div>
         
-        <!-- DASHBOARD (FACTORY METRIC TILES & INSTRUMENT CHARTS) -->
-        <div id="tab-dashboard" class="tab-content block space-y-6">
-           <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-                <h3 id="dashSectionTitle" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">Métricas Ejecutivas & KPIs</h3>
-              </div>
-              <span id="dashTelemetryBadge" class="font-mono text-[10px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">● LIVE TELEMETRY</span>
-           </div>
-
-           <!-- SELECTOR DE PERSPECTIVA (Solo visible para Administradores / Supervisores) -->
-           <div id="dashScopeSelectorContainer" class="hidden bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] flex items-center justify-between gap-3">
-             <div class="flex items-center gap-2">
-               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-               <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.2px]">Perspectiva:</label>
-             </div>
-             <select id="dashScopeSelect" onchange="renderDashboard()" class="liquid-input rounded-[3px] px-2.5 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
-               <option value="GLOBAL">🌐 Visión Global (Empresa Completa)</option>
-             </select>
-           </div>
-
-           <!-- 4 FACTORY METRIC TILES -->
-           <div class="grid grid-cols-2 border border-[#3d3a39] rounded-[10px] overflow-hidden bg-[#101010]">
-              <!-- KPI 1: Cumplimiento SLA -->
-              <div class="p-5 border-b border-r border-[#1d1a18] flex flex-col justify-between">
-                  <div class="flex items-center justify-between">
-                     <p id="dashSlaLabel" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">SLA en Plazo</p>
-                     <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
-                  </div>
-                  <div class="mt-3">
-                     <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#eeeeee]" id="dashSlaRate">0%</p>
-                     <p class="font-mono text-[10px] uppercase text-[#a0ca92] mt-2 truncate" id="dashSlaSub">Sin retrasos</p>
-                  </div>
-              </div>
-
-              <!-- KPI 2: Riesgo Inminente (Preventivo) -->
-              <div id="kpiCardRisk" onclick="drillDownKpi('risk')" class="p-5 border-b border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#181513] transition-all group select-none" title="Hacer clic para enfocar proyectos en riesgo en el mapa">
-                  <div class="flex items-center justify-between">
-                     <p id="dashRiskLabel" class="font-mono text-[11px] text-[#b8b3b0] group-hover:text-[#eeeeee] uppercase tracking-[-0.24px] transition-colors">Riesgo &le; 72h</p>
-                     <div class="flex items-center gap-1.5">
-                       <span class="text-[10px] text-[#8a8380] group-hover:text-[#eeeeee] transition-colors font-mono font-bold">↗</span>
-                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] group-hover:scale-125 transition-transform"></span>
-                     </div>
-                  </div>
-                  <div class="mt-3">
-                     <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#eeeeee]" id="dashRiskCount">0</p>
-                     <div class="flex items-center justify-between mt-2">
-                       <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#b8b3b0] truncate transition-colors" id="dashRiskSub">Próximos a vencer</p>
-                       <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">Ver ↗</span>
-                     </div>
-                  </div>
-              </div>
-
-              <!-- KPI 3: Vencidos Actuales -->
-              <div id="kpiCardOverdue" onclick="drillDownKpi('overdue')" class="p-5 border-r border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#201511] transition-all group select-none" title="Hacer clic para enfocar proyectos vencidos en el mapa">
-                  <div class="flex items-center justify-between">
-                     <p id="dashOverdueLabel" class="font-mono text-[11px] text-[#ee6018] group-hover:text-[#ff7836] uppercase tracking-[-0.24px] transition-colors">Vencidos</p>
-                     <div class="flex items-center gap-1.5">
-                       <span class="text-[10px] text-[#ee6018] group-hover:text-white transition-colors font-mono font-bold">↗</span>
-                       <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[3px] group-hover:border-[#ee6018] group-hover:bg-[#ee6018] group-hover:text-white transition-colors" id="dashOverdueBadge">0</span>
-                     </div>
-                  </div>
-                  <div class="mt-3">
-                     <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#ee6018]" id="dashOverdue">0</p>
-                     <div class="flex items-center justify-between mt-2">
-                       <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#ee6018] truncate transition-colors">Requieren atención</p>
-                       <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">Ver ↗</span>
-                     </div>
-                  </div>
-              </div>
-
-              <!-- KPI 4: Cumplimiento Documental -->
-              <div class="p-5 flex flex-col justify-between">
-                  <div class="flex items-center justify-between">
-                     <p id="dashDocsLabel" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">Docs Normativos</p>
-                     <span class="w-1.5 h-1.5 rounded-full bg-[#b8b3b0]"></span>
-                  </div>
-                  <div class="mt-3">
-                     <p class="text-[36px] font-normal tracking-[-1.12px] leading-[1] text-[#eeeeee]" id="dashDocsRate">0%</p>
-                     <p class="font-mono text-[10px] uppercase text-[#8a8380] mt-2 truncate" id="dashDocsSub">Docs Base Validados</p>
-                  </div>
-              </div>
-           </div>
-           
-           <!-- AVANCE GLOBAL PONDERADO (FACTORY LIGHT SURFACE DISPATCH CARD) -->
-           <div class="factory-bone-card p-5 rounded-[10px] space-y-3">
-              <div class="flex justify-between items-start">
-                 <div>
-                    <div class="flex items-center gap-1.5 mb-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
-                      <p id="dashGlobalTitle" class="font-mono text-[11px] text-[#101010] uppercase tracking-[-0.24px]">Avance Ponderado Global</p>
-                    </div>
-                    <p class="font-mono text-[11px] text-[#4d4947]"><span id="dashTotal" class="text-[#101010]">0</span> <span id="dashTotalUnit">PROY</span> (<span id="dashCompleted" class="text-[#101010]">0</span> LISTOS · <span id="dashProgress" class="text-[#101010]">0</span> EN CURSO)</p>
-                 </div>
-                 <p class="text-[28px] font-normal text-[#101010] tracking-[-0.04em] leading-none font-mono" id="dashGlobalText">0%</p>
-              </div>
-              <div class="w-full h-2 bg-[#101010]/15 rounded-[3px] overflow-hidden">
-                  <div id="dashGlobalBar" class="h-full bg-[#101010] transition-all duration-500 ease-out" style="width: 0%"></div>
-              </div>
-           </div>
-
-           <!-- GRÁFICAS DE CONTROL EMPRESARIAL (VISTA GLOBAL) -->
-           <div id="dashChartsContainer" class="space-y-4">
-              <!-- Gráfica 1: Balance de Carga y Capacidad -->
-              <div class="bg-[#101010] p-5 rounded-[10px] border border-[#3d3a39] space-y-3">
-                 <div class="flex items-center justify-between">
-                    <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Carga de Trabajo y Recursos</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">Completados, En tiempo y En riesgo por consultor</p>
-                    </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">CAPACIDAD</span>
-                 </div>
-                 <div class="w-full h-[220px]">
-                    <canvas id="consultantChart"></canvas>
-                 </div>
-              </div>
-
-              <!-- Gráfica 2: Rendimiento por Módulo de Negocio -->
-              <div class="bg-[#101010] p-5 rounded-[10px] border border-[#3d3a39] space-y-3">
-                 <div class="flex items-center justify-between">
-                    <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Avance por Módulo de Negocio</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">% de progreso promedio por módulo</p>
-                    </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">MÓDULOS</span>
-                 </div>
-                 <div class="w-full h-[200px]">
-                    <canvas id="moduleChart"></canvas>
-                 </div>
-              </div>
-
-              <!-- Gráfica 3: Estado General del Portafolio -->
-              <div class="bg-[#101010] p-5 rounded-[10px] border border-[#3d3a39] space-y-3">
-                 <div class="flex items-center justify-between">
-                    <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px]">Estado del Portafolio</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">Distribución general de iniciativas</p>
-                    </div>
-                    <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#b8b3b0] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">ESTATUS</span>
-                 </div>
-                 <div class="w-full h-[220px] flex justify-center">
-                    <canvas id="statusChart"></canvas>
-                 </div>
-              </div>
-           </div>
-
-           <!-- RESUMEN OPERATIVO PERSONAL DEL CONSULTOR (FLUJO CENTRALIZADO) -->
-           <div id="dashConsultantContainer" class="hidden">
-              <div class="p-4 rounded-[10px] border border-[#3d3a39] bg-[#101010] flex items-center justify-between gap-3">
-                 <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="w-2 h-2 rounded-full bg-[#ee6018] shrink-0"></span>
-                    <div>
-                       <h4 class="font-mono text-[11px] uppercase text-[#eeeeee]">Flujo de Trabajo Operativo</h4>
-                       <p class="text-[11px] text-[#8a8380] mt-0.5">Tus proyectos asignados y backlog de tareas viven en el panel Notificaciones y Trabajo.</p>
-                    </div>
-                 </div>
-                 <button type="button" onclick="closeConfigDrawer(); toggleDailyDrawer();" class="pill-btn px-3 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-medium shrink-0 transition flex items-center gap-1">
-                    <span>Abrir</span>
-                    <span>→</span>
-                 </button>
-              </div>
-           </div>
-        </div>
-
         <!-- EDITAR COMPLETO -->
-        <div id="tab-edit" class="tab-content hidden space-y-5">
+        <div id="tab-edit" class="tab-content block space-y-5">
           <!-- SELECTOR PREDICTIVO MODERNO EN VIVO -->
           <div class="space-y-2 relative" id="editSelectorWrapper">
             <div class="flex items-center justify-between">
@@ -2916,11 +2751,11 @@
   </div>
 
   
-  <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (FASE 2) -->
+  <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA -->
   <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 ">
-      <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39]">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-[97vw] xl:max-w-7xl h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           <!-- HEADER DEL DASHBOARD -->
-          <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div class="relative p-3.5 sm:p-4 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-3">
                   <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shrink-0 animate-pulse"></span>
                   <div>
@@ -2928,79 +2763,177 @@
                           <h2 class="font-mono text-xs sm:text-sm font-semibold text-[#eeeeee] uppercase tracking-[-0.24px]">Dashboard Ejecutivo & Auditoría</h2>
                           <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#3b82f6] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider font-semibold">FOPR-OFP-01-01</span>
                       </div>
-                      <p class="text-[11px] text-[#8a8380]">Control integral de requerimientos, matriz cruzada por empresas y auditoría de documentos base</p>
+                      <p class="text-[11px] text-[#8a8380]">Control integral de requerimientos, KPIs operativos y matriz cruzada por empresas</p>
                   </div>
               </div>
 
               <!-- BOTÓN CERRAR -->
-              <button type="button" onclick="closeExecutiveDashboard()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer " title="Cerrar ventana (Esc)">
+              <button type="button" onclick="closeExecutiveDashboard()" class="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer" title="Cerrar ventana (Esc)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
 
               <!-- SELECTOR DE SUB-PESTAÑAS -->
-              <div class="flex items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-1">
-                  <button type="button" id="btnTabExecCharts" onclick="switchExecutiveTab('charts')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold">
-                      📊 Gráficos y Matriz
+              <div class="flex items-center gap-1.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] p-1">
+                  <button type="button" id="btnTabExecCharts" onclick="switchExecutiveTab('charts')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition bg-[#3d3a39] text-[#fafafa] font-semibold cursor-pointer">
+                      📊 Métricas & Matriz
                   </button>
-                  <button type="button" id="btnTabExecTables" onclick="switchExecutiveTab('tables')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee]">
+                  <button type="button" id="btnTabExecTables" onclick="switchExecutiveTab('tables')" class="px-3 py-1.5 rounded-[3px] font-mono text-[11px] uppercase tracking-wider transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
                       📋 Tablas de Control
                   </button>
               </div>
           </div>
 
-          <!-- CUERPO PRINCIPAL (CONTENEDORES SCROLLABLES) -->
-          <div class="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin bg-[#101010] space-y-6">
+          <!-- CUERPO PRINCIPAL (SCROLLABLE) -->
+          <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 scrollbar-thin bg-[#101010] space-y-4">
               
               <!-- ================= SUB-PESTAÑA 1: GRÁFICOS Y MATRIZ ================= -->
-              <div id="execSubtabCharts" class="space-y-6">
-                  <!-- FILA 1: 3 GRÁFICOS DE INSTRUMENTO -->
-                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                      <!-- Gráfica 1: Agrupación por Paquete -->
-                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
-                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
-                              <span class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider font-semibold">Agrupación Requerimientos</span>
-                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Por Paquete</span>
+              <div id="execSubtabCharts" class="space-y-4">
+                  
+                  <!-- BLOQUE 1: BARRA DE CONTROL DE PERSPECTIVA Y TELEMETRÍA -->
+                  <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#1d1a18] rounded-[8px] border border-[#3d3a39]">
+                      <div class="flex items-center gap-2">
+                          <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
+                          <span id="dashSectionTitle" class="font-mono text-xs uppercase text-[#eeeeee] tracking-[-0.24px] font-semibold">Métricas Ejecutivas & KPIs</span>
+                          <span id="dashTelemetryBadge" class="font-mono text-[9px] uppercase bg-[#101010] text-[#a0ca92] px-2 py-0.5 rounded-[3px] border border-[#3d3a39] ml-2">● LIVE TELEMETRY</span>
+                      </div>
+                      
+                      <!-- Selector de Perspectiva (Global vs Por Consultor) -->
+                      <div id="dashScopeSelectorContainer" class="flex items-center gap-2 bg-[#101010] border border-[#3d3a39] px-2.5 py-1 rounded-[3px]">
+                          <label class="font-mono text-[10px] text-[#8a8380] uppercase tracking-wider">Perspectiva:</label>
+                          <select id="dashScopeSelect" onchange="window.renderDashboard()" class="bg-transparent text-xs text-[#eeeeee] font-mono focus:outline-none cursor-pointer">
+                              <option value="GLOBAL">🌐 Visión Global (Empresa Completa)</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  <!-- BLOQUE 2: 4 FACTORY METRIC TILES -->
+                  <div class="grid grid-cols-2 lg:grid-cols-4 border border-[#3d3a39] rounded-[8px] overflow-hidden bg-[#101010]">
+                      <!-- KPI 1: Cumplimiento SLA -->
+                      <div class="p-4 border-b lg:border-b-0 border-r border-[#1d1a18] flex flex-col justify-between">
+                          <div class="flex items-center justify-between">
+                              <p id="dashSlaLabel" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">SLA en Plazo</p>
+                              <span class="w-2 h-2 rounded-full bg-[#a0ca92]"></span>
                           </div>
-                          <div class="h-48 w-full relative">
-                              <canvas id="execChartPaquetesCanvas"></canvas>
+                          <div class="mt-2.5">
+                              <p class="text-3xl font-normal tracking-[-1px] leading-none text-[#eeeeee]" id="dashSlaRate">0%</p>
+                              <p class="font-mono text-[10px] uppercase text-[#a0ca92] mt-1.5 truncate" id="dashSlaSub">Sin retrasos</p>
                           </div>
                       </div>
 
-                      <!-- Gráfica 2: Tipo de Propuesta -->
-                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
-                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
-                              <span class="font-mono text-[10px] text-[#3b82f6] uppercase tracking-wider font-semibold">Tipo de Propuesta</span>
-                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Distribución</span>
-                          </div>
-                          <div class="h-48 w-full relative">
-                              <canvas id="execChartPropuestasCanvas"></canvas>
-                          </div>
-                      </div>
-
-                      <!-- Gráfica 3: Estatus de Requerimientos + Mini Tabla -->
-                      <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39] flex flex-col justify-between">
-                          <div class="flex items-center justify-between mb-3 border-b border-[#3d3a39]/50 pb-2">
-                              <span class="font-mono text-[10px] text-[#a0ca92] uppercase tracking-wider font-semibold">Estatus Requerimientos</span>
-                              <span id="execTotalReqCount" class="font-mono text-[10px] text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">0 Total</span>
-                          </div>
-                          <div class="flex items-center gap-3">
-                              <div class="h-44 w-44 relative shrink-0">
-                                  <canvas id="execChartEstatusCanvas"></canvas>
+                      <!-- KPI 2: Riesgo Inminente (Preventivo) -->
+                      <div id="kpiCardRisk" onclick="window.drillDownKpi('risk')" class="p-4 border-b lg:border-b-0 sm:border-r border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#181513] transition group select-none" title="Filtrar proyectos en riesgo">
+                          <div class="flex items-center justify-between">
+                              <p id="dashRiskLabel" class="font-mono text-[11px] text-[#b8b3b0] group-hover:text-[#eeeeee] uppercase tracking-[-0.24px] transition-colors">Riesgo &le; 72h</p>
+                              <div class="flex items-center gap-1.5">
+                                  <span class="text-[10px] text-[#8a8380] group-hover:text-[#eeeeee] font-mono font-bold">↗</span>
+                                  <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
                               </div>
-                              <div id="execStatusMiniTable" class="flex-1 max-h-44 overflow-y-auto scrollbar-thin text-[10px] font-mono space-y-1"></div>
+                          </div>
+                          <div class="mt-2.5">
+                              <p class="text-3xl font-normal tracking-[-1px] leading-none text-[#eeeeee]" id="dashRiskCount">0</p>
+                              <div class="flex items-center justify-between mt-1.5">
+                                  <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#b8b3b0] truncate" id="dashRiskSub">Próximos a vencer</p>
+                                  <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition shrink-0 ml-1">Ver ↗</span>
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- KPI 3: Vencidos Actuales -->
+                      <div id="kpiCardOverdue" onclick="window.drillDownKpi('overdue')" class="p-4 border-r border-[#1d1a18] flex flex-col justify-between cursor-pointer hover:bg-[#201511] transition group select-none" title="Filtrar proyectos vencidos">
+                          <div class="flex items-center justify-between">
+                              <p id="dashOverdueLabel" class="font-mono text-[11px] text-[#ee6018] group-hover:text-[#ff7836] uppercase tracking-[-0.24px] transition-colors">Vencidos</p>
+                              <div class="flex items-center gap-1.5">
+                                  <span class="text-[10px] text-[#ee6018] group-hover:text-white font-mono font-bold">↗</span>
+                                  <span class="font-mono text-[10px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[3px]" id="dashOverdueBadge">0</span>
+                              </div>
+                          </div>
+                          <div class="mt-2.5">
+                              <p class="text-3xl font-normal tracking-[-1px] leading-none text-[#ee6018]" id="dashOverdue">0</p>
+                              <div class="flex items-center justify-between mt-1.5">
+                                  <p class="font-mono text-[10px] uppercase text-[#8a8380] group-hover:text-[#ee6018] truncate">Requieren atención</p>
+                                  <span class="font-mono text-[9px] text-[#ee6018] opacity-0 group-hover:opacity-100 transition shrink-0 ml-1">Ver ↗</span>
+                              </div>
+                          </div>
+                      </div>
+
+                      <!-- KPI 4: Cumplimiento Documental -->
+                      <div class="p-4 flex flex-col justify-between">
+                          <div class="flex items-center justify-between">
+                              <p id="dashDocsLabel" class="font-mono text-[11px] text-[#b8b3b0] uppercase tracking-[-0.24px]">Docs Normativos</p>
+                              <span class="w-2 h-2 rounded-full bg-[#b8b3b0]"></span>
+                          </div>
+                          <div class="mt-2.5">
+                              <p class="text-3xl font-normal tracking-[-1px] leading-none text-[#eeeeee]" id="dashDocsRate">0%</p>
+                              <p class="font-mono text-[10px] uppercase text-[#8a8380] mt-1.5 truncate" id="dashDocsSub">Docs Base Validados</p>
                           </div>
                       </div>
                   </div>
 
-                  <!-- FILA 2: MATRIZ CRUZADA 9x21 -->
-                  <div class="bg-[#101010] p-4 rounded-[10px] border border-[#3d3a39]">
+                  <!-- BLOQUE 3: AVANCE PONDERADO -->
+                  <div class="factory-bone-card p-4 rounded-[8px] space-y-2">
+                      <div class="flex justify-between items-start">
+                          <div>
+                              <div class="flex items-center gap-1.5 mb-0.5">
+                                  <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                                  <p id="dashGlobalTitle" class="font-mono text-[11px] text-[#101010] uppercase tracking-[-0.24px] font-bold">Avance Ponderado Global</p>
+                              </div>
+                              <p class="font-mono text-[11px] text-[#4d4947]"><span id="dashTotal" class="text-[#101010] font-bold">0</span> <span id="dashTotalUnit">PROY</span> (<span id="dashCompleted" class="text-[#101010] font-bold">0</span> LISTOS · <span id="dashProgress" class="text-[#101010] font-bold">0</span> EN CURSO)</p>
+                          </div>
+                          <p class="text-2xl font-normal text-[#101010] tracking-[-0.04em] leading-none font-mono font-bold" id="dashGlobalText">0%</p>
+                      </div>
+                      <div class="w-full h-2 bg-[#101010]/15 rounded-[3px] overflow-hidden">
+                          <div id="dashGlobalBar" class="h-full bg-[#101010] transition-all duration-500 ease-out" style="width: 0%"></div>
+                      </div>
+                  </div>
+
+                  <!-- BLOQUE 4: DISTRIBUCIÓN OPERATIVA & COMERCIAL (3 COLUMNAS) -->
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+                      <!-- Columna 1: Estatus de Requerimientos STGT (Doughnut + Mini Tabla) -->
+                      <div class="bg-[#101010] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-2.5 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#a0ca92] uppercase tracking-wider font-semibold">Estatus Requerimientos</span>
+                              <span id="execTotalReqCount" class="font-mono text-[10px] text-[#eeeeee] bg-[#1d1a18] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">0 Total</span>
+                          </div>
+                          <div class="flex items-center gap-3">
+                              <div class="h-40 w-40 relative shrink-0">
+                                  <canvas id="execChartEstatusCanvas"></canvas>
+                              </div>
+                              <div id="execStatusMiniTable" class="flex-1 max-h-40 overflow-y-auto scrollbar-thin text-[10px] font-mono space-y-1"></div>
+                          </div>
+                      </div>
+
+                      <!-- Columna 2: Agrupación por Paquete (Compacto & Estructurado) -->
+                      <div class="bg-[#101010] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-2.5 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#ee6018] uppercase tracking-wider font-semibold">Agrupación por Paquete</span>
+                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Distribución</span>
+                          </div>
+                          <div id="execPaquetesContainer" class="flex-1 flex flex-col justify-center space-y-2 text-[10px] font-mono">
+                              <!-- Se llena dinámicamente con barras de progreso y conteo -->
+                          </div>
+                      </div>
+
+                      <!-- Columna 3: Tipo de Propuesta (Compacto & Estructurado) -->
+                      <div class="bg-[#101010] p-4 rounded-[8px] border border-[#3d3a39] flex flex-col justify-between">
+                          <div class="flex items-center justify-between mb-2.5 border-b border-[#3d3a39]/50 pb-2">
+                              <span class="font-mono text-[10px] text-[#3b82f6] uppercase tracking-wider font-semibold">Tipo de Propuesta</span>
+                              <span class="font-mono text-[9px] text-[#8a8380] uppercase">Comercial</span>
+                          </div>
+                          <div id="execPropuestasContainer" class="flex-1 flex flex-col justify-center space-y-2 text-[10px] font-mono">
+                              <!-- Se llena dinámicamente con barras de progreso y conteo -->
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- BLOQUE 5: MATRIZ CRUZADA 9x21 FOPR-OFP-01-01 -->
+                  <div class="bg-[#101010] p-4 rounded-[8px] border border-[#3d3a39]">
                       <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-[#3d3a39]">
                           <div class="flex items-center gap-2">
                               <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
-                              <h3 class="font-mono text-xs uppercase text-[#fafafa] font-normal tracking-[-0.24px] tracking-[-0.2px]">Requerimientos por Empresas (Matriz Cruzada 9 Estatus × 21 Empresas)</h3>
+                              <h3 class="font-mono text-xs uppercase text-[#fafafa] font-normal tracking-[-0.24px]">Requerimientos por Empresas (Matriz Cruzada 9 Estatus × 21 Empresas)</h3>
                           </div>
                           <div class="text-[10px] font-mono text-[#8a8380]">
-                              💡 Haz clic en cualquier número para activar <span class="text-[#3b82f6] font-semibold">Drill-Down</span> en Tablas de Control
+                              💡 Clic en cualquier celda para activar <span class="text-[#3b82f6] font-semibold">Drill-Down</span> en Tablas de Control
                           </div>
                       </div>
                       <div id="execMatrixContainer" class="overflow-x-auto scrollbar-thin max-h-[460px]"></div>
@@ -3008,43 +2941,104 @@
               </div>
 
               <!-- ================= SUB-PESTAÑA 2: TABLAS DE CONTROL ================= -->
-              <div id="execSubtabTables" class="hidden space-y-4">
-                  <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA + PILLS DE FILTRO RÁPIDO -->
-                  <div class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39] flex flex-wrap items-center justify-between gap-3">
-                      <!-- Pills Filtros Rápidos -->
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                          <button type="button" onclick="setExecutivePreset('ALL')" id="execPill_ALL" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#3d3a39] text-[#fafafa] font-semibold">
-                              Todos
-                          </button>
-                          <button type="button" onclick="setExecutivePreset('retraso_stgt')" id="execPill_retraso_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#ef4444] border border-[#ef4444]/40 hover:bg-[#ef4444]/10">
-                              🔴 Retraso STGT
-                          </button>
-                          <button type="button" onclick="setExecutivePreset('alta_dir')" id="execPill_alta_dir" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#eab308] border border-[#eab308]/40 hover:bg-[#eab308]/10">
-                              🟡 Relevantes Alta Dirección
-                          </button>
-                          <button type="button" onclick="setExecutivePreset('stgt')" id="execPill_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#9ca3af] border border-[#9ca3af]/40 hover:bg-[#9ca3af]/10">
-                              ⚡ Relevantes STGT
-                          </button>
-                          <button type="button" onclick="setExecutivePreset('auditoria')" id="execPill_auditoria" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#a0ca92] border border-[#a0ca92]/40 hover:bg-[#a0ca92]/10">
-                              👤 Auditoría / Fechas Docs
-                          </button>
+              <div id="execSubtabTables" class="hidden space-y-3.5">
+                  <!-- BARRA DE HERRAMIENTAS: FILTROS MULTICRITERIO + BUSCADOR + PILLS -->
+                  <div class="bg-[#101010] p-3.5 rounded-[8px] border border-[#3d3a39] space-y-3">
+                      <!-- Fila 1: Selects Desplegables de Filtrado -->
+                      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#8a8380] uppercase mb-1">Empresa</label>
+                              <select id="execFilterEmpresa" onchange="window.handleExecutiveDropdownFilter()" class="w-full liquid-input rounded-[3px] px-2 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
+                                  <option value="ALL">Todas las Empresas</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#8a8380] uppercase mb-1">Estatus</label>
+                              <select id="execFilterEstado" onchange="window.handleExecutiveDropdownFilter()" class="w-full liquid-input rounded-[3px] px-2 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
+                                  <option value="ALL">Todos los Estatus</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#8a8380] uppercase mb-1">Responsable</label>
+                              <select id="execFilterConsultor" onchange="window.handleExecutiveDropdownFilter()" class="w-full liquid-input rounded-[3px] px-2 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
+                                  <option value="ALL">Todos los Responsables</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#8a8380] uppercase mb-1">Paquete</label>
+                              <select id="execFilterPaquete" onchange="window.handleExecutiveDropdownFilter()" class="w-full liquid-input rounded-[3px] px-2 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
+                                  <option value="ALL">Todos los Paquetes</option>
+                                  <option value="Paquete 1">Paquete 1</option>
+                                  <option value="Paquete 2">Paquete 2</option>
+                                  <option value="Paquete 3">Paquete 3</option>
+                                  <option value="Paquete 4">Paquete 4</option>
+                                  <option value="Sin paquete">Sin paquete</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="block font-mono text-[9px] text-[#8a8380] uppercase mb-1">Propuesta</label>
+                              <select id="execFilterTipoPropuesta" onchange="window.handleExecutiveDropdownFilter()" class="w-full liquid-input rounded-[3px] px-2 py-1 text-xs text-[#eeeeee] focus:outline-none cursor-pointer">
+                                  <option value="ALL">Todos los Tipos</option>
+                                  <option value="Mantenimiento">Mantenimiento</option>
+                                  <option value="Servicio Administrado">Servicio Administrado</option>
+                                  <option value="Venta">Venta</option>
+                                  <option value="Innovación">Innovación</option>
+                              </select>
+                          </div>
+                          <div class="flex items-end">
+                              <button type="button" onclick="window.clearExecutiveDrillDown()" class="w-full h-[29px] rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] hover:border-[#8a8380] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer flex items-center justify-center gap-1">
+                                  <span>✕</span>
+                                  <span>Resetear</span>
+                              </button>
+                          </div>
                       </div>
 
-                      <!-- Búsqueda y Píldora de Filtro Activo Drill-Down -->
-                      <div class="flex items-center gap-2">
-                          <div id="execActiveDrillDownPill" class="hidden items-center gap-1.5 bg-[#3b82f6]/15 border border-[#3b82f6]/50 text-[#60a5fa] px-2.5 py-1 rounded-[3px] font-mono text-[10px]">
-                              <span id="execActiveDrillDownText">Filtro Activo</span>
-                              <button type="button" onclick="clearExecutiveDrillDown()" class="hover:text-white font-bold ml-1 text-xs">✕</button>
+                      <div class="h-px w-full bg-[#1d1a18]"></div>
+
+                      <!-- Fila 2: Presets Rápidos + Búsqueda + Contador -->
+                      <div class="flex flex-wrap items-center justify-between gap-2.5">
+                          <!-- Pills Filtros Rápidos -->
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                              <button type="button" onclick="setExecutivePreset('ALL')" id="execPill_ALL" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#3d3a39] text-[#fafafa] font-semibold cursor-pointer">
+                                  Todos
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('retraso_stgt')" id="execPill_retraso_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#ef4444] border border-[#ef4444]/40 hover:bg-[#ef4444]/10 cursor-pointer">
+                                  🔴 Retraso STGT
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('riesgo')" id="execPill_riesgo" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#f97316] border border-[#f97316]/40 hover:bg-[#f97316]/10 cursor-pointer">
+                                  ⚠️ Riesgo &le; 72h
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('vencidos')" id="execPill_vencidos" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#ee6018] border border-[#ee6018]/40 hover:bg-[#ee6018]/10 cursor-pointer">
+                                  🔥 Vencidos
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('alta_dir')" id="execPill_alta_dir" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#eab308] border border-[#eab308]/40 hover:bg-[#eab308]/10 cursor-pointer">
+                                  🟡 Alta Dirección
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('stgt')" id="execPill_stgt" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#9ca3af] border border-[#9ca3af]/40 hover:bg-[#9ca3af]/10 cursor-pointer">
+                                  ⚡ STGT
+                              </button>
+                              <button type="button" onclick="setExecutivePreset('auditoria')" id="execPill_auditoria" class="exec-pill-btn px-2.5 py-1 rounded-[3px] font-mono text-[10px] uppercase transition bg-[#101010] text-[#a0ca92] border border-[#a0ca92]/40 hover:bg-[#a0ca92]/10 cursor-pointer">
+                                  👤 Con Auditoría Docs
+                              </button>
                           </div>
-                          <div class="relative w-56 sm:w-72">
-                              <input type="text" id="execSearchInput" oninput="handleExecutiveSearch(this.value)" placeholder="Buscar por nombre, empresa, consultor..." class="w-full liquid-input rounded-[3px] pl-8 pr-3 py-1.5 text-xs text-[#eeeeee] focus:outline-none">
-                              <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+
+                          <!-- Búsqueda, Filtro Activo y Contador -->
+                          <div class="flex items-center gap-2">
+                              <div id="execActiveDrillDownPill" class="hidden items-center gap-1.5 bg-[#3b82f6]/15 border border-[#3b82f6]/50 text-[#60a5fa] px-2.5 py-1 rounded-[3px] font-mono text-[10px]">
+                                  <span id="execActiveDrillDownText">Filtro Activo</span>
+                                  <button type="button" onclick="clearExecutiveDrillDown()" class="hover:text-white font-bold ml-1 text-xs">✕</button>
+                              </div>
+                              <span id="execFilterResultCount" class="font-mono text-[10px] text-[#a0ca92] hidden sm:inline"></span>
+                              <div class="relative w-48 sm:w-64">
+                                  <input type="text" id="execSearchInput" oninput="handleExecutiveSearch(this.value)" placeholder="Buscar requerimiento, ticket..." class="w-full liquid-input rounded-[3px] pl-8 pr-3 py-1 text-xs text-[#eeeeee] focus:outline-none">
+                                  <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                              </div>
                           </div>
                       </div>
                   </div>
 
                   <!-- CONTENEDOR DE LA TABLA EJECUTIVA -->
-                  <div class="bg-[#101010] rounded-[10px] border border-[#3d3a39] overflow-hidden">
+                  <div class="bg-[#101010] rounded-[8px] border border-[#3d3a39] overflow-hidden">
                       <div id="execTableContainer" class="overflow-x-auto scrollbar-thin max-h-[560px]"></div>
                   </div>
               </div>
@@ -3173,7 +3167,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261025_v978"></script>
+  <script type="module" src="app.js?v=20261026_v979"></script>
 
 </body>
 </html>
