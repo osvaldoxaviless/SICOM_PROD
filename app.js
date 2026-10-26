@@ -3206,6 +3206,61 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
+
+    const CURATED_MODULE_COLORS = [
+        { hex: '#ee6018', name: 'Ámbar STGT' },
+        { hex: '#3b82f6', name: 'Zafiro Ejecutivo' },
+        { hex: '#10b981', name: 'Esmeralda Operativo' },
+        { hex: '#8b5cf6', name: 'Amatista Estratégico' },
+        { hex: '#ef4444', name: 'Carmesí Crítico' },
+        { hex: '#f59e0b', name: 'Dorado Alerta' },
+        { hex: '#06b6d4', name: 'Cian Digital' },
+        { hex: '#64748b', name: 'Pizarra Corporativa' }
+    ];
+
+    window.renderModuleColorSwatches = function(containerId, activeHex, callbackName) {
+        const cont = document.getElementById(containerId);
+        if (!cont) return;
+
+        const normActive = (activeHex || '#ee6018').toLowerCase();
+
+        let html = CURATED_MODULE_COLORS.map(c => {
+            const isSelected = c.hex.toLowerCase() === normActive;
+            return `
+            <button type="button" onclick="${callbackName}('${c.hex}')" class="w-6 h-6 rounded-full transition-all hover:scale-110 cursor-pointer relative flex items-center justify-center shrink-0 border ${isSelected ? 'border-white scale-110 shadow-lg ring-2 ring-white/40' : 'border-[#3d3a39] hover:border-white/50'}" style="background-color: ${c.hex}" title="${c.name}">
+                ${isSelected ? '<svg class="w-3.5 h-3.5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+            </button>`;
+        }).join('');
+
+        // Swatch 9: Selector personalizado
+        html += `
+        <label class="w-6 h-6 rounded-full bg-gradient-to-tr from-pink-500 via-indigo-500 to-amber-500 border border-[#3d3a39] flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shrink-0" title="Elegir tono personalizado...">
+            <span class="text-[10px] text-white font-bold leading-none">+</span>
+            <input type="color" value="${activeHex || '#ee6018'}" onchange="${callbackName}(this.value)" class="sr-only">
+        </label>`;
+
+        cont.innerHTML = html;
+    };
+
+    window.setNewModuleColor = function(hex) {
+        const colInput = document.getElementById('newModColor');
+        const hexInput = document.getElementById('newModColorHex');
+        if (colInput) colInput.value = hex;
+        if (hexInput) hexInput.value = hex;
+        window.renderModuleColorSwatches('newModPaletteSwatches', hex, 'window.setNewModuleColor');
+    };
+
+    window.setEditModuleColor = function(hex) {
+        const colInput = document.getElementById('editModuleColor');
+        const hexInput = document.getElementById('editModuleColorHex');
+        if (colInput) {
+            colInput.value = hex;
+            if (typeof colInput.onchange === 'function') colInput.onchange();
+        }
+        if (hexInput) hexInput.value = hex;
+        window.renderModuleColorSwatches('editModulePaletteSwatches', hex, 'window.setEditModuleColor');
+    };
+
     window.renderDrawerRecentProjects = function() {
         const cont = document.getElementById('drawerRecentProjectsList');
         if (!cont) return;
@@ -5687,10 +5742,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       }
       if (isModule) { 
         document.getElementById('editModuleFields').classList.remove('hidden'); 
-        document.getElementById('editModuleColor').value = item.color || '#0071e3'; 
-        document.getElementById('editModuleColorHex').value = item.color || '#0071e3'; 
+        document.getElementById('editModuleColor').value = item.color || '#3b82f6'; 
+        document.getElementById('editModuleColorHex').value = item.color || '#3b82f6'; 
+        if (typeof window.renderModuleColorSwatches === 'function') {
+            window.renderModuleColorSwatches('editModulePaletteSwatches', item.color || '#3b82f6', 'window.setEditModuleColor');
+        }
         document.getElementById('editModuleColor').onchange = function() { 
           document.getElementById('editModuleColorHex').value = this.value; 
+          if (typeof window.renderModuleColorSwatches === 'function') {
+              window.renderModuleColorSwatches('editModulePaletteSwatches', this.value, 'window.setEditModuleColor');
+          }
         }; 
 
         // Resumen analítico del módulo

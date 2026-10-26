@@ -62,7 +62,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v980">
+  <link rel="stylesheet" href="styles.css?v=20261026_v981">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -2182,18 +2182,20 @@
               </div>
             </div>
             
-            <div id="editModuleFields" class="space-y-5 hidden">
-              <div class="space-y-2">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase block mb-1">Color Señal del Módulo</label>
-                <div class="flex gap-3">
-                  <div class="w-12 h-12 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
-                      <input type="color" id="editModuleColor" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0">
-                  </div>
-                  <input type="text" id="editModuleColorHex" class="flex-1 liquid-input rounded-[3px] p-3.5 text-sm font-mono uppercase" readonly>
+            <div id="editModuleFields" class="space-y-3.5 hidden">
+              <div class="space-y-2 p-3.5 rounded-[8px] bg-[#181513] border border-[#2e2a28]">
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Paleta de Color Distintivo</label>
+                  <span class="font-mono text-[9px] uppercase text-[#8a8380]">Design Token</span>
                 </div>
+                <div id="editModulePaletteSwatches" class="flex items-center gap-2 flex-wrap py-1">
+                  <!-- Swatches renderizados dinámicamente -->
+                </div>
+                <input type="color" id="editModuleColor" class="hidden">
+                <input type="hidden" id="editModuleColorHex">
               </div>
-              <div id="editModuleSummary" class="bg-[#1d1a18] border border-[#3d3a39] p-4 rounded-[10px] text-[11px] text-[#b8b3b0] font-mono space-y-1"></div>
-              <button type="button" id="btnEditModuleAddProject" onclick="if(currentSelection && currentSelection.id) window.openCreateProjectForModule(currentSelection.id)" class="pill-btn w-full py-3 bg-[#1d1a18] hover:bg-[#eeeeee] border border-[#3d3a39] text-[#eeeeee] hover:text-[#101010] font-mono uppercase text-[11px] flex justify-center items-center gap-2 transition">
+              <div id="editModuleSummary" class="bg-[#181513] border border-[#2e2a28] p-3.5 rounded-[8px] text-[11px] text-[#b8b3b0] font-mono space-y-1"></div>
+              <button type="button" id="btnEditModuleAddProject" onclick="if(currentSelection && currentSelection.id) window.openCreateProjectForModule(currentSelection.id)" class="pill-btn w-full py-2.5 bg-[#181513] hover:bg-[#252220] border border-[#2e2a28] hover:border-[#3d3a39] text-[#eeeeee] font-mono uppercase text-[10px] flex justify-center items-center gap-1.5 transition cursor-pointer">
                   <span>+ Añadir Proyecto a este Módulo</span>
               </button>
             </div>
@@ -2368,21 +2370,23 @@
             </button>
           </div>
           
-          <div id="createModuleForm" class="space-y-5 hidden">
-            <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Nombre del Módulo</label>
-                <input type="text" id="newModName" placeholder="Ej. Recursos Humanos" class="w-full liquid-input rounded-[3px] p-3.5 text-sm">
+          <div id="createModuleForm" class="space-y-3.5 hidden">
+            <div class="space-y-1.5 p-3.5 rounded-[8px] bg-[#181513] border border-[#2e2a28]">
+                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Nombre del Módulo</label>
+                <input type="text" id="newModName" placeholder="Ej. Recursos Humanos, Logística..." class="w-full liquid-input rounded-[3px] p-2.5 text-xs text-[#eeeeee]">
             </div>
-            <div class="space-y-1.5">
-                <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Color Señal Distintivo</label>
-                <div class="flex gap-3">
-                  <div class="w-12 h-12 rounded-[3px] overflow-hidden border border-[#3d3a39] relative shrink-0">
-                      <input type="color" id="newModColor" value="#ee6018" oninput="document.getElementById('newModColorHex').value = this.value" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0">
-                  </div>
-                  <input type="text" id="newModColorHex" value="#ee6018" class="flex-1 liquid-input rounded-[3px] p-3.5 text-sm font-mono uppercase" readonly>
+            <div class="space-y-2 p-3.5 rounded-[8px] bg-[#181513] border border-[#2e2a28]">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Color Señal Distintivo</label>
+                    <span class="font-mono text-[9px] uppercase text-[#8a8380]">Paleta de Marca</span>
                 </div>
+                <div id="newModPaletteSwatches" class="flex items-center gap-2 flex-wrap py-1">
+                    <!-- Swatches renderizados dinámicamente -->
+                </div>
+                <input type="color" id="newModColor" value="#ee6018" class="hidden">
+                <input type="hidden" id="newModColorHex" value="#ee6018">
             </div>
-            <button onclick="createNewModule()" class="pill-btn w-full py-3.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[12px] mt-6 flex justify-center items-center gap-2">
+            <button onclick="createNewModule()" class="pill-btn w-full py-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] font-semibold mt-2 flex justify-center items-center gap-1.5 cursor-pointer">
                 <span>+ Crear Módulo</span>
             </button>
           </div>
@@ -2729,71 +2733,75 @@
         </div>
       </div>
 
-      <div class="mt-8 border-t border-[#1d1a18] pt-5 space-y-3 shrink-0">
-        <div id="backupControls" class="supremo-only hidden space-y-3">
-            <button onclick="triggerChatMorningDigest(this)" class="pill-btn w-full py-2.5 px-3 bg-[#1d1a18] hover:border-[#ee6018] text-[#eeeeee] border border-[#3d3a39] font-mono uppercase text-[11px] transition flex items-center justify-center gap-2 mb-2" title="Publicar el resumen de riesgos y proyectos atrasados en Google Chat">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Publicar Resumen de Riesgos en Chat
-            </button>
-            <!-- CANAL DE NOTIFICACIONES EXTERNAS (WEBHOOK) -->
-            <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition mb-3">
-              <summary class="cursor-pointer p-3 font-mono uppercase text-[10px] text-[#b8b3b0] hover:text-[#eeeeee] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden">
-                <span class="flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> Canal Notificaciones Webhook
-                </span>
-                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-              </summary>
-              <div class="p-3 border-t border-[#3d3a39] bg-[#101010] space-y-2.5 text-[11px]">
-                <p class="leading-relaxed text-[#8a8380]">
-                  Despacha alertas automáticas al canal de supervisión cuando un consultor envíe entregables a validación.
-                </p>
-                <div>
-                  <label class="block font-mono text-[9px] uppercase text-[#8a8380] mb-1">Webhook URL (Slack / Teams / Discord)</label>
-                  <input type="url" id="customWebhookInput" placeholder="https://hooks.slack.com/services/... o Teams / Discord" class="w-full liquid-input rounded-[3px] p-2 text-xs text-[#eeeeee]" onchange="saveCustomWebhook(this.value)">
-                </div>
-                <div class="flex items-center justify-between pt-1">
-                  <span class="font-mono text-[9px] text-[#8a8380]">Google Chat: <b class="text-[#a0ca92]">Conectado</b></span>
-                  <button type="button" onclick="testCustomWebhook()" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] border border-[#3d3a39] font-mono uppercase text-[9px] transition">Probar Alerta</button>
-                </div>
-              </div>
-            </details>
-
-            <div class="flex items-center justify-between">
-              <h4 class="font-mono text-[10px] text-[#8a8380] uppercase">Exportación y Respaldo</h4>
-              <span class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#a0ca92] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">● NUBE ACTIVA</span>
-            </div>
+      <!-- SECCIÓN INFERIOR: GESTIÓN DE DATOS & DESPACHO EXTERNO -->
+      <div class="mt-6 border-t border-[#252220] pt-4 space-y-3 shrink-0">
+        <div id="backupControls" class="supremo-only hidden space-y-2.5">
             
-            <div class="grid grid-cols-2 gap-2">
-              <button onclick="exportCSV()" class="pill-btn py-2.5 px-3 bg-[#1d1a18] border border-[#3d3a39] text-[#a0ca92] font-mono uppercase text-[11px] hover:border-[#a0ca92] transition flex items-center justify-center gap-1.5" title="Descargar informe completo en formato Excel / CSV">
-                📊 Reporte CSV
-              </button>
-              <button onclick="exportData()" class="pill-btn py-2.5 px-3 bg-[#1d1a18] border border-[#3d3a39] text-[#eeeeee] font-mono uppercase text-[11px] hover:border-[#eeeeee] transition flex items-center justify-center gap-1.5" title="Descargar copia de seguridad en formato JSON">
-                💾 Backup JSON
-              </button>
+            <!-- TARJETA: DESPACHO A GOOGLE CHAT -->
+            <div class="p-3 rounded-[8px] bg-[#181513] border border-[#2e2a28] flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-7 h-7 rounded-[4px] bg-[#10b981]/15 border border-[#10b981]/40 text-[#10b981] flex items-center justify-center text-xs shrink-0">💬</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h4 class="font-mono text-[11px] uppercase text-[#eeeeee] font-semibold truncate">Canal Google Chat</h4>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
+                        </div>
+                        <p class="text-[10px] text-[#8a8380] leading-tight truncate">Despacho de riesgos y atrasos al canal</p>
+                    </div>
+                </div>
+                <button type="button" onclick="triggerChatMorningDigest(this)" class="px-2.5 py-1.5 rounded-[4px] bg-[#1d1a18] hover:bg-[#282422] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] hover:text-white font-mono text-[10px] uppercase font-semibold transition shrink-0 flex items-center gap-1 cursor-pointer" title="Publicar resumen matutino en Google Chat">
+                    <span>Publicar</span>
+                    <span>↗</span>
+                </button>
             </div>
 
-            <!-- ZONA DE RECUPERACIÓN TÉCNICA -->
-            <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden transition mt-3">
-              <summary class="cursor-pointer p-3 font-mono uppercase text-[10px] text-[#8a8380] hover:text-[#ee6018] flex items-center justify-between transition select-none list-none [&::-webkit-details-marker]:hidden">
-                <span class="flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Recuperación Técnica (Peligro)
-                </span>
-                <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-              </summary>
-              <div class="p-3 border-t border-[#3d3a39] bg-[#101010] space-y-2 text-[11px] text-[#8a8380]">
-                <p class="leading-relaxed text-[#b8b3b0]">
-                  <b class="text-[#ee6018] font-mono uppercase">Advertencia:</b> SICOM sincroniza en tiempo real. Usar estas opciones únicamente para rescate mayor ante contingencias con doble confirmación.
-                </p>
-                <div class="pt-1 space-y-2">
-                  <button onclick="safeImportJSON()" class="pill-btn w-full py-2 bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] hover:border-[#eeeeee] font-mono uppercase text-[10px] transition flex items-center justify-center gap-1.5">
-                    📥 Restaurar desde archivo JSON local...
-                  </button>
-                  <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-                  <button onclick="safeForceCloudSync()" class="pill-btn w-full py-2 bg-[#1d1a18] hover:bg-[#ee6018] text-[#ee6018] hover:text-[#fafafa] border border-[#ee6018]/50 font-mono uppercase text-[10px] transition flex items-center justify-center gap-1.5">
-                    ⬆️ Sobreescribir Nube con Estado Local
-                  </button>
+            <!-- TARJETA: BÓVEDA DE RESPALDO & EXPORTACIÓN -->
+            <div class="p-3 rounded-[8px] bg-[#181513] border border-[#2e2a28] space-y-2">
+                <div class="flex items-center justify-between border-b border-[#252220] pb-1.5">
+                    <span class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                        <span>💾</span>
+                        <span>Bóveda & Respaldo de Datos</span>
+                    </span>
+                    <span class="font-mono text-[9px] uppercase bg-[#12100f] text-[#10b981] px-2 py-0.5 rounded-[3px] border border-[#2e2a28]">● Sincronizado</span>
                 </div>
-              </div>
-            </details>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="exportCSV()" class="py-2 px-2.5 rounded-[4px] bg-[#12100f] hover:bg-[#1a1816] border border-[#2e2a28] hover:border-[#10b981] text-[#10b981] font-mono uppercase text-[10px] transition flex items-center justify-center gap-1.5 cursor-pointer" title="Descargar informe completo en Excel / CSV">
+                        <span>📊</span>
+                        <span>Matriz CSV</span>
+                    </button>
+                    <button type="button" onclick="exportData()" class="py-2 px-2.5 rounded-[4px] bg-[#12100f] hover:bg-[#1a1816] border border-[#2e2a28] hover:border-[#eeeeee] text-[#eeeeee] font-mono uppercase text-[10px] transition flex items-center justify-center gap-1.5 cursor-pointer" title="Descargar copia de seguridad completa en JSON">
+                        <span>📥</span>
+                        <span>Backup JSON</span>
+                    </button>
+                </div>
+
+                <!-- HERRAMIENTAS AVANZADAS DE RECUPERACIÓN (COLAPSIBLE DISCRETO) -->
+                <details class="group pt-1">
+                    <summary class="cursor-pointer font-mono uppercase text-[9px] text-[#8a8380] hover:text-[#b8b3b0] flex items-center justify-between select-none list-none [&::-webkit-details-marker]:hidden">
+                        <span>⚙️ Opciones avanzadas de sincronización</span>
+                        <span class="group-open:rotate-180 transition-transform text-[8px]">▾</span>
+                    </summary>
+                    <div class="pt-2 space-y-2 text-[10px] font-mono">
+                        <button type="button" onclick="safeImportJSON()" class="w-full py-1.5 px-2 rounded-[3px] bg-[#12100f] border border-[#2e2a28] text-[#b8b3b0] hover:text-[#eeeeee] hover:border-[#3d3a39] uppercase transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <span>📂</span> Restaurar desde archivo JSON...
+                        </button>
+                        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+                        
+                        <button type="button" onclick="safeForceCloudSync()" class="w-full py-1.5 px-2 rounded-[3px] bg-[#12100f] hover:bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/30 uppercase transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <span>☁️</span> Sincronizar Nube con Estado Local
+                        </button>
+
+                        <div class="pt-1.5 border-t border-[#252220]">
+                            <label class="block text-[9px] text-[#8a8380] uppercase mb-1">Webhook URL Opcional</label>
+                            <div class="flex gap-1.5">
+                                <input type="url" id="customWebhookInput" placeholder="https://..." class="flex-1 liquid-input rounded-[3px] p-1.5 text-[10px] text-[#eeeeee]" onchange="saveCustomWebhook(this.value)">
+                                <button type="button" onclick="testCustomWebhook()" class="px-2 py-1 bg-[#12100f] hover:bg-[#252220] text-[#b8b3b0] border border-[#2e2a28] rounded-[3px] text-[9px] uppercase cursor-pointer">Test</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
         </div>
       </div>
     </div>
@@ -3233,7 +3241,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v980"></script>
+  <script type="module" src="app.js?v=20261026_v981"></script>
 
 </body>
 </html>
