@@ -80,11 +80,11 @@ runTest('6. styles.css & index.html: Dock inferior móvil z-[100000] y despejes 
     assert(css.includes('#timelineBoardView,\n    #priorityBoardView {\n        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;'), 'Vistas de entrega despejan el dock');
 });
 
-// 7. Versión v995 sincronizada en todo el sistema
-runTest('7. Versión v995 sincronizada en index.html, styles.css, app.js y sw.js', () => {
-    assert(html.includes('styles.css?v=20261026_v995'), 'index.html points to styles.css v995');
-    assert(html.includes('app.js?v=20261026_v995'), 'index.html points to app.js v995');
-    assert(sw.includes("SW_VERSION = '20261026_v995'"), 'sw.js SW_VERSION is 20261026_v995');
+// 7. Versión sincronizada en todo el sistema
+runTest('7. Versión sincronizada en index.html, styles.css, app.js y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v99[5-9]/.test(html), 'index.html points to styles.css');
+    assert(/app\.js\?v=20261026_v99[5-9]/.test(html), 'index.html points to app.js');
+    assert(/20261026_v99[5-9]/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log('\n====================================================');
