@@ -3,7 +3,7 @@
  * OS/V — Sistema Operativo de Operaciones, Seguimiento & Validación // STGT
  */
 
-const SW_VERSION = '20261026_v987';
+const SW_VERSION = '20261026_v988';
 const STATIC_CACHE_NAME = `osv-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA

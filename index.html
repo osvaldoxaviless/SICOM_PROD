@@ -14,9 +14,19 @@
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js', { scope: '/' })
-          .then(reg => console.log('✅ [PWA] Service Worker registrado en scope:', reg.scope))
+          .then(reg => {
+            console.log('✅ [PWA] Service Worker registrado en scope:', reg.scope);
+            reg.update();
+          })
           .catch(err => console.warn('⚠️ [PWA] Fallo al registrar Service Worker:', err));
       });
     }
@@ -62,7 +72,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v987">
+  <link rel="stylesheet" href="styles.css?v=20261026_v988">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -3264,7 +3274,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v987"></script>
+  <script type="module" src="app.js?v=20261026_v988"></script>
 
 </body>
 </html>

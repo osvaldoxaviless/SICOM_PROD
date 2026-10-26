@@ -67,8 +67,8 @@ test('8. index.html & CSS: Proporciones de tarjeta idénticas a referencia visua
 });
 
 test('9. Cache buster unificado en versión v=20261025_v976', () => {
-    assert(html.includes('styles.css?v=20261026_v987'), 'Falta v987 en styles.css');
-    assert(html.includes('app.js?v=20261026_v987'), 'Falta v987 en app.js');
+    assert(html.includes('styles.css?v=20261026_v988'), 'Falta v988 en styles.css');
+    assert(html.includes('app.js?v=20261026_v988'), 'Falta v988 en app.js');
 });
 
 console.log(`\n====================================================`);
