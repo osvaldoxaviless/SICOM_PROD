@@ -1662,8 +1662,8 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     display: none !important;
 }
 
-/* Protección estructural de escritorio: ocultar barra inferior móvil y controles exclusivos móviles */
-@media (min-width: 640px) {
+/* Protección estructural de escritorio: ocultar barra inferior móvil y controles exclusivos móviles (solo con altura suficiente de escritorio) */
+@media (min-width: 640px) and (min-height: 521px) {
     #mobileBottomDock,
     #mobileTopCreateContainer {
         display: none !important;
@@ -1800,4 +1800,74 @@ body:has(#loginOverlay:not(.hidden)) #mobileBottomDock {
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
+}
+
+/* ==========================================================================
+   ADAPTACIÓN ERGONÓMICA EN ORIENTACIÓN HORIZONTAL (LANDSCAPE PHONE)
+   Teléfonos en posición horizontal (altura <= 520px y ancho < 1024px)
+   Garantiza que girar el teléfono conserve la UI limpia sin saturar la pantalla
+   ========================================================================== */
+@media screen and (max-height: 520px) and (orientation: landscape) and (max-width: 1023px) {
+    /* Forzar visibilidad del dock inferior móvil en teléfonos horizontales */
+    #mobileBottomDock {
+        display: flex !important;
+        height: 44px !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    }
+
+    #mobileBottomDock button {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    #mobileBottomDock svg {
+        width: 14px !important;
+        height: 14px !important;
+        margin-bottom: 1px !important;
+    }
+
+    #mobileBottomDock span {
+        font-size: 8px !important;
+    }
+
+    /* En el Header: mantener controles limpios móviles */
+    #mobileTopCreateContainer {
+        display: block !important;
+    }
+
+    .mobile-branding-center {
+        display: flex !important;
+    }
+
+    div:has(> #mobileMenuBtn),
+    #mobileMenuBtn {
+        display: flex !important;
+    }
+
+    /* Ocultar elementos pesados de escritorio que saturan el viewport horizontal */
+    #mainViewSwitcher,
+    .desktop-search-cluster,
+    #userProfilePillBtn,
+    #btnTopExecutiveDashboard,
+    #btnTopAttendanceModal {
+        display: none !important;
+    }
+
+    /* Ocultar botones flotantes de escritorio */
+    #canvasToolsDock,
+    #speedDial,
+    #btnDailyTasks {
+        display: none !important;
+    }
+
+    /* Header compacto de 44px */
+    header {
+        height: 44px !important;
+    }
+
+    /* Ajustar infoCard sobre el dock horizontal */
+    #infoCard {
+        bottom: 48px !important;
+        max-height: calc(100vh - 54px) !important;
+    }
 }

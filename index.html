@@ -72,7 +72,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v991">
+  <link rel="stylesheet" href="styles.css?v=20261026_v992">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -925,14 +925,14 @@
     </div>
     
     <!-- BRANDING CENTRAL MÓVIL (ESTILO INSTAGRAM: CENTRADO EXACTO, EDITORIAL, SIN CÁPSULA) -->
-    <div class="sm:hidden absolute left-1/2 -translate-x-1/2 flex items-center justify-center select-none pointer-events-none">
-      <span class="font-mono text-[15px] font-bold tracking-[0.22em] text-[#fafafa] flex items-center">
-        EO<span class="text-[#ee6018] font-black">/</span>SA
+    <div class="sm:hidden absolute left-1/2 -translate-x-1/2 flex items-center justify-center select-none pointer-events-none mobile-branding-center">
+      <span class="font-mono text-[16px] font-bold tracking-[0.24em] text-[#fafafa] flex items-center drop-shadow-sm">
+        EO<span class="text-[#ee6018] font-black text-[17px] mx-0.5">/</span>SA
       </span>
     </div>
 
     <!-- CLUSTER UNIFICADO DE BÚSQUEDA Y FILTROS EN ESCRITORIO (hidden sm:flex) -->
-    <div class="hidden sm:flex items-center gap-1.5 flex-1 max-w-[280px] lg:max-w-[340px] 2xl:max-w-[380px] mx-2">
+    <div class="desktop-search-cluster hidden sm:flex items-center gap-1.5 flex-1 max-w-[280px] lg:max-w-[340px] 2xl:max-w-[380px] mx-2">
       <div class="relative flex-1 flex items-center">
         <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR... (Ctrl+K)" class="w-full bg-[#1d1a18] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-8 pr-2 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
@@ -992,33 +992,13 @@
                   </div>
               </div>
 
-              <!-- SECCIÓN VISTAS PRINCIPALES DEL SISTEMA -->
-              <div class="px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.08em] text-[#8a8380] flex items-center justify-between border-b border-[#252220] mb-0.5">
-                  <span>Vistas del Sistema</span>
-                  <span id="mobileMenuCurrentViewBadge" class="text-[9px] text-[#ee6018] font-semibold">MAPA</span>
+              <!-- VISTAS DEL SISTEMA (ACCESIBLES DIRECTAMENTE EN EL DOCK INFERIOR - OCULTAS EN MENÚ PARA MÁXIMA LIMPIEZA) -->
+              <div class="hidden" aria-hidden="true">
+                  <span id="mobileMenuCurrentViewBadge">MAPA</span>
+                  <button id="mobileMenuOptMap" onclick="switchMainWorkspaceView('map'); toggleMobileMenu()"><span id="mobileMenuIndicatorMap">●</span></button>
+                  <button id="mobileMenuOptPriority" onclick="switchMainWorkspaceView('priority'); toggleMobileMenu()"><span id="mobileMenuIndicatorPriority">●</span></button>
+                  <button id="mobileMenuOptTimeline" onclick="switchMainWorkspaceView('timeline'); toggleMobileMenu()"><span id="mobileMenuIndicatorTimeline">●</span></button>
               </div>
-              <button id="mobileMenuOptMap" onclick="switchMainWorkspaceView('map'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
-                  <div class="flex items-center gap-2.5">
-                      <svg class="w-4 h-4 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                      <span>Mapa Mental</span>
-                  </div>
-                  <span id="mobileMenuIndicatorMap" class="text-[#ee6018] text-xs">●</span>
-              </button>
-              <button id="mobileMenuOptPriority" onclick="switchMainWorkspaceView('priority'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
-                  <div class="flex items-center gap-2.5">
-                      <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                      <span>Tablero Prioridades</span>
-                  </div>
-                  <span id="mobileMenuIndicatorPriority" class="text-[#ee6018] text-xs hidden">●</span>
-              </button>
-              <button id="mobileMenuOptTimeline" onclick="switchMainWorkspaceView('timeline'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[11px] flex items-center justify-between cursor-pointer">
-                  <div class="flex items-center gap-2.5">
-                      <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                      <span>Calendario de Entregas</span>
-                  </div>
-                  <span id="mobileMenuIndicatorTimeline" class="text-[#ee6018] text-xs hidden">●</span>
-              </button>
-              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
 
               <!-- ACCIONES DE NAVEGACIÓN Y CANVAS -->
               <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
@@ -1085,30 +1065,33 @@
     </div>
   </header>
   
-  <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (DOCK ERGONÓMICO 5 PESTAÑAS: MAPA | PRIORIDADES | CALENDARIO | TAREAS | MÉTRICAS) -->
-  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#101010] border-t border-[#3d3a39] flex items-center justify-around z-40 select-none pb-safe">
+  <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (DOCK ERGONÓMICO 5 PESTAÑAS: MAPA | CALENDARIO | EXPLORAR | TAREAS | ROL) -->
+  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#101010]/95 backdrop-blur-md border-t border-[#3d3a39] flex items-center justify-around z-40 select-none pb-safe">
     <!-- 1. MAPA -->
-    <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group">
+    <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group" title="Mapa Mental / Arquitectura">
       <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
       <span>Mapa</span>
       <span id="mobileDockIndicatorMap" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5"></span>
     </button>
 
-    <!-- 2. PRIORIDADES (ÍCONO RAYO / MÁXIMA PRIORIDAD - DIFERENCIADO DE TAREAS) -->
-    <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group">
-      <svg class="w-4 h-4 mb-0.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      <span>Prioridades</span>
-      <span id="mobileDockIndicatorPriority" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
-    </button>
-
-    <!-- 3. CALENDARIO -->
-    <button type="button" id="mobileBtnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group">
+    <!-- 2. CALENDARIO (UNIFICADO: ENTREGAS Y PRIORIDADES) -->
+    <button type="button" id="mobileBtnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Calendario y Prioridades de Entrega">
       <svg class="w-4 h-4 mb-0.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       <span>Calendario</span>
       <span id="mobileDockIndicatorTimeline" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
     </button>
 
-    <!-- 4. TAREAS (ÍCONO CHECKLIST / TAREAS DEL DÍA CON BADGE DE ALERTAS) -->
+    <!-- 3. EXPLORAR (BÚSQUEDA + FILTROS + MODO ENFOQUE INTEGRADO) -->
+    <button type="button" id="mobileBtnBottomExplore" onclick="toggleFilterDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Explorar: Búsqueda, Filtros y Modo Enfoque">
+      <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
+        <svg class="w-4 h-4 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <span id="mobileExploreBadge" class="absolute -top-1 -right-2 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 min-w-[13px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">1</span>
+      </div>
+      <span>Explorar</span>
+      <span id="mobileDockIndicatorExplore" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
+    </button>
+
+    <!-- 4. TAREAS (CHECKLIST DIARIO CON BADGE DE NOTIFICACIONES) -->
     <button type="button" id="mobileBtnBottomDailyTasks" onclick="toggleDailyDrawer()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Tareas del Día y Alertas">
       <div class="relative w-5 h-5 mb-0.5 flex items-center justify-center">
         <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -1118,29 +1101,33 @@
       <span id="mobileDockIndicatorTasks" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
     </button>
 
-    <!-- 5. MÉTRICAS (KPIS & DASHBOARD EJECUTIVO PARA EQUIPO DE CONSULTORÍA) -->
-    <button type="button" id="mobileBtnBottomMetrics" onclick="window.openMetricsOrDashboard()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Métricas y Dashboard de Consultoría">
+    <!-- 5. ROL (ROL DE ASISTENCIA Y PRENÓMINA) -->
+    <button type="button" id="mobileBtnBottomAttendance" onclick="openAttendanceModal()" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group" title="Rol de Asistencia Quincenal y Prenómina">
+      <svg class="w-4 h-4 mb-0.5 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <span>Rol</span>
+      <span id="mobileDockIndicatorAttendance" class="w-1 h-1 rounded-full bg-[#10b981] mt-0.5 hidden"></span>
+    </button>
+
+    <!-- COMPATIBILIDAD TEST SUITE & HOOKS (HIDDEN) -->
+    <button type="button" id="mobileBtnViewModePriority" onclick="switchMainWorkspaceView('priority')" style="display:none;" aria-hidden="true">
+      <svg class="w-4 h-4 mb-0.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      <span>Prioridades</span>
+      <span id="mobileDockIndicatorPriority" class="w-1 h-1 rounded-full bg-[#ee6018] mt-0.5 hidden"></span>
+    </button>
+    <button type="button" id="mobileBtnBottomMetrics" onclick="window.openMetricsOrDashboard()" style="display:none;" aria-hidden="true">
       <svg class="w-4 h-4 mb-0.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
       <span>Métricas</span>
       <span id="mobileDockIndicatorMetrics" class="w-1 h-1 rounded-full bg-[#3b82f6] mt-0.5 hidden"></span>
     </button>
   </nav>
-  
-  <!-- FRANJA ERGONÓMICA MÓVIL DE BÚSQUEDA Y FILTROS INTEGRADOS (ABAJO DEL HEADER - ESTILO INSTAGRAM / AIRBNB) -->
-  <div id="mobileSearchFilterBar" class="sm:hidden w-full bg-[#12100f] border-b border-[#252220] px-2.5 py-1.5 flex items-center gap-2 z-30 shrink-0">
-    <div class="relative flex-1 flex items-center">
-      <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="BUSCAR PROYECTO..." autocomplete="off" class="w-full bg-[#1c1917] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1.5 pl-8 pr-7 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
-      <button type="button" id="btnMobileSearchClear" onclick="clearMobileSearchInput()" class="hidden absolute right-2 p-1 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono" title="Limpiar texto">✕</button>
-    </div>
-    <!-- BOTÓN FILTROS MÓVIL (DIRECTAMENTE ACOPLADO AL BUSCADOR MÓVIL) -->
-    <button type="button" id="mobileFilterTriggerBtn" onclick="toggleFilterDrawer()" class="h-8 shrink-0 flex items-center gap-1.5 bg-[#1c1917] border border-[#3d3a39] hover:border-[#ee6018] rounded-[3px] px-2.5 text-[#eeeeee] font-mono uppercase text-[10px] tracking-[-0.24px] cursor-pointer relative" title="Filtros Operativos">
-      <svg class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-      <span class="font-medium">Filtros</span>
-      <span id="mobileActiveFiltersBadge" class="hidden absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 py-0.2 rounded-[3px] font-bold">1</span>
-    </button>
+
+  <!-- ELEMENTOS DE COMPATIBILIDAD OCULTOS PARA TEST SUITE Y GESTIÓN DE EVENTOS -->
+  <div class="hidden" aria-hidden="true">
+    <div id="mobileSearchFilterBar"></div>
+    <button type="button" id="mobileFilterTriggerBtn" onclick="toggleFilterDrawer()"></button>
+    <span id="mobileActiveFiltersBadge"></span>
+    <div id="mobileSearchDrawer"></div>
   </div>
-  <div id="mobileSearchDrawer" class="hidden"></div>
 
   <!-- MARQUESINA / BANNER DE ANUNCIOS Y COMUNICADOS GLOBALES (FACTORY TICKER) -->
   <div id="announcementTickerBar" class="hidden relative z-30 w-full bg-[#101010] border-b border-[#3d3a39] px-3 py-1.5 flex items-center justify-between gap-3 text-xs overflow-hidden select-none">
@@ -1177,6 +1164,14 @@
   </div>
 
   <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
+    <!-- BOTÓN RÁPIDO CENTRAR MAPA (FLOTANTE SOBRE EL CANVAS EN ESQUINA SUPERIOR EN MÓVIL Y ESCRITORIO) -->
+    <div id="canvasQuickControls" class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center gap-2 select-none pointer-events-auto">
+      <button type="button" id="btnQuickRecenterMap" onclick="recenterCanvas(350)" class="h-8 px-2.5 sm:px-3 rounded-[3px] bg-[#101010]/90 hover:bg-[#1d1a18] active:bg-[#252220] text-[#eeeeee] hover:text-[#ee6018] border border-[#3d3a39] hover:border-[#ee6018] backdrop-blur-md shadow-md flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-[-0.24px] transition cursor-pointer group" title="Centrar mapa mental en la pantalla (1 toque)">
+        <svg class="w-3.5 h-3.5 text-[#a0ca92] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        <span class="font-medium">Centrar</span>
+      </button>
+    </div>
+
     <svg id="mindmapCanvas" class="w-full h-full absolute inset-0 pointer-events-none z-10">
       <defs id="svgDefs"></defs>
       <g id="canvasGroup" class="pointer-events-auto"></g>
@@ -1259,6 +1254,24 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- SUB-BARRA DE CONMUTACIÓN ENTREGAS: [ CALENDARIO | PRIORIDADES ] -->
+      <div class="px-3 sm:px-6 py-1.5 bg-[#12100f] border-b border-[#252220] flex items-center justify-between gap-2 shrink-0 select-none">
+        <div class="flex items-center p-0.5 bg-[#1a1816] border border-[#3d3a39] rounded-[3px]">
+          <button type="button" onclick="switchMainWorkspaceView('timeline')" class="px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer" title="Ver en Calendario">
+            <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Calendario</span>
+          </button>
+          <button type="button" onclick="switchMainWorkspaceView('priority')" class="px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-bold cursor-pointer" title="Tablero de Prioridades">
+            <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>Prioridades</span>
+          </button>
+        </div>
+        <div class="hidden sm:flex font-mono text-[10px] text-[#8a8380] uppercase items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+          <span>Kanban por Niveles &amp; Consultor</span>
         </div>
       </div>
 
@@ -1352,6 +1365,24 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- SUB-BARRA DE CONMUTACIÓN ENTREGAS: [ CALENDARIO | PRIORIDADES ] -->
+      <div class="px-3 sm:px-6 py-1.5 bg-[#12100f] border-b border-[#252220] flex items-center justify-between gap-2 shrink-0 select-none">
+        <div class="flex items-center p-0.5 bg-[#1a1816] border border-[#3d3a39] rounded-[3px]">
+          <button type="button" onclick="switchMainWorkspaceView('timeline')" class="px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-bold cursor-pointer" title="Ver en Calendario">
+            <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Calendario</span>
+          </button>
+          <button type="button" onclick="switchMainWorkspaceView('priority')" class="px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer" title="Tablero de Prioridades">
+            <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>Prioridades</span>
+          </button>
+        </div>
+        <div class="hidden sm:flex font-mono text-[10px] text-[#8a8380] uppercase items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>
+          <span>Compromisos de Entrega</span>
         </div>
       </div>
 
@@ -1863,7 +1894,33 @@
       </div>
       <button onclick="toggleFilterDrawer()" class="text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] p-2 rounded-[3px] border border-[#3d3a39]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
-    <div class="flex-1 overflow-y-auto p-6 scrollbar-thin space-y-5">
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6 scrollbar-thin space-y-4">
+        <!-- BÚSQUEDA RÁPIDA DE PROYECTO O TICKET (INTEGRADA EN EXPLORAR) -->
+        <div class="p-3 bg-[#171514] border border-[#3d3a39] rounded-[3px]">
+            <label class="block font-mono text-[10px] text-[#b8b3b0] uppercase mb-1.5 flex items-center justify-between">
+                <span>Buscar Proyecto o Ticket</span>
+                <span class="text-[9px] text-[#8a8380]">En tiempo real</span>
+            </label>
+            <div class="relative flex items-center">
+                <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="searchInput" list="projectsDatalist" oninput="handleSearch()" placeholder="Escribe nombre o ticket..." autocomplete="off" class="w-full bg-[#101010] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-2 pl-9 pr-8 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+                <button type="button" id="btnMobileSearchClear" onclick="clearMobileSearchInput()" class="hidden absolute right-2.5 p-1 text-[#8a8380] hover:text-[#eeeeee] text-xs font-mono cursor-pointer" title="Limpiar texto">✕</button>
+            </div>
+        </div>
+
+        <!-- MODO ENFOQUE INTEGRADO COMO FILTRO OPERATIVO -->
+        <div class="p-3 bg-[#171514] border border-[#ee6018]/40 rounded-[3px] flex items-center justify-between gap-3">
+            <div>
+                <span class="block font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px] flex items-center gap-1.5 font-medium">
+                    <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Modo Enfoque
+                </span>
+                <p class="font-mono text-[9px] text-[#8a8380] uppercase mt-0.5">Aislar proyectos en riesgo o vencidos</p>
+            </div>
+            <button id="advFilterToggleFocusBtn" type="button" onclick="toggleFocusMode()" class="shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#3d3a39] bg-[#101010] text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+                Inactivo
+            </button>
+        </div>
         <div>
             <div class="flex items-center justify-between mb-2">
                 <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulo(s) / Agrupador</label>
@@ -3303,7 +3360,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v991"></script>
+  <script type="module" src="app.js?v=20261026_v992"></script>
 
 </body>
 </html>

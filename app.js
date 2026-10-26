@@ -7571,22 +7571,39 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
 
-            // Barra de navegación inferior móvil (Estilo Dock / Instagram)
+            // Barra de navegación inferior móvil (Estilo Dock / Instagram - 5 accesos)
             const mBtnMap = document.getElementById('mobileBtnViewModeMap');
-            const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
             const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
+            const mBtnExplore = document.getElementById('mobileBtnBottomExplore');
+            const mBtnTasks = document.getElementById('mobileBtnBottomDailyTasks');
+            const mBtnAttendance = document.getElementById('mobileBtnBottomAttendance');
+            const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
+
             const mInact = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group";
             const mAct = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group";
+
             if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
+            if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline' || activeMode === 'priority') ? mAct : mInact;
+            if (mBtnExplore) mBtnExplore.className = mInact;
+            if (mBtnTasks) mBtnTasks.className = mInact;
+            if (mBtnAttendance) mBtnAttendance.className = mInact;
             if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
-            if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline') ? mAct : mInact;
 
             const dockIndMap = document.getElementById('mobileDockIndicatorMap');
-            const dockIndPrio = document.getElementById('mobileDockIndicatorPriority');
             const dockIndTimeline = document.getElementById('mobileDockIndicatorTimeline');
+            const dockIndExplore = document.getElementById('mobileDockIndicatorExplore');
+            const dockIndTasks = document.getElementById('mobileDockIndicatorTasks');
+            const dockIndAttendance = document.getElementById('mobileDockIndicatorAttendance');
+            const dockIndPrio = document.getElementById('mobileDockIndicatorPriority');
+
             if (dockIndMap) dockIndMap.classList.toggle('hidden', activeMode !== 'map');
+            if (dockIndTimeline) dockIndTimeline.classList.toggle('hidden', activeMode !== 'timeline' && activeMode !== 'priority');
+            if (dockIndExplore) dockIndExplore.classList.add('hidden');
             if (dockIndPrio) dockIndPrio.classList.toggle('hidden', activeMode !== 'priority');
-            if (dockIndTimeline) dockIndTimeline.classList.toggle('hidden', activeMode !== 'timeline');
+
+            // Control flotante de centrado rápido sobre el canvas
+            const quickRecenter = document.getElementById('canvasQuickControls');
+            if (quickRecenter) quickRecenter.classList.toggle('hidden', activeMode !== 'map');
 
             // Menú desplegable móvil (3 puntos)
             const badge = document.getElementById('mobileMenuCurrentViewBadge');
@@ -11297,6 +11314,8 @@ window.renderDailyTasks = function() {
         if(isFilterDrawerOpen) {
             document.getElementById('filterDrawer').classList.add('translate-x-full');
             isFilterDrawerOpen = false;
+            const indExplore = document.getElementById('mobileDockIndicatorExplore');
+            if (indExplore) indExplore.classList.add('hidden');
             if (window._lastFilteredBounds) {
                 setTimeout(() => window.focusFilteredMindMap(), 60);
             }
@@ -11312,6 +11331,9 @@ window.renderDailyTasks = function() {
             document.getElementById('filterDrawer').classList.remove('translate-x-full');
             isFilterDrawerOpen = true;
             window.populateAdvFilters();
+            if (typeof window.updateFocusModeBtnUI === 'function') window.updateFocusModeBtnUI();
+            const indExplore = document.getElementById('mobileDockIndicatorExplore');
+            if (indExplore) indExplore.classList.remove('hidden');
             if (window._lastFilteredBounds) {
                 setTimeout(() => window.focusFilteredMindMap(), 60);
             }
@@ -11692,7 +11714,7 @@ window.renderDailyTasks = function() {
         if (activeFilterBottleneck !== 'ALL') c++;
         if (showAllSecondaryLinks) c++;
         
-        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge')].filter(Boolean);
+        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge'), document.getElementById('mobileExploreBadge')].filter(Boolean);
         badges.forEach(b => {
             if (c > 0) { b.textContent = c; b.classList.remove('hidden'); }
             else { b.classList.add('hidden'); }
@@ -11727,8 +11749,9 @@ window.renderDailyTasks = function() {
         showAllSecondaryLinks = false;
         document.body.classList.remove('show-all-sec-links');
         if (typeof window.updateSecondaryLinksBtnUI === 'function') window.updateSecondaryLinksBtnUI();
+        if (typeof window.updateFocusModeBtnUI === 'function') window.updateFocusModeBtnUI();
         
-        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge')].filter(Boolean);
+        const badges = [document.getElementById('activeFiltersBadge'), document.getElementById('mobileActiveFiltersBadge'), document.getElementById('mobileExploreBadge')].filter(Boolean);
         badges.forEach(b => b.classList.add('hidden'));
         const filterBtns = [document.getElementById('btnTopFilterDrawer'), document.getElementById('mobileFilterTriggerBtn')].filter(Boolean);
         filterBtns.forEach(btn => btn.classList.remove('has-active-filters'));
@@ -11910,8 +11933,22 @@ window.renderDailyTasks = function() {
             }
         }
         window.renderMindMap();
+        if (typeof window.updateFocusModeBtnUI === 'function') window.updateFocusModeBtnUI();
         setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
         if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+    };
+
+    window.updateFocusModeBtnUI = function() {
+        const btn = document.getElementById('advFilterToggleFocusBtn');
+        if (btn) {
+            if (isFocusMode) {
+                btn.className = "shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#ee6018] bg-[#ee6018] text-[#fafafa] font-bold";
+                btn.textContent = "Activo";
+            } else {
+                btn.className = "shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#3d3a39] bg-[#101010] text-[#8a8380] hover:text-[#eeeeee]";
+                btn.textContent = "Inactivo";
+            }
+        }
     };
 
     window.toggleSecondaryLinks = function() {
