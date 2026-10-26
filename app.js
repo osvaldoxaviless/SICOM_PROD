@@ -1,5 +1,5 @@
 const SICOM_VERSION = 'v9.3';
-console.log('⚡ OS/V Control Surface', SICOM_VERSION, '— Terminal Control Surface Ready');
+console.log('⚡ OS/V', SICOM_VERSION, '— Operaciones, Seguimiento & Validación Ready');
 
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
     const formatTaskTextWithTicket = (u) => {

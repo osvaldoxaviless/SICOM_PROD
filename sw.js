@@ -1,9 +1,9 @@
 /**
  * OS/V — Service Worker para PWA & Notificaciones Push (Teléfono & Chrome)
- * STGT Control Surface — Factory Design System
+ * OS/V — Sistema Operativo de Operaciones, Seguimiento & Validación // STGT
  */
 
-const SW_VERSION = '20261026_v986';
+const SW_VERSION = '20261026_v987';
 const STATIC_CACHE_NAME = `osv-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA
