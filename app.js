@@ -3629,6 +3629,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         infoCardHideTimer = setTimeout(() => {
             if (card) card.classList.add('hidden');
             document.body.classList.remove('info-card-open');
+            const isDesk = window.innerWidth >= 640;
+            if (isDesk && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') && !isDrawerOpen && !isDailyDrawerOpen && !isPriorityDrawerOpen && !isFilterDrawerOpen) {
+                const speedDial = document.getElementById('speedDial');
+                if (speedDial) speedDial.classList.remove('hidden');
+                const btnDaily = document.getElementById('btnDailyTasks');
+                if (btnDaily) btnDaily.classList.remove('hidden');
+            }
             infoCardHideTimer = null;
         }, 250); 
         if (!keepSelection && currentSelection && currentSelection.id) {
@@ -5726,6 +5733,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
       }
       document.body.classList.add('info-card-open');
+      const speedDial = document.getElementById('speedDial');
+      if (speedDial) speedDial.classList.add('hidden');
+      const btnDaily = document.getElementById('btnDailyTasks');
+      if (btnDaily) btnDaily.classList.add('hidden');
       card.classList.remove('hidden'); 
       card.scrollTop = 0;
       requestAnimationFrame(() => {

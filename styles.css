@@ -782,31 +782,40 @@ body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget {
     transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* OCULTAR ELEMENTOS FLOTANTES DE LA DERECHA (SPEED DIAL Y BOTÓN TAREAS) CUANDO CUALQUIER WORKSPACE O PANEL LATERAL ESTÉ ABIERTO (EN DESKTOP Y MÓVIL) */
+body.info-card-open #speedDial,
+body.info-card-open #btnDailyTasks,
+body:has(#infoCard:not(.hidden)) #speedDial,
+body:has(#infoCard:not(.hidden)) #btnDailyTasks,
+body:has(#dailyDrawer:not(.-translate-x-full)) #speedDial,
+body:has(#dailyDrawer:not(.-translate-x-full)) #btnDailyTasks,
+body:has(#configDrawer:not(.translate-x-full)) #speedDial,
+body:has(#configDrawer:not(.translate-x-full)) #btnDailyTasks,
+body:has(#priorityDrawer:not(.translate-x-full)) #speedDial,
+body:has(#priorityDrawer:not(.translate-x-full)) #btnDailyTasks,
+body:has(#filterDrawer:not(.translate-x-full)) #speedDial,
+body:has(#filterDrawer:not(.translate-x-full)) #btnDailyTasks {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(12px) scale(0.95);
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @media (max-width: 767px), (orientation: landscape) and (max-height: 520px) {
-    body.info-card-open #speedDial,
-    body.info-card-open #btnDailyTasks,
     body.info-card-open #btnManual,
     body.info-card-open #canvasZoomWidget,
-    body:has(#infoCard:not(.hidden)) #speedDial,
-    body:has(#infoCard:not(.hidden)) #btnDailyTasks,
+    body.info-card-open #canvasSpeedDialTrigger,
     body:has(#infoCard:not(.hidden)) #btnManual,
     body:has(#infoCard:not(.hidden)) #canvasZoomWidget,
-    body:has(#dailyDrawer:not(.-translate-x-full)) #btnDailyTasks,
+    body:has(#infoCard:not(.hidden)) #canvasSpeedDialTrigger,
     body:has(#dailyDrawer:not(.-translate-x-full)) #btnManual,
     body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget,
-    body:has(#dailyDrawer:not(.-translate-x-full)) #speedDial,
-    body:has(#configDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#configDrawer:not(.translate-x-full)) #btnManual,
     body:has(#configDrawer:not(.translate-x-full)) #canvasZoomWidget,
-    body:has(#configDrawer:not(.translate-x-full)) #speedDial,
-    body:has(#priorityDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#priorityDrawer:not(.translate-x-full)) #btnManual,
     body:has(#priorityDrawer:not(.translate-x-full)) #canvasZoomWidget,
-    body:has(#priorityDrawer:not(.translate-x-full)) #speedDial,
-    body:has(#filterDrawer:not(.translate-x-full)) #btnDailyTasks,
     body:has(#filterDrawer:not(.translate-x-full)) #btnManual,
-    body:has(#filterDrawer:not(.translate-x-full)) #canvasZoomWidget,
-    body:has(#filterDrawer:not(.translate-x-full)) #speedDial {
+    body:has(#filterDrawer:not(.translate-x-full)) #canvasZoomWidget {
         opacity: 0 !important;
         pointer-events: none !important;
         transform: translateY(12px) scale(0.95);
