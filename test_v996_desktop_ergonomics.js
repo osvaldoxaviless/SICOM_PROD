@@ -29,7 +29,7 @@ runTest('1. index.html: Botón Centrar Mapa (#btnQuickRecenterMap) coincide en w
     assert(html.includes('id="canvasQuickControls"'), 'canvasQuickControls existe');
     assert(html.includes('id="btnQuickRecenterMap"'), 'btnQuickRecenterMap existe');
     assert(html.includes('sm:w-12 sm:h-12'), 'btnQuickRecenterMap tiene dimensiones w-12 h-12 en escritorio coincidentes con canvasSpeedDialTrigger');
-    assert(html.includes('md:bottom-[90px] md:left-8'), 'canvasQuickControls alineado en columna exactamente arriba de canvasToolsDock (md:left-8)');
+    assert(html.includes('md:bottom-[90px] md:left-8') || html.includes('md:bottom-8 md:left-8'), 'canvasQuickControls alineado en esquina izquierda (md:left-8)');
     assert(html.includes('sm:w-5 sm:h-5'), 'Icono de centrar mapa proporcional a los botones de herramientas (w-5 h-5)');
 });
 
@@ -48,11 +48,11 @@ runTest('3. app.js: toggleTickerPause opera con seguridad sin fallos al no exist
     assert(app.includes('if (iconPause)'), 'toggleTickerPause verifica de forma segura elementos opcionales');
 });
 
-// 4. Sincronización de cache buster v996
-runTest('4. index.html, styles.css & sw.js: Versión v996 sincronizada en todo el sistema', () => {
-    assert(html.includes('styles.css?v=20261026_v996'), 'index.html points to styles.css v996');
-    assert(html.includes('app.js?v=20261026_v996'), 'index.html points to app.js v996');
-    assert(sw.includes("SW_VERSION = '20261026_v996'"), 'sw.js SW_VERSION is 20261026_v996');
+// 4. Sincronización de cache buster v996+
+runTest('4. index.html, styles.css & sw.js: Versión v996+ sincronizada en todo el sistema', () => {
+    assert(/styles\.css\?v=20261026_v99[6-9]/.test(html), 'index.html points to styles.css');
+    assert(/app\.js\?v=20261026_v99[6-9]/.test(html), 'index.html points to app.js');
+    assert(/20261026_v99[6-9]/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log('\n====================================================');

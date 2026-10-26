@@ -77,7 +77,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v996">
+  <link rel="stylesheet" href="styles.css?v=20261026_v997">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -155,8 +155,8 @@
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[3px] hidden">0</span>
   </button>
 
-  <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
-  <div id="canvasToolsDock" class="flex fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex-col-reverse items-start select-none pointer-events-none">
+  <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA - OCULTO EN V997 AL TRASLADAR SUS ACCIONES A FILTROS Y PERFIL) -->
+  <div id="canvasToolsDock" class="hidden fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex-col-reverse items-start select-none pointer-events-none" aria-hidden="true">
       <!-- BOTÓN GATILLO HERRAMIENTAS -->
       <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group pointer-events-auto" title="Herramientas del Mapa Mental">
           <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -997,34 +997,26 @@
                   </div>
               </div>
 
-              <!-- VISTAS DEL SISTEMA (ACCESIBLES DIRECTAMENTE EN EL DOCK INFERIOR - OCULTAS EN MENÚ PARA MÁXIMA LIMPIEZA) -->
+              <!-- VISTAS Y ACCIONES COMPATIBILIDAD (ACCESIBLES EN CANVAS Y DOCK INFERIOR) -->
               <div class="hidden" aria-hidden="true">
                   <span id="mobileMenuCurrentViewBadge">MAPA</span>
                   <button id="mobileMenuOptMap" onclick="switchMainWorkspaceView('map'); toggleMobileMenu()"><span id="mobileMenuIndicatorMap">●</span></button>
                   <button id="mobileMenuOptPriority" onclick="switchMainWorkspaceView('priority'); toggleMobileMenu()"><span id="mobileMenuIndicatorPriority">●</span></button>
                   <button id="mobileMenuOptTimeline" onclick="switchMainWorkspaceView('timeline'); toggleMobileMenu()"><span id="mobileMenuIndicatorTimeline">●</span></button>
+                  <button id="btnMobileRecenterMapCompat" onclick="recenterCanvas(); toggleMobileMenu()">Centrar Mapa</button>
+                  <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()"><span id="mobileToggleCollapseText">Colapsar Módulos</span></button>
+                  <button id="btnMobileFocusModeCompat" onclick="toggleFocusMode(); toggleMobileMenu()">Modo Enfoque</button>
+                  <button id="btnMobileAttendanceCompat" onclick="openAttendanceModal(); toggleMobileMenu()">Rol & Prenómina</button>
               </div>
 
-              <!-- ACCIONES DE NAVEGACIÓN Y CANVAS -->
-              <button onclick="recenterCanvas(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
-                  <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-                  Centrar Mapa
+              <!-- MANUAL Y GUÍA DE OPERACIÓN -->
+              <button id="mobileMenuBtnManual" onclick="openManual(); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
+                  <svg class="w-4 h-4 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                  <span>Manual y Guía de Uso</span>
               </button>
-              <button id="btnMobileToggleCollapse" onclick="toggleAllModulesCollapse(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
-                  <svg class="w-4 h-4 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                  <span id="mobileToggleCollapseText">Colapsar Módulos</span>
-              </button>
-              <button onclick="toggleFocusMode(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
-                  <svg class="w-4 h-4 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  Modo Enfoque
-              </button>
-              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+              <div class="h-px w-full bg-[#3d3a39] my-0.5"></div>
 
               <!-- MÓDULOS DE GESTIÓN Y AUDITORÍA -->
-              <button onclick="openAttendanceModal(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
-                  <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                  Rol & Prenómina
-              </button>
               <button id="mobileBtnExecutiveDashboard" onclick="openExecutiveDashboard(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#eeeeee] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                   Dashboard & Auditoría
@@ -1040,7 +1032,7 @@
                   </div>
                   <span id="mobileInstallPwaBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018]">PWA</span>
               </button>
-              <div class="h-px w-full bg-[#3d3a39] my-1"></div>
+              <div class="h-px w-full bg-[#3d3a39] my-0.5"></div>
               <button onclick="logout(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-[3px] hover:bg-[#1d1a18] text-[#ee6018] font-mono uppercase text-[11px] flex items-center gap-3 cursor-pointer">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                   Cerrar Sesión
@@ -1163,8 +1155,8 @@
   </div>
 
   <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
-    <!-- BOTÓN RÁPIDO CENTRAR MAPA (SÓLO ÍCONO, DIMENSIONES Y ALINEACIÓN SINCRONIZADAS CON HERRAMIENTAS) -->
-    <div id="canvasQuickControls" class="fixed bottom-[70px] left-3 sm:bottom-[80px] sm:left-4 md:bottom-[90px] md:left-8 z-30 flex items-center select-none pointer-events-auto">
+    <!-- BOTÓN RÁPIDO CENTRAR MAPA (SÓLO ÍCONO, POSICIONADO EN ESQUINA INFERIOR IZQUIERDA EN ESCRITORIO Y SOBRE MAPA EN MÓVIL) -->
+    <div id="canvasQuickControls" class="fixed bottom-[70px] left-3 sm:bottom-[80px] sm:left-4 md:bottom-8 md:left-8 z-30 flex items-center select-none pointer-events-auto">
       <button type="button" id="btnQuickRecenterMap" onclick="recenterCanvas(350)" class="w-9 h-9 sm:w-12 sm:h-12 rounded-[3px] bg-[#101010]/90 hover:bg-[#1d1a18] active:bg-[#252220] text-[#a0ca92] hover:text-[#ee6018] border border-[#3d3a39] hover:border-[#ee6018] backdrop-blur-md shadow-lg flex items-center justify-center transition cursor-pointer group" title="Centrar mapa mental en la pantalla" aria-label="Centrar mapa mental">
         <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#a0ca92] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
       </button>
@@ -1926,6 +1918,20 @@
                 Inactivo
             </button>
         </div>
+
+        <!-- ESTRUCTURA DEL MAPA: EXPANDIR / COLAPSAR MÓDULOS -->
+        <div class="p-3 bg-[#171514] border border-[#3d3a39] rounded-[3px] flex items-center justify-between gap-3">
+            <div>
+                <span class="block font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px] flex items-center gap-1.5 font-medium">
+                    <svg class="w-3.5 h-3.5 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    Estructura del Mapa
+                </span>
+                <p id="advFilterCollapseSubtitle" class="font-mono text-[9px] text-[#8a8380] uppercase mt-0.5">Colapsar o expandir todos los módulos</p>
+            </div>
+            <button id="advFilterToggleCollapseBtn" type="button" onclick="toggleAllModulesCollapse()" class="shrink-0 px-3 py-1.5 rounded-[3px] font-mono text-[10px] uppercase tracking-wider transition border border-[#3d3a39] bg-[#101010] text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Colapsar o expandir todos los módulos">
+                <span id="advFilterCollapseText">Colapsar Todo</span>
+            </button>
+        </div>
         <div>
             <div class="flex items-center justify-between mb-2">
                 <label class="font-mono text-[11px] text-[#b8b3b0] uppercase">Módulo(s) / Agrupador</label>
@@ -2011,6 +2017,9 @@
           <h2 id="configDrawerTitle">Centro de Control // EO/SA</h2>
           <span id="devicePushIconBox"></span>
         </div>
+        <button id="btnDrawerManual" type="button" onclick="openManual()" class="p-1.5 rounded-[4px] bg-[#181513] hover:bg-[#252220] border border-[#2e2a28] hover:border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer" title="Manual y Guía de Operación">
+          <svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </button>
         <button id="btnTogglePushDevice" type="button" onclick="toggleDevicePushNotification()" class="p-1.5 rounded-[4px] bg-[#181513] hover:bg-[#252220] border border-[#2e2a28] hover:border-[#3d3a39] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer" title="Configurar Notificaciones Push">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
         </button>
@@ -3372,7 +3381,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v996"></script>
+  <script type="module" src="app.js?v=20261026_v997"></script>
 
 </body>
 </html>

@@ -1711,20 +1711,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     Al marcar una tarea como completada, registra tu enlace u observación del entregable y pulsa <strong class="text-[#eeeeee]">Enviar a Validación</strong>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Modo Enfoque y Foro Técnico</strong>
-                    Usa <strong class="text-[#eeeeee]">Modo Enfoque</strong> en la barra superior para aislar tus proyectos asignados y utiliza el <strong class="text-[#eeeeee]">Foro y Bitácora Técnica</strong> para acuerdos, bloqueos y menciones con acuse de lectura.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Explorar, Filtros y Modo Enfoque</strong>
+                    En el dock inferior o barra superior pulsa <strong class="text-[#eeeeee]">Explorar</strong> para filtrar proyectos por módulo, consultor, cliente o urgencia. Dentro de este panel cuentas con controles directos de arquitectura: <span class="text-[#ee6018]">Modo Enfoque</span> (aislar proyectos con riesgo), <span class="text-[#38bdf8]">Estructura del Mapa</span> (Colapsar o Expandir todos los módulos con un clic) y <span class="text-[#eeeeee]">Vínculos de Sinergia</span>. Pulsa <strong class="text-[#eeeeee]">Buscar</strong> para aplicar y regresar al mapa automáticamente.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auto-registro de Asistencia & Esquema Híbrido</strong>
-                    En la barra superior pulsa <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> (o desde el menú de 3 puntos en tu celular) para registrar tu jornada diaria en tu fila asignada durante quincenas abiertas. Selecciona claramente entre <strong class="text-[#a0ca92] font-medium">Asiste a oficina STGT</strong> para días presenciales y <strong class="text-[#eeeeee] font-medium">Home Office (A distancia)</strong> para días remotos autorizados. Si necesitas restaurar el patrón semanal predeterminado, pulsa "Restablecer horario base".
+                    Pulsa <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en el dock inferior (o cabecera) para registrar tu jornada en quincenas abiertas. Selecciona claramente entre <strong class="text-[#a0ca92] font-medium">Asiste a oficina STGT</strong> para días presenciales y <strong class="text-[#eeeeee] font-medium">Home Office (A distancia)</strong> para días remotos autorizados. En celulares dispones de la vista táctil vertical <strong class="text-[#eeeeee]">Mi Rol</strong>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Comisiones a Clientes & Vista "Mi Rol" Móvil</strong>
-                    Al realizar actividades fuera de oficina o visitas a clientes, selecciona <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> e ingresa obligatoriamente el cliente y motivo de la salida. Al consultar el sistema desde tu teléfono celular, ingresa a la pestaña <strong class="text-[#eeeeee]">Mi Rol</strong>: una interfaz vertical táctil optimizada que te permite marcar o modificar tus días con un solo toque y ver tu balance quincenal sin desplazamientos incómodos.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Comisiones a Clientes & Solicitud de Vacaciones</strong>
+                    Al realizar visitas fuera de oficina selecciona <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> indicando cliente y motivo. En la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong>, consulta tus días disponibles y solicita descansos para aprobación de Dirección.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Solicitud Formal de Vacaciones (FOPR-RHU-02-03)</strong>
-                    En la pestaña <strong class="text-[#eeeeee]">Vacaciones</strong>, consulta tu saldo de días con base en tu antigüedad por ley. Genera solicitudes ingresando tu rango de fechas; el sistema calcula los días hábiles a descontar y, tras ser aprobadas por Dirección, se reflejan automáticamente como vacaciones ('V') en tu rol quincenal. Una vez que Dirección realiza el cierre quincenal oficial, tus registros quedan protegidos y congelados.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Gestos Móviles & Centrar Mapa</strong>
+                    En teléfonos Samsung y Android, el gesto de deslizar para regresar cierra ordenadamente modales, fichas de proyecto y filtros regresando al <strong class="text-[#eeeeee]">Mapa Mental</strong> sin cerrar la app. Para reenfocar la vista, pulsa el botón flotante de centrado en la esquina inferior izquierda.
                 </li>
             </ul>`;
         }
@@ -7886,7 +7886,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (svgCanvas) svgCanvas.classList.remove('hidden');
             const isDesktopMap = window.innerWidth >= 640;
             if (isDesktopMap) {
-                if (dock) dock.classList.remove('hidden');
+                if (dock) dock.classList.add('hidden');
                 if (btnDaily) btnDaily.classList.remove('hidden');
                 if (speedDial) speedDial.classList.remove('hidden');
             } else {
@@ -10433,7 +10433,7 @@ window.closeDailyDrawer = function() {
     const isDesktop = window.innerWidth >= 640;
     if (isDesktop && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
         if (btnDaily) btnDaily.classList.remove('hidden');
-        if (dock) dock.classList.remove('hidden');
+        if (dock) dock.classList.add('hidden');
         if (speedDial) speedDial.classList.remove('hidden');
     } else {
         if (btnDaily) btnDaily.classList.add('hidden');
@@ -10457,7 +10457,7 @@ window.toggleDailyDrawer = function() {
             const isDeskToggle = window.innerWidth >= 640;
             if (isDeskToggle && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
                 if (btnDaily) btnDaily.classList.remove('hidden');
-                if (dock) dock.classList.remove('hidden');
+                if (dock) dock.classList.add('hidden');
                 if (speedDial) speedDial.classList.remove('hidden');
             } else {
                 if (btnDaily) btnDaily.classList.add('hidden');
@@ -12179,9 +12179,21 @@ window.renderDailyTasks = function() {
         const isMostlyCollapsed = collapsedModules.size >= Math.ceil(totalModules / 2);
         const txt = document.getElementById('textCollapseAll') || document.getElementById('btnToggleCollapseAllText');
         const mTxt = document.getElementById('mobileToggleCollapseText');
+        const advTxt = document.getElementById('advFilterCollapseText');
+        const advBtn = document.getElementById('advFilterToggleCollapseBtn');
         const label = isMostlyCollapsed ? 'Expandir Todo' : 'Colapsar Todo';
         if (txt) txt.textContent = label;
         if (mTxt) mTxt.textContent = label;
+        if (advTxt) advTxt.textContent = label;
+        if (advBtn) {
+            if (isMostlyCollapsed) {
+                advBtn.classList.remove('bg-[#101010]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
+                advBtn.classList.add('bg-[#38bdf8]/15', 'border-[#38bdf8]/60', 'text-[#38bdf8]');
+            } else {
+                advBtn.classList.add('bg-[#101010]', 'border-[#3d3a39]', 'text-[#b8b3b0]');
+                advBtn.classList.remove('bg-[#38bdf8]/15', 'border-[#38bdf8]/60', 'text-[#38bdf8]');
+            }
+        }
     };
 
     window.toggleFocusMode = function(forceState) {
@@ -16193,7 +16205,7 @@ window.addEventListener('resize', function() {
         if (btnDaily) btnDaily.classList.add('hidden');
         if (speedDial) speedDial.classList.add('hidden');
     } else if (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') {
-        if (dock) dock.classList.remove('hidden');
+        if (dock) dock.classList.add('hidden');
         if (btnDaily) btnDaily.classList.remove('hidden');
         if (speedDial) speedDial.classList.remove('hidden');
     }
