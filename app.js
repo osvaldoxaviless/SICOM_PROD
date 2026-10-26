@@ -1,5 +1,5 @@
 const SICOM_VERSION = 'v9.3';
-console.log('⚡ SICOM ERP', SICOM_VERSION, '— Terminal Control Surface Ready');
+console.log('⚡ OS/V Control Surface', SICOM_VERSION, '— Terminal Control Surface Ready');
 
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
     const formatTaskTextWithTicket = (u) => {
@@ -4072,7 +4072,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         window.showToast("Enviando prueba de alerta...");
         await window.sendExternalAlert('VALIDATION_SUBMITTED', {
-            project: 'Proyecto Prueba SICOM',
+            project: 'Proyecto Prueba OS/V',
             task: 'Prueba de enlace operativo y alertas inmediatas',
             feedback: 'El canal de notificaciones externas está conectado y operativo.',
             consultant: localAuthor || 'Sistema'
@@ -4098,14 +4098,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.initPushNotificationSystem = async function() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            console.log('ℹ️ [SICOM Push] Service Worker o PushManager no disponible en este entorno.');
+            console.log('ℹ️ [OS/V Push] Service Worker o PushManager no disponible en este entorno.');
             window.updatePushUI('unsupported');
             return;
         }
 
         try {
             const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-            console.log('✅ [SICOM Push] Service Worker registrado en scope:', reg.scope);
+            console.log('✅ [OS/V Push] Service Worker registrado en scope:', reg.scope);
             await navigator.serviceWorker.ready;
 
             const currentSub = await reg.pushManager.getSubscription();
@@ -4125,7 +4125,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }, 2500);
             }
         } catch (e) {
-            console.warn('⚠️ [SICOM Push] Error inicializando Service Worker:', e);
+            console.warn('⚠️ [OS/V Push] Error inicializando Service Worker:', e);
         }
     };
 
@@ -4237,7 +4237,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: '⚡ SICOM Notificaciones',
+                    title: '⚡ OS/V Notificaciones',
                     body: `¡Operador ${localAuthor || 'Activo'}! Tu dispositivo está enlazado y listo para recibir alertas.`,
                     singleSubscription: JSON.parse(JSON.stringify(sub)),
                     tag: 'test-push'
@@ -4251,7 +4251,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 // Fallback directo a Service Worker local
                 if ('serviceWorker' in navigator) {
                     const reg = await navigator.serviceWorker.ready;
-                    reg.showNotification('⚡ SICOM Alerta Activa', {
+                    reg.showNotification('⚡ OS/V Alerta Activa', {
                         body: `¡Excelente ${localAuthor || 'Operador'}! Enlace operativo verificado.`,
                         icon: '/icon.svg',
                         badge: '/icon.svg',
@@ -4263,7 +4263,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             console.warn('Fallback a notificación por Service Worker:', e);
             if ('serviceWorker' in navigator) {
                 const reg = await navigator.serviceWorker.ready;
-                reg.showNotification('⚡ SICOM Alerta', {
+                reg.showNotification('⚡ OS/V Alerta', {
                     body: `Enlace verificado en ${localAuthor || 'este equipo'}.`,
                     icon: '/icon.svg',
                     badge: '/icon.svg'
@@ -4359,7 +4359,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         const fechaTexto = `${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
         
-        let msg = `🌅 *TORRE DE CONTROL SICOM — RESUMEN DE RIESGOS*\n` +
+        let msg = `🌅 *TORRE DE CONTROL OS/V — RESUMEN DE RIESGOS*\n` +
                   `📅 _${fechaTexto}_\n\n`;
                   
         if (overdue.length > 0) {
@@ -10079,13 +10079,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         (appData.modules || []).forEach(m => (m.projects || []).forEach(p => addRow('Módulo', m.name, p)));
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `sicom_reporte_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `osv_reporte_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
     };
     
     window.exportData = function() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, consultants, globalDocs }));
-      const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", `sicom_backup_${new Date().toISOString().slice(0,10)}.json`); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
+      const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", `osv_backup_${new Date().toISOString().slice(0,10)}.json`); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
     };
 
     window.safeImportJSON = function() {
@@ -15703,7 +15703,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 window.addEventListener('appinstalled', () => {
     window.deferredPwaPrompt = null;
-    console.log('🎉 [PWA] ¡SICOM instalado con éxito en el dispositivo!');
+    console.log('🎉 [PWA] ¡OS/V instalado con éxito en el dispositivo!');
     const installText = document.getElementById('mobileInstallPwaText');
     if (installText) installText.textContent = 'App Instalada';
     const installBadge = document.getElementById('mobileInstallPwaBadge');
