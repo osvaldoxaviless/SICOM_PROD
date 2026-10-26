@@ -52,7 +52,7 @@ test('app.js: renderPriorityBoard asigna data-node-id y evalúa isSelected para 
 });
 
 test('index.html: cache buster actualizado a v974', () => {
-    assert(index.includes('app.js?v=20261025_v974'));
+    assert(index.includes('app.js?v=20261025_v975'));
 });
 
 console.log('====================================================');

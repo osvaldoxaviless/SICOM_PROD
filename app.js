@@ -932,6 +932,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     function showLoginScreen() {
         document.getElementById('cloudLoader').style.opacity = '0'; setTimeout(() => document.getElementById('cloudLoader').style.display = 'none', 500);
         const overlay = document.getElementById('loginOverlay'), card = document.getElementById('loginCard');
+        const pwaBox = document.getElementById('loginPwaInstallContainer');
+        if (pwaBox && (window.innerWidth < 640 || window.matchMedia('(display-mode: standalone)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent))) {
+            pwaBox.classList.add('hidden');
+            pwaBox.style.display = 'none';
+        }
         overlay.classList.remove('hidden'); setTimeout(() => { overlay.style.opacity = '1'; card.style.opacity = '1'; card.style.transform = 'scale(1) translateY(0)'; }, 50);
     }
 
@@ -960,13 +965,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#3b82f6]';
             } else if (userRole === 'Supervisor') {
                 passLabel.innerHTML = `<svg width="14" height="14" style="width:14px;height:14px;flex-shrink:0;" class="w-3.5 h-3.5 text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Acceso Supervisor (Edición Completa)`;
-                passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#eeeeee]';
+                passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#101010]';
             } else if (userRole === 'Lector') {
                 passLabel.innerHTML = `<svg width="14" height="14" style="width:14px;height:14px;flex-shrink:0;" class="w-3.5 h-3.5 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Acceso Lector (Solo Vista)`;
                 passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#8a8380]';
             } else {
                 passLabel.innerHTML = `<svg width="14" height="14" style="width:14px;height:14px;flex-shrink:0;" class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Acceso Consultor (Operativo)`;
-                passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#a0ca92]';
+                passLabel.className = 'font-mono text-[10px] mb-2 flex items-center gap-1.5 uppercase text-[#2d5a27]';
             }
             passDiv.classList.remove('hidden'); setTimeout(() => { passDiv.style.opacity = '1'; passDiv.style.transform = 'translateY(0)'; }, 10);
             

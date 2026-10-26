@@ -188,8 +188,8 @@ select.bg-transparent.appearance-none {
     color: var(--color-obsidian-canvas) !important;
     border: 1px solid var(--color-ash-stroke) !important;
     border-radius: var(--radius-cards) !important;
-    box-shadow: none !important;
-    padding: 28px 24px !important;
+    box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(61, 58, 57, 0.3) !important;
+    padding: 2rem !important;
 }
 
 #loginCard h2 {
@@ -826,35 +826,22 @@ body:has(#dailyDrawer:not(.-translate-x-full)) #canvasZoomWidget {
     }
 
     #loginOverlay {
+        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         overflow-y: auto !important;
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
     }
 
     #loginCard {
         margin: auto !important;
-        padding: 1.25rem 1.5rem !important;
-        max-width: 22rem !important;
+        width: 100% !important;
+        max-width: 384px !important;
+        padding: 2rem 1.5rem !important;
     }
 
-    #loginCard h2 {
-        font-size: 1.5rem !important;
-        margin-bottom: 0.15rem !important;
-    }
-
-    #loginCard .space-y-5 {
-        margin-top: 0.5rem !important;
-    }
-
-    #loginCard .space-y-5 > * + * {
-        margin-top: 0.6rem !important;
-    }
-
-    #loginCard button.pill-btn {
-        padding-top: 0.65rem !important;
-        padding-bottom: 0.65rem !important;
-        margin-top: 0.75rem !important;
+    #loginPwaInstallContainer {
+        display: none !important;
     }
 
     #manualModal,
@@ -1492,7 +1479,8 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
 @media (max-width: 639px) {
     #canvasToolsDock,
     #btnDailyTasks,
-    #speedDial {
+    #speedDial,
+    #loginPwaInstallContainer {
         display: none !important;
     }
 }
@@ -1563,11 +1551,23 @@ div[id$="Modal"].hidden,
     right: 0 !important;
     bottom: 0 !important;
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
     z-index: 99999 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+}
+
+body:has(#loginOverlay:not(.hidden)) #mobileBottomDock {
+    display: none !important;
+}
+
+@media (display-mode: standalone) {
+    #loginPwaInstallContainer {
+        display: none !important;
+    }
 }
 
 /* Sizing autónomo para la tarjeta de Login */
