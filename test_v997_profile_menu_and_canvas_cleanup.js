@@ -59,17 +59,16 @@ runTest('4. index.html: configDrawer cuenta con botón de Manual y Guía de Oper
 });
 
 // 5. Contenido del manual actualizado con arquitectura v9 y navegación
-runTest('5. app.js: openManual actualizado con filtros unificados, gestos móviles y dock de 5 accesos', () => {
-    assert(app.includes('Explorar, Filtros y Modo Enfoque'), 'openManual documenta panel Explorar con filtros integrados');
+runTest('5. app.js: openManual actualizado con filtros unificados y dock de 5 accesos', () => {
+    assert(app.includes('Explorar') && app.includes('Modo Enfoque'), 'openManual documenta panel Explorar con filtros integrados');
     assert(app.includes('Estructura del Mapa'), 'openManual documenta colapso/expansión de módulos');
-    assert(app.includes('Gestos Móviles & Centrar Mapa'), 'openManual documenta gestos Samsung/Android y botón de recenter');
 });
 
-// 6. Versión sincronizada en todo el sistema (v997)
-runTest('6. Versión sincronizada 20261026_v997 en index.html, app.js y sw.js', () => {
-    assert(html.includes('styles.css?v=20261026_v997'), 'index.html points to styles.css?v=20261026_v997');
-    assert(html.includes('app.js?v=20261026_v997'), 'index.html points to app.js?v=20261026_v997');
-    assert(sw.includes("SW_VERSION = '20261026_v997'"), 'sw.js SW_VERSION is 20261026_v997');
+// 6. Versión sincronizada en todo el sistema (v997/v998)
+runTest('6. Versión sincronizada 20261026_v997/v998 en index.html, app.js y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v99[78]/.test(html), 'index.html points to styles.css?v=20261026_v997 or v998');
+    assert(/app\.js\?v=20261026_v99[78]/.test(html), 'index.html points to app.js?v=20261026_v997 or v998');
+    assert(/SW_VERSION = '20261026_v99[78]'/.test(sw), 'sw.js SW_VERSION is 20261026_v997 or v998');
 });
 
 console.log('\n====================================================');

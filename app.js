@@ -1353,7 +1353,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     document.addEventListener('click', function(e) {
         const menu = document.getElementById('mobileMenuDropdown');
         if (menu && !menu.classList.contains('hidden')) {
-            if (e.target.closest('#mobileMenuBtn') || e.target.closest('#mobileMenuDropdown')) return;
+            if (e.target.closest('#mobileMenuBtn') || e.target.closest('#userProfilePillBtn') || e.target.closest('#mobileMenuDropdown')) return;
             menu.classList.add('hidden');
             menu.classList.remove('flex');
         }
@@ -1572,50 +1572,50 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             <div class="border-b border-[#3d3a39] pb-3 mb-4">
                 <h3 class="text-base font-normal text-[#eeeeee] flex items-center gap-2">
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPREMO</span>
-                    <span>Dirección General</span>
+                    <span>Dirección General & Arquitectura</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura, configuración, usuarios, nómina y auditoría institucional del sistema STGT // SICOM.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Control absoluto de la arquitectura de proyectos, configuración del sistema, usuarios, prenómina institucional y auditoría STGT // EO/SA.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Gestión de Accesos y Equipo</strong>
-                    En <strong class="text-[#eeeeee]">Panel &gt; Equipo</strong>, puedes dar de alta nuevos consultores o modificar existentes. Haz clic en la llave para asignar o resetear la contraseña privada de cualquier usuario, o cambiar sus niveles de acceso al instante.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Gobernanza, Equipo y Niveles de Acceso</strong>
+                    En <strong class="text-[#eeeeee]">Configuración &gt; Equipo</strong>, puedes dar de alta nuevos consultores o modificar existentes. Haz clic en la llave para asignar o restablecer contraseñas de acceso y ajustar niveles de autorización en tiempo real.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Arquitectura y Estructura</strong>
-                    Capacidad exclusiva para crear nuevos <strong class="text-[#eeeeee]">Módulos</strong> (agrupadores departamentales) y eliminar proyectos o módulos permanentemente desde el panel de edición.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Arquitectura Modular y Módulos</strong>
+                    Facultad exclusiva para crear nuevos <strong class="text-[#eeeeee]">Módulos</strong> (agrupadores departamentales) y gestionar proyectos estratégicos desde el Centro de Operaciones.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Centro de Trabajo (Panel Izquierdo)</strong>
-                    Supervisa todo el ciclo operativo en sus 4 pestañas: 
-                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Alertas</span> (vencidos), 
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Centro de Tareas y Auditoría Operativa</strong>
+                    Supervisa el ciclo de entrega en la pestaña <strong class="text-[#eeeeee]">Tareas</strong>: 
+                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Alertas</span> (vencidos o riesgo), 
                     <span class="text-[#eeeeee] font-mono text-[10px] uppercase">Pendientes</span> (por consultor), 
-                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Validación</span> (evidencias por auditar) y 
-                    <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Hechas</span> (tareas validadas).
+                    <span class="text-[#ee6018] font-mono text-[10px] uppercase">Validación</span> (evidencias enviadas por auditar) y 
+                    <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Hechas</span> (compromisos aprobados).
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Acciones Rápidas (+)</strong>
-                    Desde el botón inferior derecho puedes crear proyectos, registrar tareas personales, asignar <strong class="text-[#eeeeee]">Tareas por proyecto</strong> o abrir un nuevo módulo directamente.
+                    Desde el botón de creación rápida <strong class="text-[#eeeeee]">(+)</strong> puedes dar de alta nuevos proyectos, asignar tareas por proyecto, registrar tareas generales o abrir un nuevo módulo directamente.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Docs Base y Estandarización</strong>
-                    En <strong class="text-[#eeeeee]">Panel &gt; Docs Base</strong>, defines los documentos obligatorios de calidad. El avance porcentual (0 a 100%) de cada proyecto se calcula automáticamente según los documentos validados.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Docs Base y Estandarización de Calidad</strong>
+                    En <strong class="text-[#eeeeee]">Configuración &gt; Docs Base</strong>, defines los documentos técnicos y evidencias obligatorias. El porcentaje de avance (0 a 100%) de cada proyecto se calcula automáticamente conforme se aprueban las evidencias.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Auditoría Inmutable y Respaldos</strong>
-                    En <strong class="text-[#eeeeee]">Panel &gt; Historial</strong> puedes auditar cada modificación. Al final del Panel dispones de exportación CSV, respaldo JSON y sincronización con la nube.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Trazabilidad Inmutable e Historial</strong>
+                    En <strong class="text-[#eeeeee]">Configuración &gt; Historial</strong> auditas cada movimiento del sistema con sello de autor y fecha. Cuenta con exportación masiva en CSV y sincronización en la nube.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Rol de Asistencia y Esquema Híbrido (FOPR-RHU-02-02 Ver. 4)</strong>
-                    Acceso directo desde el botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en la cabecera superior. Navega entre quincenas (Q1 del 1 al 15, Q2 del 16 al fin de mes). Supervisa la <strong class="text-[#eeeeee]">Matriz General</strong>, la <strong class="text-[#eeeeee]">Vista Diaria</strong> y <strong class="text-[#eeeeee]">Mi Rol</strong>. Administra el esquema híbrido diferenciando entre <span class="text-[#a0ca92] font-medium">Asiste a oficina STGT</span> y <span class="text-[#eeeeee] font-medium">Home Office (A distancia)</span>, con permisos absolutos para editar y corregir cualquier celda o colaborador con un solo clic.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Rol de Asistencia Institucional & Esquema Híbrido (FOPR-RHU-02-02 Ver. 4)</strong>
+                    Acceso directo desde <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong>. Supervisa la <strong class="text-[#eeeeee]">Matriz General</strong>, la <strong class="text-[#eeeeee]">Vista Diaria</strong> y <strong class="text-[#eeeeee]">Mi Rol</strong>. Administra el esquema híbrido diferenciando entre <span class="text-[#a0ca92] font-medium">Asiste a oficina STGT</span> y <span class="text-[#eeeeee] font-medium">Home Office (A distancia)</span>, con permisos absolutos de edición.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">08 // Cierre Quincenal, Bloqueo y Descarga Oficial Excel</strong>
-                    Controla el ciclo de auditoría de cada quincena: conmuta entre <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Abierta (Captura)</span>, <span class="text-[#ee6018] font-mono text-[10px] uppercase">En Revisión</span> y <span class="text-[#8a8380] font-mono text-[10px] uppercase">Cerrada (Bloqueada)</span>. Al cerrar la quincena, se congelan automáticamente las modificaciones de consultores y supervisores. Cuenta con el botón exclusivo <strong class="text-[#10b981]">Descargar Excel FOPR-RHU-02-02 Ver. 4</strong>, que genera el formato oficial institucional STGT con colores corporativos, cuadrícula de días, subtotales y firmas de Recursos Humanos y Dirección.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">08 // Cierre Quincenal Oficial y Descarga Excel</strong>
+                    Controla el ciclo de cada quincena: conmuta entre <span class="text-[#a0ca92] font-mono text-[10px] uppercase">Abierta (Captura)</span>, <span class="text-[#ee6018] font-mono text-[10px] uppercase">En Revisión</span> y <span class="text-[#8a8380] font-mono text-[10px] uppercase">Cerrada (Bloqueada)</span>. Al cerrar, se congelan las modificaciones y se habilita la <strong class="text-[#10b981]">Descarga Oficial Excel FOPR-RHU-02-02 Ver. 4</strong> con formato institucional STGT.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">09 // Gestión de Vacaciones (FOPR-RHU-02-03) & Comisiones</strong>
-                    Pestaña <strong class="text-[#eeeeee]">Vacaciones</strong> para auditar y autorizar solicitudes con saldo calculado automáticamente según la Ley Federal del Trabajo. Al aprobarse, los días hábiles se descuentan y se reflejan como vacaciones ('V') en el rol de asistencia. Supervisa también las comisiones de campo con motivo y cliente obligatorio.
+                    Pestaña <strong class="text-[#eeeeee]">Vacaciones</strong> para auditar y autorizar solicitudes con cálculo de días hábiles conforme a ley (LFT). Al aprobarse, se descuentan del saldo y se reflejan como vacaciones ('V') en el rol. Supervisa también comisiones de campo con motivo y cliente obligatorio.
                 </li>
             </ul>`;
         } else if (currentUserRole === 'Supervisor') {
@@ -1625,36 +1625,36 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40">SUPERVISOR</span>
                     <span>Coordinación de Operaciones</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregas, seguimiento de asistencia y cumplimiento de tiempos del equipo.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Responsable del flujo operativo, auditoría de calidad de entregables, cumplimiento de tiempos del equipo y supervisión de asistencia.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Auditoría y Validación de Entregas</strong>
-                    Abre el panel izquierdo en la pestaña <strong class="text-[#eeeeee]">Validación</strong> para revisar tareas concluidas con su evidencia y <span class="text-[#a0ca92] font-mono uppercase">Aprobar</span> o <span class="text-[#ee6018] font-mono uppercase">Rechazar</span>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Auditoría y Validación de Entregables</strong>
+                    En la pestaña <strong class="text-[#eeeeee]">Tareas &gt; Validación</strong>, revisa tareas terminadas con sus enlaces y evidencias de calidad antes de <span class="text-[#a0ca92] font-mono uppercase">Aprobar</span> o <span class="text-[#ee6018] font-mono uppercase">Rechazar</span>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Asignación de Tareas por Proyecto</strong>
-                    Utiliza el botón <strong class="text-[#eeeeee]">"+" &gt; Tarea por proyecto</strong> para delegar actividades vinculadas a cualquier proyecto con responsable y fecha límite.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Asignación y Delegación de Actividades</strong>
+                    Utiliza el botón <strong class="text-[#eeeeee]">"+" &gt; Tarea por proyecto</strong> para delegar actividades vinculadas a proyectos específicos con responsable y fecha límite compromiso.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Control Operativo de Proyectos</strong>
-                    Selecciona cualquier proyecto para editar su estatus, fechas compromiso, porcentaje de avance y enlaces oficiales de Drive e InvGate.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Control Operativo de Proyectos y Fichas Técnicas</strong>
+                    Selecciona cualquier proyecto en el mapa para editar su estatus, fechas compromiso, porcentaje de avance y enlaces oficiales de Drive e InvGate.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Tablero y Prioridades por Consultor</strong>
-                    Usa <strong class="text-[#eeeeee]">Prioridades</strong> (con pestañas por consultor) y <strong class="text-[#eeeeee]">Panel &gt; Tablero</strong> para medir carga operativa, avance promedio y atrasos.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Tablero Kanban de Prioridades</strong>
+                    Usa la pestaña <strong class="text-[#eeeeee]">Prioridades</strong> (con pestañas por consultor) para medir carga operativa, avance promedio, cuellos de botella y proyectos con atraso.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Foro y Bitácora Técnica</strong>
-                    Registra acuerdos, bloqueos y menciones (<code class="font-mono text-[#ee6018]">@</code>) con acuse de lectura en cada proyecto.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Foro y Bitácora Técnica de Acuerdos</strong>
+                    Registra acuerdos, bloqueos operativos y menciones directas (<code class="font-mono text-[#ee6018]">@Consultor</code>) con confirmación de lectura en la bitácora de cada proyecto.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Supervisión de Asistencia & Esquema Híbrido</strong>
-                    Ingresa al botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> para auditar la asistencia diaria y quincenal de tu equipo. Supervisa la alternancia del esquema híbrido: <strong class="text-[#eeeeee]">Asiste a oficina STGT</strong> vs <strong class="text-[#eeeeee]">Home Office (A distancia)</strong>, y corrobora que las salidas operativas a clientes tengan registrado su motivo y cliente bajo el estado <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> en quincenas activas.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Supervisión de Asistencia Diaria & Esquema Híbrido</strong>
+                    Ingresa a <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> para auditar la asistencia diaria y quincenal de tu equipo. Supervisa la alternancia: <strong class="text-[#eeeeee]">Asiste a oficina STGT</strong> vs <strong class="text-[#eeeeee]">Home Office (A distancia)</strong>, y corrobora que las salidas operativas tengan registrado cliente y motivo bajo el estado <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Solicitudes de Vacaciones & Vista Mi Rol</strong>
-                    Supervisa las solicitudes de descanso en la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong> para validar la disponibilidad y cobertura operativa de los proyectos. Utiliza la pestaña vertical <strong class="text-[#eeeeee]">Mi Rol</strong> para gestionar tu propio registro quincenal y la <strong class="text-[#eeeeee]">Vista Diaria</strong> para planificar la distribución presencial y remota del equipo.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Solicitudes de Vacaciones & Cobertura Operativa</strong>
+                    Supervisa las solicitudes de descanso en la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong> para validar la disponibilidad y cobertura de proyectos antes del visto bueno final de Dirección.
                 </li>
             </ul>`;
         } else if (currentUserRole === 'Lector') {
@@ -1664,28 +1664,28 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">LECTOR</span>
                     <span>Auditoría y Supervisión Ejecutiva</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // SICOM, con protección integral contra modificaciones accidentales.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Acceso de auditoría visual total al sistema STGT // EO/SA, con protección integral contra modificaciones accidentales.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Navegación y Búsqueda</strong>
-                    Explora libremente el mapa mental arrastrando con el ratón. Usa la búsqueda superior o aplica filtros por consultor, empresa y estatus.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Visualización y Navegación del Sistema</strong>
+                    Explora libremente el mapa mental de proyectos, el calendario de entregas y el tablero de prioridades. Utiliza la búsqueda rápida o aplica filtros por consultor, empresa y estatus.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Inspección Detallada de Proyectos</strong>
-                    Haz clic en cualquier proyecto para consultar estatus, fechas límite, tareas concluidas, bitácora técnica y documentos base.
+                    Haz clic en cualquier proyecto para consultar estatus, fechas límite, tareas concluidas, bitácora técnica de acuerdos y documentos base auditados.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Evidencias y Tickets Oficiales</strong>
                     Accede directamente a los botones de <strong class="text-[#eeeeee]">Drive</strong> e <strong class="text-[#a0ca92]">InvGate</strong> enlazados al proyecto.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Métricas y Trazabilidad</strong>
-                    En el menú <strong class="text-[#eeeeee]">Panel</strong>, consulta el <strong class="text-[#eeeeee]">Tablero</strong> para evaluar el rendimiento global y la pestaña <strong class="text-[#eeeeee]">Historial</strong>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Métricas y Dashboard Ejecutivo</strong>
+                    Accede a <strong class="text-[#eeeeee]">Dashboard &amp; Auditoría</strong> para consultar indicadores clave de rendimiento (KPIs), avance global y distribución de proyectos.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
                     <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auditoría de Rol de Asistencia & Prenómina</strong>
-                    Accede al botón <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en la cabecera superior. En modo solo lectura y auditoría, podrás revisar en tiempo real la Matriz General del equipo, identificar quién asiste a oficina STGT, quién labora en Home Office (A distancia), comisiones en campo o ausencias, además de consultar el estatus de cierre quincenal institucional.
+                    Accede a <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong>. En modo solo lectura y auditoría, podrás revisar en tiempo real la Matriz General del equipo, identificar quién asiste a oficina STGT, quién labora en Home Office, comisiones o ausencias, y consultar el estado de cierre quincenal institucional.
                 </li>
             </ul>`;
         } else {
@@ -1695,36 +1695,36 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40">CONSULTOR</span>
                     <span>Operación y Ejecución</span>
                 </h3>
-                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta avances con evidencias, registra tu asistencia y mantén al día tus entregas.</p>
+                <p class="text-xs text-[#b8b3b0] mt-1.5 leading-relaxed">Ejecuta asignaciones con precisión, documenta entregables con evidencias verificables, registra tu asistencia diaria y mantén al día tus entregas.</p>
             </div>
             <ul class="text-xs space-y-2.5 text-[#b8b3b0] list-none leading-relaxed">
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Centro de Trabajo (Panel Izquierdo)</strong>
-                    Abre el panel izquierdo para gestionar tus <strong class="text-[#eeeeee]">Pendientes</strong>, revisar <strong class="text-[#ee6018]">Alertas</strong>, dar seguimiento a entregas en <strong class="text-[#ee6018]">Validación</strong> y consultar tus tareas <strong class="text-[#a0ca92]">Hechas</strong>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">01 // Centro de Tareas y Compromisos</strong>
+                    En la pestaña <strong class="text-[#eeeeee]">Tareas</strong>, gestiona integralmente tus actividades: atiende tus <strong class="text-[#eeeeee]">Pendientes</strong>, resuelve de inmediato las <strong class="text-[#ee6018]">Alertas</strong> (tareas en riesgo o atrasadas), da seguimiento a entregas en <strong class="text-[#ee6018]">Validación</strong> y consulta tus tareas <strong class="text-[#a0ca92]">Hechas</strong>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Diferenciación de Tareas (+)</strong>
-                    En el botón flotante inferior derecho puedes registrar <strong class="text-[#eeeeee]">Tareas diarias personales</strong>, vincular una <strong class="text-[#eeeeee]">Tarea por proyecto</strong> o dar de alta un <strong class="text-[#eeeeee]">Nuevo proyecto</strong>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">02 // Reporte con Evidencia a Validación</strong>
+                    Al marcar una tarea como completada, registra tu enlace de evidencia u observación y pulsa <strong class="text-[#eeeeee]">Enviar a Validación</strong> para visto bueno de Coordinación.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Reporte con Evidencia</strong>
-                    Al marcar una tarea como completada, registra tu enlace u observación del entregable y pulsa <strong class="text-[#eeeeee]">Enviar a Validación</strong>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">03 // Acciones Rápidas (+)</strong>
+                    En el botón de creación rápida <strong class="text-[#eeeeee]">(+)</strong> puedes registrar <strong class="text-[#eeeeee]">Tareas generales</strong>, vincular una <strong class="text-[#eeeeee]">Tarea por proyecto</strong> o dar de alta un <strong class="text-[#eeeeee]">Nuevo proyecto</strong>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Explorar, Filtros y Modo Enfoque</strong>
-                    En el dock inferior o barra superior pulsa <strong class="text-[#eeeeee]">Explorar</strong> para filtrar proyectos por módulo, consultor, cliente o urgencia. Dentro de este panel cuentas con controles directos de arquitectura: <span class="text-[#ee6018]">Modo Enfoque</span> (aislar proyectos con riesgo), <span class="text-[#38bdf8]">Estructura del Mapa</span> (Colapsar o Expandir todos los módulos con un clic) y <span class="text-[#eeeeee]">Vínculos de Sinergia</span>. Pulsa <strong class="text-[#eeeeee]">Buscar</strong> para aplicar y regresar al mapa automáticamente.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">04 // Navegación, Filtros y Modo Enfoque</strong>
+                    En <strong class="text-[#eeeeee]">Explorar</strong> puedes filtrar proyectos por módulo, cliente o urgencia. Cuentas además con <span class="text-[#ee6018]">Modo Enfoque</span> (para aislar tus proyectos en riesgo) y <span class="text-[#38bdf8]">Estructura del Mapa</span> (para expandir o colapsar todos los módulos). Pulsa <strong class="text-[#eeeeee]">Buscar</strong> para aplicar y volver al mapa.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auto-registro de Asistencia & Esquema Híbrido</strong>
-                    Pulsa <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> en el dock inferior (o cabecera) para registrar tu jornada en quincenas abiertas. Selecciona claramente entre <strong class="text-[#a0ca92] font-medium">Asiste a oficina STGT</strong> para días presenciales y <strong class="text-[#eeeeee] font-medium">Home Office (A distancia)</strong> para días remotos autorizados. En celulares dispones de la vista táctil vertical <strong class="text-[#eeeeee]">Mi Rol</strong>.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">05 // Auto-registro de Asistencia Diaria & Esquema Híbrido</strong>
+                    Pulsa <strong class="text-[#eeeeee]">Rol &amp; Prenómina</strong> para registrar tu jornada en quincenas abiertas: selecciona entre <strong class="text-[#a0ca92] font-medium">Asiste a oficina STGT</strong> para días presenciales y <strong class="text-[#eeeeee] font-medium">Home Office (A distancia)</strong> para días remotos autorizados. En celulares dispones de la interfaz táctil vertical <strong class="text-[#eeeeee]">Mi Rol</strong>.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Comisiones a Clientes & Solicitud de Vacaciones</strong>
-                    Al realizar visitas fuera de oficina selecciona <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> indicando cliente y motivo. En la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong>, consulta tus días disponibles y solicita descansos para aprobación de Dirección.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">06 // Comisiones de Campo & Solicitud de Vacaciones</strong>
+                    Al realizar visitas a clientes o salidas fuera de oficina, selecciona <span class="text-[#ee6018] font-mono text-[10px] uppercase">Comisión (COM)</span> indicando cliente y motivo de salida. En la pestaña <strong class="text-[#eeeeee]">Vacaciones (FOPR-RHU-02-03)</strong>, consulta tus días disponibles y genera solicitudes de descanso para aprobación de Dirección.
                 </li>
                 <li class="bg-[#101010] p-3.5 rounded-[10px] border border-[#3d3a39]">
-                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Gestos Móviles & Centrar Mapa</strong>
-                    En teléfonos Samsung y Android, el gesto de deslizar para regresar cierra ordenadamente modales, fichas de proyecto y filtros regresando al <strong class="text-[#eeeeee]">Mapa Mental</strong> sin cerrar la app. Para reenfocar la vista, pulsa el botón flotante de centrado en la esquina inferior izquierda.
+                    <strong class="font-mono text-[11px] uppercase text-[#eeeeee] block mb-1">07 // Ficha Técnica de Proyecto y Bitácora</strong>
+                    Al hacer clic en cualquier proyecto del mapa mental o calendario, consulta sus compromisos, documentos base, accesos directos a Drive e InvGate y registra acuerdos o menciones (<code class="font-mono text-[#ee6018]">@Consultor</code>) en la bitácora técnica.
                 </li>
             </ul>`;
         }

@@ -910,10 +910,14 @@ body:has(#priorityBoardView:not(.hidden)) #activeFilterPill {
     z-index: 100000 !important;
 }
 
-@media (max-width: 1023px) {
-    .desktop-left-branding {
-        display: none !important;
-    }
+/* Branding EO/SA centrado simétricamente tanto en escritorio como en móvil */
+.header-branding-center,
+.mobile-branding-center {
+    display: flex !important;
+}
+
+.desktop-left-branding {
+    display: none !important;
 }
 
 /* ==========================================================================

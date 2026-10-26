@@ -39,7 +39,7 @@ const sw = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
 // 1. Branding Central Único en Móvil Horizontal y Vertical
 test('1. index.html & styles.css: Branding EO/SA central único en móvil; branding izquierdo oculto en <1024px y landscape', () => {
     assert(html.includes('desktop-left-branding hidden lg:flex'), 'Left branding uses desktop-left-branding and hidden lg:flex');
-    assert(html.includes('lg:hidden absolute left-1/2 -translate-x-1/2') && html.includes('mobile-branding-center'), 'Centered branding visible on mobile/tablets (<1024px)');
+    assert(html.includes('absolute left-1/2 -translate-x-1/2') && html.includes('mobile-branding-center'), 'Centered branding visible on mobile/tablets (<1024px)');
     assert(css.includes('.desktop-left-branding') && css.includes('display: none !important'), 'styles.css suppresses left branding on mobile & landscape');
 });
 
