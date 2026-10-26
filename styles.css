@@ -1423,6 +1423,43 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     font-weight: 500;
 }
 
+/* Optimización de espacio y distribución de la Matriz General en Rol & Prenómina */
+#attendanceModal > div {
+    width: 98vw !important;
+    max-width: 98vw !important;
+    height: 96vh !important;
+    max-height: 96vh !important;
+}
+
+#attendanceTableContainer table th,
+#attendanceTableContainer table td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+#attendanceTableContainer table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    background-color: #141211 !important;
+    z-index: 20 !important;
+}
+
+#attendanceTableContainer table thead th:first-child {
+    left: 0 !important;
+    z-index: 30 !important;
+}
+
+#attendanceTableContainer table tbody td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    background-color: #101010 !important;
+    z-index: 10 !important;
+}
+
+.att-week-divider {
+    border-left: 2px solid #5a5553 !important;
+}
+
 /* ==========================================================================
    ESTILOS DE IMPRESIÓN OFICIAL RH (FOPR-RHU-02-03)
    ========================================================================== */
@@ -1538,6 +1575,16 @@ body:has(#configDrawer:not(.translate-x-full), #filterDrawer:not(.translate-x-fu
     pointer-events: none !important;
 }
 
+#btnDailyTasks.hidden,
+#canvasToolsDock.hidden,
+#speedDial.hidden,
+#attSubbarMatrix.hidden,
+body:has(#timelineBoardView:not(.hidden)) #btnDailyTasks,
+body:has(#timelineBoardView:not(.hidden)) #canvasToolsDock,
+body:has(#timelineBoardView:not(.hidden)) #speedDial,
+body:has(#priorityBoardView:not(.hidden)) #btnDailyTasks,
+body:has(#priorityBoardView:not(.hidden)) #canvasToolsDock,
+body:has(#priorityBoardView:not(.hidden)) #speedDial,
 #cellStatusPopover.hidden,
 #mobileTopCreateMenu.hidden,
 #mobileMenuDropdown.hidden,

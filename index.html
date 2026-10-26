@@ -62,7 +62,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261025_v976">
+  <link rel="stylesheet" href="styles.css?v=20261025_v977">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -135,13 +135,13 @@
   </div>
 
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ABAJO A LA DERECHA, JUNTO AL SPEED DIAL DE CREACIÓN) -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[3px] hidden">0</span>
   </button>
 
   <!-- SPEED DIAL IZQUIERDO: HERRAMIENTAS DEL LIENZO (DESPLEGABLE HACIA ARRIBA) -->
-  <div id="canvasToolsDock" class="hidden sm:flex fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex-col-reverse items-start select-none pointer-events-none">
+  <div id="canvasToolsDock" class="flex fixed bottom-6 left-4 md:bottom-8 md:left-8 z-[50] flex-col-reverse items-start select-none pointer-events-none">
       <!-- BOTÓN GATILLO HERRAMIENTAS -->
       <button id="canvasSpeedDialTrigger" type="button" onclick="toggleCanvasSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Herramientas del mapa" class="w-12 h-12 rounded-[3px] bg-[#1d1a18] hover:bg-[#eeeeee] text-[#b8b3b0] hover:text-[#101010] flex items-center justify-center border border-[#3d3a39] hover:border-[#eeeeee] transition-all focus:outline-none cursor-pointer group pointer-events-auto" title="Herramientas del Mapa Mental">
           <svg class="csd-icon w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -182,7 +182,7 @@
   </div>
 
   <!-- SPEED DIAL: NÚCLEO DE CREACIÓN (abajo a la derecha) -->
-  <div id="speedDial" class="lector-hide hidden sm:flex fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
+  <div id="speedDial" class="lector-hide flex fixed bottom-6 right-4 md:bottom-8 md:right-8 z-[50] flex flex-col-reverse items-end">
       <!-- BOTÓN GATILLO -->
       <button id="speedDialTrigger" type="button" onclick="toggleSpeedDial()" aria-haspopup="menu" aria-expanded="false" aria-label="Crear nuevo" class="w-12 h-12 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] flex items-center justify-center border border-[#fafafa] transition-colors focus:outline-none">
           <svg class="sd-plus w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -529,30 +529,25 @@
        ========================================================================== -->
 
   <!-- MODAL PRINCIPAL: ROL DE ASISTENCIA & PRENÓMINA QUINCENAL (FACTORY INSTRUMENT SURFACE) -->
-  <div id="attendanceModal" class="fixed inset-0 z-[99990] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4">
-      <div class="bg-[#101010] rounded-[10px] w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-[#3d3a39]">
-          <!-- HEADER DE LA TORRE DE ASISTENCIA -->
-          <div class="relative p-4 sm:p-5 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
-              <div class="flex items-center gap-3">
+  <div id="attendanceModal" class="fixed inset-0 z-[99990] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-1 sm:p-2">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-[99vw] sm:max-w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-[#3d3a39]">
+          <!-- HEADER COMPACTO DE LA TORRE DE ASISTENCIA -->
+          <div class="relative px-3 sm:px-4 py-2 pr-11 sm:pr-12 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-2 shrink-0">
+              <div class="flex items-center gap-2">
                   <span class="w-2 h-2 rounded-full bg-[#ee6018] shrink-0"></span>
-                  <div>
-                      <div class="flex items-center gap-2">
-                          <h2 class="font-mono text-xs sm:text-sm font-normal text-[#eeeeee] uppercase tracking-[-0.24px]">Rol de Asistencia & Prenómina</h2>
-                          <span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider">FOPR-RHU-02-02 Ver. 4</span>
-                      </div>
-                      <p class="text-[11px] text-[#8a8380]">Control quincenal de comisiones (PT), vacaciones (VA), oficina y home office</p>
-                  </div>
+                  <h2 class="font-mono text-xs font-medium text-[#eeeeee] uppercase tracking-[-0.24px]">Rol de Asistencia & Prenómina</h2>
+                  <span class="hidden xl:inline-block px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39] font-mono text-[9px] uppercase tracking-wider">FOPR-RHU-02-02 Ver. 4</span>
               </div>
 
               <!-- BOTÓN CERRAR ARRIBA A LA DERECHA (PUNTO DE SALIDA VISIBLE E INTUITIVO) -->
-              <button type="button" onclick="closeAttendanceModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer " title="Cerrar ventana (Esc)">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              <button type="button" onclick="closeAttendanceModal()" class="absolute top-2 right-2 sm:right-3 p-1.5 text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] bg-[#101010] border border-[#3d3a39] hover:border-[#8a8380] rounded-[3px] transition z-30 flex items-center justify-center cursor-pointer" title="Cerrar ventana (Esc)">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
 
               <!-- SELECTOR DE QUINCENA / PERIODO -->
-              <div class="flex items-center gap-2 flex-wrap">
-                  <div class="flex items-center gap-1 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] p-1 text-xs">
-                      <select id="attSelMonth" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-xs px-2 py-1 outline-none cursor-pointer">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                  <div class="flex items-center gap-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] p-0.5 text-[11px]">
+                      <select id="attSelMonth" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-[11px] px-1.5 py-0.5 outline-none cursor-pointer">
                           <option value="1">Enero</option>
                           <option value="2">Febrero</option>
                           <option value="3">Marzo</option>
@@ -566,18 +561,18 @@
                           <option value="11">Noviembre</option>
                           <option value="12">Diciembre</option>
                       </select>
-                      <select id="attSelYear" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-xs px-2 py-1 outline-none cursor-pointer">
+                      <select id="attSelYear" onchange="changeAttendancePeriod()" class="bg-transparent text-[#eeeeee] font-mono text-[11px] px-1.5 py-0.5 outline-none cursor-pointer">
                           <option value="2025">2025</option>
                           <option value="2026" selected>2026</option>
                           <option value="2027">2027</option>
                       </select>
-                      <select id="attSelQuincena" onchange="changeAttendancePeriod()" class="bg-transparent text-[#ee6018] font-mono font-medium text-xs px-2 py-1 outline-none cursor-pointer">
+                      <select id="attSelQuincena" onchange="changeAttendancePeriod()" class="bg-transparent text-[#ee6018] font-mono font-medium text-[11px] px-1.5 py-0.5 outline-none cursor-pointer">
                           <option value="Q1" selected>1ª Quincena (1 - 15)</option>
                           <option value="Q2">2ª Quincena (16 - Fin)</option>
                       </select>
                   </div>
 
-                  <button type="button" onclick="setAttendanceCurrentPeriod()" class="p-1.5 px-2.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition" title="Ir a la quincena actual de hoy">
+                  <button type="button" onclick="setAttendanceCurrentPeriod()" class="py-1 px-2 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] transition" title="Ir a la quincena actual de hoy">
                       Hoy
                   </button>
 
@@ -586,79 +581,81 @@
                   <div id="attValidationButtonContainer" class="flex items-center"></div>
 
                   <!-- BOTONES ACCIÓN FACTORY (CHROME NEUTRO MONOCROMO) -->
-                  <button type="button" onclick="openCommissionModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
+                  <button type="button" onclick="openCommissionModal()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                       <span>+ Comisión</span>
                   </button>
 
-                  <button type="button" onclick="openVacationModal()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[11px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
+                  <button type="button" onclick="openVacationModal()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
                       <span>+ Vacaciones</span>
                   </button>
 
                   <!-- BOTÓN ALTA PRIORIDAD / FACTORY LIGHT FILLED BUTTON (EXCLUSIVO AUDITORÍA OSVALDO AVILÉS) -->
-                  <button type="button" id="btnExportPrenomina" onclick="exportPrenominaXLSX()" class="hidden px-3.5 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium uppercase text-[11px] rounded-[3px] flex items-center gap-2 transition" title="Descargar archivo Excel oficial FOPR-RHU-02-02 con fórmulas y códigos (Exclusivo Osvaldo Avilés)">
-                      <svg class="w-3.5 h-3.5 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                      <span>Descargar Prenómina (.xlsx)</span>
+                  <button type="button" id="btnExportPrenomina" onclick="exportPrenominaXLSX()" class="hidden px-2.5 py-1 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium uppercase text-[10px] rounded-[3px] flex items-center gap-1.5 transition" title="Descargar archivo Excel oficial FOPR-RHU-02-02 con fórmulas y códigos (Exclusivo Osvaldo Avilés)">
+                      <svg class="w-3 h-3 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      <span>Descargar (.xlsx)</span>
                   </button>
               </div>
           </div>
 
-          <!-- BARRA DE PESTAÑAS / VISTAS DEL ROL (FACTORY VIEW SWITCHER) -->
-          <div class="px-3 sm:px-5 py-2 bg-[#101010] border-b border-[#3d3a39] flex flex-wrap items-center justify-between gap-2 shrink-0 select-none">
-              <div class="flex items-center gap-1 p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
-                  <button type="button" id="attTabBtn-matrix" onclick="setAttendanceViewTab('matrix')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono text-[10px] sm:text-[10.5px] uppercase transition flex items-center gap-1.5 bg-[#fafafa] text-[#101010] font-medium" title="Vista de matriz general quincenal">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                      <span>Matriz General</span>
-                  </button>
-                  <button type="button" id="attTabBtn-consultant" onclick="setAttendanceViewTab('consultant')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono text-[10px] sm:text-[10.5px] uppercase transition flex items-center gap-1.5 text-[#8a8380] hover:text-[#eeeeee]" title="Vista vertical por consultor (Ideal para teléfono)">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span>Mi Rol / Por Consultor</span>
-                  </button>
-                  <button type="button" id="attTabBtn-daily" onclick="setAttendanceViewTab('daily')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono text-[10px] sm:text-[10.5px] uppercase transition flex items-center gap-1.5 text-[#8a8380] hover:text-[#eeeeee]" title="Vista por día específico del equipo">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                      <span>Vista Diaria</span>
-                  </button>
+          <!-- BARRA UNIFICADA DE VISTAS Y FILTROS POR EQUIPO (ULTRA-COMPACTA) -->
+          <div class="px-3 sm:px-4 py-1.5 bg-[#101010] border-b border-[#3d3a39] flex flex-wrap items-center justify-between gap-2 shrink-0 select-none">
+              <div class="flex items-center gap-2 flex-wrap">
+                  <div class="flex items-center gap-1 p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px]">
+                      <button type="button" id="attTabBtn-matrix" onclick="setAttendanceViewTab('matrix')" class="px-2 sm:px-2.5 py-0.5 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1.5 bg-[#fafafa] text-[#101010] font-medium" title="Vista de matriz general quincenal">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                          <span>Matriz General</span>
+                      </button>
+                      <button type="button" id="attTabBtn-consultant" onclick="setAttendanceViewTab('consultant')" class="px-2 sm:px-2.5 py-0.5 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1.5 text-[#8a8380] hover:text-[#eeeeee]" title="Vista vertical por consultor (Ideal para teléfono)">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                          <span>Por Consultor</span>
+                      </button>
+                      <button type="button" id="attTabBtn-daily" onclick="setAttendanceViewTab('daily')" class="px-2 sm:px-2.5 py-0.5 rounded-[3px] font-mono text-[10px] uppercase transition flex items-center gap-1.5 text-[#8a8380] hover:text-[#eeeeee]" title="Vista por día específico del equipo">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                          <span>Vista Diaria</span>
+                      </button>
+                  </div>
+
+                  <!-- FILTROS POR EQUIPO INTEGRADOS EN LA MISMA BARRA (ACTIVO EN MATRIZ GENERAL) -->
+                  <div id="attSubbarMatrix" class="flex items-center gap-1 overflow-x-auto scrollbar-thin">
+                      <span class="hidden sm:inline-block h-3.5 w-px bg-[#3d3a39] mx-0.5"></span>
+                      <span class="font-mono text-[9.5px] text-[#8a8380] uppercase mr-0.5">Equipo:</span>
+                      <button type="button" onclick="setAttendanceTeamFilter('ALL')" id="attTeamBtn-ALL" class="att-team-pill px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase transition bg-[#fafafa] text-[#101010] border border-[#fafafa]">Todos</button>
+                      <button type="button" onclick="setAttendanceTeamFilter('Equipo Manuel Gutiérrez')" id="attTeamBtn-Manuel" class="att-team-pill px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Manuel G.</button>
+                      <button type="button" onclick="setAttendanceTeamFilter('Equipo Carlos Islas')" id="attTeamBtn-Carlos" class="att-team-pill px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Carlos I.</button>
+                      <button type="button" onclick="setAttendanceTeamFilter('Equipo Coordinación')" id="attTeamBtn-Coord" class="att-team-pill px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Coordinación</button>
+                      <button type="button" onclick="setAttendanceTeamFilter('Equipo Gerencia')" id="attTeamBtn-Gerencia" class="att-team-pill px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Gerencia</button>
+                  </div>
               </div>
 
-              <div id="attTabAuxControls" class="flex items-center gap-2 text-xs font-mono text-[#8a8380]">
-                  <!-- Inyección dinámica de controles según la pestaña activa -->
-              </div>
-          </div>
-
-          <!-- SUB-BARRA: FILTROS POR EQUIPO (SÓLO ACTIVA EN MATRIZ GENERAL) -->
-          <div id="attSubbarMatrix" class="px-3 sm:px-5 py-2 bg-[#101010] border-b border-[#1d1a18] flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
-              <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-thin py-0.5">
-                  <span class="font-mono text-[10px] text-[#8a8380] uppercase mr-1">Equipo:</span>
-                  <button type="button" onclick="setAttendanceTeamFilter('ALL')" id="attTeamBtn-ALL" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition bg-[#fafafa] text-[#101010] border border-[#fafafa]">Todos</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Manuel Gutiérrez')" id="attTeamBtn-Manuel" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Manuel G.</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Carlos Islas')" id="attTeamBtn-Carlos" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Carlos I.</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Coordinación')" id="attTeamBtn-Coord" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Coordinación</button>
-                  <button type="button" onclick="setAttendanceTeamFilter('Equipo Gerencia')" id="attTeamBtn-Gerencia" class="att-team-pill px-2.5 py-1 rounded-[3px] text-[10px] font-mono uppercase transition text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39]">Eq. Gerencia</button>
-              </div>
-
-              <div id="attSubbarControls" class="flex items-center gap-2">
-                  <span id="attPeriodLabel" class="font-mono text-[11px] text-[#b8b3b0]">Periodo: Del 1 al 15 de Octubre de 2026</span>
+              <div class="flex items-center gap-2 ml-auto">
+                  <div id="attSubbarControls" class="hidden xl:flex items-center gap-2">
+                      <span id="attPeriodLabel" class="font-mono text-[10px] text-[#b8b3b0]">Periodo: Del 1 al 15 de Octubre de 2026</span>
+                  </div>
+                  <div id="attTabAuxControls" class="flex items-center gap-2 text-[10px] font-mono text-[#8a8380]">
+                      <!-- Inyección dinámica de controles según la pestaña activa -->
+                  </div>
               </div>
           </div>
 
           <!-- CUERPO PRINCIPAL: VISTA DE ASISTENCIA / ROL (SCROLLABLE) -->
-          <div class="flex-1 overflow-y-auto overflow-x-hidden p-2.5 sm:p-5 bg-[#101010]" id="attendanceTableContainer">
+          <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-1.5 sm:p-2 bg-[#101010]" id="attendanceTableContainer">
               <!-- Renderizado dinámico desde app.js -->
           </div>
 
-          <!-- FOOTER / LEYENDA FACTORY DE CÓDIGOS OFICIALES RH -->
-          <div class="p-3 px-4 sm:px-5 border-t border-[#1d1a18] bg-[#121110] flex flex-wrap items-center justify-between gap-2 text-[10.5px] font-mono shrink-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-[#8a8380] uppercase text-[9.5px]">Leyenda:</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE (A DISTANCIA)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO MÉDICO</span>
+          <!-- FOOTER / LEYENDA FACTORY DE CÓDIGOS OFICIALES RH (COMPACTO) -->
+          <div class="py-1.5 px-3 sm:px-4 border-t border-[#1d1a18] bg-[#121110] flex flex-wrap items-center justify-between gap-2 text-[9.5px] font-mono shrink-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[#8a8380] uppercase text-[9px]">Leyenda:</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#8a8380] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> HOME OFFICE</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947]"><span class="w-1.5 h-1.5 rounded-full bg-[#fafafa]"></span> OFICINA STGT</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> COMISIÓN (PT)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#a0ca92] border border-[#a0ca92]/40"><span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span> AFR / ODM (PT)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#101010]"></span> VACACIONES (VA)</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39]"><span class="w-1.5 h-1.5 rounded-full bg-[#8a8380]"></span> PERMISO MÉDICO</span>
               </div>
-              <div id="attPermNotice" class="text-[#8a8380] text-[10px]">
+              <div id="attPermNotice" class="text-[#8a8380] text-[9.5px] truncate">
                   💡 Edición autorizada únicamente para: Miguel Barbosa, Rafael Romero y Osvaldo Avilés.
               </div>
           </div>
@@ -3179,7 +3176,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261025_v976"></script>
+  <script type="module" src="app.js?v=20261025_v977"></script>
 
 </body>
 </html>

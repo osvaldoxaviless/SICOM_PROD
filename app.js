@@ -1706,7 +1706,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const isLector = currentUserRole === 'Lector';
         document.querySelectorAll('.lector-hide').forEach(el => { 
-            if(isLector) el.classList.add('hidden'); else el.classList.remove('hidden'); 
+            if (isLector) {
+                el.classList.add('hidden');
+            } else if (el.id === 'speedDial') {
+                if (window.innerWidth >= 640 && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            } else {
+                el.classList.remove('hidden');
+            }
         });
 
         document.querySelectorAll('.audit-pmo-only').forEach(el => {
@@ -12666,15 +12676,15 @@ window.renderDailyTasks = function() {
             if (isMaster) {
                 if (!isLocked) {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
-                            <svg class="w-3.5 h-3.5 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1 transition" title="Auditar, validar y bloquear esta quincena para todos los demás colaboradores">
+                            <svg class="w-3 h-3 text-[#a0ca92]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                             <span>Validar y Cerrar</span>
                         </button>
                     `;
                 } else {
                     btnCont.innerHTML = `
-                        <button type="button" onclick="toggleValidateQuincena()" class="px-3 py-1.5 bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1.5 transition" title="Reabrir quincena para permitir modificaciones">
-                            <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                        <button type="button" onclick="toggleValidateQuincena()" class="px-2.5 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#ee6018] text-[#ee6018] hover:text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center gap-1 transition" title="Reabrir quincena para permitir modificaciones">
+                            <svg class="w-3 h-3 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                             <span>Reabrir Quincena</span>
                         </button>
                     `;
@@ -13038,6 +13048,11 @@ window.renderDailyTasks = function() {
             if (tab === 'matrix') subbar.classList.remove('hidden');
             else subbar.classList.add('hidden');
         }
+        const subControls = document.getElementById('attSubbarControls');
+        if (subControls) {
+            if (tab === 'matrix') subControls.classList.remove('hidden');
+            else subControls.classList.add('hidden');
+        }
 
         window.renderAttendanceTable();
     };
@@ -13055,29 +13070,34 @@ window.renderDailyTasks = function() {
     function renderAttendanceMatrixView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead) {
         const aux = document.getElementById('attTabAuxControls');
         if (aux) {
-            aux.innerHTML = `<span class="hidden sm:inline font-mono text-[10px] text-[#8a8380]">Vista Matriz Quincenal (${list.length} colaboradores)</span>`;
+            aux.innerHTML = `<span class="hidden sm:inline font-mono text-[9.5px] text-[#8a8380]">(${list.length} integrantes)</span>`;
         }
+
+        const todayStr = new Date().toISOString().slice(0, 10);
 
         let html = `
         <!-- Indicador táctil móvil -->
-        <div class="md:hidden mb-2.5 px-3 py-1.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
+        <div class="md:hidden mb-1.5 px-2.5 py-1 rounded-[3px] bg-[#101010] border border-[#3d3a39] flex items-center justify-between text-[9.5px] font-mono text-[#8a8380]">
             <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span> Desliza la tabla para ver todos los días</span>
             <button type="button" onclick="setAttendanceViewTab('consultant')" class="text-[#fafafa] hover:text-[#ee6018] underline font-medium">Ver en Vertical ➔</button>
         </div>
 
         <div class="overflow-x-auto w-full rounded-[3px] border border-[#3d3a39]" style="-webkit-overflow-scrolling: touch;">
-            <table class="min-w-[1100px] w-full text-left border-collapse text-xs">
+            <table class="min-w-[820px] w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="bg-[#101010] border-b border-[#3d3a39] font-mono text-[10px] text-[#8a8380] uppercase tracking-[-0.24px]">
-                        <th class="p-2.5 sm:p-3 relative md:sticky md:left-0 bg-[#101010] z-20 w-[140px] sm:w-[190px] md:min-w-[210px] border-r border-[#3d3a39]">Colaborador</th>
-                        <th class="p-2 sm:p-3 min-w-[75px] sm:min-w-[95px] border-r border-[#3d3a39] text-center">Horario</th>
-                        ${workDays.map(wd => `
-                            <th class="p-2 text-center min-w-[110px] sm:min-w-[125px] border-r border-[#3d3a39] ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
-                                <div class="font-normal text-[#eeeeee]">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
-                                <div class="text-[9px] text-[#8a8380] lowercase font-mono">${monthName.substring(0, 3)}</div>
+                    <tr class="bg-[#141211] border-b border-[#3d3a39] font-mono text-[9.5px] text-[#8a8380] uppercase tracking-[-0.24px]">
+                        <th class="py-1.5 px-2.5 sticky top-0 left-0 bg-[#141211] z-30 w-[160px] sm:w-[175px] min-w-[160px] max-w-[185px] border-r border-[#3d3a39]">Colaborador / Equipo</th>
+                        ${workDays.map((wd, idx) => {
+                            const isMonday = wd.dowName === 'Lun' && idx > 0;
+                            const isToday = wd.dateStr === todayStr;
+                            return `
+                            <th class="py-1.5 px-1 text-center min-w-[68px] sm:min-w-[76px] sticky top-0 bg-[#141211] z-20 border-r border-[#2d2a29] ${isMonday ? 'att-week-divider border-l-2 border-l-[#5a5553]' : ''}">
+                                <div class="font-semibold text-[10px] leading-tight ${isToday ? 'text-[#ee6018]' : 'text-[#eeeeee]'}">${wd.dowName} ${String(wd.dayNum).padStart(2, '0')}</div>
+                                <div class="text-[8.5px] text-[#8a8380] lowercase font-mono leading-none mt-0.5">${monthName.substring(0, 3)}</div>
                             </th>
-                        `).join('')}
-                        <th class="p-2.5 sm:p-3 min-w-[110px] sm:min-w-[130px] text-center text-[#eeeeee]">Resumen</th>
+                            `;
+                        }).join('')}
+                        <th class="py-1.5 px-2 min-w-[92px] w-[100px] sticky top-0 bg-[#141211] z-20 text-center text-[#eeeeee]">Resumen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#1d1a18]">
@@ -13098,9 +13118,10 @@ window.renderDailyTasks = function() {
             let homeCount = 0;
 
             let cellsHtml = '';
-            workDays.forEach(wd => {
+            workDays.forEach((wd, idx) => {
                 const dayRecord = cAtt[wd.dateStr];
                 const cellInfo = window.getAttendanceCellDetails(dayRecord, cName, wd.dateStr);
+                const isMonday = wd.dowName === 'Lun' && idx > 0;
 
                 if (cellInfo.type === 'vacaciones') vaCount++;
                 else if (cellInfo.type === 'comision' || cellInfo.type === 'afr' || cellInfo.type === 'odm') ptCount++;
@@ -13116,8 +13137,8 @@ window.renderDailyTasks = function() {
                 const cellTitle = editCheck.allowed ? `${escapeHtml(cellInfo.label)} (Clic para cambiar)` : `${escapeHtml(cellInfo.label)} (${escapeHtml(editCheck.reason)})`;
 
                 cellsHtml += `
-                    <td class="p-1.5 border-r border-[#1d1a18] text-center ${wd.dowName === 'Lun' ? 'border-l border-[#3d3a39]' : ''}">
-                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1.5 px-1 rounded-[3px] font-mono text-[10px] leading-tight flex items-center justify-center gap-1 ${cellInfo.chipClass} ${cursorStyle}" title="${cellTitle}">
+                    <td class="py-1 px-1 border-r border-[#1d1a18] text-center ${isMonday ? 'att-week-divider border-l-2 border-l-[#3d3a39]' : ''}">
+                        <button type="button" onclick="${clickAction}" class="att-cell w-full py-1 px-1 rounded-[3px] font-mono text-[9.5px] leading-tight flex items-center justify-center ${cellInfo.chipClass} ${cursorStyle}" title="${cellTitle}">
                             <span class="truncate">${escapeHtml(cellInfo.label)}</span>
                         </button>
                     </td>
@@ -13125,36 +13146,33 @@ window.renderDailyTasks = function() {
             });
 
             let summaryHtml = '';
-            if (ptCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[9px] uppercase font-medium">${ptCount} d com</span> `;
-            if (vaCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[9px] uppercase font-medium">${vaCount} d vac</span> `;
-            if (stgtCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[9px] uppercase font-medium">${stgtCount} ofi</span> `;
-            if (homeCount > 0) summaryHtml += `<span class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] text-[#8a8380] border border-[#3d3a39] font-mono text-[9px] uppercase font-medium">${homeCount} home</span>`;
-            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[10px] uppercase">Laborando</span>`;
+            if (ptCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#ee6018] border border-[#ee6018]/40 font-mono text-[8.5px] uppercase font-medium" title="${ptCount} día(s) en comisión">${ptCount}PT</span>`;
+            if (vaCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#eeeeee] text-[#101010] border border-[#ffffff] font-mono text-[8.5px] uppercase font-medium" title="${vaCount} día(s) de vacaciones">${vaCount}VA</span>`;
+            if (stgtCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#1d1a18] text-[#eeeeee] border border-[#4d4947] font-mono text-[8.5px] uppercase font-medium" title="${stgtCount} día(s) en Oficina STGT">${stgtCount}OF</span>`;
+            if (homeCount > 0) summaryHtml += `<span class="px-1 py-0.5 rounded-[2px] bg-[#101010] text-[#8a8380] border border-[#3d3a39] font-mono text-[8.5px] uppercase font-medium" title="${homeCount} día(s) en Home Office">${homeCount}HO</span>`;
+            if (!summaryHtml) summaryHtml = `<span class="text-[#8a8380] font-mono text-[9px] uppercase">—</span>`;
 
             html += `
-                <tr class="hover:bg-[#101010] transition-colors border-b border-[#1d1a18]">
-                    <td class="p-2 sm:p-3 relative md:sticky md:left-0 bg-[#101010] z-10 border-r border-[#3d3a39] w-[140px] sm:w-[190px] md:min-w-[210px]">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[9px] text-[#eeeeee] shrink-0">
+                <tr class="hover:bg-[#161413] transition-colors border-b border-[#1d1a18]">
+                    <td class="py-1 px-2 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39] w-[160px] sm:w-[175px] min-w-[160px] max-w-[185px]" title="${escapeHtml(cName)} · ${escapeHtml(jobTitle)} · Horario: ${escapeHtml(schedule)}">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-5 h-5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[8.5px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
-                            <div class="min-w-0 truncate">
-                                <div class="flex items-center gap-1.5 truncate">
-                                    <span class="font-normal text-[#eeeeee] truncate text-xs">${escapeHtml(cName)}</span>
-                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8.5px] text-[#8a8380] bg-[#101010] border border-[#3d3a39] px-1 rounded-[3px]">${empNo}</span>` : ''}
+                            <div class="min-w-0 flex-1 truncate">
+                                <div class="flex items-center gap-1 truncate leading-tight">
+                                    <span class="font-medium text-[#eeeeee] truncate text-[11px]">${escapeHtml(cName)}</span>
+                                    ${empNo ? `<span class="hidden sm:inline font-mono text-[8px] text-[#8a8380] bg-[#161413] border border-[#2d2a29] px-1 rounded-[2px] shrink-0">${empNo}</span>` : ''}
                                 </div>
-                                <div class="text-[9.5px] text-[#8a8380] truncate font-mono">
-                                    ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> Jefe: <span class="text-[#10b981] font-mono">${escapeHtml(lead.split(' ')[0])}</span>
+                                <div class="text-[8.5px] text-[#8a8380] truncate font-mono leading-tight">
+                                    ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> <span class="text-[#10b981]">${escapeHtml(lead.split(' ')[0])}</span>
                                 </div>
                             </div>
                         </div>
                     </td>
-                    <td class="p-2 border-r border-[#3d3a39] text-center font-mono text-[10px] text-[#8a8380]">
-                        ${escapeHtml(schedule)}
-                    </td>
                     ${cellsHtml}
-                    <td class="p-2 sm:p-2.5 text-center">
-                        <div class="flex flex-col items-center gap-1">
+                    <td class="py-1 px-1.5 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center gap-1">
                             ${summaryHtml}
                         </div>
                     </td>
