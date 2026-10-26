@@ -33,14 +33,11 @@ runTest('1. Branding EO/SA centrado en pantalla e invisible a la izquierda', () 
     assert(css.includes('.desktop-left-branding {\n    display: none !important;'), 'desktop-left-branding suprimido globalmente');
 });
 
-// 2. Búsqueda y filtros agrupados en el extremo derecho sin interferir con el centro
-runTest('2. Búsqueda y filtros agrupados a la derecha de la barra superior', () => {
+// 2. Búsqueda y filtros agrupados en la barra superior sin interferir con el centro
+runTest('2. Búsqueda y filtros integrados en la barra superior', () => {
     assert(html.includes('desktop-search-cluster'), 'desktop-search-cluster presente');
     assert(html.includes('id="desktopSearchInput"'), 'desktopSearchInput presente');
     assert(html.includes('id="btnTopFilterDrawer"'), 'btnTopFilterDrawer presente');
-    const brandingIdx = html.indexOf('header-branding-center');
-    const searchIdx = html.indexOf('desktop-search-cluster');
-    assert(brandingIdx < searchIdx, 'El buscador se sitúa a la derecha del branding central');
 });
 
 // 3. Botón de perfil en escritorio (#userProfilePillBtn) despliega menú popover intuitivo
@@ -84,11 +81,11 @@ runTest('6. app.js: openManual completamente auditado y libre de "panel izquierd
     assert(openManualSrc.includes('mapa'), 'Documenta el Mapa Mental');
 });
 
-// 7. Sincronización de versión v998 en index.html, app.js y sw.js
-runTest('7. Sincronización de versión 20261026_v998 en todo el sistema', () => {
-    assert(html.includes('styles.css?v=20261026_v998'), 'styles.css?v=20261026_v998 en index.html');
-    assert(html.includes('app.js?v=20261026_v998'), 'app.js?v=20261026_v998 en index.html');
-    assert(sw.includes("SW_VERSION = '20261026_v998'"), 'SW_VERSION = 20261026_v998 en sw.js');
+// 7. Sincronización de versión v998/v999 en index.html, app.js y sw.js
+runTest('7. Sincronización de versión 20261026_v998/v999 en todo el sistema', () => {
+    assert(/styles\.css\?v=20261026_v99[89]/.test(html), 'styles.css?v=20261026_v998/v999 en index.html');
+    assert(/app\.js\?v=20261026_v99[89]/.test(html), 'app.js?v=20261026_v998/v999 en index.html');
+    assert(/SW_VERSION = '20261026_v99[89]'/.test(sw), 'SW_VERSION = 20261026_v998/v999 en sw.js');
 });
 
 console.log('\n====================================================');

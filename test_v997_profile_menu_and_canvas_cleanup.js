@@ -64,11 +64,11 @@ runTest('5. app.js: openManual actualizado con filtros unificados y dock de 5 ac
     assert(app.includes('Estructura del Mapa'), 'openManual documenta colapso/expansión de módulos');
 });
 
-// 6. Versión sincronizada en todo el sistema (v997/v998)
-runTest('6. Versión sincronizada 20261026_v997/v998 en index.html, app.js y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v99[78]/.test(html), 'index.html points to styles.css?v=20261026_v997 or v998');
-    assert(/app\.js\?v=20261026_v99[78]/.test(html), 'index.html points to app.js?v=20261026_v997 or v998');
-    assert(/SW_VERSION = '20261026_v99[78]'/.test(sw), 'sw.js SW_VERSION is 20261026_v997 or v998');
+// 6. Versión sincronizada en todo el sistema (v997/v998/v999)
+runTest('6. Versión sincronizada 20261026_v997/v998/v999 en index.html, app.js y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v99[789]/.test(html), 'index.html points to styles.css?v=20261026_v997/v998/v999');
+    assert(/app\.js\?v=20261026_v99[789]/.test(html), 'index.html points to app.js?v=20261026_v997/v998/v999');
+    assert(/SW_VERSION = '20261026_v99[789]'/.test(sw), 'sw.js SW_VERSION is 20261026_v997/v998/v999');
 });
 
 console.log('\n====================================================');
