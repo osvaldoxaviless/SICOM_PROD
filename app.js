@@ -526,6 +526,23 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(!appData.core) appData.core = { id: 'sicom', name: 'SICOM' };
         if(!appData.directProjects) appData.directProjects = [];
         if(!appData.modules) appData.modules = [];
+
+        // Garantizar unicidad estricta de IDs en todos los proyectos de la base de datos (previene borrados en cascada no deseados)
+        const seenProjIds = new Set();
+        (appData.directProjects || []).forEach(p => {
+            if (!p.id || seenProjIds.has(p.id)) {
+                p.id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+            }
+            seenProjIds.add(p.id);
+        });
+        (appData.modules || []).forEach(m => {
+            (m.projects || []).forEach(p => {
+                if (!p.id || seenProjIds.has(p.id)) {
+                    p.id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+                }
+                seenProjIds.add(p.id);
+            });
+        });
         if(!appData.dailyTasks) appData.dailyTasks = [];
         if(!appData.globalTasks) appData.globalTasks = [];
         if(!appData.announcementConfig) appData.announcementConfig = { autoBiweeklyEnabled: true, autoMonthEndEnabled: true, forceBiweeklyActive: false, forceMonthEndActive: false };
@@ -8576,12 +8593,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       };
 
       const buildModuleProjectsList = (modId, ownP, linkedP) => {
-          const rawList = ownP.length > 0 ? ownP : linkedP;
+          // Cada módulo aloja estrictamente sus proyectos propios para evitar duplicidades visuales en el mapa
+          const rawList = ownP;
           return isDefaultState ? rawList : rawList.filter(p => isFiltered(p));
       };
 
       const dirLinked = getLinkedProjectsForModule('hub-direct');
-      // Ordenamiento por Peso (Gravedad al Centro): mayor a menor según cantidad de proyectos
+      // Ordenamiento por Peso (Gravedad al Centro): mayor a menor según cantidad de proyectos propios
       const allNodes = [
           {
               type: 'direct-hub',
@@ -8607,7 +8625,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           });
       });
 
-      allNodes.sort((a, b) => ((b.ownProjects || []).length || (b.linkedProjects || []).length) - ((a.ownProjects || []).length || (a.linkedProjects || []).length));
+      allNodes.sort((a, b) => (b.ownProjects || []).length - (a.ownProjects || []).length);
 
       // Simetría izquierda (Oeste) y derecha (Este), con los más pesados al centro (y ≈ 0) y los ligeros hacia Norte y Sur
       const leftRaw = [], rightRaw = [];

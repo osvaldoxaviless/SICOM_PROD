@@ -82,9 +82,9 @@ runTest('6. styles.css & index.html: Dock inferior móvil z-[100000] y despejes 
 
 // 7. Versión sincronizada en todo el sistema
 runTest('7. Versión sincronizada en index.html, styles.css, app.js y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v99[5-9]/.test(html), 'index.html points to styles.css');
-    assert(/app\.js\?v=20261026_v99[5-9]/.test(html), 'index.html points to app.js');
-    assert(/20261026_v99[5-9]/.test(sw), 'sw.js SW_VERSION is synced');
+    assert(/styles\.css\?v=20261026_v(99[5-9]|1000)/.test(html), 'index.html points to styles.css');
+    assert(/app\.js\?v=20261026_v(99[5-9]|1000)/.test(html), 'index.html points to app.js');
+    assert(/20261026_v(99[5-9]|1000)/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log('\n====================================================');

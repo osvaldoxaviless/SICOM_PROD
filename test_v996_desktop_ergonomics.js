@@ -50,9 +50,9 @@ runTest('3. app.js: toggleTickerPause opera con seguridad sin fallos al no exist
 
 // 4. Sincronización de cache buster v996+
 runTest('4. index.html, styles.css & sw.js: Versión v996+ sincronizada en todo el sistema', () => {
-    assert(/styles\.css\?v=20261026_v99[6-9]/.test(html), 'index.html points to styles.css');
-    assert(/app\.js\?v=20261026_v99[6-9]/.test(html), 'index.html points to app.js');
-    assert(/20261026_v99[6-9]/.test(sw), 'sw.js SW_VERSION is synced');
+    assert(/styles\.css\?v=20261026_v(99[6-9]|1000)/.test(html), 'index.html points to styles.css');
+    assert(/app\.js\?v=20261026_v(99[6-9]|1000)/.test(html), 'index.html points to app.js');
+    assert(/20261026_v(99[6-9]|1000)/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log('\n====================================================');
