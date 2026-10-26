@@ -229,7 +229,9 @@ if (!catalogMatch) throw new Error('Could not extract STGT_STATUS_CATALOG and no
 const dashMarker = '// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN (FASE 2)';
 const dashIndex = appSource.indexOf(dashMarker);
 if (dashIndex === -1) throw new Error('Could not locate Executive Dashboard module in app.js');
-const dashboardModuleSource = appSource.substring(dashIndex);
+const calMarker = '// === CALENDARIO INTERACTIVO DE ENTREGAS';
+const calIdx = appSource.indexOf(calMarker, dashIndex);
+const dashboardModuleSource = calIdx !== -1 ? appSource.substring(dashIndex, calIdx) : appSource.substring(dashIndex);
 
 // Setup Global Sandbox Environment
 const mockDoc = new MockDocument();
@@ -259,6 +261,8 @@ const mockDoc = new MockDocument();
 
 // Global sandbox bindings
 global.window = global;
+global.window.addEventListener = () => {};
+global.window.matchMedia = () => ({ matches: false });
 global.document = mockDoc;
 global.Chart = MockChart;
 global.requestAnimationFrame = (fn) => fn();

@@ -4,7 +4,7 @@ console.log('⚡ SICOM ERP', SICOM_VERSION, '— Terminal Control Surface Ready'
 const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
     const formatTaskTextWithTicket = (u) => {
         const safe = escapeHtml(u);
-        return safe.replace(/##([^#\s]+)##/g, '<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1.5 py-0.5 rounded-md font-mono text-[10px] mr-1">#$1</span>');
+        return safe.replace(/##([^#\s]+)##/g, '<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1.5 py-0.5 rounded-[3px] font-mono text-[10px] mr-1">#$1</span>');
     };
     window.formatTaskTextWithTicket = formatTaskTextWithTicket;
     // Escapa un valor para usarlo como argumento string en un handler inline: onclick="fn('${jsArg(valor)}')"
@@ -4785,7 +4785,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(btn){
             btn.classList.remove('hidden'); 
             btn.textContent = "Validar N/A"; 
-            btn.className = "pill-btn w-full py-2 bg-brand-accent text-[10px] font-bold text-white mt-2 shadow-[0_0_15px_rgba(0,113,227,0.3)]";
+            btn.className = "pill-btn w-full py-2 bg-brand-accent text-[10px] font-bold text-white mt-2 shadow-none";
         } 
     } else { 
         if(obsCont) obsCont.classList.add('hidden');
@@ -10932,7 +10932,7 @@ window.renderDailyTasks = function() {
                 </div>
                 ${mentionAlerts.map(a => {
                     return `
-                    <div class="bg-[#1d1a18] border border-[#ee6018]/60 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-[0_4px_16px_rgba(238,96,24,0.12)] cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
+                    <div class="bg-[#1d1a18] border border-[#ee6018]/60 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-none cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
                         <div class="flex items-start gap-2.5">
                             <span class="text-lg leading-none mt-0.5">💬</span>
                             <div class="flex-1 min-w-0">
