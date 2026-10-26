@@ -72,7 +72,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v992">
+  <link rel="stylesheet" href="styles.css?v=20261026_v993">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -902,7 +902,7 @@
       </div>
 
       <!-- BRANDING ESCRITORIO (EDITORIAL, REFINADO, SIN CÁPSULA) -->
-      <div class="hidden sm:flex items-center gap-2 select-none shrink-0 pr-1">
+      <div class="desktop-left-branding hidden lg:flex items-center gap-2 select-none shrink-0 pr-1">
         <span class="w-2 h-2 rounded-full bg-[#ee6018] shadow-[0_0_8px_rgba(238,96,24,0.6)]"></span>
         <span class="font-mono text-sm font-bold tracking-[0.2em] text-[#fafafa]">EO<span class="text-[#ee6018] font-black">/</span>SA</span>
       </div>
@@ -925,7 +925,7 @@
     </div>
     
     <!-- BRANDING CENTRAL MÓVIL (ESTILO INSTAGRAM: CENTRADO EXACTO, EDITORIAL, SIN CÁPSULA) -->
-    <div class="sm:hidden absolute left-1/2 -translate-x-1/2 flex items-center justify-center select-none pointer-events-none mobile-branding-center">
+    <div class="lg:hidden absolute left-1/2 -translate-x-1/2 flex items-center justify-center select-none pointer-events-none mobile-branding-center">
       <span class="font-mono text-[16px] font-bold tracking-[0.24em] text-[#fafafa] flex items-center drop-shadow-sm">
         EO<span class="text-[#ee6018] font-black text-[17px] mx-0.5">/</span>SA
       </span>
@@ -1164,11 +1164,10 @@
   </div>
 
   <main class="flex-1 relative overflow-hidden bg-grid cursor-grab active:cursor-grabbing z-0" id="workspace">
-    <!-- BOTÓN RÁPIDO CENTRAR MAPA (FLOTANTE SOBRE EL CANVAS EN ESQUINA SUPERIOR EN MÓVIL Y ESCRITORIO) -->
-    <div id="canvasQuickControls" class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center gap-2 select-none pointer-events-auto">
-      <button type="button" id="btnQuickRecenterMap" onclick="recenterCanvas(350)" class="h-8 px-2.5 sm:px-3 rounded-[3px] bg-[#101010]/90 hover:bg-[#1d1a18] active:bg-[#252220] text-[#eeeeee] hover:text-[#ee6018] border border-[#3d3a39] hover:border-[#ee6018] backdrop-blur-md shadow-md flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-[-0.24px] transition cursor-pointer group" title="Centrar mapa mental en la pantalla (1 toque)">
-        <svg class="w-3.5 h-3.5 text-[#a0ca92] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-        <span class="font-medium">Centrar</span>
+    <!-- BOTÓN RÁPIDO CENTRAR MAPA (SÓLO ÍCONO, EN PARTE INFERIOR DIRECTAMENTE ARRIBA DE "MAPA") -->
+    <div id="canvasQuickControls" class="fixed bottom-[70px] left-3 sm:bottom-20 sm:left-4 md:bottom-24 md:left-6 z-30 flex items-center select-none pointer-events-auto">
+      <button type="button" id="btnQuickRecenterMap" onclick="recenterCanvas(350)" class="w-9 h-9 sm:w-10 sm:h-10 rounded-[3px] bg-[#101010]/90 hover:bg-[#1d1a18] active:bg-[#252220] text-[#a0ca92] hover:text-[#ee6018] border border-[#3d3a39] hover:border-[#ee6018] backdrop-blur-md shadow-lg flex items-center justify-center transition cursor-pointer group" title="Centrar mapa mental en la pantalla" aria-label="Centrar mapa mental">
+        <svg class="w-4 h-4 text-[#a0ca92] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
       </button>
     </div>
 
@@ -1404,6 +1403,11 @@
     <!-- INFOCARD: FACTORY HYBRID TACTICAL DISPATCH (#eeeeee HEADER ON #101010 CONTROL PANEL) -->
     <div id="infoCard" class="absolute bottom-16 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 md:left-auto md:top-3 md:bottom-3 md:right-3 md:w-[48vw] md:min-w-[540px] md:max-w-[760px] 2xl:max-w-[840px] md:max-h-none md:h-[calc(100%-1.5rem)] liquid-glass-panel border border-[#3d3a39] shadow-2xl rounded-[10px] p-4 sm:p-5 md:p-6 hidden opacity-0 transition-all duration-200 z-[60] max-h-[82vh] overflow-y-auto scrollbar-thin">
       
+      <!-- DRAG HANDLE PARA MÓVIL (DESLIZAR HACIA ABAJO PARA CERRAR) -->
+      <div id="infoCardDragHandle" class="w-full flex items-center justify-center -mt-2 pb-2 cursor-grab active:cursor-grabbing select-none sm:hidden">
+        <span class="w-12 h-1.5 bg-[#8a8380]/60 rounded-full"></span>
+      </div>
+
       <!-- FLASHLIT DISPATCH HEADER (#eeeeee Bone Card) -->
       <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none sticky top-0 z-20">
         <div class="flex justify-between items-center mb-2.5">
@@ -1417,7 +1421,9 @@
           </div>
           <div class="flex items-center gap-2">
             <span id="infoProgressPill" class="font-mono text-[10px] text-[#101010] bg-[#101010]/10 px-2 py-0.5 rounded-[3px] font-medium">0%</span>
-            <button onclick="closeInfoCardSafe()" class="text-[#4d4947] hover:text-[#101010] p-1 rounded-[3px] hover:bg-[#101010]/10 transition" title="Cerrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <!-- BOTÓN ACCESO DIRECTO EDICIÓN EN PANEL (ESPECIAL MÓVIL Y ESCRITORIO) -->
+            <button id="btnHeaderEditProject" onclick="editFromInfoCard()" class="hidden text-[#4d4947] hover:text-[#101010] p-1 rounded-[3px] hover:bg-[#101010]/10 transition cursor-pointer" title="Modificar en Panel de Control"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+            <button onclick="closeInfoCardSafe()" class="text-[#4d4947] hover:text-[#101010] p-1 rounded-[3px] hover:bg-[#101010]/10 transition cursor-pointer" title="Cerrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
           </div>
         </div>
         <h3 id="infoTitle" class="text-[20px] font-medium text-[#101010] tracking-[-0.03em] leading-[1.2] break-words">Nombre</h3>
@@ -1462,7 +1468,7 @@
           <div id="quickSaveIndicator" class="absolute top-[-8px] left-0 right-0 h-0.5 bg-[#ee6018] opacity-0 transition-opacity duration-200 z-20"></div>
 
           <!-- 1. ESTADO Y FECHAS -->
-          <details class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden" open>
+          <details id="acc-status-details" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[10px] overflow-hidden" open>
               <summary class="flex justify-between items-center cursor-pointer p-3.5 select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/25 transition">
                   <span class="font-mono text-[11px] text-[#eeeeee] uppercase tracking-[-0.24px]">01 // Estado y Fechas</span>
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
@@ -3360,7 +3366,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v992"></script>
+  <script type="module" src="app.js?v=20261026_v993"></script>
 
 </body>
 </html>

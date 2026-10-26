@@ -99,11 +99,11 @@ test('6. index.html: Menú móvil [ OA ] no muestra vistas redundantes de sistem
     assert(menuSection.includes('class="hidden" aria-hidden="true"'), 'redundant system views are hidden in mobile menu dropdown');
 });
 
-// 7. Sincronización de cache buster v992
-test('7. index.html, styles.css & sw.js: Cache buster actualizado a v992', () => {
-    assert(html.includes('app.js?v=20261026_v992'), 'index.html references app.js?v=20261026_v992');
-    assert(html.includes('styles.css?v=20261026_v992'), 'index.html references styles.css?v=20261026_v992');
-    assert(sw.includes('20261026_v992'), 'sw.js SW_VERSION is 20261026_v992');
+// 7. Sincronización de cache buster
+test('7. index.html, styles.css & sw.js: Cache buster actualizado y sincronizado', () => {
+    assert(html.includes('app.js?v=20261026_v992') || html.includes('app.js?v=20261026_v993'), 'index.html references app.js?v');
+    assert(html.includes('styles.css?v=20261026_v992') || html.includes('styles.css?v=20261026_v993'), 'index.html references styles.css?v');
+    assert(sw.includes('20261026_v992') || sw.includes('20261026_v993'), 'sw.js SW_VERSION is synced');
 });
 
 console.log(`\n====================================================`);

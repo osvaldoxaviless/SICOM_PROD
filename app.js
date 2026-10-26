@@ -1531,9 +1531,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => { if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); });
+        document.addEventListener('DOMContentLoaded', () => { 
+            if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
+            if (typeof window.initInfoCardSwipeDown === 'function') window.initInfoCardSwipeDown();
+        });
     } else {
-        setTimeout(() => { if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); }, 150);
+        setTimeout(() => { 
+            if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
+            if (typeof window.initInfoCardSwipeDown === 'function') window.initInfoCardSwipeDown();
+        }, 150);
     }
 
     function resetInactivityTimeout() {
@@ -3658,10 +3664,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return false; } 
         document.body.classList.remove('info-card-open');
         const card = document.getElementById('infoCard');
-        if (card) card.classList.add('opacity-0'); 
+        if (card) {
+            card.style.transform = '';
+            card.classList.add('opacity-0'); 
+        }
         if (infoCardHideTimer) clearTimeout(infoCardHideTimer);
         infoCardHideTimer = setTimeout(() => {
-            if (card) card.classList.add('hidden');
+            if (card) {
+                card.classList.add('hidden');
+                card.style.transform = '';
+            }
             document.body.classList.remove('info-card-open');
             const isDesk = window.innerWidth >= 640;
             if (isDesk && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map') && !isDrawerOpen && !isDailyDrawerOpen && !isPriorityDrawerOpen && !isFilterDrawerOpen) {
@@ -3678,6 +3690,72 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         return true;
     }
+
+    // === GESTO TÁCTIL: DESLIZAR HACIA ABAJO PARA CERRAR INFOCARD EN MÓVIL ===
+    window.initInfoCardSwipeDown = function() {
+        const card = document.getElementById('infoCard');
+        if (!card || card.__swipeBound) return;
+        card.__swipeBound = true;
+
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let canDragFromTop = false;
+
+        card.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const isFromHandle = !!e.target.closest('#infoCardDragHandle');
+            if (card.scrollTop <= 2 || isFromHandle) {
+                canDragFromTop = true;
+                startY = touch.clientY;
+                currentY = touch.clientY;
+                isDragging = false;
+            } else {
+                canDragFromTop = false;
+            }
+        }, { passive: true });
+
+        card.addEventListener('touchmove', (e) => {
+            if (!canDragFromTop || e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const deltaY = touch.clientY - startY;
+
+            if (deltaY > 8 && card.scrollTop <= 2) {
+                isDragging = true;
+                currentY = touch.clientY;
+                const translateY = Math.max(0, deltaY);
+                card.style.transform = `translateY(${translateY}px)`;
+                card.style.transition = 'none';
+            } else if (deltaY < 0) {
+                isDragging = false;
+                card.style.transform = '';
+            }
+        }, { passive: true });
+
+        const endDrag = () => {
+            if (!canDragFromTop) return;
+            canDragFromTop = false;
+            if (isDragging) {
+                isDragging = false;
+                const deltaY = currentY - startY;
+                card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease';
+                if (deltaY > 65) {
+                    card.style.transform = 'translateY(100%)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.transform = '';
+                        window.closeInfoCardSafe(true);
+                    }, 200);
+                } else {
+                    card.style.transform = '';
+                }
+            }
+        };
+
+        card.addEventListener('touchend', endDrag, { passive: true });
+        card.addEventListener('touchcancel', endDrag, { passive: true });
+    };
 
     
     // === LÓGICA DE TAREA POR PROYECTO Y TAREA GLOBAL ===
@@ -5355,10 +5433,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (infoCardHideTimer) { clearTimeout(infoCardHideTimer); infoCardHideTimer = null; }
       const card = document.getElementById('infoCard'); let item = null;
       if (card) {
+        card.style.transform = '';
+        card.style.opacity = '';
         card.scrollTop = 0;
         if (typeof card.scrollTo === 'function') {
           try { card.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch(e) {}
         }
+        if (typeof window.initInfoCardSwipeDown === 'function') window.initInfoCardSwipeDown();
       }
       const qTasks = document.getElementById('quickTasksList');
       if (qTasks) qTasks.scrollTop = 0;
@@ -5367,6 +5448,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       const infoNotes = document.getElementById('infoNotes');
       if (infoNotes) infoNotes.scrollTop = 0;
       document.getElementById('infoQuickEditContainer').classList.add('hidden'); document.getElementById('btnFullEditInfoCard').classList.add('hidden');
+      const btnHdrEditReset = document.getElementById('btnHeaderEditProject');
+      if (btnHdrEditReset) btnHdrEditReset.classList.add('hidden');
       document.getElementById('infoNotesContainer').classList.add('hidden');
       const modActions = document.getElementById('moduleActionsInfoCard');
       if (modActions) modActions.classList.add('hidden');
@@ -5577,6 +5660,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const prioColor = prioNum <= 3 ? 'text-[#ee6018] border-[#ee6018]/40' : (prioNum <= 6 ? 'text-[#eeeeee] border-[#3d3a39]' : 'text-[#8a8380] border-[#3d3a39]');
         document.getElementById('infoMetricValue').innerHTML = `<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border ${prioColor} font-medium">#${item.priority || 1} · ${prioTag}</span>`;
         document.getElementById('infoQuickEditContainer').classList.remove('hidden'); 
+        const accStatus = document.getElementById('acc-status-details');
+        if (accStatus) accStatus.open = true;
         
         const btnDrive = document.getElementById('infoDriveBtn');
         const btnInvgate = document.getElementById('infoInvgateBtn');
@@ -5638,6 +5723,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         if(currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') document.getElementById('btnFullEditInfoCard').classList.remove('hidden');
+        const btnHdrEdit = document.getElementById('btnHeaderEditProject');
+        if (btnHdrEdit) btnHdrEdit.classList.toggle('hidden', isLector);
         
         const assigneeSelect = document.getElementById('newQuickTaskAssignee');
         if (assigneeSelect) {
