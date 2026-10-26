@@ -72,7 +72,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v993">
+  <link rel="stylesheet" href="styles.css?v=20261026_v994">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -1066,7 +1066,7 @@
   </header>
   
   <!-- BARRA DE NAVEGACIÓN INFERIOR MÓVIL (DOCK ERGONÓMICO 5 PESTAÑAS: MAPA | CALENDARIO | EXPLORAR | TAREAS | ROL) -->
-  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#101010]/95 backdrop-blur-md border-t border-[#3d3a39] flex items-center justify-around z-40 select-none pb-safe">
+  <nav id="mobileBottomDock" aria-label="Navegación móvil principal" class="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#101010]/95 backdrop-blur-md border-t border-[#3d3a39] flex items-center justify-around z-[100000] select-none pb-safe">
     <!-- 1. MAPA -->
     <button type="button" id="mobileBtnViewModeMap" onclick="switchMainWorkspaceView('map')" class="flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group" title="Mapa Mental / Arquitectura">
       <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -1206,20 +1206,20 @@
         <!-- DERECHA: ACCIONES COMPLEMENTARIAS DEL TABLERO DE PRIORIDADES -->
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- LISTA LATERAL COMPACTA -->
-          <button type="button" onclick="togglePriorityDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
+          <button type="button" onclick="togglePriorityDrawer()" class="hidden sm:flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer" title="Ver lista compacta lateral de prioridades">
             <svg class="w-3.5 h-3.5 text-[#b8b3b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h7"/></svg>
             <span class="hidden sm:inline">Lista Lateral</span>
           </button>
 
           <!-- TAREAS DIARIAS Y NOTIFICACIONES (ANOTAR TAREA / ALERTAS) -->
-          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+          <button type="button" id="btnPriorityDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
             <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="hidden sm:inline">Tareas</span>
             <span id="priorityDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">0</span>
           </button>
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CABECERA -->
-          <div class="relative lector-hide" id="priorityCreateContainer">
+          <div class="relative lector-hide hidden sm:block" id="priorityCreateContainer">
             <button type="button" id="priorityCreateTrigger" onclick="window.togglePriorityCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
               <svg class="w-3.5 h-3.5 transition-transform duration-200" id="priorityCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
               <span class="hidden sm:inline">Nuevo</span>
@@ -1294,7 +1294,7 @@
             <button type="button" onclick="window.calendarPrev()" class="p-1.5 hover:bg-[#1d1a18] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer" title="Anterior">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </button>
-            <span id="calMonthYearLabel" class="px-2 sm:px-3 py-1 font-mono text-[11px] sm:text-xs font-semibold text-[#fafafa] uppercase tracking-wider min-w-[110px] sm:min-w-[130px] text-center select-none">
+            <span id="calMonthYearLabel" class="px-1.5 sm:px-3 py-1 font-mono text-[10px] sm:text-xs font-semibold text-[#fafafa] uppercase tracking-wider min-w-[78px] sm:min-w-[130px] text-center select-none truncate">
               Octubre 2026
             </span>
             <button type="button" onclick="window.calendarNext()" class="p-1.5 hover:bg-[#1d1a18] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer" title="Siguiente">
@@ -1305,17 +1305,17 @@
 
         <!-- CENTRO: SELECTOR DE MODO [ MES | SEMANA ] -->
         <div class="flex items-center p-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] shrink-0">
-          <button type="button" id="btnCalModeMonth" onclick="window.setCalendarViewMode('month')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
+          <button type="button" id="btnCalModeMonth" onclick="window.setCalendarViewMode('month')" class="px-2 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[9.5px] sm:text-[11px] tracking-[-0.24px] transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer">
             Mes
           </button>
-          <button type="button" id="btnCalModeWeek" onclick="window.setCalendarViewMode('week')" class="px-2.5 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
+          <button type="button" id="btnCalModeWeek" onclick="window.setCalendarViewMode('week')" class="px-2 sm:px-3 py-1 rounded-[3px] font-mono uppercase text-[9.5px] sm:text-[11px] tracking-[-0.24px] transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer">
             Semana
           </button>
         </div>
 
         <!-- DERECHA: ACCIONES DEL CALENDARIO (FILTRO, TAREAS Y + NUEVO) -->
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <select id="timelineConsultantFilter" onchange="window.setCalendarConsultantFilter(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] sm:text-[11px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[115px] sm:max-w-[150px] truncate">
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <select id="timelineConsultantFilter" onchange="window.setCalendarConsultantFilter(this.value)" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[9.5px] sm:text-[11px] rounded-[3px] px-1.5 sm:px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer max-w-[95px] sm:max-w-[150px] truncate">
             <option value="ALL">👤 Todos</option>
           </select>
           <span id="timelineCountBadge" class="hidden md:inline-block font-mono text-[10px] px-2 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-bold shrink-0">
@@ -1323,14 +1323,14 @@
           </span>
 
           <!-- TAREAS DIARIAS Y NOTIFICACIONES EN CALENDARIO -->
-          <button type="button" id="btnCalendarDailyTasks" onclick="toggleDailyDrawer()" class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
+          <button type="button" id="btnCalendarDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono text-[10px] uppercase transition cursor-pointer relative group" title="Notificaciones y Trabajo / Anotar Tarea Rápida">
             <svg class="w-3.5 h-3.5 text-[#ee6018] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             <span class="hidden sm:inline">Tareas</span>
             <span id="calendarDailyAlertsBadge" class="bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold hidden">0</span>
           </button>
 
           <!-- BOTÓN + NUEVO DESPLEGABLE EN CALENDARIO -->
-          <div class="relative lector-hide" id="calendarCreateContainer">
+          <div class="relative lector-hide hidden sm:block" id="calendarCreateContainer">
             <button type="button" id="calendarCreateTrigger" onclick="window.toggleCalendarCreateMenu()" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[3px] bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[10px] font-bold uppercase transition cursor-pointer" title="Crear nuevo proyecto, tarea, comisión o vacaciones">
               <svg class="w-3.5 h-3.5 transition-transform duration-200" id="calendarCreateIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
               <span class="hidden sm:inline">Nuevo</span>
@@ -3366,7 +3366,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v993"></script>
+  <script type="module" src="app.js?v=20261026_v994"></script>
 
 </body>
 </html>

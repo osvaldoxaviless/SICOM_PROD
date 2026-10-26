@@ -855,6 +855,40 @@ body:has(#filterDrawer:not(.translate-x-full)) #btnDailyTasks {
     }
 }
 
+@media (max-width: 767px) {
+    /* Desahogo inferior para Calendario y Tablero de Prioridades sobre el Dock móvil */
+    #timelineBoardView,
+    #priorityBoardView {
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Cajones móviles terminan sobre el dock para mantener la navegación siempre visible */
+    #dailyDrawer,
+    #filterDrawer,
+    #configDrawer {
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+        height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px)) !important;
+        max-height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Modal de Rol de Asistencia termina sobre el dock */
+    #attendanceModal > div {
+        margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 2px) !important;
+        height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px) - 6px) !important;
+        max-height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px) - 6px) !important;
+    }
+}
+
+/* Ocultamiento absoluto de la pastilla de filtro cuando no se está en el Mapa Mental */
+body:has(#timelineBoardView:not(.hidden)) #activeFilterPill,
+body:has(#priorityBoardView:not(.hidden)) #activeFilterPill {
+    display: none !important;
+}
+
+#mobileBottomDock {
+    z-index: 100000 !important;
+}
+
 @media (max-width: 1023px) {
     .desktop-left-branding {
         display: none !important;
@@ -1893,6 +1927,26 @@ body:has(#loginOverlay:not(.hidden)) #mobileBottomDock {
     #canvasQuickControls {
         bottom: calc(44px + env(safe-area-inset-bottom, 0px) + 8px) !important;
         left: 12px !important;
+    }
+
+    /* Desahogo inferior en landscape para Vistas y Cajones sobre el dock */
+    #timelineBoardView,
+    #priorityBoardView {
+        bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    #dailyDrawer,
+    #filterDrawer,
+    #configDrawer {
+        bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
+        height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px)) !important;
+        max-height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    #attendanceModal > div {
+        margin-bottom: calc(44px + env(safe-area-inset-bottom, 0px) + 2px) !important;
+        height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px) - 4px) !important;
+        max-height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px) - 4px) !important;
     }
 
     /* Ajustar infoCard como panel lateral derecho sobre el dock horizontal para no tapar el mapa */

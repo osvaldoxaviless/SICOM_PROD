@@ -7637,6 +7637,41 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
+    // === GESTOR GLOBAL DE ESTADO DE NAVEGACIÓN EN EL DOCK INFERIOR MÓVIL (5 ACCESOS PERMANENTES) ===
+    window.syncMobileDockState = function(activeMode) {
+        if (!activeMode) activeMode = mainWorkspaceViewMode || 'map';
+        const mInact = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group";
+        const mAct = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group";
+
+        const mBtnMap = document.getElementById('mobileBtnViewModeMap');
+        const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
+        const mBtnExplore = document.getElementById('mobileBtnBottomExplore');
+        const mBtnTasks = document.getElementById('mobileBtnBottomDailyTasks');
+        const mBtnAttendance = document.getElementById('mobileBtnBottomAttendance');
+        const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
+
+        if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
+        if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline' || activeMode === 'priority') ? mAct : mInact;
+        if (mBtnExplore) mBtnExplore.className = (activeMode === 'explore') ? mAct : mInact;
+        if (mBtnTasks) mBtnTasks.className = (activeMode === 'tasks') ? mAct : mInact;
+        if (mBtnAttendance) mBtnAttendance.className = (activeMode === 'attendance') ? mAct : mInact;
+        if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
+
+        const dockIndMap = document.getElementById('mobileDockIndicatorMap');
+        const dockIndTimeline = document.getElementById('mobileDockIndicatorTimeline');
+        const dockIndExplore = document.getElementById('mobileDockIndicatorExplore');
+        const dockIndTasks = document.getElementById('mobileDockIndicatorTasks');
+        const dockIndAttendance = document.getElementById('mobileDockIndicatorAttendance');
+        const dockIndPrio = document.getElementById('mobileDockIndicatorPriority');
+
+        if (dockIndMap) dockIndMap.classList.toggle('hidden', activeMode !== 'map');
+        if (dockIndTimeline) dockIndTimeline.classList.toggle('hidden', activeMode !== 'timeline' && activeMode !== 'priority');
+        if (dockIndExplore) dockIndExplore.classList.toggle('hidden', activeMode !== 'explore');
+        if (dockIndTasks) dockIndTasks.classList.toggle('hidden', activeMode !== 'tasks');
+        if (dockIndAttendance) dockIndAttendance.classList.toggle('hidden', activeMode !== 'attendance');
+        if (dockIndPrio) dockIndPrio.classList.toggle('hidden', activeMode !== 'priority');
+    };
+
     window.switchMainWorkspaceView = function(mode) {
         mainWorkspaceViewMode = mode;
         const btnMap = document.getElementById('btnViewModeMap');
@@ -7650,6 +7685,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const btnDaily = document.getElementById('btnDailyTasks');
         const speedDial = document.getElementById('speedDial');
 
+        // Cerrar cajones o modales flotantes al cambiar de vista desde el dock
+        if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen && typeof window.closeDailyDrawer === 'function') {
+            window.closeDailyDrawer();
+            isDailyDrawerOpen = false;
+        }
+        if (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen && typeof window.closeFilterDrawer === 'function') {
+            window.closeFilterDrawer();
+        }
+        if (typeof window.closeAttendanceModal === 'function') {
+            const attM = document.getElementById('attendanceModal');
+            if (attM && !attM.classList.contains('hidden')) window.closeAttendanceModal();
+        }
+        if (typeof isDrawerOpen !== 'undefined' && isDrawerOpen && typeof window.closeConfigDrawer === 'function') {
+            window.closeConfigDrawer();
+        }
+
         const setActiveTabStyle = (activeMode) => {
             // Conmutador de escritorio (Header)
             const dInact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
@@ -7658,35 +7709,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
 
-            // Barra de navegación inferior móvil (Estilo Dock / Instagram - 5 accesos)
-            const mBtnMap = document.getElementById('mobileBtnViewModeMap');
-            const mBtnTimeline = document.getElementById('mobileBtnViewModeTimeline');
-            const mBtnExplore = document.getElementById('mobileBtnBottomExplore');
-            const mBtnTasks = document.getElementById('mobileBtnBottomDailyTasks');
-            const mBtnAttendance = document.getElementById('mobileBtnBottomAttendance');
-            const mBtnPrio = document.getElementById('mobileBtnViewModePriority');
-
-            const mInact = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#8a8380] hover:text-[#eeeeee] transition cursor-pointer relative group";
-            const mAct = "flex-1 flex flex-col items-center justify-center py-1 px-1 font-mono uppercase text-[9px] tracking-[-0.24px] text-[#fafafa] font-medium transition cursor-pointer relative group";
-
-            if (mBtnMap) mBtnMap.className = (activeMode === 'map') ? mAct : mInact;
-            if (mBtnTimeline) mBtnTimeline.className = (activeMode === 'timeline' || activeMode === 'priority') ? mAct : mInact;
-            if (mBtnExplore) mBtnExplore.className = mInact;
-            if (mBtnTasks) mBtnTasks.className = mInact;
-            if (mBtnAttendance) mBtnAttendance.className = mInact;
-            if (mBtnPrio) mBtnPrio.className = (activeMode === 'priority') ? mAct : mInact;
-
-            const dockIndMap = document.getElementById('mobileDockIndicatorMap');
-            const dockIndTimeline = document.getElementById('mobileDockIndicatorTimeline');
-            const dockIndExplore = document.getElementById('mobileDockIndicatorExplore');
-            const dockIndTasks = document.getElementById('mobileDockIndicatorTasks');
-            const dockIndAttendance = document.getElementById('mobileDockIndicatorAttendance');
-            const dockIndPrio = document.getElementById('mobileDockIndicatorPriority');
-
-            if (dockIndMap) dockIndMap.classList.toggle('hidden', activeMode !== 'map');
-            if (dockIndTimeline) dockIndTimeline.classList.toggle('hidden', activeMode !== 'timeline' && activeMode !== 'priority');
-            if (dockIndExplore) dockIndExplore.classList.add('hidden');
-            if (dockIndPrio) dockIndPrio.classList.toggle('hidden', activeMode !== 'priority');
+            // Sincronizar dock inferior móvil (5 accesos)
+            window.syncMobileDockState(activeMode);
 
             // Control flotante de centrado rápido sobre el canvas
             const quickRecenter = document.getElementById('canvasQuickControls');
@@ -10283,6 +10307,7 @@ window.closeDailyDrawer = function() {
         drawer.classList.add('-translate-x-full');
     }
     isDailyDrawerOpen = false;
+    if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
     
     // Restaurar botones al cerrar SOLO si estamos en escritorio y en el mapa mental
     const btnDaily = document.getElementById('btnDailyTasks');
@@ -10308,6 +10333,7 @@ window.toggleDailyDrawer = function() {
         if(isDailyDrawerOpen) {
             window.closeDailyDrawer();
             isDailyDrawerOpen = false;
+            if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
             
             const dock = document.getElementById('canvasToolsDock');
             const speedDial = document.getElementById('speedDial');
@@ -10326,8 +10352,16 @@ window.toggleDailyDrawer = function() {
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
             if (typeof window.closeCanvasSpeedDial === 'function') window.closeCanvasSpeedDial();
             if (window.innerWidth < 768) window.closeInfoCardSafe();
+            if (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen && typeof window.closeFilterDrawer === 'function') {
+                window.closeFilterDrawer();
+            }
+            if (typeof window.closeAttendanceModal === 'function') {
+                const attM = document.getElementById('attendanceModal');
+                if (attM && !attM.classList.contains('hidden')) window.closeAttendanceModal();
+            }
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
+            if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('tasks');
             
             // Ocultar botones flotantes para que no traslapen el drawer
             const dock = document.getElementById('canvasToolsDock');
@@ -11403,6 +11437,7 @@ window.renderDailyTasks = function() {
             isFilterDrawerOpen = false;
             const indExplore = document.getElementById('mobileDockIndicatorExplore');
             if (indExplore) indExplore.classList.add('hidden');
+            if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
             if (window._lastFilteredBounds) {
                 setTimeout(() => window.focusFilteredMindMap(), 60);
             }
@@ -11415,8 +11450,16 @@ window.renderDailyTasks = function() {
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();
+            if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen && typeof window.closeDailyDrawer === 'function') {
+                window.closeDailyDrawer();
+            }
+            if (typeof window.closeAttendanceModal === 'function') {
+                const attM = document.getElementById('attendanceModal');
+                if (attM && !attM.classList.contains('hidden')) window.closeAttendanceModal();
+            }
             document.getElementById('filterDrawer').classList.remove('translate-x-full');
             isFilterDrawerOpen = true;
+            if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('explore');
             window.populateAdvFilters();
             if (typeof window.updateFocusModeBtnUI === 'function') window.updateFocusModeBtnUI();
             const indExplore = document.getElementById('mobileDockIndicatorExplore');
@@ -11870,6 +11913,12 @@ window.renderDailyTasks = function() {
         const pill = document.getElementById('activeFilterPill');
         const textSpan = document.getElementById('activeFilterPillText');
         if (!pill || !textSpan) return;
+
+        // La pastilla de filtro solo debe ser visible en el Mapa Mental
+        if (typeof mainWorkspaceViewMode !== 'undefined' && mainWorkspaceViewMode !== 'map') {
+            pill.classList.add('hidden');
+            return;
+        }
 
         const isModAll = activeFilterModules.includes('ALL') || activeFilterModules.length === 0;
         const isConsAll = activeFilterConsultants.includes('ALL') || activeFilterConsultants.length === 0;
@@ -12899,12 +12948,26 @@ window.renderDailyTasks = function() {
         const m = document.getElementById('attendanceModal');
         if (!m) return;
         
+        // Si ya está abierto en móvil, conmutar (cerrar)
+        if (!m.classList.contains('hidden') && window.innerWidth < 768) {
+            window.closeAttendanceModal();
+            return;
+        }
+
+        if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen && typeof window.closeDailyDrawer === 'function') {
+            window.closeDailyDrawer();
+        }
+        if (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen && typeof window.closeFilterDrawer === 'function') {
+            window.closeFilterDrawer();
+        }
+
         if (!document.getElementById('attSelMonth').value) document.getElementById('attSelMonth').value = "10";
         if (!document.getElementById('attSelYear').value) document.getElementById('attSelYear').value = "2026";
         if (!document.getElementById('attSelQuincena').value) document.getElementById('attSelQuincena').value = "Q1";
 
         m.classList.remove('hidden');
         setTimeout(() => m.classList.remove('opacity-0'), 10);
+        if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('attendance');
 
         if (window.innerWidth < 768) {
             window.setAttendanceViewTab('consultant');
@@ -12920,6 +12983,7 @@ window.renderDailyTasks = function() {
         m.classList.add('opacity-0');
         setTimeout(() => m.classList.add('hidden'), 200);
         window.closeCellStatusPopover();
+        if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
     };
 
     window.changeAttendancePeriod = function() {
@@ -13260,7 +13324,7 @@ window.renderDailyTasks = function() {
             <table class="att-matrix-table min-w-[780px] md:min-w-0 w-full h-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-[#141211] border-b border-[#3d3a39] font-mono text-[9px] text-[#8a8380] uppercase tracking-[-0.24px]">
-                        <th class="py-1 px-2 sticky top-0 left-0 bg-[#141211] z-30 border-r border-[#3d3a39]">Colaborador / Equipo</th>
+                        <th class="py-1 px-1.5 sm:px-2 sticky top-0 left-0 bg-[#141211] z-30 border-r border-[#3d3a39] max-w-[85px] sm:max-w-none"><span class="sm:hidden font-mono text-[8.5px]">Equipo</span><span class="hidden sm:inline">Colaborador / Equipo</span></th>
                         ${workDays.map((wd, idx) => {
                             const isMonday = wd.dowName === 'Lun' && idx > 0;
                             const isToday = wd.dateStr === todayStr;
@@ -13278,6 +13342,8 @@ window.renderDailyTasks = function() {
         `;
 
         list.forEach(cName => {
+            const nameParts = cName.trim().split(/\s+/);
+            const shortName = nameParts.length > 1 ? `${nameParts[0]} ${nameParts[1][0]}.` : nameParts[0];
             const cMeta = consultants[cName] || defaultConsultantMetadata[cName] || {};
             const empNo = cMeta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '';
             const jobTitle = cMeta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || cMeta.title || 'Consultor';
@@ -13328,17 +13394,18 @@ window.renderDailyTasks = function() {
 
             html += `
                 <tr class="hover:bg-[#161413] transition-colors border-b border-[#1d1a18]">
-                    <td class="py-0.5 px-2 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39] align-middle" title="${escapeHtml(cName)} · ${escapeHtml(jobTitle)} · Horario: ${escapeHtml(schedule)}">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-5 h-5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[8px] text-[#eeeeee] shrink-0">
+                    <td class="py-0.5 px-1 sm:px-2 sticky left-0 bg-[#101010] z-10 border-r border-[#3d3a39] align-middle max-w-[85px] sm:max-w-none" title="${escapeHtml(cName)} · ${escapeHtml(jobTitle)} · Horario: ${escapeHtml(schedule)}">
+                        <div class="flex items-center gap-1 sm:gap-1.5">
+                            <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-[2px] sm:rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-[7px] sm:text-[8px] text-[#eeeeee] shrink-0">
                                 ${cName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div class="min-w-0 flex-1 truncate">
                                 <div class="flex items-center gap-1 truncate leading-tight">
-                                    <span class="font-medium text-[#eeeeee] truncate text-[10.5px]">${escapeHtml(cName)}</span>
+                                    <span class="sm:hidden font-medium text-[#eeeeee] truncate text-[9px]">${escapeHtml(shortName)}</span>
+                                    <span class="hidden sm:inline font-medium text-[#eeeeee] truncate text-[10.5px]">${escapeHtml(cName)}</span>
                                     ${empNo ? `<span class="hidden sm:inline font-mono text-[7.5px] text-[#8a8380] bg-[#161413] border border-[#2d2a29] px-1 rounded-[2px] shrink-0">${empNo}</span>` : ''}
                                 </div>
-                                <div class="text-[8px] text-[#8a8380] truncate font-mono leading-tight">
+                                <div class="hidden sm:block text-[8px] text-[#8a8380] truncate font-mono leading-tight">
                                     ${escapeHtml(jobTitle)} <span class="text-[#3d3a39]">·</span> <span class="text-[#10b981]">${escapeHtml(lead.split(' ')[0])}</span>
                                 </div>
                             </div>
@@ -15732,7 +15799,7 @@ document.addEventListener('click', function(e) {
 
             // Cuadrícula de días
             const numRows = gridDays.length / 7;
-            html += `<div class="flex-1 grid grid-cols-7 grid-rows-${numRows} min-h-0 border-b border-[#3d3a39] divide-x divide-y divide-[#24211f] overflow-y-auto">`;
+            html += `<div class="flex-1 grid grid-cols-7 min-h-0 border-b border-[#3d3a39] divide-x divide-y divide-[#24211f] overflow-y-auto" style="grid-template-rows: repeat(${numRows}, minmax(0, 1fr));">`;
 
             gridDays.forEach(gd => {
                 const isToday = gd.dateStr === todayStr;
