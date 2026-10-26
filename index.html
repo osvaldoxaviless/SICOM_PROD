@@ -240,7 +240,7 @@
   </script>
 
   <!-- MODAL MANUAL DE USUARIO -->
-  <div id="manualModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="manualModal" onclick="if(event.target === this) closeManual()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-2xl w-full mx-4 transform scale-95 transition-transform duration-200 max-h-[85vh] overflow-y-auto scrollbar-thin relative">
           <button onclick="closeManual()" class="absolute top-6 right-6 text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] hover:border-[#eeeeee] p-2 rounded-[3px] border border-[#3d3a39]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
           <div class="flex items-center gap-3 mb-6 pr-10">
@@ -258,7 +258,7 @@
   </div>
 
   <!-- MODAL RETROALIMENTACIÓN TAREA -->
-  <div id="taskFeedbackModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="taskFeedbackModal" onclick="if(event.target === this) closeTaskFeedbackModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
@@ -282,7 +282,7 @@
   </div>
 
   <!-- MODALES SEGUROS -->
-  <div id="deleteConfirmModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="deleteConfirmModal" onclick="if(event.target === this) closeDeleteModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
           <div class="flex items-center justify-center w-10 h-10 rounded-[3px] bg-[#1d1a18] text-[#ee6018] mb-5 border border-[#ee6018]/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
           <h3 id="deleteModalTitle" class="text-xl font-normal text-[#eeeeee] mb-2">¿Estás seguro?</h3>
@@ -294,7 +294,7 @@
       </div>
   </div>
   
-  <div id="passwordModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="passwordModal" onclick="if(event.target === this) closePasswordModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
           <div class="flex items-center gap-2 mb-3">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
@@ -311,7 +311,7 @@
       </div>
   </div>
   
-  <div id="renameModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="renameModal" onclick="if(event.target === this) closeRenameModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
           <h3 class="text-xl font-normal text-[#eeeeee] mb-2">Renombrar Consultor</h3>
           <p class="text-xs text-[#8a8380] mb-5">El cambio se aplicará a todos sus proyectos asignados.</p>
@@ -325,7 +325,7 @@
   </div>
 
   <!-- MODAL EDITAR PERFIL COMPLETO CONSULTOR -->
-  <div id="editConsultantModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="editConsultantModal" onclick="if(event.target === this) closeEditConsultantModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-7 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
@@ -462,7 +462,7 @@
   </div>
 
   <!-- MODAL ASIGNAR TAREA POR PROYECTO -->
-  <div id="globalTaskModal" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="globalTaskModal" onclick="if(event.target === this) closeGlobalTaskModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div class="liquid-glass rounded-[10px] p-6 sm:p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
@@ -529,7 +529,7 @@
        ========================================================================== -->
 
   <!-- MODAL PRINCIPAL: ROL DE ASISTENCIA & PRENÓMINA QUINCENAL (FACTORY INSTRUMENT SURFACE) -->
-  <div id="attendanceModal" class="fixed inset-0 z-[99990] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-1 sm:p-2">
+  <div id="attendanceModal" onclick="if(event.target === this) closeAttendanceModal()" class="fixed inset-0 z-[99990] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-1 sm:p-2">
       <div class="bg-[#101010] rounded-[10px] w-full max-w-[99vw] sm:max-w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           <!-- HEADER COMPACTO DE LA TORRE DE ASISTENCIA (1 SOLA LÍNEA) -->
           <div class="px-3 py-1.5 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-1.5 shrink-0">
@@ -660,7 +660,7 @@
   </div>
 
   <!-- MODAL: REGISTRAR COMISIÓN RÁPIDA (FACTORY DIALOG) -->
-  <div id="commissionModal" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150">
+  <div id="commissionModal" onclick="if(event.target === this) closeCommissionModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150">
       <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-6 sm:p-7 max-w-md w-full mx-4 transform scale-95 transition-transform duration-150">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
@@ -729,7 +729,7 @@
   </div>
 
   <!-- MODAL: SOLICITUD DE VACACIONES (FACTORY DIALOG) -->
-  <div id="vacationModal" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150">
+  <div id="vacationModal" onclick="if(event.target === this) closeVacationModal()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150">
       <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-6 sm:p-7 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-150 max-h-[92vh] overflow-y-auto">
           <div class="flex items-center gap-2 mb-2">
               <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>

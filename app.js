@@ -1369,27 +1369,93 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
-    // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K) y Cierre de Ventanas (Esc)
+    // Acceso directo global para Búsqueda (Ctrl+K o Cmd+K) y Cierre Universal en Cascada (Esc LIFO)
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            // 1. Popovers, dropdowns y menús contextuales activos
+            if (typeof window.closeCanvasSpeedDial === 'function') {
+                const spd = document.getElementById('canvasSpeedDialMenu') || document.getElementById('speedDialMenu');
+                if (spd && !spd.classList.contains('hidden')) { window.closeCanvasSpeedDial(); return; }
+            }
+            const admDrop = document.getElementById('drawerAdminMenuDropdown');
+            if (admDrop && !admDrop.classList.contains('hidden')) { admDrop.classList.add('hidden'); return; }
+
+            const pop = document.getElementById('cellStatusPopover');
+            if (pop && !pop.classList.contains('hidden')) { window.closeCellStatusPopover(); return; }
+
+            const statusTooltip = document.getElementById('statusTooltipPopover');
+            if (statusTooltip && !statusTooltip.classList.contains('hidden')) { statusTooltip.classList.add('hidden'); return; }
+
+            // 2. Modales emergentes (LIFO - ventanas modales)
+            const delMod = document.getElementById('deleteConfirmModal');
+            if (delMod && !delMod.classList.contains('hidden')) { window.closeDeleteModal(); return; }
+
+            const passMod = document.getElementById('passwordModal');
+            if (passMod && !passMod.classList.contains('hidden')) { window.closePasswordModal(); return; }
+
+            const fbMod = document.getElementById('taskFeedbackModal');
+            if (fbMod && !fbMod.classList.contains('hidden')) { window.closeTaskFeedbackModal(); return; }
+
+            const gtMod = document.getElementById('globalTaskModal');
+            if (gtMod && !gtMod.classList.contains('hidden')) { window.closeGlobalTaskModal(); return; }
+
+            const renMod = document.getElementById('renameModal');
+            if (renMod && !renMod.classList.contains('hidden')) { window.closeRenameModal(); return; }
+
+            const editConsMod = document.getElementById('editConsultantModal');
+            if (editConsMod && !editConsMod.classList.contains('hidden')) { window.closeEditConsultantModal(); return; }
+
+            const manMod = document.getElementById('manualModal');
+            if (manMod && !manMod.classList.contains('hidden')) { window.closeManual(); return; }
+
+            const comMod = document.getElementById('commissionModal');
+            if (comMod && !comMod.classList.contains('hidden')) { window.closeCommissionModal(); return; }
+
+            const vacMod = document.getElementById('vacationModal');
+            if (vacMod && !vacMod.classList.contains('hidden')) { window.closeVacationModal(); return; }
+
+            const pwaMod = document.getElementById('pwaInstallGuideModal');
+            if (pwaMod && !pwaMod.classList.contains('hidden')) { window.closePwaInstallGuideModal(); return; }
+
             const calDayMod = document.getElementById('calendarDayModal');
             if (calDayMod && !calDayMod.classList.contains('hidden')) {
                 if (typeof window.closeCalendarDayModal === 'function') window.closeCalendarDayModal();
                 return;
             }
+
             const execMod = document.getElementById('executiveDashboardModal');
             if (execMod && !execMod.classList.contains('hidden')) {
                 window.closeExecutiveDashboard();
                 return;
             }
-            const pop = document.getElementById('cellStatusPopover');
-            if (pop && !pop.classList.contains('hidden')) {
-                window.closeCellStatusPopover();
-                return;
-            }
+
             const att = document.getElementById('attendanceModal');
             if (att && !att.classList.contains('hidden')) {
                 window.closeAttendanceModal();
+                return;
+            }
+
+            // 3. Paneles deslizantes / Drawers laterales
+            const cfg = document.getElementById('configDrawer');
+            if (cfg && !cfg.classList.contains('translate-x-full')) { window.closeConfigDrawer(); return; }
+
+            const dly = document.getElementById('dailyDrawer');
+            if (dly && !dly.classList.contains('-translate-x-full')) { window.closeDailyDrawer(); return; }
+
+            const pri = document.getElementById('priorityDrawer');
+            if (pri && !pri.classList.contains('translate-x-full')) { window.closePriorityDrawer(); return; }
+
+            const flt = document.getElementById('filterDrawer');
+            if (flt && !flt.classList.contains('translate-x-full')) {
+                if (typeof window.closeFilterDrawer === 'function') window.closeFilterDrawer();
+                else window.toggleFilterDrawer();
+                return;
+            }
+
+            // 4. Búsqueda móvil activa
+            if (window.isMobileSearchOpen && window.isMobileSearchOpen()) {
+                if (typeof window.closeMobileSearch === 'function') window.closeMobileSearch(false);
+                else window.toggleSearch();
                 return;
             }
         }
@@ -2733,7 +2799,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
                 const isAuthor = Boolean(noteToDelete.by && localAuthor && noteToDelete.by.trim().toLowerCase() === localAuthor.trim().toLowerCase());
                 if (!isSuper && !isAuthor) {
-                    alert('Solo el autor de la nota o un supervisor pueden eliminarla.');
+                    window.showToast('⚠️ Solo el autor de la nota o un supervisor pueden eliminarla.', true);
                     return;
                 }
                 if (!confirm('¿Deseas eliminar este comentario del foro?')) return;
@@ -11122,13 +11188,19 @@ window.renderDailyTasks = function() {
         window.animateCameraTo(targetTx, targetTy, targetScale, 520);
     };
 
-    window.toggleFilterDrawer = function() {
+    window.closeFilterDrawer = function() {
         if(isFilterDrawerOpen) {
             document.getElementById('filterDrawer').classList.add('translate-x-full');
             isFilterDrawerOpen = false;
             if (window._lastFilteredBounds) {
                 setTimeout(() => window.focusFilteredMindMap(), 60);
             }
+        }
+    };
+
+    window.toggleFilterDrawer = function() {
+        if(isFilterDrawerOpen) {
+            window.closeFilterDrawer();
         } else {
             if(isDrawerOpen) window.closeConfigDrawer();
             if(isPriorityDrawerOpen) window.closePriorityDrawer();

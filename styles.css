@@ -502,6 +502,17 @@ header {
     box-shadow: none;
 }
 
+@media (max-width: 640px) {
+    #toast {
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        font-size: 11px;
+        padding: 8px 14px;
+        max-width: 90vw;
+        text-align: center;
+        white-space: normal;
+    }
+}
+
 /* ESTILOS DE SCROLL Y ACORDEONES PARA NOTIFICACIONES Y TRABAJO */
 #dailyTasksContainer {
     scrollbar-width: thin;
