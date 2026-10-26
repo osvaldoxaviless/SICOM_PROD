@@ -1,7 +1,7 @@
 {
   "name": "sicom-prod",
   "version": "2.0.0",
-  "description": "OS/V — Sistema Operativo de Operaciones, Seguimiento & Validación // STGT",
+  "description": "EO/SA — Enterprise Operations & Systems Architecture // STGT",
   "private": true,
   "scripts": {
     "start": "node -e \"console.log('SICOM Static / Vercel API')\""

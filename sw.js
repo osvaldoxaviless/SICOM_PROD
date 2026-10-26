@@ -1,10 +1,10 @@
 /**
- * OS/V — Service Worker para PWA & Notificaciones Push (Teléfono & Chrome)
- * OS/V — Sistema Operativo de Operaciones, Seguimiento & Validación // STGT
+ * EO/SA — Service Worker para PWA & Notificaciones Push (Teléfono & Chrome)
+ * EO/SA — Enterprise Operations & Systems Architecture // STGT
  */
 
-const SW_VERSION = '20261026_v988';
-const STATIC_CACHE_NAME = `osv-cache-${SW_VERSION}`;
+const SW_VERSION = '20261026_v989';
+const STATIC_CACHE_NAME = `eosa-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA
 const PRECACHE_ASSETS = [
@@ -86,12 +86,12 @@ self.addEventListener('fetch', (event) => {
 // Receptor de notificaciones Push del Sistema Operativo
 self.addEventListener('push', (event) => {
     let payload = {
-        title: '🔔 Alerta OS/V',
+        title: '🔔 Alerta EO/SA',
         body: 'Nueva actualización en el tablero de operaciones.',
         icon: '/icon-192.png',
         badge: '/icon-192.png',
         url: '/',
-        tag: 'osv-alert'
+        tag: 'eosa-alert'
     };
 
     if (event.data) {
@@ -113,10 +113,10 @@ self.addEventListener('push', (event) => {
             url: payload.url || '/',
             timestamp: Date.now()
         },
-        tag: payload.tag || 'osv-alert',
+        tag: payload.tag || 'eosa-alert',
         renotify: true,
         actions: [
-            { action: 'open', title: 'Abrir OS/V' }
+            { action: 'open', title: 'Abrir EO/SA' }
         ]
     };
 
@@ -135,7 +135,7 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // Si ya hay una pestaña de OS/V abierta, enfocarla
+            // Si ya hay una pestaña de EO/SA abierta, enfocarla
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if ('focus' in client) {

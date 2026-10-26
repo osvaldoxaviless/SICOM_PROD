@@ -1,6 +1,6 @@
 {
-  "name": "OS/V — Operaciones, Seguimiento & Validación",
-  "short_name": "OS/V",
+  "name": "EO/SA — Enterprise Operations & Systems Architecture",
+  "short_name": "EO/SA",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -8,7 +8,7 @@
   "orientation": "any",
   "background_color": "#101010",
   "theme_color": "#101010",
-  "description": "Sistema Operativo de Operaciones, Seguimiento & Validación // STGT",
+  "description": "Enterprise Operations & Systems Architecture // STGT",
   "categories": [
     "business",
     "productivity",

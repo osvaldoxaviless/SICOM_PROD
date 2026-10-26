@@ -58,17 +58,17 @@ test('7. app.js: Color de etiqueta de Supervisor en login legible contra tarjeta
 });
 
 test('8. index.html & CSS: Proporciones de tarjeta idénticas a referencia visual de escritorio (36px SICOM, STGT badge, padding completo)', () => {
-    assert(html.includes('text-[36px] font-normal text-[#101010] mb-1 tracking-[-1.12px] leading-[1.1]">OS/V</h2>'),
+    assert(html.includes('text-[36px] font-normal text-[#101010] mb-1 tracking-[-1.12px] leading-[1.1]">EO/SA</h2>'),
         'Encabezado SICOM 36px preservado');
-    assert(html.includes('SISTEMA OPERATIVO // STGT'),
+    assert(html.includes('ENTERPRISE OPERATIONS // STGT'),
         'Sub-etiqueta táctica CONTROL SURFACE // STGT preservada');
     assert(html.includes('id="loginLogo"') && html.includes('STGT'),
         'Badge oscuro STGT preservado');
 });
 
 test('9. Cache buster unificado en versión v=20261025_v976', () => {
-    assert(html.includes('styles.css?v=20261026_v988'), 'Falta v988 en styles.css');
-    assert(html.includes('app.js?v=20261026_v988'), 'Falta v988 en app.js');
+    assert(html.includes('styles.css?v=20261026_v989'), 'Falta v989 en styles.css');
+    assert(html.includes('app.js?v=20261026_v989'), 'Falta v989 en app.js');
 });
 
 console.log(`\n====================================================`);
