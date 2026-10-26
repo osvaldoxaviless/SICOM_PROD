@@ -2104,11 +2104,29 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.renderDailyTasks();
     };
 
+    let toastTimer = null;
+    let toastCleanupTimer = null;
     window.showToast = function(msg, isError = false) {
-        const t = document.getElementById('toast'); t.textContent = msg;
-        if(isError) t.classList.add('error'); else t.classList.remove('error');
-        t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
-    }
+        const t = document.getElementById('toast');
+        if (!t) return;
+        if (toastTimer) clearTimeout(toastTimer);
+        if (toastCleanupTimer) clearTimeout(toastCleanupTimer);
+
+        t.textContent = msg;
+        if (isError) t.classList.add('error');
+        else t.classList.remove('error');
+
+        t.classList.add('show');
+        toastTimer = setTimeout(() => {
+            t.classList.remove('show');
+            toastCleanupTimer = setTimeout(() => {
+                if (!t.classList.contains('show')) {
+                    t.classList.remove('error');
+                    t.textContent = '';
+                }
+            }, 250);
+        }, 3200);
+    };
 
     window.setConnectionStatus = function(status) {
         const dot = document.getElementById('connectionStatusDot');
