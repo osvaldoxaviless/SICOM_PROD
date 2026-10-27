@@ -79,7 +79,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v1005">
+  <link rel="stylesheet" href="styles.css?v=20261026_v1006">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -914,7 +914,7 @@
         <span class="font-mono text-sm font-bold tracking-[0.2em] text-[#fafafa]">EO<span class="text-[#ee6018] font-black">/</span>SA</span>
       </div>
 
-      <!-- SELECTOR DE VISTA PRINCIPAL (ESTILO ODOO: MAPA | PRIORIDADES | CRONOGRAMA) -->
+      <!-- SELECTOR DE VISTA PRINCIPAL (LIMPIO Y COMPACTO: MAPA | PRIORIDADES | CALENDARIO) -->
       <div id="mainViewSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] shrink-0">
         <button type="button" id="btnViewModeMap" onclick="switchMainWorkspaceView('map')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer" title="Vista de Arquitectura (Mapa Mental)">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -928,11 +928,9 @@
           <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span class="hidden sm:inline">Calendario</span>
         </button>
-        <button type="button" id="btnViewModeTasks" onclick="toggleDailyDrawer()" class="hidden px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative" title="Notificaciones y Trabajo (Tareas y Alertas)">
-          <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-          <span class="hidden sm:inline">Tareas</span>
-          <span id="desktopHeaderDailyAlertsBadge" class="hidden font-mono text-[9px] bg-[#ee6018] text-[#fafafa] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold">0</span>
-        </button>
+        <!-- Placeholders invisibles de tareas (gestionadas exclusivamente en drawer inferior) -->
+        <span id="btnViewModeTasks" class="hidden" style="display:none !important;"></span>
+        <span id="desktopHeaderDailyAlertsBadge" class="hidden" style="display:none !important;"></span>
       </div>
 
       <!-- SEPARADOR DISCRETO IZQUIERDA -->
@@ -3444,44 +3442,48 @@
           <!-- Área Principal de Trabajo Dividida -->
           <div id="docSignScrollContainer" class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3.5 overflow-y-auto pr-1 scroll-smooth">
               
-              <!-- Columna Izquierda: Visor PDF de Última Página & Pad de Firma (7 cols) -->
+              <!-- Columna Izquierda: Visor PDF de la Hoja de Firmas & Pad de Firma (7 cols) -->
               <div class="lg:col-span-7 flex flex-col gap-2.5 min-h-0">
                   
-                  <!-- Subir PDF / Estado de Archivo -->
-                  <div class="bg-[#101010] p-2.5 rounded-[8px] border border-[#3d3a39]">
-                      <div class="flex items-center justify-between gap-2 mb-1.5">
-                          <span class="font-mono text-[10px] text-[#b8b3b0] uppercase font-semibold">1. Documento PDF Oficial</span>
-                          <span id="docSignPdfInfo" class="font-mono text-[9px] text-[#8a8380]">Ningún PDF cargado</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                          <label class="pill-btn py-1.5 px-3 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#eeeeee] font-mono text-[10px] uppercase cursor-pointer transition flex items-center gap-1.5 shrink-0">
+                  <!-- Subir PDF / Navegación de Páginas -->
+                  <div class="bg-[#101010] p-2 rounded-[8px] border border-[#3d3a39] flex flex-wrap items-center justify-between gap-2 shrink-0">
+                      <div class="flex items-center gap-2 min-w-0">
+                          <label class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#eeeeee] font-mono text-[10px] uppercase cursor-pointer transition flex items-center gap-1.5 shrink-0">
                               <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                               <span>Subir PDF</span>
                               <input type="file" id="docSignPdfInput" accept="application/pdf" onchange="handleDocPdfFileSelected(event)" class="hidden">
                           </label>
-                          <div id="docSignPdfNameContainer" class="flex-1 min-w-0 text-xs text-[#8a8380] truncate font-mono">
+                          <div id="docSignPdfNameContainer" class="text-xs text-[#8a8380] truncate font-mono max-w-[200px] sm:max-w-[260px]">
                               Arrastra o sube el PDF para firmar
                           </div>
                       </div>
+                      
+                      <!-- Paginador del Visor -->
+                      <div id="docSignPaginationControls" class="hidden items-center gap-1 font-mono text-[10px] text-[#b8b3b0]">
+                          <button type="button" onclick="changeDocSignPage(-1)" class="px-1.5 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Anterior">◀</button>
+                          <span class="px-1 text-[#8a8380]">Pág <span id="docSignCurrentPageNum" class="text-[#eeeeee] font-bold">1</span> de <span id="docSignTotalPagesNum">1</span></span>
+                          <button type="button" onclick="changeDocSignPage(1)" class="px-1.5 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Siguiente">▶</button>
+                      </div>
                   </div>
 
-                  <!-- Visor Interactivo de Última Página -->
-                  <div class="flex-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-2 flex flex-col min-h-[220px] max-h-[360px] relative overflow-hidden">
+                  <!-- Visor Interactivo de la Hoja de Firmas -->
+                  <div class="flex-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-2 flex flex-col min-h-[300px] max-h-[460px] relative overflow-hidden">
                       <div class="flex items-center justify-between pb-1 px-1 border-b border-[#1d1a18] text-[10px] font-mono text-[#8a8380] uppercase shrink-0">
-                          <span id="docSignViewerPageLabel">Vista Previa: Última Página</span>
-                          <span class="text-[#ee6018] flex items-center gap-1">📍 Haz clic en la hoja para posicionar la firma</span>
+                          <span id="docSignViewerPageLabel">Hoja de Firmas Oficial</span>
+                          <span class="text-[#ee6018] flex items-center gap-1">📍 Haz clic en tu casilla para ubicar la firma</span>
                       </div>
                       
-                      <div id="docSignPdfViewport" class="flex-1 overflow-auto relative flex items-center justify-center p-2 bg-[#1a1816] rounded min-h-[160px]">
-                          <div id="docSignNoPdfPlaceholder" class="text-center p-6 text-[#8a8380]">
+                      <div id="docSignPdfViewport" class="flex-1 overflow-y-auto relative flex flex-col items-center justify-start p-2 bg-[#141414] rounded border border-[#23201e] min-h-[220px]">
+                          <div id="docSignNoPdfPlaceholder" class="text-center p-8 text-[#8a8380] my-auto">
                               <svg class="w-10 h-10 mx-auto mb-2 opacity-30 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                              <p class="text-xs font-mono uppercase">Carga el PDF para visualizar la hoja de firmas</p>
+                              <p class="text-xs font-mono uppercase">Carga el PDF oficial para visualizar la hoja de firmas</p>
+                              <p class="text-[10px] text-[#635d5a] mt-1 font-mono">El sistema detectará automáticamente las casillas de autorización</p>
                           </div>
-                          <div id="docSignCanvasWrapper" class="relative hidden inline-block shadow-2xl p-1 bg-white rounded">
+                          <div id="docSignCanvasWrapper" class="relative hidden inline-block shadow-2xl p-1 bg-white rounded my-1">
                               <canvas id="docSignPdfCanvas" class="max-w-full h-auto cursor-crosshair block rounded bg-white shadow-md border border-[#999999]" style="background-color: #ffffff !important;"></canvas>
                               <!-- Marcador visual interactivo de posición -->
-                              <div id="docSignStampTarget" class="absolute pointer-events-none border-2 border-dashed border-[#ee6018] bg-[#ee6018]/30 rounded flex items-center justify-center text-[10px] font-mono text-[#ffffff] font-bold transition-all shadow-[0_0_12px_rgba(238,96,24,0.8)]" style="display:none; width: 110px; height: 38px;">
-                                  <span class="bg-[#ee6018] text-white px-1.5 py-0.5 rounded text-[9px] shadow-sm">📍 FIRMA AQUÍ</span>
+                              <div id="docSignStampTarget" class="absolute pointer-events-none border-2 border-dashed border-[#ee6018] bg-[#ee6018]/30 rounded flex items-center justify-center text-[10px] font-mono text-[#ffffff] font-bold transition-all shadow-[0_0_12px_rgba(238,96,24,0.8)]" style="display:none; width: 85px; height: 28px;">
+                                  <span id="docSignStampTargetLabel" class="bg-[#ee6018] text-white px-1.5 py-0.5 rounded text-[8.5px] shadow-sm font-semibold truncate max-w-[120px]">📍 FIRMA AQUÍ</span>
                               </div>
                           </div>
                       </div>
@@ -3489,14 +3491,33 @@
                       <!-- Controles de Ajuste Fino de Posición de Firma -->
                       <div id="docSignStampControls" class="hidden flex items-center justify-between pt-1.5 px-1 border-t border-[#1d1a18] shrink-0 text-[10px] font-mono text-[#8a8380]">
                           <div class="flex items-center gap-1.5">
-                              <span>Posición Stamp:</span>
-                              <span id="docSignPosLabel" class="text-[#fafafa] font-bold">X: 410, Y: 120</span>
+                              <span>Coordenadas:</span>
+                              <span id="docSignPosLabel" class="text-[#fafafa] font-bold">X: 485, Y: 331</span>
                           </div>
                           <div class="flex items-center gap-1">
                               <button type="button" onclick="adjustStampPos(0, 25)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Arriba (+25 pt)">↑</button>
                               <button type="button" onclick="adjustStampPos(0, -25)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Abajo (-25 pt)">↓</button>
                               <button type="button" onclick="adjustStampPos(-25, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Izquierda (-25 pt)">←</button>
                               <button type="button" onclick="adjustStampPos(25, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Derecha (+25 pt)">→</button>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- ESTADO: DOCUMENTO 100% COMPLETADO (REEMPLAZA EL PAD SI YA TERMINÓ) -->
+                  <div id="docSignCompletedCard" class="hidden bg-gradient-to-r from-[#14532d]/40 via-[#101010] to-[#14532d]/20 p-3 rounded-[8px] border-2 border-[#22c55e]/60 shrink-0">
+                      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div class="flex items-center gap-2.5">
+                              <div class="w-8 h-8 rounded-full bg-[#22c55e]/20 border border-[#22c55e] flex items-center justify-center text-[#22c55e] text-base font-bold shrink-0">✓</div>
+                              <div>
+                                  <div class="font-mono text-[11px] text-[#22c55e] font-bold uppercase tracking-wider">¡Documento 100% Firmado y Autorizado!</div>
+                                  <div class="text-[10px] text-[#b8b3b0]">Todas las firmas del circuito están inyectadas en la hoja oficial del PDF.</div>
+                              </div>
+                          </div>
+                          <div class="flex items-center gap-2 shrink-0">
+                              <button type="button" onclick="downloadCurrentSignedPdf()" class="pill-btn px-3.5 py-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-black font-mono text-[11px] uppercase font-bold transition flex items-center gap-1.5 shadow-lg shadow-[#22c55e]/20">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                  <span>Descargar PDF Firmado</span>
+                              </button>
                           </div>
                       </div>
                   </div>
@@ -3513,7 +3534,7 @@
                       </div>
                       
                       <div class="bg-[#ffffff] rounded-[6px] p-1 border-2 border-[#3d3a39] overflow-hidden shadow-inner">
-                          <canvas id="signaturePadCanvas" height="100" class="w-full bg-[#ffffff] cursor-crosshair touch-none block" style="background-color: #ffffff !important;"></canvas>
+                          <canvas id="signaturePadCanvas" height="90" class="w-full bg-[#ffffff] cursor-crosshair touch-none block" style="background-color: #ffffff !important;"></canvas>
                       </div>
 
                       <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5">
@@ -3524,48 +3545,52 @@
                       </div>
                   </div>
 
-                  <!-- Botón de Descarga & Instrucción de Drive -->
-                  <div class="bg-[#1d1a18] p-2.5 rounded-[8px] border border-[#3d3a39] flex items-center justify-between gap-2 shrink-0">
+                  <!-- Descarga de Respaldo / Estado -->
+                  <div id="docSignDownloadContainer" class="bg-[#1d1a18] p-2 rounded-[8px] border border-[#3d3a39] flex items-center justify-between gap-2 shrink-0">
                       <div class="min-w-0">
                           <div class="font-mono text-[10px] text-[#a0ca92] uppercase font-bold flex items-center gap-1">
-                              <span>✓ Archivo Firmado</span>
+                              <span>✓ Archivo del Proyecto</span>
                           </div>
                           <div id="docSignDownloadHint" class="text-[10px] text-[#8a8380] truncate">
-                              Descarga el PDF para subirlo a la carpeta de Drive del proyecto.
+                              Puedes descargar el PDF con las firmas estampadas hasta este momento.
                           </div>
                       </div>
-                      <button type="button" id="btnDownloadSignedPdf" onclick="downloadCurrentSignedPdf()" class="pill-btn px-3 py-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-black font-mono text-[10px] uppercase font-bold transition flex items-center gap-1.5 shrink-0">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                          <span>Descargar PDF</span>
+                      <button type="button" id="btnDownloadSignedPdf" onclick="downloadCurrentSignedPdf()" class="pill-btn px-2.5 py-1 bg-[#282523] hover:bg-[#3d3a39] text-[#fafafa] font-mono text-[10px] uppercase font-semibold transition flex items-center gap-1.5 shrink-0 border border-[#4d4845]">
+                          <svg class="w-3.5 h-3.5 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                          <span>Descargar Copia</span>
                       </button>
                   </div>
               </div>
 
               <!-- Columna Derecha: Circuito de Firmas Configurable (5 cols) -->
               <div class="lg:col-span-5 flex flex-col gap-2.5 min-h-0 bg-[#101010] p-3 rounded-[8px] border border-[#3d3a39]">
-                  <div class="flex items-center justify-between pb-2 border-b border-[#3d3a39] shrink-0">
+                  <div class="flex items-center justify-between pb-2 border-b border-[#3d3a39] shrink-0 gap-1.5">
                       <div>
                           <span class="font-mono text-[10px] text-[#ee6018] uppercase font-bold">Circuito de Firmas</span>
                           <div class="text-[9px] text-[#8a8380]">Secuencia obligatoria de autorización</div>
                       </div>
-                      <button type="button" onclick="addSignerToCircuitPrompt()" class="pill-btn px-2 py-1 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] font-mono text-[9px] uppercase transition flex items-center gap-1">
-                          <span>+ Agregar</span>
-                      </button>
+                      
+                      <!-- Plantillas y Agregar Compactos en la Cabecera -->
+                      <div class="flex items-center gap-1 shrink-0">
+                          <div class="relative group">
+                              <button type="button" class="pill-btn px-2 py-1 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] font-mono text-[9px] uppercase transition flex items-center gap-1">
+                                  <span>Plantillas ▾</span>
+                              </button>
+                              <div class="absolute right-0 top-full mt-1 hidden group-hover:flex flex-col bg-[#161413] border border-[#3d3a39] rounded shadow-xl z-20 py-1 min-w-[140px]">
+                                  <button type="button" onclick="loadStandardCircuit('plano')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Plano (3 Firmas)</button>
+                                  <button type="button" onclick="loadStandardCircuit('validacion')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Validación (2 Firmas)</button>
+                                  <button type="button" onclick="loadStandardCircuit('completo')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Comité (4 Firmas)</button>
+                              </div>
+                          </div>
+                          <button type="button" onclick="addSignerToCircuitPrompt()" class="pill-btn px-2 py-1 bg-[#ee6018]/10 hover:bg-[#ee6018]/20 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[9px] uppercase font-bold transition flex items-center gap-1">
+                              <span>+ Agregar</span>
+                          </button>
+                      </div>
                   </div>
 
                   <!-- Lista de Firmantes del Circuito -->
-                  <div id="docSignCircuitList" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[180px]">
+                  <div id="docSignCircuitList" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[220px]">
                       <!-- Rendered dynamically -->
-                  </div>
-
-                  <!-- Preajustes Rápidos de Circuito -->
-                  <div class="pt-2 border-t border-[#3d3a39] shrink-0">
-                      <span class="font-mono text-[9px] text-[#8a8380] uppercase block mb-1.5">Plantillas de Circuito STGT:</span>
-                      <div class="flex flex-wrap gap-1">
-                          <button type="button" onclick="loadStandardCircuit('validacion')" class="pill-btn px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] font-mono text-[9px] uppercase transition">Validación (Rafael + Osvaldo)</button>
-                          <button type="button" onclick="loadStandardCircuit('plano')" class="pill-btn px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] font-mono text-[9px] uppercase transition">Plano (3 Firmas)</button>
-                          <button type="button" onclick="loadStandardCircuit('completo')" class="pill-btn px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] font-mono text-[9px] uppercase transition">Comité (4 Firmas)</button>
-                      </div>
                   </div>
 
               </div>
@@ -3575,7 +3600,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v1005"></script>
+  <script type="module" src="app.js?v=20261026_v1006"></script>
 
 </body>
 </html>

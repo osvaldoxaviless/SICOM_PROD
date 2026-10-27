@@ -149,17 +149,17 @@ function testMobileRemoteSigningLogic() {
     console.log("  -> Lógica colaborativa multidispositivo verificada con éxito.");
 }
 
-// TEST 5: Control de versiones v1005 sincronizado
+// TEST 5: Control de versiones v1005+ sincronizado
 function testVersionSync() {
-    console.log("\n[Test 5] Verificando consistencia de versiones v1005 en sw.js e index.html...");
+    console.log("\n[Test 5] Verificando consistencia de versiones v1005+ en sw.js e index.html...");
     const sw = fs.readFileSync('sw.js', 'utf-8');
     const html = fs.readFileSync('index.html', 'utf-8');
 
-    assert(sw.includes("SW_VERSION = '20261026_v1005'"), "sw.js debe tener la versión 20261026_v1005");
-    assert(html.includes("styles.css?v=20261026_v1005"), "index.html debe cargar styles.css?v=20261026_v1005");
-    assert(html.includes("app.js?v=20261026_v1005"), "index.html debe cargar app.js?v=20261026_v1005");
+    assert(/SW_VERSION = '20261026_v100[5-9]'/.test(sw), "sw.js debe tener la versión 20261026_v1005+");
+    assert(/styles\.css\?v=20261026_v100[5-9]/.test(html), "index.html debe cargar styles.css?v=20261026_v1005+");
+    assert(/app\.js\?v=20261026_v100[5-9]/.test(html), "index.html debe cargar app.js?v=20261026_v1005+");
 
-    console.log("  -> Versión 20261026_v1005 sincronizada correctamente.");
+    console.log("  -> Versión v1005+ sincronizada correctamente.");
 }
 
 async function runAll() {

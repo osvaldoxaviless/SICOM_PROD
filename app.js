@@ -2074,11 +2074,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         const btnTasksHeader = document.getElementById('btnViewModeTasks');
         if (btnTasksHeader) {
-            if (isLector) {
-                btnTasksHeader.classList.add('hidden');
-            } else {
-                btnTasksHeader.classList.remove('hidden');
-            }
+            btnTasksHeader.classList.add('hidden');
         }
 
         // El botón de Dashboard & Auditoría es accesible para todos los consultores y administradores en escritorio
@@ -8366,7 +8362,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
             const btnTasks = document.getElementById('btnViewModeTasks');
-            if (btnTasks) btnTasks.className = (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) ? dAct : dInact;
+            if (btnTasks) btnTasks.classList.add('hidden');
 
             // Sincronizar dock inferior móvil (5 accesos)
             window.syncMobileDockState(activeMode);
@@ -10982,7 +10978,7 @@ window.closeDailyDrawer = function() {
     
     const btnTasksHeader = document.getElementById('btnViewModeTasks');
     if (btnTasksHeader) {
-        btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative";
+        btnTasksHeader.classList.add('hidden');
     }
     
     // Restaurar botones al cerrar SOLO si estamos en escritorio y en el mapa mental
@@ -11012,7 +11008,7 @@ window.toggleDailyDrawer = function() {
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
             const btnTasksHeader = document.getElementById('btnViewModeTasks');
             if (btnTasksHeader) {
-                btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative";
+                btnTasksHeader.classList.add('hidden');
             }
             
             const dock = document.getElementById('canvasToolsDock');
@@ -11043,7 +11039,7 @@ window.toggleDailyDrawer = function() {
             isDailyDrawerOpen = true;
             const btnTasksHeader = document.getElementById('btnViewModeTasks');
             if (btnTasksHeader) {
-                btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer relative";
+                btnTasksHeader.classList.add('hidden');
             }
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('tasks');
             if (typeof window.pushNavigationState === 'function') window.pushNavigationState('dailyDrawer');
@@ -11821,12 +11817,7 @@ window.renderDailyTasks = function() {
     }
     const deskHeaderBadge = document.getElementById('desktopHeaderDailyAlertsBadge');
     if (deskHeaderBadge) {
-        if (alertBadgeTotal > 0) {
-            deskHeaderBadge.textContent = alertBadgeTotal;
-            deskHeaderBadge.classList.remove('hidden');
-        } else {
-            deskHeaderBadge.classList.add('hidden');
-        }
+        deskHeaderBadge.classList.add('hidden');
     }
 
     // 6. RENDERIZADO DEL CONTENIDO DE LA PESTAÑA SELECCIONADA
@@ -17104,15 +17095,28 @@ window.updateDocSignStatusBadge = function() {
     const total = circuit.length;
     const signed = circuit.filter(s => s.status === 'signed').length;
 
+    const padContainer = document.getElementById('docSignPadContainer');
+    const completedCard = document.getElementById('docSignCompletedCard');
+    const downloadContainer = document.getElementById('docSignDownloadContainer');
+
     if (total === 0) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#3d3a39] bg-[#101010] text-[#8a8380]";
         badge.textContent = "⚪ SIN FIRMAS";
+        if (completedCard) completedCard.classList.add('hidden');
+        if (padContainer) padContainer.classList.remove('hidden');
+        if (downloadContainer) downloadContainer.classList.remove('hidden');
     } else if (signed === total) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#22c55e]/40 bg-[#22c55e]/15 text-[#22c55e] font-bold";
         badge.textContent = `🟢 100% FIRMADO (${total}/${total})`;
+        if (completedCard) completedCard.classList.remove('hidden');
+        if (padContainer) padContainer.classList.add('hidden');
+        if (downloadContainer) downloadContainer.classList.add('hidden');
     } else {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#eab308]/40 bg-[#eab308]/15 text-[#eab308] font-bold";
         badge.textContent = `🟡 EN PROCESO (${signed}/${total})`;
+        if (completedCard) completedCard.classList.add('hidden');
+        if (padContainer) padContainer.classList.remove('hidden');
+        if (downloadContainer) downloadContainer.classList.remove('hidden');
     }
 };
 
@@ -17200,6 +17204,11 @@ window.focusSignaturePadFor = function(name, role) {
     const padContainer = document.getElementById('docSignPadContainer');
     const scrollContainer = document.getElementById('docSignScrollContainer');
     const canvas = document.getElementById('signaturePadCanvas');
+    const activeSignerEl = document.getElementById('docSignPadActiveSigner');
+
+    if (activeSignerEl && name) {
+        activeSignerEl.textContent = `Turno: ${name} (${role || 'Firmante'})`;
+    }
 
     if (canvas) {
         if (typeof window.resizeSignaturePad === 'function') window.resizeSignaturePad();
@@ -17207,18 +17216,18 @@ window.focusSignaturePadFor = function(name, role) {
     }
 
     if (padContainer) {
+        padContainer.classList.remove('hidden');
         padContainer.classList.remove('border-[#3d3a39]');
-        padContainer.classList.add('border-[#ee6018]', 'ring-2', 'ring-[#ee6018]/50');
+        padContainer.classList.add('border-[#0055cc]', 'ring-4', 'ring-[#0055cc]/50');
         setTimeout(() => {
-            padContainer.classList.remove('ring-2', 'ring-[#ee6018]/50');
+            padContainer.classList.remove('ring-4', 'ring-[#0055cc]/50');
             padContainer.classList.add('border-[#3d3a39]');
         }, 2200);
 
         if (scrollContainer) {
-            const targetTop = padContainer.offsetTop - 20;
-            scrollContainer.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+            scrollContainer.scrollTo({ top: Math.max(0, padContainer.offsetTop - 30), behavior: 'smooth' });
         }
-        padContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        padContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     window.showToast(`✍️ Listo. Dibuja tu firma en el recuadro blanco para ${name} (${role})`, false);
@@ -17406,6 +17415,45 @@ window.handleDocPdfFileSelected = async function(event) {
     reader.readAsArrayBuffer(file);
 };
 
+window.changeDocSignPage = function(delta) {
+    if (!activeSignDocCtx.pdfPageCount || activeSignDocCtx.pdfPageCount <= 1) return;
+    const current = Number(activeSignDocCtx.currentPageNum) || activeSignDocCtx.pdfPageCount;
+    const next = Math.max(1, Math.min(activeSignDocCtx.pdfPageCount, current + delta));
+    if (next !== current) {
+        activeSignDocCtx.currentPageNum = next;
+        window.renderLastPdfPage();
+    }
+};
+
+// Detección automática e inteligente de casillas de firmas en planos y actas oficiales
+async function detectSignerCoordsOnPage(page, signerName, signerRole) {
+    try {
+        const textContent = await page.getTextContent();
+        const items = textContent.items || [];
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const nameTokens = norm(signerName).split(/\s+/).filter(w => w.length > 2);
+        const roleTokens = norm(signerRole).split(/\s+/).filter(w => w.length > 3);
+
+        for (const item of items) {
+            const itemNorm = norm(item.str);
+            if (!itemNorm) continue;
+            const matchesName = nameTokens.length > 0 && nameTokens.some(t => itemNorm.includes(t));
+            const matchesRole = roleTokens.length > 0 && roleTokens.some(t => itemNorm.includes(t));
+
+            if (matchesName || matchesRole) {
+                const itemY = item.transform[5];
+                // En tablas de firmas oficiales STGT, la columna 'Firma de Autorización' está en X: 485
+                const sX = 485;
+                const sY = Math.round(itemY - 12);
+                return { x: sX, y: sY };
+            }
+        }
+    } catch (e) {
+        console.warn("Fallo en detección automática de coordenadas:", e);
+    }
+    return null;
+}
+
 window.renderLastPdfPage = async function() {
     if (!activeSignDocCtx.pdfBytes) return;
     const canvas = document.getElementById('docSignPdfCanvas');
@@ -17414,13 +17462,13 @@ window.renderLastPdfPage = async function() {
     const controls = document.getElementById('docSignStampControls');
     const info = document.getElementById('docSignPdfInfo');
     const nameCont = document.getElementById('docSignPdfNameContainer');
+    const pagControls = document.getElementById('docSignPaginationControls');
+    const curPageSpan = document.getElementById('docSignCurrentPageNum');
+    const totalPagesSpan = document.getElementById('docSignTotalPagesNum');
 
     if (placeholder) placeholder.classList.add('hidden');
     if (wrapper) wrapper.classList.remove('hidden');
     if (controls) controls.classList.remove('hidden');
-
-    if (info) info.textContent = `${activeSignDocCtx.pdfPageCount} pág${activeSignDocCtx.pdfPageCount > 1 ? 's' : ''} (Última hoja)`;
-    if (nameCont) nameCont.textContent = activeSignDocCtx.pdfFileName || 'Documento Oficial.pdf';
 
     try {
         if (typeof pdfjsLib === 'undefined') {
@@ -17431,7 +17479,6 @@ window.renderLastPdfPage = async function() {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
 
-        // Clonar búfer desacoplado para evitar que el WebWorker lo desconecte (detach)
         let bytesCopy = null;
         if (activeSignDocCtx.pdfBytes instanceof Uint8Array) {
             bytesCopy = new Uint8Array(activeSignDocCtx.pdfBytes.buffer.slice(activeSignDocCtx.pdfBytes.byteOffset, activeSignDocCtx.pdfBytes.byteOffset + activeSignDocCtx.pdfBytes.byteLength));
@@ -17444,21 +17491,41 @@ window.renderLastPdfPage = async function() {
         const loadingTask = pdfjsLib.getDocument({ data: bytesCopy });
         const pdf = await loadingTask.promise;
         activeSignDocCtx.pdfPageCount = pdf.numPages;
-        const page = await pdf.getPage(pdf.numPages); // Siempre la última página donde van las firmas
+
+        // Por defecto, mostrar siempre la última hoja donde residen las firmas oficiales
+        if (!activeSignDocCtx.currentPageNum || activeSignDocCtx.currentPageNum > pdf.numPages) {
+            activeSignDocCtx.currentPageNum = pdf.numPages;
+        }
+        const activePageNum = activeSignDocCtx.currentPageNum;
+        const page = await pdf.getPage(activePageNum);
+
+        if (info) info.textContent = `${activeSignDocCtx.pdfPageCount} pág${activeSignDocCtx.pdfPageCount > 1 ? 's' : ''}`;
+        if (nameCont) nameCont.textContent = activeSignDocCtx.pdfFileName || 'Documento Oficial.pdf';
+
+        if (pagControls) {
+            if (pdf.numPages > 1) {
+                pagControls.classList.remove('hidden');
+                pagControls.classList.add('flex');
+                if (curPageSpan) curPageSpan.textContent = activePageNum;
+                if (totalPagesSpan) totalPagesSpan.textContent = pdf.numPages;
+            } else {
+                pagControls.classList.add('hidden');
+            }
+        }
 
         const unscaledViewport = page.getViewport({ scale: 1.0 });
         activeSignDocCtx.pagePdfWidth = unscaledViewport.width || 612;
         activeSignDocCtx.pagePdfHeight = unscaledViewport.height || 792;
 
-        const targetWidth = Math.min(520, (wrapper.parentElement?.clientWidth || 480) - 24);
+        const targetWidth = Math.min(540, (wrapper.parentElement?.clientWidth || 480) - 20);
         const scale = targetWidth / activeSignDocCtx.pagePdfWidth;
-        const viewport = page.getViewport({ scale: scale > 0.35 ? scale : 0.75 });
+        const viewport = page.getViewport({ scale: scale > 0.4 ? scale : 0.8 });
 
         canvas.width = Math.round(viewport.width);
         canvas.height = Math.round(viewport.height);
         canvas.style.backgroundColor = '#ffffff';
 
-        // PINTAR FONDO BLANCO PAPEL OBLIGATORIO (Evita el recuadro negro en PDFs sin fondo explícito)
+        // PINTAR FONDO BLANCO PAPEL OBLIGATORIO
         const ctx = canvas.getContext('2d');
         ctx.save();
         ctx.fillStyle = '#ffffff';
@@ -17471,7 +17538,50 @@ window.renderLastPdfPage = async function() {
         };
         await page.render(renderCtx).promise;
 
+        // Obtener firmante activo para auto-posicionamiento en la casilla exacta
+        const item = getProjectById(activeSignDocCtx.projectId);
+        const circuit = item?.docs?.[activeSignDocCtx.docId]?.signatureCircuit || [];
+        const activeSigner = circuit.find(s => s.status !== 'signed');
+
+        if (activeSigner && (!activeSignDocCtx.lastAutoSignerId || activeSignDocCtx.lastAutoSignerId !== activeSigner.id)) {
+            activeSignDocCtx.lastAutoSignerId = activeSigner.id;
+            const detected = await detectSignerCoordsOnPage(page, activeSigner.name, activeSigner.role);
+            if (detected) {
+                activeSignDocCtx.stampX = detected.x;
+                activeSignDocCtx.stampY = detected.y;
+            } else {
+                const normName = (activeSigner.name || '').toLowerCase();
+                if (normName.includes('barbosa')) {
+                    activeSignDocCtx.stampX = 485;
+                    activeSignDocCtx.stampY = 331;
+                } else if (normName.includes('romero')) {
+                    activeSignDocCtx.stampX = 485;
+                    activeSignDocCtx.stampY = 298;
+                } else if (normName.includes('perez')) {
+                    activeSignDocCtx.stampX = 485;
+                    activeSignDocCtx.stampY = 365;
+                } else if (normName.includes('osvaldo') || normName.includes('avil') || normName.includes('sanchez')) {
+                    activeSignDocCtx.stampX = 485;
+                    activeSignDocCtx.stampY = 535;
+                } else {
+                    activeSignDocCtx.stampX = 485;
+                    activeSignDocCtx.stampY = 298;
+                }
+            }
+        }
+
+        activeSignDocCtx.stampWidth = 80;
+        activeSignDocCtx.stampHeight = 26;
+
         window.updateStampTargetVisual();
+
+        // Desplazar automáticamente el visor para centrar la casilla de firma en la pantalla
+        const viewportElem = document.getElementById('docSignPdfViewport');
+        if (viewportElem && canvas) {
+            const sY = activeSignDocCtx.stampY || 300;
+            const targetCanvasY = ((activeSignDocCtx.pagePdfHeight - sY) / activeSignDocCtx.pagePdfHeight) * canvas.height;
+            viewportElem.scrollTo({ top: Math.max(0, targetCanvasY - 120), behavior: 'smooth' });
+        }
 
         canvas.onclick = function(e) {
             const rect = canvas.getBoundingClientRect();
@@ -17483,15 +17593,15 @@ window.renderLastPdfPage = async function() {
             const pdfY = activeSignDocCtx.pagePdfHeight - ((clickY / rect.height) * activeSignDocCtx.pagePdfHeight);
 
             if (!isNaN(pdfX) && !isNaN(pdfY)) {
-                const sW = activeSignDocCtx.stampWidth || 110;
-                const sH = activeSignDocCtx.stampHeight || 38;
+                const sW = activeSignDocCtx.stampWidth || 80;
+                const sH = activeSignDocCtx.stampHeight || 26;
                 activeSignDocCtx.stampX = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfWidth - sW - 10, pdfX - (sW / 2))));
                 activeSignDocCtx.stampY = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfHeight - sH - 10, pdfY - (sH / 2))));
 
-                const item = getProjectById(activeSignDocCtx.projectId);
-                if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
-                    item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
-                    item.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
+                const it = getProjectById(activeSignDocCtx.projectId);
+                if (it && it.docs && it.docs[activeSignDocCtx.docId]) {
+                    it.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
+                    it.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
                 }
 
                 window.updateStampTargetVisual();
@@ -17505,21 +17615,29 @@ window.renderLastPdfPage = async function() {
 
 window.updateStampTargetVisual = function() {
     const target = document.getElementById('docSignStampTarget');
+    const targetLabel = document.getElementById('docSignStampTargetLabel');
     const canvas = document.getElementById('docSignPdfCanvas');
     const label = document.getElementById('docSignPosLabel');
     if (!target || !canvas) return;
 
     let sX = Number(activeSignDocCtx.stampX);
     let sY = Number(activeSignDocCtx.stampY);
-    if (isNaN(sX)) sX = 410;
-    if (isNaN(sY)) sY = 120;
+    if (isNaN(sX)) sX = 485;
+    if (isNaN(sY)) sY = 331;
     const pW = activeSignDocCtx.pagePdfWidth || 612;
     const pH = activeSignDocCtx.pagePdfHeight || 792;
-    const sW = activeSignDocCtx.stampWidth || 110;
-    const sH = activeSignDocCtx.stampHeight || 38;
+    const sW = activeSignDocCtx.stampWidth || 80;
+    const sH = activeSignDocCtx.stampHeight || 26;
 
     if (label) {
         label.textContent = `X: ${sX}, Y: ${sY}`;
+    }
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    const circuit = item?.docs?.[activeSignDocCtx.docId]?.signatureCircuit || [];
+    const activeSigner = circuit.find(s => s.status !== 'signed');
+    if (targetLabel) {
+        targetLabel.textContent = `📍 Firma: ${activeSigner ? activeSigner.name.split(' ')[0] : 'Aquí'}`;
     }
 
     const rect = canvas.getBoundingClientRect();
@@ -17537,19 +17655,19 @@ window.updateStampTargetVisual = function() {
     target.style.left = `${Math.round(cssX)}px`;
     target.style.top = `${Math.round(cssY)}px`;
     target.style.width = `${Math.max(60, Math.round(cssWidth))}px`;
-    target.style.height = `${Math.max(25, Math.round(cssHeight))}px`;
+    target.style.height = `${Math.max(22, Math.round(cssHeight))}px`;
 };
 
 window.adjustStampPos = function(dx, dy) {
     let curX = Number(activeSignDocCtx.stampX);
     let curY = Number(activeSignDocCtx.stampY);
-    if (isNaN(curX)) curX = 410;
-    if (isNaN(curY)) curY = 120;
+    if (isNaN(curX)) curX = 485;
+    if (isNaN(curY)) curY = 331;
 
     const maxW = activeSignDocCtx.pagePdfWidth || 612;
     const maxH = activeSignDocCtx.pagePdfHeight || 792;
-    const sW = activeSignDocCtx.stampWidth || 110;
-    const sH = activeSignDocCtx.stampHeight || 38;
+    const sW = activeSignDocCtx.stampWidth || 80;
+    const sH = activeSignDocCtx.stampHeight || 26;
 
     activeSignDocCtx.stampX = Math.max(10, Math.min(maxW - sW - 10, curX + dx));
     activeSignDocCtx.stampY = Math.max(10, Math.min(maxH - sH - 10, curY + dy));
@@ -17687,9 +17805,19 @@ window.syncCircuitSignaturesToPdf = async function() {
                 for (let i = 0; i < binaryString.length; i++) pngBytes[i] = binaryString.charCodeAt(i);
 
                 const sigImg = await pdfDoc.embedPng(pngBytes);
-                const sX = Number(signer.coords?.x) || 410;
-                const sY = Number(signer.coords?.y) || 120;
-                lastPage.drawImage(sigImg, { x: sX, y: sY, width: 110, height: 38 });
+                let sX = Number(signer.coords?.x);
+                let sY = Number(signer.coords?.y);
+
+                if (isNaN(sX) || isNaN(sY)) {
+                    const norm = (signer.name || '').toLowerCase();
+                    if (norm.includes('barbosa')) { sX = 485; sY = 331; }
+                    else if (norm.includes('romero')) { sX = 485; sY = 298; }
+                    else if (norm.includes('perez')) { sX = 485; sY = 365; }
+                    else if (norm.includes('osvaldo') || norm.includes('avil') || norm.includes('sanchez')) { sX = 485; sY = 535; }
+                    else { sX = 485; sY = 298; }
+                }
+
+                lastPage.drawImage(sigImg, { x: sX, y: sY, width: 80, height: 26 });
                 signer.injectedInPdf = true;
             } catch (errSig) {
                 console.warn("Fallo inyectando firma remota:", errSig);
@@ -17738,8 +17866,10 @@ window.stampSignatureOnActiveDocument = async function() {
     const stampDateStr = `${now.toLocaleDateString('es-MX')} ${now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
 
     let stampedInPdf = false;
+    let stampedX = Number(activeSignDocCtx.stampX) || 485;
+    let stampedY = Number(activeSignDocCtx.stampY) || 331;
 
-    // Si el archivo PDF está disponible en la memoria/almacenamiento de este dispositivo:
+    // Si el archivo PDF está disponible en memoria:
     if (activeSignDocCtx.pdfBytes) {
         try {
             await window.ensurePdfLibReady();
@@ -17772,19 +17902,14 @@ window.stampSignatureOnActiveDocument = async function() {
                 const pWidth = lastPage.getWidth() || 612;
                 const pHeight = lastPage.getHeight() || 792;
 
-                let sX = Number(activeSignDocCtx.stampX);
-                let sY = Number(activeSignDocCtx.stampY);
-                let sW = Number(activeSignDocCtx.stampWidth) || 110;
-                let sH = Number(activeSignDocCtx.stampHeight) || 38;
-
-                if (isNaN(sX) || sX < 0) sX = Math.round(pWidth * 0.65);
-                if (isNaN(sY) || sY < 0) sY = 120;
-                if (sX + sW > pWidth) sX = Math.max(10, pWidth - sW - 10);
-                if (sY + sH > pHeight) sY = Math.max(10, pHeight - sH - 10);
+                let sW = 80;
+                let sH = 26;
+                if (stampedX + sW > pWidth) stampedX = Math.max(10, pWidth - sW - 10);
+                if (stampedY + sH > pHeight) stampedY = Math.max(10, pHeight - sH - 10);
 
                 lastPage.drawImage(signatureImage, {
-                    x: sX,
-                    y: sY,
+                    x: stampedX,
+                    y: stampedY,
                     width: sW,
                     height: sH
                 });
@@ -17809,11 +17934,14 @@ window.stampSignatureOnActiveDocument = async function() {
     signer.signaturePng = signaturePngDataUrl;
     signer.injectedInPdf = stampedInPdf;
     signer.coords = {
-        x: Number(activeSignDocCtx.stampX) || 410,
-        y: Number(activeSignDocCtx.stampY) || 120
+        x: stampedX,
+        y: stampedY,
+        page: activeSignDocCtx.currentPageNum || activeSignDocCtx.pdfPageCount
     };
 
     logActivity(item.id, item.name, `Estampó firma digital [${signer.role}]: ${signer.name} en ${activeSignDocCtx.docName}`, localAuthor);
+
+    activeSignDocCtx.lastAutoSignerId = null; // Reiniciar para que el siguiente firmante calcule su casilla
 
     const remaining = circuit.filter(s => s.status !== 'signed').length;
     if (remaining === 0) {
@@ -17821,15 +17949,12 @@ window.stampSignatureOnActiveDocument = async function() {
         window.showToast("🎉 ¡Documento 100% firmado por todos los involucrados!", false);
         window.triggerCelebration();
     } else {
-        activeSignDocCtx.stampY = Math.max(20, (Number(activeSignDocCtx.stampY) || 120) - 40);
-        docData.lastStampX = activeSignDocCtx.stampX;
-        docData.lastStampY = activeSignDocCtx.stampY;
         const nextSigner = circuit.find(s => s.status !== 'signed');
         const nextName = nextSigner ? `${nextSigner.name} (${nextSigner.role})` : 'el siguiente firmante';
         if (stampedInPdf) {
             window.showToast(`✅ Firma de ${signer.name} estampada en el PDF. Turno de ${nextName}.`, false);
         } else {
-            window.showToast(`✅ Firma de ${signer.name} autorizada y registrada desde el móvil. Turno de ${nextName}.`, false);
+            window.showToast(`✅ Firma de ${signer.name} autorizada y registrada. Turno de ${nextName}.`, false);
         }
     }
 
@@ -17838,6 +17963,8 @@ window.stampSignatureOnActiveDocument = async function() {
     window.clearSignaturePad();
     window.renderDocSignCircuitList();
     window.updateDocSignStatusBadge();
+
+    // Actualizar inmediatamente la vista previa para que la firma recién estampada se vea reflejada
     if (activeSignDocCtx.pdfBytes) {
         window.renderLastPdfPage();
     }
@@ -17845,11 +17972,17 @@ window.stampSignatureOnActiveDocument = async function() {
     if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
 };
 
-window.downloadCurrentSignedPdf = function() {
+window.downloadCurrentSignedPdf = async function() {
     if (!activeSignDocCtx.pdfBytes) {
         window.showToast("⚠️ No hay archivo PDF disponible para descargar.", true);
         return;
     }
+
+    // Sincronizar infaliblemente todas las firmas del circuito antes de exportar
+    if (typeof window.syncCircuitSignaturesToPdf === 'function') {
+        await window.syncCircuitSignaturesToPdf();
+    }
+
     const cleanStr = (s) => (s || '').replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/_+/g, '_');
     const tkMadre = cleanStr(activeSignDocCtx.parentTicket || 'S_T');
     const tkHijo = cleanStr(activeSignDocCtx.childTicket || 'DOC');

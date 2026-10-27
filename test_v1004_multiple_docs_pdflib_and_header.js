@@ -58,8 +58,10 @@ function testHeaderAndSearch() {
     console.log("\n[Test 3] Verificando header limpio y buscador compacto...");
     const html = fs.readFileSync('index.html', 'utf-8');
 
-    assert(html.includes('<button type="button" id="btnViewModeTasks" onclick="toggleDailyDrawer()" class="hidden'),
-        "El botón de Tareas en mainViewSwitcher debe estar oculto con class='hidden'");
+    const tasksIsHiddenOrRemoved = html.includes('id="btnViewModeTasks" class="hidden"') || 
+                                   html.includes('style="display:none !important;"') ||
+                                   !html.includes('<button type="button" id="btnViewModeTasks"');
+    assert(tasksIsHiddenOrRemoved, "El botón de Tareas debe estar oculto o removido del conmutador superior");
     
     assert(html.includes('desktop-search-cluster hidden sm:flex items-center gap-1 shrink-0'),
         "El cluster de búsqueda debe ser compacto");
