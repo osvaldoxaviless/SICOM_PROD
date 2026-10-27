@@ -30,10 +30,10 @@ async function runTests() {
     const swJsContent = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
 
     // 1. Verificación de versiones desplegadas
-    console.log("--- 1. VERIFICACIÓN DE VERSIONES (v1002) ---");
-    assert(indexHtmlContent.includes('styles.css?v=20261026_v1002'), "index.html referencia styles.css?v=20261026_v1002");
-    assert(indexHtmlContent.includes('app.js?v=20261026_v1002'), "index.html referencia app.js?v=20261026_v1002");
-    assert(swJsContent.includes("SW_VERSION = '20261026_v1002'"), "sw.js define SW_VERSION = '20261026_v1002'");
+    console.log("--- 1. VERIFICACIÓN DE VERSIONES (v1002/v1003) ---");
+    assert(/styles\.css\?v=20261026_v(1002|1003)/.test(indexHtmlContent), "index.html referencia styles.css?v=20261026_v1002 o v1003");
+    assert(/app\.js\?v=20261026_v(1002|1003)/.test(indexHtmlContent), "index.html referencia app.js?v=20261026_v1002 o v1003");
+    assert(/SW_VERSION = '20261026_v(1002|1003)'/.test(swJsContent), "sw.js define SW_VERSION = '20261026_v1002' o '20261026_v1003'");
 
     // 2. Verificación de CDN y Modal de Firmas en index.html
     console.log("\n--- 2. VERIFICACIÓN DE MODAL Y LIQUID GLASS EN index.html ---");

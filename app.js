@@ -346,10 +346,149 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     };
 
+    // === BLINDAJE DE PERSISTENCIA Y REGISTRO DE ELEMENTOS ELIMINADOS ===
+    function getDeletedProjectIds() {
+        try {
+            const raw = localStorage.getItem('sicom_deleted_projects');
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function recordDeletedProject(id) {
+        if (!id) return;
+        try {
+            let current = getDeletedProjectIds();
+            if (!current.includes(id)) {
+                current.push(id);
+                if (current.length > 300) current.splice(0, current.length - 300);
+                localStorage.setItem('sicom_deleted_projects', JSON.stringify(current));
+            }
+        } catch (_) {}
+    }
+
+    function unrecordDeletedProject(id) {
+        if (!id) return;
+        try {
+            let current = getDeletedProjectIds();
+            if (current.includes(id)) {
+                current = current.filter(x => x !== id);
+                localStorage.setItem('sicom_deleted_projects', JSON.stringify(current));
+            }
+        } catch (_) {}
+    }
+
+    window._getDeletedProjectIds = getDeletedProjectIds;
+    window._recordDeletedProject = recordDeletedProject;
+    window._unrecordDeletedProject = unrecordDeletedProject;
+
+    // === RECONCILIACIÓN NO DESTRUCTIVA DE INSTANTÁNEAS DE FIRESTORE ===
+    function reconcileCloudSnapshot(remoteAppData) {
+        if (!remoteAppData || !Array.isArray(remoteAppData.modules)) {
+            return { reconciled: remoteAppData, mergedAny: false };
+        }
+
+        const deletedIds = getDeletedProjectIds();
+        const remoteIds = new Set();
+        (remoteAppData.directProjects || []).forEach(p => { if (p && p.id) remoteIds.add(p.id); });
+        (remoteAppData.modules || []).forEach(m => {
+            (m?.projects || []).forEach(p => { if (p && p.id) remoteIds.add(p.id); });
+        });
+
+        let mergedAny = false;
+
+        const checkAndMergeLocalProject = (lp, targetLoc) => {
+            if (!lp || !lp.id) return;
+            if (!remoteIds.has(lp.id) && !deletedIds.includes(lp.id)) {
+                console.log(`🛡️ [SICOM Reconcile] Preservando proyecto local creado: [${lp.id}] ${lp.name}`);
+                if (targetLoc === 'DIRECT' || targetLoc === 'hub-direct') {
+                    if (!remoteAppData.directProjects) remoteAppData.directProjects = [];
+                    remoteAppData.directProjects.push(JSON.parse(JSON.stringify(lp)));
+                } else {
+                    const targetMod = (remoteAppData.modules || []).find(m => m.id === targetLoc);
+                    if (targetMod) {
+                        if (!targetMod.projects) targetMod.projects = [];
+                        targetMod.projects.push(JSON.parse(JSON.stringify(lp)));
+                    } else {
+                        if (!remoteAppData.directProjects) remoteAppData.directProjects = [];
+                        remoteAppData.directProjects.push(JSON.parse(JSON.stringify(lp)));
+                    }
+                }
+                remoteIds.add(lp.id);
+                mergedAny = true;
+            }
+        };
+
+        // 1. Revisar estado local actual en memoria
+        if (appData) {
+            (appData.directProjects || []).forEach(p => checkAndMergeLocalProject(p, 'DIRECT'));
+            (appData.modules || []).forEach(m => {
+                if (m && m.id) (m.projects || []).forEach(p => checkAndMergeLocalProject(p, m.id));
+            });
+        }
+
+        // 2. Revisar también localStorage por si hubo una recarga antes de la sincronización remota
+        try {
+            const localRaw = localStorage.getItem('sicom_data');
+            if (localRaw) {
+                const parsedLocal = JSON.parse(localRaw);
+                if (parsedLocal) {
+                    (parsedLocal.directProjects || []).forEach(p => checkAndMergeLocalProject(p, 'DIRECT'));
+                    (parsedLocal.modules || []).forEach(m => {
+                        if (m && m.id) (m.projects || []).forEach(p => checkAndMergeLocalProject(p, m.id));
+                    });
+                }
+            }
+        } catch (_) {}
+
+        // 3. Fusión profunda de proyectos que coinciden (documentos firmados, tickets, drive links)
+        const remoteProjMap = new Map();
+        (remoteAppData.directProjects || []).forEach(p => { if (p && p.id) remoteProjMap.set(p.id, p); });
+        (remoteAppData.modules || []).forEach(m => (m?.projects || []).forEach(p => { if (p && p.id) remoteProjMap.set(p.id, p); }));
+
+        const mergeProjectDeep = (lp) => {
+            if (!lp || !lp.id) return;
+            const rp = remoteProjMap.get(lp.id);
+            if (!rp) return;
+
+            if (lp.ticket && !rp.ticket) {
+                rp.ticket = lp.ticket;
+                mergedAny = true;
+            }
+            if (lp.driveLink && !rp.driveLink) {
+                rp.driveLink = lp.driveLink;
+                mergedAny = true;
+            }
+            if (lp.invgateLink && !rp.invgateLink) {
+                rp.invgateLink = lp.invgateLink;
+                mergedAny = true;
+            }
+            if (lp.docs && typeof lp.docs === 'object') {
+                if (!rp.docs) rp.docs = {};
+                Object.keys(lp.docs).forEach(dKey => {
+                    const lDoc = lp.docs[dKey];
+                    const rDoc = rp.docs[dKey];
+                    if (lDoc && (!rDoc || (!rDoc.signedPdfId && lDoc.signedPdfId) || (!rDoc.checked && lDoc.checked))) {
+                        rp.docs[dKey] = JSON.parse(JSON.stringify(lDoc));
+                        mergedAny = true;
+                    }
+                });
+            }
+        };
+
+        if (appData) {
+            (appData.directProjects || []).forEach(mergeProjectDeep);
+            (appData.modules || []).forEach(m => (m?.projects || []).forEach(mergeProjectDeep));
+        }
+
+        return { reconciled: remoteAppData, mergedAny };
+    }
+
+    window._reconcileCloudSnapshot = reconcileCloudSnapshot;
+
 
     async function initData() {
-        window.populateLoginDropdown();
-
         // Verificación de sesión persistente (sicom_active_user)
         let activeUserJson = localStorage.getItem('sicom_active_user');
         let activeUser = null;
@@ -358,6 +497,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             localAuthor = activeUser.operator;
             currentUserRole = activeUser.role || currentUserRole;
         }
+
+        // Hidratación instantánea desde almacenamiento local seguro (evita pantalla en blanco o flash de datos de prueba)
+        try { loadLocalFallback(); } catch(e) { console.warn("Error hidratando datos locales:", e); }
+
+        window.populateLoginDropdown();
 
         // Arranque instantáneo de interfaz (salta modal de login si existe sesión activa)
         if (localAuthor) { 
@@ -403,11 +547,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         const cloudProjCount = (Array.isArray(data.appData?.directProjects) ? data.appData.directProjects.length : 0) +
                             (Array.isArray(data.appData?.modules) ? data.appData.modules.reduce((acc, m) => acc + (Array.isArray(m?.projects) ? m.projects.length : 0), 0) : 0);
                         if (data.appData && Array.isArray(data.appData.modules) && data.appData.modules.length >= 12 && cloudProjCount >= 50) {
-                            appData = data.appData;
+                            
+                            // Reconciliación no destructiva con creaciones locales
+                            const { reconciled, mergedAny } = reconcileCloudSnapshot(data.appData);
+                            appData = reconciled;
                             window._sicomCloudHydrated = true;
                             try { localStorage.setItem('sicom_data', JSON.stringify(appData)); } catch (_) {}
                             if (window.SICOM_IDB) {
                                 window.SICOM_IDB.save('latest_state', { appData, consultants, globalDocs, savedAt: Date.now() }).catch(() => {});
+                            }
+                            if (mergedAny && globalSetDoc && docRef) {
+                                console.log("🛡️ [SICOM Reconcile] Sincronizando proyectos/firmas locales preservados hacia Firestore...");
+                                globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false }).catch(e => console.warn('Reconcile write:', e));
                             }
                         } else {
                             console.warn("⚠️ [SICOM Cloud] Portafolio incompleto detectado en nube (" + cloudProjCount + " proys). Restaurando los 80 proyectos maestros a la nube...");
@@ -474,6 +625,15 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                                     knownModuleIds.add(m.id);
                                 }
                             });
+                            // Blindaje: Si hay un nodo actualmente activo o seleccionado, no colapsar su módulo contenedor
+                            if (currentSelection && currentSelection.id) {
+                                let activeMod = (currentSelection.type === 'direct-project') ? 'hub-direct' : null;
+                                if (!activeMod && appData.modules) {
+                                    const pMod = appData.modules.find(m => (m.projects || []).some(p => p.id === currentSelection.id));
+                                    if (pMod) activeMod = pMod.id;
+                                }
+                                if (activeMod) collapsedModules.delete(activeMod);
+                            }
                             if (typeof window.updateCollapseAllButtonState === 'function') {
                                 window.updateCollapseAllButtonState();
                             }
@@ -2211,9 +2371,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     let cloudWriteTimer = null;
     let cloudWritePending = false;
 
-    window.flushCloudWrite = function() {
+    window.flushCloudWrite = function(force = false) {
         if (cloudWriteTimer) { clearTimeout(cloudWriteTimer); cloudWriteTimer = null; }
-        if (!cloudWritePending) return;
+        if (!cloudWritePending && !force) return;
         cloudWritePending = false;
         if (!(isFirebaseReady && db && appId && globalDoc && globalSetDoc)) return;
         // Blindaje estricto: nunca sobreescribir la nube con datos vacíos o truncados (< 50 proyectos)
@@ -4656,7 +4816,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 });
             }
 
-            window.saveData(true);
+            window.saveData(true); 
+      window.flushCloudWrite(true);
             window.closeGlobalTaskModal();
             if (currentSelection && currentSelection.id === item.id) {
                 window.renderTasksQuick(item);
@@ -5088,7 +5249,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 logMsg += newTicket ? ` y asignó ticket #${newTicket}` : ' y removió ticket';
             }
             logActivity(item.id, item.name, logMsg, localAuthor);
-            window.saveData(true);
+            window.saveData(true); 
+      window.flushCloudWrite(true);
             
             const btnDrive = document.getElementById('infoDriveBtn');
             const btnInvgate = document.getElementById('infoInvgateBtn');
@@ -5526,6 +5688,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
       }
       window.saveData(true); 
+      window.flushCloudWrite(true); 
       window.populateGlobalEditSelector(); 
       window.updateDatalist(); 
       window.renderMindMap(); 
@@ -6219,7 +6382,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
            let pName = "";
            if (type === 'module') {
                const mod = appData.modules.find(m => m.id === id);
-               if(mod) pName = mod.name;
+               if(mod) { pName = mod.name; (mod.projects || []).forEach(p => recordDeletedProject(p.id)); } recordDeletedProject(id);
                appData.modules = appData.modules.filter(m => m.id !== id);
                (appData.directProjects || []).forEach(p => {
                    if (Array.isArray(p.secondaryModules)) p.secondaryModules = p.secondaryModules.filter(mId => mId !== id);
@@ -6232,18 +6395,18 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
            }
            else if (type === 'direct-project') {
                const proj = appData.directProjects.find(p => p.id === id);
-               if(proj) pName = proj.name;
+               if(proj) { pName = proj.name; recordDeletedProject(id); }
                appData.directProjects = appData.directProjects.filter(p => p.id !== id); 
            }
            else if (type === 'project') {
                appData.modules.forEach(m => { 
                    const proj = (m.projects || []).find(p => p.id === id);
-                   if(proj) pName = proj.name;
+                   if(proj) { pName = proj.name; recordDeletedProject(id); }
                    if(m.projects) m.projects = m.projects.filter(p => p.id !== id); 
                }); 
            }
            if (pName) logActivity(id, pName, 'Eliminó el elemento permanentemente', localAuthor);
-           currentSelection = { type: null, id: null }; document.getElementById('globalEditSelector').value = ""; window.saveData(true); window.handleGlobalEditSelectionChange(); window.populateGlobalEditSelector(); window.closeInfoCardSafe(); window.renderMindMap(); 
+           currentSelection = { type: null, id: null }; document.getElementById('globalEditSelector').value = ""; window.saveData(true); window.flushCloudWrite(true); window.handleGlobalEditSelectionChange(); window.populateGlobalEditSelector(); window.closeInfoCardSafe(); window.renderMindMap(); 
        } 
        else if(itemToDelete.category === 'consultant') { const name = itemToDelete.id; appData.directProjects.forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); appData.modules.forEach(m => { (m.projects || []).forEach(p => { p.consultants = p.consultants.filter(c => c !== name); }); }); delete consultants[name]; if (activeFilterConsultant === name) activeFilterConsultant = 'ALL'; activeFilterConsultants = activeFilterConsultants.filter(c => c !== name); if (activeFilterConsultants.length === 0) activeFilterConsultants = ['ALL']; if (localAuthor === name) { localAuthor = ''; localStorage.removeItem('sicom_author'); location.reload(); } window.saveData(true); window.populateConsultantSelects(); window.renderRegisteredConsultantsList(); if(isDrawerOpen && currentSelection.id) window.handleGlobalEditSelectionChange(); window.renderMindMap(); }
        window.closeDeleteModal(); window.updateDatalist();
@@ -6381,15 +6544,40 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         console.warn("No se pudo enviar alerta de nuevo proyecto:", errAlert);
       }
 
-      window.saveData(true); 
+      // Quitar de lista de IDs borrados si acaso
+      unrecordDeletedProject(np.id);
+
+      // Expandir módulo padre para visibilidad inmediata en el canvas
+      const parentModKey = (loc === 'DIRECT') ? 'hub-direct' : loc;
+      collapsedModules.delete(parentModKey);
+      lastExpandedModuleId = parentModKey;
+      if (typeof window.updateCollapseAllButtonState === 'function') {
+        window.updateCollapseAllButtonState();
+      }
+
+      // Persistencia local inmediata y subida atómica a Firestore (sin debounce)
+      window.saveData(false);
+      window.flushCloudWrite(true);
+
+      const createdType = (loc === 'DIRECT') ? 'direct-project' : 'project';
+
+      // Cerrar cajón de creación o conmutar a edición para mostrar el proyecto recién creado
+      if (typeof window.closeConfigDrawer === 'function') {
+        window.closeConfigDrawer();
+      }
+      if (typeof window.switchTab === 'function') {
+        window.switchTab('edit');
+      }
+
       window.populateGlobalEditSelector(); 
       window.updateDatalist(); 
       window.renderMindMap();
-      window.showToast(`Proyecto "${name}" creado exitosamente`, false);
+      window.triggerCelebration();
+      window.showToast(`✅ Proyecto "${name}" creado exitosamente y guardado en la nube. ¡Listo para firmas!`, false);
 
-      const createdType = (loc === 'DIRECT') ? 'direct-project' : 'project';
       setTimeout(() => {
         window.selectNode(createdType, np.id);
+        window.showInfoCard(createdType, np.id);
       }, 100);
     }
 
@@ -6409,6 +6597,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       document.getElementById('newModName').value = ''; 
       logActivity(newId, name, 'Creó el módulo', localAuthor); 
       window.saveData(true); 
+      window.flushCloudWrite(true); 
       window.populateGlobalEditSelector(); 
       window.populateNewProjectLocationSelect(newId); 
       if (typeof window.populateEditProjectLocationSelect === 'function') {
@@ -10160,7 +10349,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 archiveTaskFeedback(task);
                 delete task.validatedDate; delete task.validatedTime; delete task.validatedBy;
                 logActivity(item.id, item.name, `Reabrió tarea desde dashboard: ${task.text}`, localAuthor);
-                window.saveData(true);
+                window.saveData(true); 
+      window.flushCloudWrite(true);
                 window.renderDashboard();
                 window.showToast("Tarea reactivada", false);
             } else {
@@ -10182,7 +10372,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     validatedBy: localAuthor,
                     consultant: task.assignee || 'Consultor'
                 });
-                window.saveData(true);
+                window.saveData(true); 
+      window.flushCloudWrite(true);
                 window.renderDashboard();
                 window.showToast("Tarea validada", false);
                 window.triggerCelebration();
@@ -10190,7 +10381,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 task.done = false;
                 archiveTaskFeedback(task);
                 logActivity(item.id, item.name, `Canceló envío a validación desde dashboard: ${task.text}`, localAuthor);
-                window.saveData(true);
+                window.saveData(true); 
+      window.flushCloudWrite(true);
                 window.renderDashboard();
                 window.showToast("Envío a validación cancelado", false);
             }
@@ -10934,7 +11126,8 @@ window.toggleDailyDrawer = function() {
             logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea general: "${text}"${commitDate ? ` (Compromiso: ${commitDate})` : ''}`, localAuthor);
         }
         
-        window.saveData(true);
+        window.saveData(true); 
+      window.flushCloudWrite(true);
         window.closeFastDailyTaskModal();
     };
 
@@ -15472,7 +15665,7 @@ window.populateExecutiveFilterDropdowns = function() {
     
     // Empresa
     const selEmp = document.getElementById('execFilterEmpresa');
-    if (selEmp && selEmp.options.length <= 1) {
+    if (selEmp && selEmp.options && selEmp.options.length <= 1) {
         const companies = ['AFR', 'ZIN', 'TEO', 'AVM', 'ODM', 'STGT', 'CETRAM', 'ODA', 'ACAM', 'SATEL', 'SIG', 'CSP', 'TDN', 'OVN', 'ORO', 'MOD', 'TMT', 'SGC', 'CGT', 'SLLP', 'CAE'];
         companies.forEach(c => {
             const opt = document.createElement('option');
@@ -15484,7 +15677,7 @@ window.populateExecutiveFilterDropdowns = function() {
 
     // Estatus
     const selEst = document.getElementById('execFilterEstado');
-    if (selEst && selEst.options.length <= 1 && window.STGT_STATUS_CATALOG) {
+    if (selEst && selEst.options && selEst.options.length <= 1 && window.STGT_STATUS_CATALOG) {
         Object.keys(window.STGT_STATUS_CATALOG).forEach(s => {
             const opt = document.createElement('option');
             opt.value = s;
@@ -15495,7 +15688,7 @@ window.populateExecutiveFilterDropdowns = function() {
 
     // Consultor
     const selCons = document.getElementById('execFilterConsultor');
-    if (selCons && selCons.options.length <= 1 && typeof consultants !== 'undefined') {
+    if (selCons && selCons.options && selCons.options.length <= 1 && typeof consultants !== 'undefined') {
         Object.keys(consultants).sort().forEach(c => {
             const opt = document.createElement('option');
             opt.value = c;
@@ -17183,6 +17376,7 @@ window.stampSignatureOnActiveDocument = async function() {
         }
 
         window.saveData(false);
+        window.flushCloudWrite(true);
         window.clearSignaturePad();
         window.renderDocSignCircuitList();
         window.updateDocSignStatusBadge();

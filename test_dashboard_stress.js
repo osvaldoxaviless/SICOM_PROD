@@ -226,7 +226,7 @@ const catalogMatch = appSource.match(/window\.STGT_STATUS_CATALOG = \{[\s\S]+?\}
 if (!catalogMatch) throw new Error('Could not extract STGT_STATUS_CATALOG and normalizeProjectStatus from app.js');
 
 // Extract Dashboard Module
-const dashMarker = '// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN (FASE 2)';
+const dashMarker = appSource.includes('// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN INTEGRADO') ? '// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN INTEGRADO' : '// MÓDULO DASHBOARD EJECUTIVO & AUDITORÍA CON DRILL-DOWN (FASE 2)';
 const dashIndex = appSource.indexOf(dashMarker);
 if (dashIndex === -1) throw new Error('Could not locate Executive Dashboard module in app.js');
 const calMarker = '// === CALENDARIO INTERACTIVO DE ENTREGAS';
