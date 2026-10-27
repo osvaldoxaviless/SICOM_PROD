@@ -42,7 +42,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3453,9 +3454,10 @@
                               <span>Subir PDF</span>
                               <input type="file" id="docSignPdfInput" accept="application/pdf" onchange="handleDocPdfFileSelected(event)" class="hidden">
                           </label>
-                          <div id="docSignPdfNameContainer" class="text-xs text-[#8a8380] truncate font-mono max-w-[200px] sm:max-w-[260px]">
+                          <div id="docSignPdfNameContainer" class="text-xs text-[#8a8380] truncate font-mono max-w-[180px] sm:max-w-[240px]">
                               Arrastra o sube el PDF para firmar
                           </div>
+                          <span id="docSignPdfInfo" class="font-mono text-[9px] text-[#a0ca92] bg-[#1d1a18] px-1.5 py-0.5 rounded border border-[#3d3a39] shrink-0">Ningún PDF</span>
                       </div>
                       
                       <!-- Paginador del Visor -->
@@ -3467,38 +3469,44 @@
                   </div>
 
                   <!-- Visor Interactivo de la Hoja de Firmas -->
-                  <div class="flex-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-2 flex flex-col min-h-[300px] max-h-[460px] relative overflow-hidden">
+                  <div class="flex-1 bg-[#101010] border border-[#3d3a39] rounded-[8px] p-2 flex flex-col relative overflow-hidden" style="min-height: 310px; max-height: 470px;">
                       <div class="flex items-center justify-between pb-1 px-1 border-b border-[#1d1a18] text-[10px] font-mono text-[#8a8380] uppercase shrink-0">
                           <span id="docSignViewerPageLabel">Hoja de Firmas Oficial</span>
-                          <span class="text-[#ee6018] flex items-center gap-1">📍 Haz clic en tu casilla para ubicar la firma</span>
+                          <span class="text-[#ee6018] flex items-center gap-1">📍 Selecciona tu casilla o haz clic en la tabla</span>
+                      </div>
+
+                      <!-- Selector Directo de Casilla ("Enfrente del Nombre") detectado del PDF -->
+                      <div id="docSignDetectedSlotsBar" class="hidden flex-wrap items-center gap-1.5 py-1.5 px-2 bg-[#181615] border-b border-[#2b2826] shrink-0">
+                          <span class="font-mono text-[9px] text-[#ee6018] uppercase font-bold shrink-0">🎯 Enfrente de:</span>
+                          <div id="docSignDetectedSlotsList" class="flex flex-wrap items-center gap-1"></div>
                       </div>
                       
-                      <div id="docSignPdfViewport" class="flex-1 overflow-y-auto relative flex flex-col items-center justify-start p-2 bg-[#141414] rounded border border-[#23201e] min-h-[220px]">
+                      <div id="docSignPdfViewport" class="flex-1 overflow-y-auto relative flex flex-col items-center justify-start p-2 bg-[#141414] rounded border border-[#23201e]" style="min-height: 220px;">
                           <div id="docSignNoPdfPlaceholder" class="text-center p-8 text-[#8a8380] my-auto">
                               <svg class="w-10 h-10 mx-auto mb-2 opacity-30 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                               <p class="text-xs font-mono uppercase">Carga el PDF oficial para visualizar la hoja de firmas</p>
-                              <p class="text-[10px] text-[#635d5a] mt-1 font-mono">El sistema detectará automáticamente las casillas de autorización</p>
+                              <p class="text-[10px] text-[#635d5a] mt-1 font-mono">El sistema detectará automáticamente el nombre de cada firmante en la tabla</p>
                           </div>
-                          <div id="docSignCanvasWrapper" class="relative hidden inline-block shadow-2xl p-1 bg-white rounded my-1">
-                              <canvas id="docSignPdfCanvas" class="max-w-full h-auto cursor-crosshair block rounded bg-white shadow-md border border-[#999999]" style="background-color: #ffffff !important;"></canvas>
+                          <div id="docSignCanvasWrapper" class="relative hidden shrink-0 inline-block shadow-2xl p-1 bg-white rounded my-1" style="flex-shrink: 0;">
+                              <canvas id="docSignPdfCanvas" class="max-w-full h-auto cursor-crosshair block rounded bg-white shadow-md border border-[#999999]" style="background-color: #ffffff !important; display: block;"></canvas>
                               <!-- Marcador visual interactivo de posición -->
                               <div id="docSignStampTarget" class="absolute pointer-events-none border-2 border-dashed border-[#ee6018] bg-[#ee6018]/30 rounded flex items-center justify-center text-[10px] font-mono text-[#ffffff] font-bold transition-all shadow-[0_0_12px_rgba(238,96,24,0.8)]" style="display:none; width: 85px; height: 28px;">
-                                  <span id="docSignStampTargetLabel" class="bg-[#ee6018] text-white px-1.5 py-0.5 rounded text-[8.5px] shadow-sm font-semibold truncate max-w-[120px]">📍 FIRMA AQUÍ</span>
+                                  <span id="docSignStampTargetLabel" class="bg-[#ee6018] text-white px-1.5 py-0.5 rounded text-[8.5px] shadow-sm font-semibold truncate max-w-[140px]">📍 FIRMA AQUÍ</span>
                               </div>
                           </div>
                       </div>
                       
                       <!-- Controles de Ajuste Fino de Posición de Firma -->
                       <div id="docSignStampControls" class="hidden flex items-center justify-between pt-1.5 px-1 border-t border-[#1d1a18] shrink-0 text-[10px] font-mono text-[#8a8380]">
-                          <div class="flex items-center gap-1.5">
-                              <span>Coordenadas:</span>
-                              <span id="docSignPosLabel" class="text-[#fafafa] font-bold">X: 485, Y: 331</span>
+                          <div class="flex items-center gap-1.5 truncate">
+                              <span>Casilla:</span>
+                              <span id="docSignPosLabel" class="text-[#fafafa] font-bold truncate">Auto (Enfrente del nombre)</span>
                           </div>
-                          <div class="flex items-center gap-1">
-                              <button type="button" onclick="adjustStampPos(0, 25)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Arriba (+25 pt)">↑</button>
-                              <button type="button" onclick="adjustStampPos(0, -25)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Abajo (-25 pt)">↓</button>
-                              <button type="button" onclick="adjustStampPos(-25, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Izquierda (-25 pt)">←</button>
-                              <button type="button" onclick="adjustStampPos(25, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Derecha (+25 pt)">→</button>
+                          <div class="flex items-center gap-1 shrink-0">
+                              <button type="button" onclick="adjustStampPos(0, 15)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Arriba (+15 pt)">↑</button>
+                              <button type="button" onclick="adjustStampPos(0, -15)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Abajo (-15 pt)">↓</button>
+                              <button type="button" onclick="adjustStampPos(-15, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Izquierda (-15 pt)">←</button>
+                              <button type="button" onclick="adjustStampPos(15, 0)" class="px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] rounded text-[#fafafa] font-bold" title="Mover Derecha (+15 pt)">→</button>
                           </div>
                       </div>
                   </div>
@@ -3576,10 +3584,12 @@
                               <button type="button" class="pill-btn px-2 py-1 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] font-mono text-[9px] uppercase transition flex items-center gap-1">
                                   <span>Plantillas ▾</span>
                               </button>
-                              <div class="absolute right-0 top-full mt-1 hidden group-hover:flex flex-col bg-[#161413] border border-[#3d3a39] rounded shadow-xl z-20 py-1 min-w-[140px]">
+                              <div class="absolute right-0 top-full mt-1 hidden group-hover:flex flex-col bg-[#161413] border border-[#3d3a39] rounded shadow-xl z-20 py-1 min-w-[165px]">
+                                  <button type="button" onclick="syncCircuitFromPdfTable()" class="px-2.5 py-1.5 text-left font-mono text-[9px] text-[#38bdf8] hover:bg-[#282523] transition font-bold border-b border-[#2b2826]">⚡ Leer Firmantes del PDF</button>
                                   <button type="button" onclick="loadStandardCircuit('plano')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Plano (3 Firmas)</button>
                                   <button type="button" onclick="loadStandardCircuit('validacion')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Validación (2 Firmas)</button>
                                   <button type="button" onclick="loadStandardCircuit('completo')" class="px-2.5 py-1 text-left font-mono text-[9px] text-[#eeeeee] hover:bg-[#282523] transition">Comité (4 Firmas)</button>
+                                  <button type="button" onclick="resetDocumentSignatures()" class="px-2.5 py-1.5 text-left font-mono text-[9px] text-[#ef4444] hover:bg-[#282523] transition border-t border-[#2b2826]">🔄 Reiniciar Firmas</button>
                               </div>
                           </div>
                           <button type="button" onclick="addSignerToCircuitPrompt()" class="pill-btn px-2 py-1 bg-[#ee6018]/10 hover:bg-[#ee6018]/20 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[9px] uppercase font-bold transition flex items-center gap-1">
@@ -3600,7 +3610,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v1006"></script>
+  <script type="module" src="app.js?v=20261026_v1007"></script>
 
 </body>
 </html>
