@@ -17546,7 +17546,11 @@ window.focusSignaturePadFor = function(name, role) {
                 if (window.activeSignatureMode === 'initials') {
                     const parts = (name || '').trim().split(/\s+/).filter(Boolean);
                     if (parts.length <= 1) input.value = name || 'Firma';
-                    else input.value = `${parts.map(p => p[0].toUpperCase() + '.').join(' ')} ${parts[parts.length - 1]}`;
+                    else if (parts.length === 2) input.value = `${parts[0][0]}. ${parts[1]}`;
+                    else {
+                        const initialsPrefix = parts.slice(0, -1).map(p => p[0].toUpperCase() + '.').join(' ');
+                        input.value = `${initialsPrefix} ${parts[parts.length - 1]}`;
+                    }
                 } else {
                     input.value = name || 'Firmante Autorizado';
                 }
@@ -18682,7 +18686,8 @@ window.switchSignatureMode = function(mode) {
                 } else if (parts.length === 2) {
                     initialsText = `${parts[0][0]}. ${parts[1]}`;
                 } else {
-                    initialsText = `${parts.map(p => p[0].toUpperCase() + '.').join(' ')} ${parts[parts.length - 1]}`;
+                    const initialsPrefix = parts.slice(0, -1).map(p => p[0].toUpperCase() + '.').join(' ');
+                    initialsText = `${initialsPrefix} ${parts[parts.length - 1]}`;
                 }
                 input.value = initialsText;
             }
