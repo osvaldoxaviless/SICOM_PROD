@@ -4227,6 +4227,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                            `👔 *Jefe Inmediato:* ${payload.lead || 'Coordinación'}\n` +
                            `👥 *Copia:* Osvaldo Avilés (Admin), Miguel Barbosa (Gerente), Rafael Romero (Coordinador)\n` +
                            `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
+            } else if (type === 'DOCUMENT_SIGNED_COMPLETE') {
+                chatText = `📄 *DOCUMENTO 100% FIRMADO Y AUTORIZADO*\n` +
+                           `📦 *Proyecto:* ${payload.project || 'General'}\n` +
+                           `📑 *Documento:* ${payload.docName || 'Documento'}\n` +
+                           `👤 *Solicitante:* ${payload.targetUser || payload.consultant || 'Responsable'}\n` +
+                           `✅ *Estado:* Circuito de firmas completado por todos los firmantes.\n` +
+                           `📥 Listo para descarga oficial y resguardo en Google Drive.\n` +
+                           `🔗 ${(typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? (window.location.origin + window.location.pathname) : 'https://tablerocontrolaplstgt.vercel.app/'}`;
             } else if (type === 'VACATION_REQUESTED') {
                 chatText = `🏖️ *NUEVA SOLICITUD DE VACACIONES (FOPR-RHU-02-03)*\n` +
                            `👤 *Colaborador:* ${payload.consultant || 'Colaborador'}\n` +
@@ -4338,6 +4346,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     } else {
                         pushUrl = '/?openNotif=1&tab=alerts';
                     }
+                } else if (type === 'DOCUMENT_SIGNED_COMPLETE') {
+                    pushTitle = '📄 ¡DOCUMENTO 100% FIRMADO!';
+                    pushBody = `${payload.project || 'Proyecto'}: "${payload.docName || 'Documento'}" completó todas las firmas y está listo para descargar y subir a Drive.`;
+                    targetUser = payload.targetUser || payload.consultant || null;
+                    if (pId) pushUrl = `/?openProject=${encodeURIComponent(pId)}&projectType=${encodeURIComponent(pType)}&openSignDoc=${encodeURIComponent(payload.docId || '')}`;
                 } else if (type === 'MORNING_DIGEST') {
                     pushTitle = '☀️ RESUMEN MATUTINO SICOM';
                     pushBody = 'Hay proyectos y entregas prioritarias programadas para hoy.';
@@ -16888,16 +16901,52 @@ window.addEventListener('resize', function() {
 
 window.isSameUserOrAlias = function(nameA, nameB) {
     if (!nameA || !nameB) return false;
-    const a = nameA.trim().toLowerCase();
-    const b = nameB.trim().toLowerCase();
+    const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const a = norm(nameA);
+    const b = norm(nameB);
     if (a === b) return true;
-    if ((a.includes('osvaldo') || a.includes('emmanuel')) && (b.includes('osvaldo') || b.includes('emmanuel'))) return true;
+    if ((a.includes('osvaldo') || a.includes('emmanuel') || a.includes('sanchez') || a.includes('aviles')) && 
+        (b.includes('osvaldo') || b.includes('emmanuel') || b.includes('sanchez') || b.includes('aviles'))) return true;
     if (a.includes('rafael') && b.includes('rafael')) return true;
     if (a.includes('barbosa') && b.includes('barbosa')) return true;
+    if (a.includes('jesus') && b.includes('jesus')) return true;
+    if ((a.includes('sue') || a.includes('oyuqui')) && (b.includes('sue') || b.includes('oyuqui'))) return true;
     if (a.includes('islas') && b.includes('islas')) return true;
     if (a.includes('gutierrez') && b.includes('gutierrez')) return true;
     if (a.includes('gonzalez') && b.includes('gonzalez')) return true;
     return false;
+};
+
+// Determina el solicitante/responsable del documento en SICOM
+window.getDocSignRequester = function(item, docData) {
+    return docData?.requestedBy || item?.consultor || (Array.isArray(item?.consultants) && item.consultants[0]) || item?.author || 'Emmanuel Osvaldo Sánchez Avilés';
+};
+
+// Determina si el usuario activo es el solicitante o tiene privilegios de dirección (Supremo/Supervisor)
+window.isCurrentUserDocRequesterOrSuper = function(item, docData) {
+    if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') return true;
+    const req = window.getDocSignRequester(item, docData);
+    return window.isSameUserOrAlias(req, localAuthor);
+};
+
+// Controles ergonómicos de Zoom para el visor de la Hoja de Firmas (ideal para vista cansada / personas mayores)
+window.changeDocSignZoom = function(delta) {
+    if (!activeSignDocCtx.zoomLevel) activeSignDocCtx.zoomLevel = 1.15;
+    activeSignDocCtx.zoomLevel = Math.max(0.65, Math.min(2.2, Math.round((activeSignDocCtx.zoomLevel + delta) * 100) / 100));
+    const label = document.getElementById('docSignZoomLabel');
+    if (label) label.textContent = `${Math.round(activeSignDocCtx.zoomLevel * 100)}%`;
+    if (activeSignDocCtx.pdfBytes) {
+        window.renderLastPdfPage();
+    }
+};
+
+window.resetDocSignZoom = function() {
+    activeSignDocCtx.zoomLevel = 1.0;
+    const label = document.getElementById('docSignZoomLabel');
+    if (label) label.textContent = '100%';
+    if (activeSignDocCtx.pdfBytes) {
+        window.renderLastPdfPage();
+    }
 };
 
 function getProjectById(id) {
@@ -17021,8 +17070,11 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
         detectedRows: [],
         selectedSlotLabel: '',
         userManuallyPickedCoords: false,
-        lastAutoSignerId: null
+        lastAutoSignerId: null,
+        zoomLevel: 1.15
     };
+    const initZoomLabel = document.getElementById('docSignZoomLabel');
+    if (initZoomLabel) initZoomLabel.textContent = '115%';
 
     // Recuperar binario PDF (y copia limpia original si existe) de IndexedDB
     if (window.SICOM_IDB) {
@@ -17148,25 +17200,43 @@ window.updateDocSignStatusBadge = function() {
     const padContainer = document.getElementById('docSignPadContainer');
     const completedCard = document.getElementById('docSignCompletedCard');
     const downloadContainer = document.getElementById('docSignDownloadContainer');
+    const requesterActions = document.getElementById('docSignCompletedRequesterActions');
+    const nonRequesterNotice = document.getElementById('docSignCompletedNonRequesterNotice');
+    const requesterNameEl = document.getElementById('docSignCompletedRequesterName');
+
+    const requester = window.getDocSignRequester(item, docData);
+    const isRequesterOrSuper = window.isCurrentUserDocRequesterOrSuper(item, docData);
 
     if (total === 0) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#3d3a39] bg-[#101010] text-[#8a8380]";
         badge.textContent = "⚪ SIN FIRMAS";
         if (completedCard) completedCard.classList.add('hidden');
         if (padContainer) padContainer.classList.remove('hidden');
-        if (downloadContainer) downloadContainer.classList.remove('hidden');
+        if (downloadContainer) downloadContainer.classList.toggle('hidden', !isRequesterOrSuper);
     } else if (signed === total) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#22c55e]/40 bg-[#22c55e]/15 text-[#22c55e] font-bold";
         badge.textContent = `🟢 100% FIRMADO (${total}/${total})`;
         if (completedCard) completedCard.classList.remove('hidden');
         if (padContainer) padContainer.classList.add('hidden');
         if (downloadContainer) downloadContainer.classList.add('hidden');
+
+        // Configuración de descarga exclusiva para el solicitante vs aviso a los demás firmantes
+        if (isRequesterOrSuper) {
+            if (requesterActions) requesterActions.classList.remove('hidden');
+            if (nonRequesterNotice) nonRequesterNotice.classList.add('hidden');
+        } else {
+            if (requesterActions) requesterActions.classList.add('hidden');
+            if (nonRequesterNotice) {
+                nonRequesterNotice.classList.remove('hidden');
+                if (requesterNameEl) requesterNameEl.textContent = requester;
+            }
+        }
     } else {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#eab308]/40 bg-[#eab308]/15 text-[#eab308] font-bold";
         badge.textContent = `🟡 EN PROCESO (${signed}/${total})`;
         if (completedCard) completedCard.classList.add('hidden');
         if (padContainer) padContainer.classList.remove('hidden');
-        if (downloadContainer) downloadContainer.classList.remove('hidden');
+        if (downloadContainer) downloadContainer.classList.toggle('hidden', !isRequesterOrSuper);
     }
 };
 
@@ -17754,6 +17824,7 @@ window.syncCircuitFromPdfTable = async function() {
 };
 
 window.resetDocumentSignatures = async function() {
+    if (!confirm("¿Deseas reiniciar todas las firmas de este documento para comenzar de nuevo el circuito?")) return;
     const item = getProjectById(activeSignDocCtx.projectId);
     if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
     const docData = item.docs[activeSignDocCtx.docId];
@@ -18030,10 +18101,15 @@ window.renderLastPdfPage = async function() {
         activeSignDocCtx.pagePdfWidth = unscaledViewport.width || 612;
         activeSignDocCtx.pagePdfHeight = unscaledViewport.height || 792;
 
-        const parentWidth = wrapper?.parentElement?.clientWidth || 480;
-        const targetWidth = Math.max(320, Math.min(540, parentWidth - 20));
-        const scale = targetWidth / activeSignDocCtx.pagePdfWidth;
-        const viewport = page.getViewport({ scale: scale > 0.45 ? scale : 0.82 });
+        const parentWidth = wrapper?.parentElement?.clientWidth || 500;
+        const targetWidth = Math.max(340, Math.min(580, parentWidth - 20));
+        const baseScale = targetWidth / activeSignDocCtx.pagePdfWidth;
+        const zoom = activeSignDocCtx.zoomLevel || 1.15;
+        const scale = Math.max(0.60, baseScale * zoom);
+        const viewport = page.getViewport({ scale: scale });
+
+        const zoomLabel = document.getElementById('docSignZoomLabel');
+        if (zoomLabel) zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
 
         canvas.width = Math.round(viewport.width);
         canvas.height = Math.round(viewport.height);
@@ -18476,7 +18552,27 @@ window.stampSignatureOnActiveDocument = async function() {
     const remaining = circuit.filter(s => s.status !== 'signed').length;
     if (remaining === 0) {
         docData.checked = true;
-        window.showToast("🎉 ¡Documento 100% firmado por todos los involucrados!", false);
+        const requester = window.getDocSignRequester(item, docData);
+        const isReqOrSuper = window.isCurrentUserDocRequesterOrSuper(item, docData);
+
+        // Disparar alerta externa y Web Push al Solicitante
+        if (typeof window.sendExternalAlert === 'function') {
+            window.sendExternalAlert('DOCUMENT_SIGNED_COMPLETE', {
+                project: item.name,
+                projectId: item.id,
+                projectType: activeSignDocCtx.pType,
+                docName: activeSignDocCtx.docName,
+                docId: activeSignDocCtx.docId,
+                targetUser: requester,
+                consultant: requester
+            });
+        }
+
+        if (isReqOrSuper) {
+            window.showToast("🎉 ¡Documento 100% firmado! Puedes descargarlo ahora para guardarlo en la carpeta de Drive.", false);
+        } else {
+            window.showToast(`🎉 ¡Documento 100% firmado! Tu firma se estampó correctamente y se notificó a ${requester} para descargar el PDF y respaldarlo en Drive.`, false);
+        }
         window.triggerCelebration();
     } else {
         const nextSigner = circuit.find(s => s.status !== 'signed');
@@ -18503,6 +18599,16 @@ window.stampSignatureOnActiveDocument = async function() {
 };
 
 window.downloadCurrentSignedPdf = async function() {
+    const item = getProjectById(activeSignDocCtx.projectId);
+    const docData = item?.docs?.[activeSignDocCtx.docId];
+    const isReqOrSuper = window.isCurrentUserDocRequesterOrSuper(item, docData);
+
+    if (!isReqOrSuper) {
+        const requester = window.getDocSignRequester(item, docData);
+        window.showToast(`ℹ️ La descarga oficial está asignada al solicitante (${requester}) para evitar sobrecargar tu equipo y respaldar en Drive.`, false);
+        return;
+    }
+
     if (!activeSignDocCtx.pdfBytes) {
         window.showToast("⚠️ No hay archivo PDF disponible para descargar.", true);
         return;
