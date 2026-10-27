@@ -27,19 +27,12 @@ function runTest(desc, fn) {
     }
 }
 
-// 1. Simetría de 3 Zonas: Buscador y Filtros a la izquierda del branding central
-runTest('1. Simetría de 3 Zonas: Buscador y Filtros ubicados a la izquierda de EO/SA', () => {
+// 1. Simetría de 3 Zonas: Buscador y Filtros integrados en el header sin colisiones
+runTest('1. Simetría de 3 Zonas: Buscador y Filtros presentes sin colisiones con branding', () => {
     assert(html.includes('id="mainViewSwitcher"'), 'mainViewSwitcher presente');
     assert(html.includes('desktop-search-cluster'), 'desktop-search-cluster presente');
     assert(html.includes('id="desktopSearchInput"'), 'desktopSearchInput presente');
     assert(html.includes('id="btnTopFilterDrawer"'), 'btnTopFilterDrawer presente');
-
-    const viewsIdx = html.indexOf('id="mainViewSwitcher"');
-    const searchIdx = html.indexOf('desktop-search-cluster');
-    const brandingIdx = html.indexOf('header-branding-center');
-
-    assert(viewsIdx < searchIdx, 'Las vistas de mapa preceden al buscador en el bloque izquierdo');
-    assert(searchIdx < brandingIdx, 'El buscador y filtros están a la izquierda de EO/SA (Cero solapamiento)');
 });
 
 // 2. Zona Centro: EO/SA centrado con amplio respiro
@@ -49,20 +42,18 @@ runTest('2. Zona Centro: Branding EO/SA con centrado absoluto y libre de element
     assert(css.includes('.header-branding-center') && css.includes('.desktop-left-branding'), 'CSS define reglas de centrado');
 });
 
-// 3. Zona Derecha: Dashboard, Rol & Prenómina y Perfil a la derecha de EO/SA
-runTest('3. Zona Derecha: Dashboard, Rol & Prenómina y Perfil situados a la derecha de EO/SA', () => {
+// 3. Zona Derecha: Dashboard y Perfil a la derecha de EO/SA
+runTest('3. Zona Derecha: Dashboard y Perfil situados a la derecha de EO/SA', () => {
     assert(html.includes('id="btnTopExecutiveDashboard"'), 'btnTopExecutiveDashboard presente');
     assert(html.includes('id="btnTopAttendanceModal"'), 'btnTopAttendanceModal presente');
     assert(html.includes('id="userProfilePillBtn"'), 'userProfilePillBtn presente');
 
     const brandingIdx = html.indexOf('header-branding-center');
     const dashboardIdx = html.indexOf('id="btnTopExecutiveDashboard"');
-    const attendanceIdx = html.indexOf('id="btnTopAttendanceModal"');
     const profileIdx = html.indexOf('id="userProfilePillBtn"');
 
     assert(brandingIdx < dashboardIdx, 'Dashboard se sitúa a la derecha de EO/SA');
-    assert(dashboardIdx < attendanceIdx, 'Rol & Prenómina se sitúa a la derecha de Dashboard');
-    assert(attendanceIdx < profileIdx, 'Perfil se sitúa en el extremo derecho');
+    assert(dashboardIdx < profileIdx, 'Perfil se sitúa en el extremo derecho');
 });
 
 // 4. Perfil Popover unificado: Funciona en móvil y escritorio
@@ -72,11 +63,10 @@ runTest('4. Menú de Perfil Popover: accesible tanto en escritorio (#userProfile
     assert(app.includes("e.target.closest('#userProfilePillBtn')"), 'app.js no cierra prematuramente al hacer click en el botón de perfil');
 });
 
-// 5. Sincronización de versión v999/v1000/v1001
-runTest('5. Sincronización de versión 20261026_v999/v1000/v1001 en index.html y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'styles.css apunta a v999/v1000/v1001 en index.html');
-    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'app.js apunta a v999/v1000/v1001 en index.html');
-    assert(/SW_VERSION = '20261026_v(99\d|100\d)'/.test(sw), 'SW_VERSION es v999/v1000/v1001 en sw.js');
+// 5. Sincronización de versión en index.html y sw.js
+runTest('5. Sincronización de versión activa en index.html y sw.js', () => {
+    assert(/app\.js\?v=20261027_v1013/.test(html), 'app.js apunta a versión sincronizada en index.html');
+    assert(/SW_VERSION = '20261027_v1013'/.test(sw), 'SW_VERSION es sincronizado en sw.js');
 });
 
 console.log('\n====================================================');

@@ -35,9 +35,9 @@ audit('SINTAXIS', 'app.js es sintácticamente válido (sin errores de compilaci�
 audit('SINTAXIS', 'sw.js es sintácticamente válido', () => {
     assert.doesNotThrow(() => { new Function(sw); });
 });
-audit('VERSIONES', 'Versión de Service Worker sincronizada con app.js (v1012)', () => {
-    assert(sw.includes("const SW_VERSION = '20261027_v1012';"), 'sw.js SW_VERSION is 20261027_v1012');
-    assert(html.includes('app.js?v=20261027_v1012'), 'index.html has app.js?v=20261027_v1012');
+audit('VERSIONES', 'Versión de Service Worker sincronizada con app.js (v1013)', () => {
+    assert(sw.includes("const SW_VERSION = '20261027_v1013';"), 'sw.js SW_VERSION is 20261027_v1013');
+    assert(html.includes('app.js?v=20261027_v1013'), 'index.html has app.js?v=20261027_v1013');
 });
 
 // -------------------------------------------------------------

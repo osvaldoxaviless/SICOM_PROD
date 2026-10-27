@@ -8448,7 +8448,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const dInact = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer";
             const dAct = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer";
             if (btnMap) btnMap.className = (activeMode === 'map') ? dAct : dInact;
-            if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
+            if (btnPrio) {
+                btnPrio.className = 'hidden';
+                btnPrio.style.setProperty('display', 'none', 'important');
+            }
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
             const btnTasks = document.getElementById('btnViewModeTasks');
             if (btnTasks) btnTasks.classList.add('hidden');
