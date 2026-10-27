@@ -17054,9 +17054,13 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
             inner.classList.remove('scale-95');
             inner.classList.add('scale-100');
         }
+        if (typeof window.resizeSignaturePad === 'function') window.resizeSignaturePad();
     });
 
     if (activeSignDocCtx.pdfBytes) {
+        if (typeof window.syncCircuitSignaturesToPdf === 'function') {
+            await window.syncCircuitSignaturesToPdf();
+        }
         window.renderLastPdfPage();
     } else {
         document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
@@ -17193,12 +17197,31 @@ window.renderDocSignCircuitList = function() {
 };
 
 window.focusSignaturePadFor = function(name, role) {
-    const pad = document.getElementById('signaturePadCanvas');
-    if (pad) {
-        pad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const padContainer = document.getElementById('docSignPadContainer');
+    const scrollContainer = document.getElementById('docSignScrollContainer');
+    const canvas = document.getElementById('signaturePadCanvas');
+
+    if (canvas) {
+        if (typeof window.resizeSignaturePad === 'function') window.resizeSignaturePad();
         window.clearSignaturePad();
-        window.showToast(`✍️ Listo. Dibuja la firma para ${name} (${role})`, false);
     }
+
+    if (padContainer) {
+        padContainer.classList.remove('border-[#3d3a39]');
+        padContainer.classList.add('border-[#ee6018]', 'ring-2', 'ring-[#ee6018]/50');
+        setTimeout(() => {
+            padContainer.classList.remove('ring-2', 'ring-[#ee6018]/50');
+            padContainer.classList.add('border-[#3d3a39]');
+        }, 2200);
+
+        if (scrollContainer) {
+            const targetTop = padContainer.offsetTop - 20;
+            scrollContainer.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        }
+        padContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    window.showToast(`✍️ Listo. Dibuja tu firma en el recuadro blanco para ${name} (${role})`, false);
 };
 
 window.addSignerToCircuitPrompt = function() {
@@ -17408,23 +17431,42 @@ window.renderLastPdfPage = async function() {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
 
-        const loadingTask = pdfjsLib.getDocument({ data: activeSignDocCtx.pdfBytes.slice() });
+        // Clonar búfer desacoplado para evitar que el WebWorker lo desconecte (detach)
+        let bytesCopy = null;
+        if (activeSignDocCtx.pdfBytes instanceof Uint8Array) {
+            bytesCopy = new Uint8Array(activeSignDocCtx.pdfBytes.buffer.slice(activeSignDocCtx.pdfBytes.byteOffset, activeSignDocCtx.pdfBytes.byteOffset + activeSignDocCtx.pdfBytes.byteLength));
+        } else if (activeSignDocCtx.pdfBytes instanceof ArrayBuffer) {
+            bytesCopy = new Uint8Array(activeSignDocCtx.pdfBytes.slice(0));
+        } else {
+            bytesCopy = new Uint8Array(activeSignDocCtx.pdfBytes);
+        }
+
+        const loadingTask = pdfjsLib.getDocument({ data: bytesCopy });
         const pdf = await loadingTask.promise;
         activeSignDocCtx.pdfPageCount = pdf.numPages;
-        const page = await pdf.getPage(pdf.numPages); // Siempre la última página donde firman
+        const page = await pdf.getPage(pdf.numPages); // Siempre la última página donde van las firmas
 
         const unscaledViewport = page.getViewport({ scale: 1.0 });
-        activeSignDocCtx.pagePdfWidth = unscaledViewport.width;
-        activeSignDocCtx.pagePdfHeight = unscaledViewport.height;
+        activeSignDocCtx.pagePdfWidth = unscaledViewport.width || 612;
+        activeSignDocCtx.pagePdfHeight = unscaledViewport.height || 792;
 
         const targetWidth = Math.min(520, (wrapper.parentElement?.clientWidth || 480) - 24);
-        const scale = targetWidth / unscaledViewport.width;
+        const scale = targetWidth / activeSignDocCtx.pagePdfWidth;
         const viewport = page.getViewport({ scale: scale > 0.35 ? scale : 0.75 });
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        canvas.style.backgroundColor = '#ffffff';
+
+        // PINTAR FONDO BLANCO PAPEL OBLIGATORIO (Evita el recuadro negro en PDFs sin fondo explícito)
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
         const renderCtx = {
-            canvasContext: canvas.getContext('2d'),
+            canvasContext: ctx,
             viewport: viewport
         };
         await page.render(renderCtx).promise;
@@ -17433,25 +17475,27 @@ window.renderLastPdfPage = async function() {
 
         canvas.onclick = function(e) {
             const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
 
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            const pdfX = (clickX / rect.width) * activeSignDocCtx.pagePdfWidth;
+            const pdfY = activeSignDocCtx.pagePdfHeight - ((clickY / rect.height) * activeSignDocCtx.pagePdfHeight);
 
-            const pdfX = (clickX * scaleX / canvas.width) * activeSignDocCtx.pagePdfWidth;
-            const pdfY = activeSignDocCtx.pagePdfHeight - ((clickY * scaleY / canvas.height) * activeSignDocCtx.pagePdfHeight);
+            if (!isNaN(pdfX) && !isNaN(pdfY)) {
+                const sW = activeSignDocCtx.stampWidth || 110;
+                const sH = activeSignDocCtx.stampHeight || 38;
+                activeSignDocCtx.stampX = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfWidth - sW - 10, pdfX - (sW / 2))));
+                activeSignDocCtx.stampY = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfHeight - sH - 10, pdfY - (sH / 2))));
 
-            activeSignDocCtx.stampX = Math.round(pdfX - (activeSignDocCtx.stampWidth / 2));
-            activeSignDocCtx.stampY = Math.round(pdfY - (activeSignDocCtx.stampHeight / 2));
+                const item = getProjectById(activeSignDocCtx.projectId);
+                if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+                    item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
+                    item.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
+                }
 
-            const item = getProjectById(activeSignDocCtx.projectId);
-            if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
-                item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
-                item.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
+                window.updateStampTargetVisual();
             }
-
-            window.updateStampTargetVisual();
         };
 
     } catch (err) {
@@ -17465,8 +17509,17 @@ window.updateStampTargetVisual = function() {
     const label = document.getElementById('docSignPosLabel');
     if (!target || !canvas) return;
 
+    let sX = Number(activeSignDocCtx.stampX);
+    let sY = Number(activeSignDocCtx.stampY);
+    if (isNaN(sX)) sX = 410;
+    if (isNaN(sY)) sY = 120;
+    const pW = activeSignDocCtx.pagePdfWidth || 612;
+    const pH = activeSignDocCtx.pagePdfHeight || 792;
+    const sW = activeSignDocCtx.stampWidth || 110;
+    const sH = activeSignDocCtx.stampHeight || 38;
+
     if (label) {
-        label.textContent = `X: ${activeSignDocCtx.stampX}, Y: ${activeSignDocCtx.stampY}`;
+        label.textContent = `X: ${sX}, Y: ${sY}`;
     }
 
     const rect = canvas.getBoundingClientRect();
@@ -17475,21 +17528,32 @@ window.updateStampTargetVisual = function() {
         return;
     }
 
-    const cssX = ((activeSignDocCtx.stampX) / activeSignDocCtx.pagePdfWidth) * rect.width;
-    const cssY = ((activeSignDocCtx.pagePdfHeight - (activeSignDocCtx.stampY + activeSignDocCtx.stampHeight)) / activeSignDocCtx.pagePdfHeight) * rect.height;
-    const cssWidth = (activeSignDocCtx.stampWidth / activeSignDocCtx.pagePdfWidth) * rect.width;
-    const cssHeight = (activeSignDocCtx.stampHeight / activeSignDocCtx.pagePdfHeight) * rect.height;
+    const cssX = (sX / pW) * rect.width;
+    const cssY = ((pH - (sY + sH)) / pH) * rect.height;
+    const cssWidth = (sW / pW) * rect.width;
+    const cssHeight = (sH / pH) * rect.height;
 
     target.style.display = 'flex';
     target.style.left = `${Math.round(cssX)}px`;
     target.style.top = `${Math.round(cssY)}px`;
-    target.style.width = `${Math.round(cssWidth)}px`;
-    target.style.height = `${Math.round(cssHeight)}px`;
+    target.style.width = `${Math.max(60, Math.round(cssWidth))}px`;
+    target.style.height = `${Math.max(25, Math.round(cssHeight))}px`;
 };
 
 window.adjustStampPos = function(dx, dy) {
-    activeSignDocCtx.stampX = Math.max(0, activeSignDocCtx.stampX + dx);
-    activeSignDocCtx.stampY = Math.max(0, activeSignDocCtx.stampY + dy);
+    let curX = Number(activeSignDocCtx.stampX);
+    let curY = Number(activeSignDocCtx.stampY);
+    if (isNaN(curX)) curX = 410;
+    if (isNaN(curY)) curY = 120;
+
+    const maxW = activeSignDocCtx.pagePdfWidth || 612;
+    const maxH = activeSignDocCtx.pagePdfHeight || 792;
+    const sW = activeSignDocCtx.stampWidth || 110;
+    const sH = activeSignDocCtx.stampHeight || 38;
+
+    activeSignDocCtx.stampX = Math.max(10, Math.min(maxW - sW - 10, curX + dx));
+    activeSignDocCtx.stampY = Math.max(10, Math.min(maxH - sH - 10, curY + dy));
+
     const item = getProjectById(activeSignDocCtx.projectId);
     if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
         item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
@@ -17498,16 +17562,33 @@ window.adjustStampPos = function(dx, dy) {
     window.updateStampTargetVisual();
 };
 
+window.resizeSignaturePad = function() {
+    const canvas = document.getElementById('signaturePadCanvas');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    const computedWidth = container ? container.clientWidth : 0;
+    const finalWidth = (computedWidth > 50) ? computedWidth : Math.min(window.innerWidth - 40, 500);
+
+    if (canvas.width !== finalWidth || canvas.height !== 100) {
+        canvas.width = finalWidth;
+        canvas.height = 100;
+        if (sigPadCtx) {
+            sigPadCtx.strokeStyle = '#0055cc';
+            sigPadCtx.lineWidth = 2.5;
+            sigPadCtx.lineCap = 'round';
+            sigPadCtx.lineJoin = 'round';
+        }
+    }
+};
+
 window.initSignaturePad = function() {
     const canvas = document.getElementById('signaturePadCanvas');
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width > 0 ? rect.width : 450;
-    canvas.height = 85;
+    window.resizeSignaturePad();
 
     sigPadCtx = canvas.getContext('2d');
-    sigPadCtx.strokeStyle = '#0055cc'; // Tinta azul corporativa idéntica al documento STGT
+    sigPadCtx.strokeStyle = '#0055cc'; // Tinta azul corporativa
     sigPadCtx.lineWidth = 2.5;
     sigPadCtx.lineCap = 'round';
     sigPadCtx.lineJoin = 'round';
@@ -17574,13 +17655,61 @@ window.clearSignaturePad = function() {
     hasSignatureDrawn = false;
 };
 
-window.stampSignatureOnActiveDocument = async function() {
-    if (!activeSignDocCtx.pdfBytes) {
-        window.showToast("⚠️ Primero sube un archivo PDF para firmar.", true);
-        return;
+// Sincronizador automático de firmas registradas en el circuito hacia el binario del PDF
+window.syncCircuitSignaturesToPdf = async function() {
+    if (!activeSignDocCtx.pdfBytes) return;
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+    const circuit = docData.signatureCircuit || [];
+
+    const pendingStamps = circuit.filter(s => s.status === 'signed' && s.signaturePng && !s.injectedInPdf);
+    if (pendingStamps.length === 0) return;
+
+    try {
+        await window.ensurePdfLibReady();
+        if (typeof PDFLib === 'undefined' || !PDFLib.PDFDocument) return;
+
+        let rawBytes = activeSignDocCtx.pdfBytes;
+        if (rawBytes instanceof ArrayBuffer) rawBytes = new Uint8Array(rawBytes.slice(0));
+        else if (rawBytes && rawBytes.buffer instanceof ArrayBuffer) rawBytes = new Uint8Array(rawBytes.buffer.slice(rawBytes.byteOffset, rawBytes.byteOffset + rawBytes.byteLength));
+        else if (Array.isArray(rawBytes) || (typeof rawBytes === 'object' && rawBytes !== null)) rawBytes = new Uint8Array(Object.values(rawBytes));
+
+        const pdfDoc = await PDFLib.PDFDocument.load(rawBytes, { ignoreEncryption: true, updateMetadata: false });
+        const pages = pdfDoc.getPages();
+        const lastPage = pages[pages.length - 1];
+
+        for (const signer of pendingStamps) {
+            try {
+                const base64Data = signer.signaturePng.split(',')[1];
+                const binaryString = atob(base64Data);
+                const pngBytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) pngBytes[i] = binaryString.charCodeAt(i);
+
+                const sigImg = await pdfDoc.embedPng(pngBytes);
+                const sX = Number(signer.coords?.x) || 410;
+                const sY = Number(signer.coords?.y) || 120;
+                lastPage.drawImage(sigImg, { x: sX, y: sY, width: 110, height: 38 });
+                signer.injectedInPdf = true;
+            } catch (errSig) {
+                console.warn("Fallo inyectando firma remota:", errSig);
+            }
+        }
+
+        const newBytes = await pdfDoc.save({ useObjectStreams: false });
+        activeSignDocCtx.pdfBytes = newBytes;
+        if (window.SICOM_IDB && activeSignDocCtx.pdfKey) {
+            await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, newBytes);
+        }
+        window.saveData(false);
+    } catch (e) {
+        console.warn("Error en syncCircuitSignaturesToPdf:", e);
     }
+};
+
+window.stampSignatureOnActiveDocument = async function() {
     if (!hasSignatureDrawn) {
-        window.showToast("⚠️ Dibuja tu firma en el recuadro antes de estampar.", true);
+        window.showToast("⚠️ Dibuja tu firma en el recuadro blanco antes de estampar.", true);
         return;
     }
 
@@ -17602,69 +17731,118 @@ window.stampSignatureOnActiveDocument = async function() {
         return;
     }
 
-    try {
-        await window.ensurePdfLibReady();
-        if (typeof PDFLib === 'undefined') {
-            window.showToast("⚠️ Biblioteca PDFLib no disponible para firmar.", true);
-            return;
+    const padCanvas = document.getElementById('signaturePadCanvas');
+    const signaturePngDataUrl = padCanvas.toDataURL('image/png');
+
+    const now = new Date();
+    const stampDateStr = `${now.toLocaleDateString('es-MX')} ${now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
+
+    let stampedInPdf = false;
+
+    // Si el archivo PDF está disponible en la memoria/almacenamiento de este dispositivo:
+    if (activeSignDocCtx.pdfBytes) {
+        try {
+            await window.ensurePdfLibReady();
+            if (typeof PDFLib !== 'undefined' && PDFLib.PDFDocument) {
+                let rawBytes = activeSignDocCtx.pdfBytes;
+                if (rawBytes instanceof ArrayBuffer) {
+                    rawBytes = new Uint8Array(rawBytes.slice(0));
+                } else if (rawBytes && rawBytes.buffer instanceof ArrayBuffer) {
+                    rawBytes = new Uint8Array(rawBytes.buffer.slice(rawBytes.byteOffset, rawBytes.byteOffset + rawBytes.byteLength));
+                } else if (Array.isArray(rawBytes) || (typeof rawBytes === 'object' && rawBytes !== null)) {
+                    rawBytes = new Uint8Array(Object.values(rawBytes));
+                }
+
+                const pdfDoc = await PDFLib.PDFDocument.load(rawBytes, {
+                    ignoreEncryption: true,
+                    updateMetadata: false
+                });
+
+                // Convertir base64 a Uint8Array binario puro
+                const base64Data = signaturePngDataUrl.split(',')[1];
+                const binaryString = atob(base64Data);
+                const pngBytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    pngBytes[i] = binaryString.charCodeAt(i);
+                }
+
+                const signatureImage = await pdfDoc.embedPng(pngBytes);
+                const pages = pdfDoc.getPages();
+                const lastPage = pages[pages.length - 1];
+                const pWidth = lastPage.getWidth() || 612;
+                const pHeight = lastPage.getHeight() || 792;
+
+                let sX = Number(activeSignDocCtx.stampX);
+                let sY = Number(activeSignDocCtx.stampY);
+                let sW = Number(activeSignDocCtx.stampWidth) || 110;
+                let sH = Number(activeSignDocCtx.stampHeight) || 38;
+
+                if (isNaN(sX) || sX < 0) sX = Math.round(pWidth * 0.65);
+                if (isNaN(sY) || sY < 0) sY = 120;
+                if (sX + sW > pWidth) sX = Math.max(10, pWidth - sW - 10);
+                if (sY + sH > pHeight) sY = Math.max(10, pHeight - sH - 10);
+
+                lastPage.drawImage(signatureImage, {
+                    x: sX,
+                    y: sY,
+                    width: sW,
+                    height: sH
+                });
+
+                const newPdfBytes = await pdfDoc.save({ useObjectStreams: false });
+                activeSignDocCtx.pdfBytes = newPdfBytes;
+
+                if (window.SICOM_IDB && activeSignDocCtx.pdfKey) {
+                    await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, newPdfBytes);
+                }
+                stampedInPdf = true;
+            }
+        } catch (err) {
+            console.error("Error al inyectar firma en PDF con pdf-lib:", err);
         }
-
-        const padCanvas = document.getElementById('signaturePadCanvas');
-        const signaturePngDataUrl = padCanvas.toDataURL('image/png');
-
-        const pdfDoc = await PDFLib.PDFDocument.load(activeSignDocCtx.pdfBytes);
-        const signatureImage = await pdfDoc.embedPng(signaturePngDataUrl);
-        const pages = pdfDoc.getPages();
-        const lastPage = pages[pages.length - 1];
-
-        lastPage.drawImage(signatureImage, {
-            x: activeSignDocCtx.stampX,
-            y: activeSignDocCtx.stampY,
-            width: activeSignDocCtx.stampWidth,
-            height: activeSignDocCtx.stampHeight
-        });
-
-        const newPdfBytes = await pdfDoc.save();
-        activeSignDocCtx.pdfBytes = newPdfBytes;
-
-        if (window.SICOM_IDB) {
-            await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, newPdfBytes);
-        }
-
-        const now = new Date();
-        const stampDateStr = `${now.toLocaleDateString('es-MX')} ${now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
-        signer.status = 'signed';
-        signer.signedAt = stampDateStr;
-        signer.signedBy = localAuthor;
-        signer.coords = { x: activeSignDocCtx.stampX, y: activeSignDocCtx.stampY };
-
-        logActivity(item.id, item.name, `Estampó firma digital [${signer.role}]: ${signer.name} en ${activeSignDocCtx.docName}`, localAuthor);
-
-        const remaining = circuit.filter(s => s.status !== 'signed').length;
-        if (remaining === 0) {
-            docData.checked = true;
-            window.showToast("🎉 ¡Documento 100% firmado por todos los involucrados!", false);
-            window.triggerCelebration();
-        } else {
-            activeSignDocCtx.stampY = Math.max(20, activeSignDocCtx.stampY - 40);
-            docData.lastStampX = activeSignDocCtx.stampX;
-            docData.lastStampY = activeSignDocCtx.stampY;
-            window.showToast(`✅ Firma de ${signer.name} estampada. Turno del siguiente firmante.`, false);
-        }
-
-        window.saveData(false);
-        window.flushCloudWrite(true);
-        window.clearSignaturePad();
-        window.renderDocSignCircuitList();
-        window.updateDocSignStatusBadge();
-        window.renderLastPdfPage();
-
-        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
-
-    } catch (err) {
-        console.error("Error al estampar firma en PDF:", err);
-        window.showToast("⚠️ Falló la inyección de la firma en el PDF.", true);
     }
+
+    // Registrar estado de la firma en el circuito
+    signer.status = 'signed';
+    signer.signedAt = stampDateStr;
+    signer.signedBy = localAuthor;
+    signer.signaturePng = signaturePngDataUrl;
+    signer.injectedInPdf = stampedInPdf;
+    signer.coords = {
+        x: Number(activeSignDocCtx.stampX) || 410,
+        y: Number(activeSignDocCtx.stampY) || 120
+    };
+
+    logActivity(item.id, item.name, `Estampó firma digital [${signer.role}]: ${signer.name} en ${activeSignDocCtx.docName}`, localAuthor);
+
+    const remaining = circuit.filter(s => s.status !== 'signed').length;
+    if (remaining === 0) {
+        docData.checked = true;
+        window.showToast("🎉 ¡Documento 100% firmado por todos los involucrados!", false);
+        window.triggerCelebration();
+    } else {
+        activeSignDocCtx.stampY = Math.max(20, (Number(activeSignDocCtx.stampY) || 120) - 40);
+        docData.lastStampX = activeSignDocCtx.stampX;
+        docData.lastStampY = activeSignDocCtx.stampY;
+        const nextSigner = circuit.find(s => s.status !== 'signed');
+        const nextName = nextSigner ? `${nextSigner.name} (${nextSigner.role})` : 'el siguiente firmante';
+        if (stampedInPdf) {
+            window.showToast(`✅ Firma de ${signer.name} estampada en el PDF. Turno de ${nextName}.`, false);
+        } else {
+            window.showToast(`✅ Firma de ${signer.name} autorizada y registrada desde el móvil. Turno de ${nextName}.`, false);
+        }
+    }
+
+    window.saveData(false);
+    window.flushCloudWrite(true);
+    window.clearSignaturePad();
+    window.renderDocSignCircuitList();
+    window.updateDocSignStatusBadge();
+    if (activeSignDocCtx.pdfBytes) {
+        window.renderLastPdfPage();
+    }
+
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
 };
 
 window.downloadCurrentSignedPdf = function() {
