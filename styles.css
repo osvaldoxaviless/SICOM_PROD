@@ -910,6 +910,10 @@ body:has(#priorityBoardView:not(.hidden)) #activeFilterPill {
     z-index: 100000 !important;
 }
 
+#documentSignModal {
+    z-index: 100005 !important;
+}
+
 /* Branding EO/SA centrado simétricamente tanto en escritorio como en móvil */
 .header-branding-center,
 .mobile-branding-center {
@@ -1842,7 +1846,8 @@ div[id$="Modal"].hidden,
     justify-content: center !important;
 }
 
-body:has(#loginOverlay:not(.hidden)) #mobileBottomDock {
+body:has(#loginOverlay:not(.hidden)) #mobileBottomDock,
+body:has(#documentSignModal:not(.hidden)) #mobileBottomDock {
     display: none !important;
 }
 

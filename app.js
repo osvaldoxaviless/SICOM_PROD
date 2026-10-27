@@ -17163,10 +17163,26 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
     const modal = document.getElementById('documentSignModal');
     if (!modal) return;
 
+    // Ocultar dock inferior móvil para evitar superposiciones con los controles del modal
+    const dock = document.getElementById('mobileBottomDock');
+    if (dock) {
+        dock.classList.add('hidden');
+        dock.style.display = 'none';
+    }
+
     document.getElementById('docSignModalDocTitle').textContent = docName;
     document.getElementById('docSignProjectTicket').textContent = activeSignDocCtx.parentTicket || 'S/T';
     document.getElementById('docSignChildTicket').value = activeSignDocCtx.childTicket;
     document.getElementById('docSignDriveDocLink').value = activeSignDocCtx.driveDocLink;
+
+    // Auto-sanar estado inconsistente: Si el circuito tiene firmantes pendientes, no puede estar marcado como checked ni purgado
+    const circuit = docData?.signatureCircuit || [];
+    const hasCircuit = circuit.length > 0;
+    if (hasCircuit && circuit.some(s => s.status === 'pending') && (docData.checked || docData.pdfPurged)) {
+        docData.checked = false;
+        delete docData.pdfPurged;
+        window.saveData(false);
+    }
 
     window.updateDocSignStatusBadge();
     window.renderDocSignCircuitList();
@@ -17199,8 +17215,7 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
         const nameEl = document.getElementById('docSignPdfNameContainer');
         const placeholderText = document.getElementById('docSignNoPdfPlaceholder');
 
-        const circuit = docData?.signatureCircuit || [];
-        const isFullySigned = (circuit.length > 0 && circuit.every(s => s.status === 'signed')) || docData.checked;
+        const isFullySigned = hasCircuit && circuit.every(s => s.status === 'signed');
 
         if (isFullySigned) {
             if (infoEl) infoEl.textContent = '✓ Firmado';
@@ -17243,6 +17258,12 @@ window.closeDocumentSignModal = function() {
     }
     setTimeout(() => {
         modal.classList.add('hidden');
+        // Restaurar visibilidad del dock inferior móvil
+        const dock = document.getElementById('mobileBottomDock');
+        if (dock) {
+            dock.classList.remove('hidden');
+            dock.style.display = '';
+        }
     }, 200);
 
     const item = getProjectById(activeSignDocCtx.projectId);
@@ -17264,6 +17285,7 @@ window.updateDocSignStatusBadge = function() {
     const circuit = docData?.signatureCircuit || [];
     const total = circuit.length;
     const signed = circuit.filter(s => s.status === 'signed').length;
+    const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
 
     const padContainer = document.getElementById('docSignPadContainer');
     const completedCard = document.getElementById('docSignCompletedCard');
@@ -17271,6 +17293,7 @@ window.updateDocSignStatusBadge = function() {
     const requesterActions = document.getElementById('docSignCompletedRequesterActions');
     const nonRequesterNotice = document.getElementById('docSignCompletedNonRequesterNotice');
     const requesterNameEl = document.getElementById('docSignCompletedRequesterName');
+    const mobileCompletedBar = document.getElementById('docSignMobileCompletedBar');
 
     const requester = window.getDocSignRequester(item, docData);
     const isRequesterOrSuper = window.isCurrentUserDocRequesterOrSuper(item, docData);
@@ -17278,18 +17301,50 @@ window.updateDocSignStatusBadge = function() {
     const mobileCountEl = document.getElementById('docSignMobileCircuitCount');
     if (mobileCountEl) mobileCountEl.textContent = `${signed}/${total}`;
 
+    // Visibilidad de controles de eliminación y reemplazo para Administradores / Supervisores
+    const hasPdfOrProgress = !!(docData?.pdfFileName || activeSignDocCtx.pdfBytes || (circuit.some(s => s.status === 'signed')) || docData?.checked);
+    const headerAdminBtn = document.getElementById('docSignBtnAdminHeaderDelete');
+    if (headerAdminBtn) {
+        if (isSuper && hasPdfOrProgress) {
+            headerAdminBtn.classList.remove('hidden');
+            headerAdminBtn.classList.add('flex');
+        } else {
+            headerAdminBtn.classList.add('hidden');
+            headerAdminBtn.classList.remove('flex');
+        }
+    }
+    const adminDeletePdfBtn = document.getElementById('docSignBtnAdminDeletePdf');
+    if (adminDeletePdfBtn) {
+        if (isSuper && hasPdfOrProgress) {
+            adminDeletePdfBtn.classList.remove('hidden');
+            adminDeletePdfBtn.classList.add('flex');
+        } else {
+            adminDeletePdfBtn.classList.add('hidden');
+            adminDeletePdfBtn.classList.remove('flex');
+        }
+    }
+    const adminReplaceBtn = document.getElementById('docSignBtnAdminReplacePdf');
+    if (adminReplaceBtn) {
+        adminReplaceBtn.classList.toggle('hidden', !isSuper);
+    }
+
     if (total === 0) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#3d3a39] bg-[#101010] text-[#8a8380]";
         badge.textContent = "⚪ SIN FIRMAS";
         if (completedCard) completedCard.classList.add('hidden');
         if (padContainer) padContainer.classList.remove('hidden');
         if (downloadContainer) downloadContainer.classList.toggle('hidden', !isRequesterOrSuper);
+        if (mobileCompletedBar) mobileCompletedBar.classList.add('hidden');
     } else if (signed === total) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#22c55e]/40 bg-[#22c55e]/15 text-[#22c55e] font-bold";
         badge.textContent = `🟢 100% FIRMADO (${total}/${total})`;
         if (completedCard) completedCard.classList.remove('hidden');
         if (padContainer) padContainer.classList.add('hidden');
         if (downloadContainer) downloadContainer.classList.add('hidden');
+        if (mobileCompletedBar) {
+            mobileCompletedBar.classList.remove('hidden');
+            mobileCompletedBar.classList.add('flex');
+        }
 
         // Configuración de descarga exclusiva para el solicitante vs aviso a los demás firmantes
         if (isRequesterOrSuper) {
@@ -17308,6 +17363,7 @@ window.updateDocSignStatusBadge = function() {
         if (completedCard) completedCard.classList.add('hidden');
         if (padContainer) padContainer.classList.remove('hidden');
         if (downloadContainer) downloadContainer.classList.toggle('hidden', !isRequesterOrSuper);
+        if (mobileCompletedBar) mobileCompletedBar.classList.add('hidden');
     }
 };
 
@@ -17917,25 +17973,154 @@ window.resetDocumentSignatures = async function() {
         delete s.coords;
     });
     docData.checked = false;
+    delete docData.pdfPurged;
     delete docData.lastStampX;
     delete docData.lastStampY;
 
     // Restaurar el PDF limpio sin firmas
-    if (activeSignDocCtx.pdfBytes) {
+    if (activeSignDocCtx.cleanPdfBytes) {
+        activeSignDocCtx.pdfBytes = new Uint8Array(activeSignDocCtx.cleanPdfBytes);
+        if (window.SICOM_IDB && activeSignDocCtx.pdfKey) {
+            await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, activeSignDocCtx.pdfBytes);
+        }
+    } else if (activeSignDocCtx.pdfBytes) {
         await window.restoreCleanPdfPageInMemory();
+    } else {
+        // Si no hay PDF cargado o fue purgado
+        document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
+        const placeholder = document.getElementById('docSignNoPdfPlaceholder');
+        if (placeholder) {
+            placeholder.classList.remove('hidden');
+            placeholder.innerHTML = `
+                <svg class="w-8 h-8 mx-auto mb-1.5 opacity-30 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p class="text-[10.5px] font-mono uppercase">Carga el PDF oficial para firmar</p>
+                <p class="text-[9px] text-[#635d5a] mt-0.5 font-mono">Las casillas se detectan automáticamente</p>`;
+        }
+        const infoEl = document.getElementById('docSignPdfInfo');
+        if (infoEl) infoEl.textContent = 'Ningún PDF';
+        const nameEl = document.getElementById('docSignPdfNameContainer');
+        if (nameEl) nameEl.textContent = 'Arrastra o sube el PDF para firmar';
     }
 
     activeSignDocCtx.lastAutoSignerId = null;
     activeSignDocCtx.userManuallyPickedCoords = false;
+    window.clearSignaturePad();
     window.saveData(false);
     window.flushCloudWrite(true);
     window.renderDocSignCircuitList();
     window.updateDocSignStatusBadge();
+
     if (activeSignDocCtx.pdfBytes) {
         await window.renderLastPdfPage();
     }
+
+    if (circuit.length > 0) {
+        window.focusSignaturePadFor(circuit[0].name, circuit[0].role);
+    }
+
+    if (activeSignDocCtx.prefix === 'quick') {
+        window.renderDocChecklists('quick', item.docs);
+    } else if (activeSignDocCtx.prefix === 'edit') {
+        window.renderDocChecklists('edit', item.docs);
+    }
     if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
-    window.showToast("🔄 Firmas reiniciadas y hoja del PDF restaurada en limpio.", false);
+    window.showToast(`🔄 Circuito reiniciado en limpio. Turno de: ${circuit[0]?.name || 'Primer firmante'}`, false);
+};
+
+// Permite a Administradores y Supervisores eliminar el PDF actual para cargar una versión nueva y reiniciar el flujo
+window.deleteDocumentPdfAndRestart = async function() {
+    const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+    if (!isSuper) {
+        window.showToast("⚠️ Solo un Administrador o Supervisor puede eliminar el archivo y reiniciar el proceso.", true);
+        return;
+    }
+
+    if (!confirm("⚠️ ¿Deseas eliminar el archivo PDF cargado y reiniciar todo el proceso de firmas?\n\nEsta acción borrará el archivo de la memoria y reiniciará el circuito para que puedas subir una nueva versión del documento.")) {
+        return;
+    }
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+
+    // 1. Eliminar binario y respaldo limpio de IndexedDB
+    if (window.SICOM_IDB && activeSignDocCtx.pdfKey) {
+        try {
+            await window.SICOM_IDB.delete(activeSignDocCtx.pdfKey);
+            await window.SICOM_IDB.delete(activeSignDocCtx.pdfKey + '_clean');
+        } catch (e) {
+            console.warn("Fallo al eliminar PDF de IndexedDB:", e);
+        }
+    }
+
+    // 2. Limpiar contexto en memoria
+    activeSignDocCtx.pdfBytes = null;
+    activeSignDocCtx.cleanPdfBytes = null;
+    activeSignDocCtx.pdfFileName = '';
+    activeSignDocCtx.pdfPageCount = 1;
+    activeSignDocCtx.currentPageNum = 1;
+    activeSignDocCtx.detectedRows = [];
+    activeSignDocCtx.selectedSlotLabel = '';
+    activeSignDocCtx.userManuallyPickedCoords = false;
+    activeSignDocCtx.lastAutoSignerId = null;
+
+    // 3. Limpiar documento en el proyecto
+    docData.checked = false;
+    delete docData.pdfFileName;
+    delete docData.pdfUploadedAt;
+    delete docData.pdfPageCount;
+    delete docData.pdfKey;
+    delete docData.pdfPurged;
+    delete docData.lastStampX;
+    delete docData.lastStampY;
+
+    const circuit = docData.signatureCircuit || [];
+    circuit.forEach(s => {
+        s.status = 'pending';
+        delete s.signedAt;
+        delete s.signedBy;
+        delete s.signaturePng;
+        delete s.injectedInPdf;
+        delete s.coords;
+    });
+
+    // 4. Limpiar UI
+    const fileInput = document.getElementById('docSignPdfInput');
+    if (fileInput) fileInput.value = '';
+
+    document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
+    const placeholder = document.getElementById('docSignNoPdfPlaceholder');
+    if (placeholder) {
+        placeholder.classList.remove('hidden');
+        placeholder.innerHTML = `
+            <svg class="w-8 h-8 mx-auto mb-1.5 opacity-30 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <p class="text-[10.5px] font-mono uppercase">Carga el PDF oficial para firmar</p>
+            <p class="text-[9px] text-[#635d5a] mt-0.5 font-mono">Las casillas se detectan automáticamente</p>`;
+    }
+
+    const infoEl = document.getElementById('docSignPdfInfo');
+    if (infoEl) infoEl.textContent = 'Ningún PDF';
+    const nameEl = document.getElementById('docSignPdfNameContainer');
+    if (nameEl) nameEl.textContent = 'Arrastra o sube el PDF para firmar';
+
+    document.getElementById('docSignStampControls')?.classList.add('hidden');
+    document.getElementById('docSignDetectedSlotsBar')?.classList.add('hidden');
+    document.getElementById('docSignPaginationControls')?.classList.add('hidden');
+
+    window.clearSignaturePad();
+    window.saveData(false);
+    window.flushCloudWrite(true);
+    window.renderDocSignCircuitList();
+    window.updateDocSignStatusBadge();
+
+    if (activeSignDocCtx.prefix === 'quick') {
+        window.renderDocChecklists('quick', item.docs);
+    } else if (activeSignDocCtx.prefix === 'edit') {
+        window.renderDocChecklists('edit', item.docs);
+    }
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+
+    window.showToast("🗑️ Archivo PDF eliminado. El documento está listo para subir una nueva versión.", false);
 };
 
 // Restaura la última página del PDF a su estado original limpio (removiendo estampados previos de pdf-lib)
@@ -17964,20 +18149,8 @@ window.restoreCleanPdfPageInMemory = async function() {
         const contents = lastPage.node.Contents();
 
         if (PDFLib.PDFArray && contents instanceof PDFLib.PDFArray && contents.size() > 1) {
-            const keep = [];
-            for (let i = 0; i < contents.size(); i++) {
-                const ref = contents.get(i);
-                const obj = pdfDoc.context.lookup(ref);
-                const len = obj?.contents?.length || obj?.getUnencodedContentsSize?.() || 0;
-                // Los streams de página originales miden > 400 bytes; los drawImage de pdf-lib miden ~10 a ~120 bytes
-                if (len > 400) keep.push(ref);
-            }
-            if (keep.length === 1) {
-                lastPage.node.set(PDFLib.PDFName.of('Contents'), keep[0]);
-            } else if (keep.length > 1) {
-                const newArr = pdfDoc.context.obj(keep);
-                lastPage.node.set(PDFLib.PDFName.of('Contents'), newArr);
-            }
+            // El stream 0 es el contenido original de la página; los posteriores son las firmas agregadas con drawImage
+            lastPage.node.set(PDFLib.PDFName.of('Contents'), contents.get(0));
         }
 
         const cleaned = await pdfDoc.save({ useObjectStreams: false });
@@ -18269,6 +18442,11 @@ window.updateStampTargetVisual = function() {
     const circuit = item?.docs?.[activeSignDocCtx.docId]?.signatureCircuit || [];
     const activeSigner = circuit.find(s => s.status !== 'signed');
 
+    if (!activeSigner) {
+        target.style.display = 'none';
+        return;
+    }
+
     if (label) {
         const slotDesc = activeSignDocCtx.selectedSlotLabel
             ? `Enfrente de: ${activeSignDocCtx.selectedSlotLabel} (X:${sX}, Y:${sY})`
@@ -18325,7 +18503,10 @@ window.resizeSignaturePad = function() {
     const computedWidth = container ? container.clientWidth : 0;
     const finalWidth = (computedWidth > 50) ? computedWidth : Math.min(window.innerWidth - 40, 500);
 
-    const padHeight = (window.innerWidth < 640) ? 55 : 60;
+    // En pantallas táctiles móviles (< 1024px), dar una altura generosa (135px) para máxima comodidad táctil al firmar con el dedo
+    // En escritorio (>= 1024px), mantener altura balanceada (75px) para que todo quepa en una sola pantalla sin scroll
+    const isMobileView = (window.innerWidth < 1024);
+    const padHeight = isMobileView ? 135 : 75;
     if (canvas.width !== finalWidth || canvas.height !== padHeight) {
         canvas.width = finalWidth;
         canvas.height = padHeight;

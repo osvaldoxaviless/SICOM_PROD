@@ -3391,9 +3391,9 @@
       </div>
   </div>
 
-  <!-- MODAL DE FIRMAS DIGITALES Y GOBERNANZA DE DOCUMENTOS (v1009) -->
-  <div id="documentSignModal" onclick="if(event.target === this) closeDocumentSignModal()" class="fixed inset-0 z-[99999] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-200 p-1 sm:p-2.5 md:p-3">
-      <div class="liquid-glass rounded-[10px] p-2 sm:p-3.5 max-w-5xl w-full mx-auto transform scale-95 transition-transform duration-200 h-[94vh] max-h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39]">
+  <!-- MODAL DE FIRMAS DIGITALES Y GOBERNANZA DE DOCUMENTOS (v1010) -->
+  <div id="documentSignModal" onclick="if(event.target === this) closeDocumentSignModal()" class="fixed inset-0 z-[100005] bg-[#101010]/90 hidden flex items-center justify-center opacity-0 transition-opacity duration-200 p-1 sm:p-2.5 md:p-3">
+      <div class="liquid-glass rounded-[10px] p-2 sm:p-3.5 max-w-5xl w-full mx-auto transform scale-95 transition-transform duration-200 h-[96dvh] sm:h-[94vh] max-h-[96dvh] sm:max-h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39]">
           
           <!-- Encabezado Modal Compacto -->
           <div class="flex items-center justify-between pb-1.5 border-b border-[#3d3a39] shrink-0">
@@ -3407,9 +3407,16 @@
                       <h3 id="docSignModalDocTitle" class="text-xs sm:text-sm font-semibold text-[#fafafa] truncate mt-0.5">Documento</h3>
                   </div>
               </div>
-              <button type="button" onclick="closeDocumentSignModal()" class="text-[#8a8380] hover:text-[#eeeeee] p-1 sm:p-1.5 transition rounded-[3px] hover:bg-[#1d1a18] border border-transparent hover:border-[#3d3a39]" title="Cerrar (Esc)">
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
+              <div class="flex items-center gap-1.5 shrink-0">
+                  <!-- Botón de Administrador / Supervisor para Eliminar PDF y Reiniciar -->
+                  <button type="button" id="docSignBtnAdminHeaderDelete" onclick="deleteDocumentPdfAndRestart()" class="hidden pill-btn px-2 py-0.5 bg-[#ef4444]/15 hover:bg-[#ef4444]/25 border border-[#ef4444]/40 text-[#ef4444] font-mono text-[8.5px] sm:text-[9px] uppercase font-bold transition items-center gap-1 cursor-pointer" title="Eliminar archivo PDF actual y reiniciar proceso desde cero (Solo Administrador / Supervisor)">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <span class="hidden sm:inline">Eliminar Archivo</span>
+                  </button>
+                  <button type="button" onclick="closeDocumentSignModal()" class="text-[#8a8380] hover:text-[#eeeeee] p-1 sm:p-1.5 transition rounded-[3px] hover:bg-[#1d1a18] border border-transparent hover:border-[#3d3a39]" title="Cerrar (Esc)">
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+              </div>
           </div>
 
           <!-- Segmented Control Móvil (Solo visible en pantallas pequeñas < lg) -->
@@ -3450,32 +3457,40 @@
           <div id="docSignScrollContainer" class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-y-auto lg:overflow-hidden pr-0.5">
               
               <!-- Columna Izquierda: Visor PDF y Pad de Firma (FLEX-COL H-FULL OVERFLOW-HIDDEN EN DESKTOP) -->
-              <div id="docSignColLeft" class="lg:col-span-7 flex flex-col gap-1.5 h-full min-h-0 overflow-hidden">
+              <div id="docSignColLeft" class="lg:col-span-7 flex flex-col gap-1.5 h-full min-h-0 overflow-y-auto lg:overflow-hidden">
                   
                   <!-- Subir PDF / Navegación de Páginas -->
-                  <div class="bg-[#101010] p-1 sm:p-1.5 rounded-[6px] border border-[#3d3a39] flex items-center justify-between gap-1.5 shrink-0">
+                  <div class="bg-[#101010] p-1 sm:p-1.5 rounded-[6px] border border-[#3d3a39] flex items-center justify-between gap-1.5 shrink-0 flex-wrap">
                       <div class="flex items-center gap-1.5 min-w-0">
                           <label class="pill-btn py-0.5 px-2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#eeeeee] font-mono text-[9px] sm:text-[9.5px] uppercase cursor-pointer transition flex items-center gap-1 shrink-0">
                               <svg class="w-3 h-3 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                               <span>Subir PDF</span>
                               <input type="file" id="docSignPdfInput" accept="application/pdf" onchange="handleDocPdfFileSelected(event)" class="hidden">
                           </label>
-                          <div id="docSignPdfNameContainer" class="text-[10px] sm:text-[11px] text-[#8a8380] truncate font-mono max-w-[120px] sm:max-w-[200px]">
+                          <div id="docSignPdfNameContainer" class="text-[10px] sm:text-[11px] text-[#8a8380] truncate font-mono max-w-[120px] sm:max-w-[180px]">
                               Arrastra o sube el PDF
                           </div>
                           <span id="docSignPdfInfo" class="font-mono text-[8.5px] text-[#a0ca92] bg-[#1d1a18] px-1 py-0.2 rounded border border-[#3d3a39] shrink-0">Ningún PDF</span>
                       </div>
                       
-                      <!-- Paginador del Visor -->
-                      <div id="docSignPaginationControls" class="hidden items-center gap-0.5 font-mono text-[9px] sm:text-[9.5px] text-[#b8b3b0] shrink-0">
-                          <button type="button" onclick="changeDocSignPage(-1)" class="px-1 py-0.2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Anterior">◀</button>
-                          <span class="px-0.5 text-[#8a8380]">Pág <span id="docSignCurrentPageNum" class="text-[#eeeeee] font-bold">1</span>/<span id="docSignTotalPagesNum">1</span></span>
-                          <button type="button" onclick="changeDocSignPage(1)" class="px-1 py-0.2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Siguiente">▶</button>
+                      <div class="flex items-center gap-1 shrink-0">
+                          <!-- Botón de Administrador / Supervisor para Eliminar PDF -->
+                          <button type="button" id="docSignBtnAdminDeletePdf" onclick="deleteDocumentPdfAndRestart()" class="hidden pill-btn py-0.5 px-2 bg-[#ef4444]/15 hover:bg-[#ef4444]/25 border border-[#ef4444]/40 text-[#ef4444] font-mono text-[8.5px] sm:text-[9px] uppercase font-bold transition items-center gap-1 cursor-pointer" title="Eliminar archivo PDF actual y reiniciar proceso (Solo Admin / Supervisor)">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                              <span>Eliminar PDF</span>
+                          </button>
+
+                          <!-- Paginador del Visor -->
+                          <div id="docSignPaginationControls" class="hidden items-center gap-0.5 font-mono text-[9px] sm:text-[9.5px] text-[#b8b3b0] shrink-0">
+                              <button type="button" onclick="changeDocSignPage(-1)" class="px-1 py-0.2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Anterior">◀</button>
+                              <span class="px-0.5 text-[#8a8380]">Pág <span id="docSignCurrentPageNum" class="text-[#eeeeee] font-bold">1</span>/<span id="docSignTotalPagesNum">1</span></span>
+                              <button type="button" onclick="changeDocSignPage(1)" class="px-1 py-0.2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] rounded text-[#fafafa] font-bold" title="Página Siguiente">▶</button>
+                          </div>
                       </div>
                   </div>
 
                   <!-- Visor Interactivo de la Hoja de Firmas (FLEX-1 MIN-H-0: LLENA EL ESPACIO SIN EMPUJAR EL PAD) -->
-                  <div id="docSignViewerCard" class="flex-1 min-h-[140px] bg-[#101010] border border-[#3d3a39] rounded-[6px] p-1.5 flex flex-col relative overflow-hidden">
+                  <div id="docSignViewerCard" class="flex-1 min-h-[160px] max-h-[44vh] lg:max-h-none bg-[#101010] border border-[#3d3a39] rounded-[6px] p-1.5 flex flex-col relative overflow-hidden shrink-0 lg:shrink">
                       <div class="flex items-center justify-between pb-1 px-1 border-b border-[#1d1a18] text-[9.5px] font-mono text-[#8a8380] uppercase shrink-0 gap-1.5">
                           <div class="flex items-center gap-1.5">
                               <span id="docSignViewerPageLabel">Hoja de Firmas Oficial</span>
@@ -3527,8 +3542,19 @@
                       </div>
                   </div>
 
+                  <!-- Barra de Acceso Rápido Móvil para Documentos 100% Firmados -->
+                  <div id="docSignMobileCompletedBar" class="hidden lg:hidden p-2 rounded-[6px] bg-[#14532d]/40 border border-[#22c55e]/60 flex items-center justify-between gap-2 shrink-0">
+                      <div class="flex items-center gap-1.5 min-w-0">
+                          <span class="w-4 h-4 rounded-full bg-[#22c55e]/20 text-[#22c55e] flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                          <span class="font-mono text-[9.5px] text-[#22c55e] font-bold truncate">¡Documento 100% Autorizado!</span>
+                      </div>
+                      <button type="button" onclick="downloadCurrentSignedPdf()" class="pill-btn px-2.5 py-1 bg-[#22c55e] hover:bg-[#16a34a] text-black font-mono text-[9px] uppercase font-bold transition flex items-center gap-1 shrink-0">
+                          <span>Descargar PDF</span>
+                      </button>
+                  </div>
+
                   <!-- Pad de Firma Táctil (COMPACTO ~110px: SIEMPRE VISIBLE SIN SCROLL EN DESKTOP) -->
-                  <div id="docSignPadContainer" class="bg-[#101010] p-1.5 sm:p-2 rounded-[6px] border-2 border-[#3d3a39] shrink-0 transition-all duration-200">
+                  <div id="docSignPadContainer" class="bg-[#101010] p-1.5 sm:p-2 rounded-[6px] border-2 border-[#3d3a39] shrink-0 transition-all duration-200 mt-auto">
                       <div class="flex items-center justify-between mb-1">
                           <div class="flex items-center gap-1.5 min-w-0">
                               <span class="w-2 h-2 rounded-full bg-[#0055cc] animate-pulse shrink-0"></span>
@@ -3540,7 +3566,7 @@
                       
                       <!-- Lienzo con margen lateral para permitir scroll táctil en móvil -->
                       <div class="bg-[#ffffff] rounded-[4px] p-0.5 border border-[#3d3a39] overflow-hidden">
-                          <canvas id="signaturePadCanvas" height="60" class="w-full bg-[#ffffff] cursor-crosshair block" style="background-color: #ffffff !important; touch-action: none; height: 60px;"></canvas>
+                          <canvas id="signaturePadCanvas" class="w-full bg-[#ffffff] cursor-crosshair block" style="background-color: #ffffff !important; touch-action: none; display: block;"></canvas>
                       </div>
 
                       <div class="flex items-center justify-between gap-2 mt-1 shrink-0">
@@ -3601,6 +3627,10 @@
                                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                       <span>Liberar Espacio</span>
                                   </button>
+                                  <button type="button" id="docSignBtnAdminReplacePdf" onclick="deleteDocumentPdfAndRestart()" class="pill-btn px-2 py-1 bg-[#ef4444]/15 hover:bg-[#ef4444]/25 border border-[#ef4444]/40 text-[#ef4444] font-mono text-[8.5px] uppercase font-bold transition flex items-center gap-1 cursor-pointer" title="Eliminar archivo firmado y reiniciar circuito desde cero (Solo Admin / Supervisor)">
+                                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                      <span>Reemplazar Archivo</span>
+                                  </button>
                               </div>
 
                               <!-- Mensaje para Otros Firmantes (No solicitantes) -->
@@ -3623,7 +3653,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261027_v1009"></script>
+  <script type="module" src="app.js?v=20261027_v1010"></script>
 
 </body>
 </html>
