@@ -2012,3 +2012,22 @@ body:has(#documentSignModal:not(.hidden)) #mobileBottomDock {
         padding: 0.75rem 1rem 1.5rem 1rem !important;
     }
 }
+
+/* === REFINAMIENTO EDITORIAL PASTILLA DERECHA Y BUSCADOR (v1015) === */
+#desktopSearchInput,
+#desktopSearchInput::placeholder {
+    font-family: var(--font-geist, Geist, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
+    text-transform: uppercase !important;
+    font-size: 11px !important;
+    letter-spacing: -0.24px !important;
+}
+
+#desktopSearchInput::placeholder {
+    color: #736d6a !important;
+    opacity: 1;
+}
+
+#userAvatarInitials {
+    letter-spacing: 0.02em;
+}
+

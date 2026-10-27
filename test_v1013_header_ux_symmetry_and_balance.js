@@ -1,17 +1,18 @@
 /**
- * TEST SUITE V1014: HEADER UX SIMETRÍA EXACTA — PÍLDORAS GEMELAS DE 3 ELEMENTOS
+ * TEST SUITE V1015: HEADER UX SIMETRÍA EXACTA — PÍLDORAS GEMELAS DE 3 ELEMENTOS
  * - Lado Izquierdo (#mainViewSwitcher): [ 🗺️ Mapa | 📅 Calendario | 📋 Rol & Prenómina ]
  * - Centro: [ EO/SA ] Centrado absoluto, sin solapamientos
- * - Lado Derecho (#rightActionSwitcher): [ 🔍 Buscador & Filtro | 📊 Dashboard | 🟧 OA (Solo Iniciales) ]
- * - Erradicación de bordes individuales dispersos y separadores innecesarios
- * - Perfil minimalista: Solamente las iniciales y punto de estado en línea
+ * - Lado Derecho (#rightActionSwitcher): [ 🔍 Buscador & Filtro | 📊 Dashboard | 🟧 OA/AD (Solo Iniciales, Sin Colisión) ]
+ * - Erradicación de colisión del dot verde sobre las iniciales del avatar
+ * - Tipografía y estilo unificado entre Buscador (BUSCAR...) y Dashboard
+ * - Separadores sutiles de 1px entre herramientas para acabado premium
  */
 
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
-console.log('AUDITORÍA AUTOMATIZADA V1014: PÍLDORAS GEMELAS SIMÉTRICAS DE 3 ELEMENTOS EN HEADER');
+console.log('AUDITORÍA AUTOMATIZADA V1015: PÍLDORAS GEMELAS SIMÉTRICAS DE 3 ELEMENTOS EN HEADER');
 console.log('===================================================================================\n');
 
 const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
@@ -69,8 +70,8 @@ runTest('4. Centro: Branding EO/SA con centrado absoluto y libre de colisiones',
     assert(html.includes('EO<span class="text-[#ee6018] font-black text-[17px] mx-0.5">/</span>SA'), 'Logo EO/SA completo');
 });
 
-// 5. Agrupación derecha: Pastillita gemela #rightActionSwitcher con 3 elementos
-runTest('5. Lado Derecho: #rightActionSwitcher contiene 3 elementos (Buscador/Filtro, Dashboard, Perfil)', () => {
+// 5. Agrupación derecha: Pastillita gemela #rightActionSwitcher con 3 elementos y separadores
+runTest('5. Lado Derecho: #rightActionSwitcher contiene 3 elementos (Buscador/Filtro, Dashboard, Perfil) y separadores', () => {
     assert(html.includes('id="rightActionSwitcher"'), 'Contenedor #rightActionSwitcher encontrado');
     const startIdx = html.indexOf('id="rightActionSwitcher"');
     const endIdx = html.indexOf('id="btnTopPriorityDrawer"');
@@ -81,38 +82,42 @@ runTest('5. Lado Derecho: #rightActionSwitcher contiene 3 elementos (Buscador/Fi
     assert(rightContent.includes('id="btnTopFilterDrawer"'), 'btnTopFilterDrawer está dentro de #rightActionSwitcher');
     assert(rightContent.includes('id="btnTopExecutiveDashboard"'), 'btnTopExecutiveDashboard está dentro de #rightActionSwitcher');
     assert(rightContent.includes('id="userProfilePillBtn"'), 'userProfilePillBtn está dentro de #rightActionSwitcher');
+    assert(rightContent.includes('w-px h-4 bg-[#353230]'), 'Separadores sutiles entre herramientas');
 
     // Posicionamiento a la derecha del branding central
     const brandingIdx = html.indexOf('header-branding-center');
     assert(startIdx > brandingIdx, 'rightActionSwitcher está a la derecha del branding central');
 });
 
-// 6. Perfil en la pastillita derecha: SOLO las iniciales sin etiquetas redundantes
-runTest('6. Perfil en #rightActionSwitcher: Muestra únicamente las iniciales del usuario (OA)', () => {
+// 6. Perfil en la pastillita derecha: SOLO las iniciales sin etiquetas redundantes ni punto verde encimado
+runTest('6. Perfil en #rightActionSwitcher: Iniciales limpias sin punto verde encimado', () => {
     const profileBtnMatch = html.match(/<button[^>]+id="userProfilePillBtn"[^>]*>([\s\S]*?)<\/button>/);
     assert(profileBtnMatch, 'userProfilePillBtn encontrado');
     const btnInner = profileBtnMatch[1];
 
     assert(btnInner.includes('id="userAvatarInitials"'), 'Badge de iniciales presente');
-    assert(btnInner.includes('id="connectionStatusDot"'), 'Punto de conexión en línea presente');
+    assert(btnInner.includes('id="connectionStatusDot"'), 'Elemento connectionStatusDot presente en DOM');
+    assert(btnInner.includes('class="hidden"') || btnInner.includes('display:none !important;'), 'connectionStatusDot oculto para evitar colisión con iniciales');
 
     // Comprobar que NO contiene textos que saturen el botón
     assert(!btnInner.includes('>CONSULTOR<'), 'Texto CONSULTOR eliminado del botón');
     assert(!btnInner.includes('>Control<'), 'Texto Control eliminado del botón');
 });
 
-// 7. Estilos CSS responsivos para ocultar ambas pastillitas en móvil (<640px)
-runTest('7. styles.css oculta de manera segura ambas pastillitas en viewport móvil', () => {
+// 7. Estilos CSS responsivos y tipografía unificada
+runTest('7. styles.css unifica tipografía (BUSCAR... y DASHBOARD) y oculta en móvil (<640px)', () => {
     assert(css.includes('#mainViewSwitcher'), 'mainViewSwitcher en styles.css');
     assert(css.includes('#rightActionSwitcher'), 'rightActionSwitcher en styles.css');
+    assert(css.includes('#desktopSearchInput'), 'desktopSearchInput estilizado en styles.css');
+    assert(html.includes('placeholder="BUSCAR..."'), 'Placeholder unificado a BUSCAR... en mayúsculas');
 });
 
-// 8. Sincronización de versión v1014
-runTest('8. Sincronización de versión 20261027_v1014 en index.html y sw.js', () => {
-    assert(html.includes('app.js?v=20261027_v1014'), 'index.html apunta a app.js?v=20261027_v1014');
-    assert(sw.includes("const SW_VERSION = '20261027_v1014';"), 'sw.js tiene SW_VERSION = 20261027_v1014');
+// 8. Sincronización de versión v1015
+runTest('8. Sincronización de versión 20261027_v1015 en index.html y sw.js', () => {
+    assert(html.includes('app.js?v=20261027_v1015'), 'index.html apunta a app.js?v=20261027_v1015');
+    assert(sw.includes("const SW_VERSION = '20261027_v1015';"), 'sw.js tiene SW_VERSION = 20261027_v1015');
 });
 
 console.log('\n===================================================================================');
-console.log('✅ TODAS LAS PRUEBAS V1014 PASARON EXITOSAMENTE CON 100% DE INTEGRIDAD.');
+console.log('✅ TODAS LAS PRUEBAS V1015 PASARON EXITOSAMENTE CON 100% DE INTEGRIDAD.');
 console.log('===================================================================================');

@@ -2399,17 +2399,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     window.setConnectionStatus = function(status) {
         const dot = document.getElementById('connectionStatusDot');
-        if(!dot) return;
-        dot.className = "w-1.5 h-1.5 rounded-full transition-colors duration-150";
-        if(status === 'online') {
-            dot.classList.add('bg-[#a0ca92]');
-            dot.title = "En Línea";
-        } else if (status === 'syncing') {
-            dot.classList.add('bg-[#ee6018]', 'animate-pulse');
-            dot.title = "Sincronizando nube...";
-        } else {
-            dot.classList.add('bg-[#ee6018]');
-            dot.title = "Sin Conexión (Modo Local)";
+        if(dot) {
+            dot.className = "hidden";
+            dot.style.setProperty('display', 'none', 'important');
+            if(status === 'online') {
+                dot.title = "En Línea";
+            } else if (status === 'syncing') {
+                dot.title = "Sincronizando nube...";
+            } else {
+                dot.title = "Sin Conexión (Modo Local)";
+            }
+        }
+        const mobDot = document.getElementById('mobileConnectionDot');
+        if(mobDot) {
+            mobDot.className = "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#101010]";
+            if(status === 'online') {
+                mobDot.classList.add('bg-[#a0ca92]');
+                mobDot.title = "En Línea";
+            } else if (status === 'syncing') {
+                mobDot.classList.add('bg-[#ee6018]', 'animate-pulse');
+                mobDot.title = "Sincronizando nube...";
+            } else {
+                mobDot.classList.add('bg-[#ee6018]');
+                mobDot.title = "Sin Conexión (Modo Local)";
+            }
         }
     };
 
