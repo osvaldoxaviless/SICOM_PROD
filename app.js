@@ -52,7 +52,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     const isCompletedStatus = window.isCompletedStatus;
 
     let appId, db, auth, isFirebaseReady = false, unsubscribeSnapshot = null;
-    let globalDoc, globalSetDoc;
+    let globalDoc, globalSetDoc, globalGetDoc, globalDeleteDoc;
     
     let svgElem, canvasGroup;
     let translateX = 0, translateY = 0, scale = 1;
@@ -571,9 +571,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js");
             const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js");
-            const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
+            const { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
             
-            globalDoc = doc; globalSetDoc = setDoc;
+            globalDoc = doc; globalSetDoc = setDoc; globalGetDoc = getDoc; globalDeleteDoc = deleteDoc;
 
             const firebaseConfig = {
                 apiKey: ['AIzaSyD5_UtypfJ', 'g5qsFDdv-MBamP18IZ_vZhVE'].join(''),
@@ -17236,6 +17236,25 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
         }
     }
 
+    // 2. Si no está en IndexedDB local (ej. usuario en teléfono móvil), intentar recuperar de Firestore sicom_pdfs
+    if (!activeSignDocCtx.pdfBytes && isFirebaseReady && db && globalDoc && globalGetDoc) {
+        try {
+            const pdfDocRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', pdfKey);
+            const snap = await globalGetDoc(pdfDocRef);
+            if (snap.exists() && snap.data()?.base64) {
+                const uint8 = base64ToUint8(snap.data().base64);
+                activeSignDocCtx.pdfBytes = uint8;
+                activeSignDocCtx.cleanPdfBytes = new Uint8Array(uint8);
+                if (window.SICOM_IDB) {
+                    await window.SICOM_IDB.save(pdfKey, uint8);
+                    await window.SICOM_IDB.save(pdfKey + '_clean', uint8);
+                }
+            }
+        } catch (e) {
+            console.warn("Recuperación remota de PDF en Firestore:", e);
+        }
+    }
+
     const modal = document.getElementById('documentSignModal');
     if (!modal) return;
 
@@ -17281,6 +17300,9 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
             await window.syncCircuitSignaturesToPdf();
         }
         await window.renderLastPdfPage();
+    } else if (docData && docData.signatureSheetPreview) {
+        // En dispositivos móviles sin el binario completo, renderizar la hoja de firmas oficial sincronizada
+        await window.renderSignatureSheetFromPreview(docData.signatureSheetPreview, docData);
     } else {
         document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
         document.getElementById('docSignNoPdfPlaceholder')?.classList.remove('hidden');
@@ -18169,6 +18191,14 @@ window.deleteDocumentPdfAndRestart = async function() {
     delete docData.pdfPurged;
     delete docData.lastStampX;
     delete docData.lastStampY;
+    delete docData.signatureSheetPreview;
+
+    if (isFirebaseReady && db && globalDoc && globalDeleteDoc && activeSignDocCtx.pdfKey) {
+        try {
+            const pdfDocRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', activeSignDocCtx.pdfKey);
+            globalDeleteDoc(pdfDocRef).catch(() => {});
+        } catch (_) {}
+    }
 
     const circuit = docData.signatureCircuit || [];
     circuit.forEach(s => {
@@ -18263,6 +18293,125 @@ window.restoreCleanPdfPageInMemory = async function() {
     }
 };
 
+function uint8ToBase64(bytes) {
+    let binary = '';
+    const len = bytes.byteLength;
+    const chunkSize = 8192;
+    for (let i = 0; i < len; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, len)));
+    }
+    return btoa(binary);
+}
+
+function base64ToUint8(base64) {
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+
+window.renderSignatureSheetFromPreview = async function(previewDataUrl, docData) {
+    const canvas = document.getElementById('docSignPdfCanvas');
+    const wrapper = document.getElementById('docSignCanvasWrapper');
+    const placeholder = document.getElementById('docSignNoPdfPlaceholder');
+    const controls = document.getElementById('docSignStampControls');
+    const info = document.getElementById('docSignPdfInfo');
+    const nameCont = document.getElementById('docSignPdfNameContainer');
+
+    if (!canvas || !previewDataUrl) return;
+
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const parentWidth = wrapper?.parentElement?.clientWidth || 500;
+            const targetWidth = Math.max(340, Math.min(580, parentWidth - 20));
+            const aspect = (img.height && img.width) ? (img.height / img.width) : (792 / 612);
+            const w = Math.round(targetWidth);
+            const h = Math.round(targetWidth * aspect);
+
+            canvas.width = w;
+            canvas.height = h;
+            canvas.style.width = `${w}px`;
+            canvas.style.height = `${h}px`;
+            canvas.style.backgroundColor = '#ffffff';
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+
+            activeSignDocCtx.pagePdfWidth = docData.pagePdfWidth || 612;
+            activeSignDocCtx.pagePdfHeight = docData.pagePdfHeight || 792;
+            activeSignDocCtx.detectedRows = docData.detectedRows || [];
+            activeSignDocCtx.stampWidth = 82;
+            activeSignDocCtx.stampHeight = 26;
+
+            if (placeholder) placeholder.classList.add('hidden');
+            if (wrapper) wrapper.classList.remove('hidden');
+            if (controls) controls.classList.remove('hidden');
+            if (info) info.textContent = `✓ Hoja oficial sincronizada`;
+            if (nameCont) nameCont.textContent = docData.pdfFileName || 'Documento Oficial.pdf';
+
+            // Auto-posicionar casilla frente al firmante activo
+            const item = getProjectById(activeSignDocCtx.projectId);
+            const circuit = item?.docs?.[activeSignDocCtx.docId]?.signatureCircuit || [];
+            const activeSignerIdx = circuit.findIndex(s => s.status !== 'signed');
+            const activeSigner = activeSignerIdx !== -1 ? circuit[activeSignerIdx] : null;
+
+            if (activeSigner && (!activeSignDocCtx.lastAutoSignerId || activeSignDocCtx.lastAutoSignerId !== activeSigner.id || !activeSignDocCtx.userManuallyPickedCoords)) {
+                activeSignDocCtx.lastAutoSignerId = activeSigner.id;
+                const resolved = window.resolveExactStampCoordsForSigner(activeSigner, activeSignerIdx, circuit, activeSignDocCtx.detectedRows);
+                activeSignDocCtx.stampX = resolved.x;
+                activeSignDocCtx.stampY = resolved.y;
+                activeSignDocCtx.selectedSlotLabel = resolved.label || activeSigner.name;
+            }
+
+            window.renderDetectedSlotsBar();
+            window.updateStampTargetVisual();
+
+            // Desplazar automáticamente el visor para centrar la tabla de firmas en la pantalla
+            const viewportElem = document.getElementById('docSignPdfViewport');
+            if (viewportElem && canvas) {
+                const sY = activeSignDocCtx.stampY || 333;
+                const targetCanvasY = ((activeSignDocCtx.pagePdfHeight - sY) / activeSignDocCtx.pagePdfHeight) * canvas.height;
+                viewportElem.scrollTo({ top: Math.max(0, targetCanvasY - 110), behavior: 'smooth' });
+            }
+
+            canvas.onclick = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                const pdfX = (clickX / rect.width) * activeSignDocCtx.pagePdfWidth;
+                const pdfY = activeSignDocCtx.pagePdfHeight - ((clickY / rect.height) * activeSignDocCtx.pagePdfHeight);
+
+                if (!isNaN(pdfX) && !isNaN(pdfY)) {
+                    const sW = activeSignDocCtx.stampWidth || 82;
+                    const sH = activeSignDocCtx.stampHeight || 26;
+                    activeSignDocCtx.stampX = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfWidth - sW - 10, pdfX - (sW / 2))));
+                    activeSignDocCtx.stampY = Math.round(Math.max(10, Math.min(activeSignDocCtx.pagePdfHeight - sH - 10, pdfY - (sH / 2))));
+                    activeSignDocCtx.userManuallyPickedCoords = true;
+                    activeSignDocCtx.selectedSlotLabel = `Manual (X:${activeSignDocCtx.stampX}, Y:${activeSignDocCtx.stampY})`;
+
+                    window.updateStampTargetVisual();
+                    window.renderDetectedSlotsBar();
+                }
+            };
+
+            resolve();
+        };
+        img.onerror = (e) => {
+            console.warn("Fallo al cargar preview de hoja de firmas:", e);
+            resolve();
+        };
+        img.src = previewDataUrl;
+    });
+};
+
 window.handleDocPdfFileSelected = async function(event) {
     const file = event.target?.files?.[0];
     if (!file) return;
@@ -18318,6 +18467,23 @@ window.handleDocPdfFileSelected = async function(event) {
                 const circuit = d.signatureCircuit || [];
                 circuit.forEach(s => { s.injectedInPdf = false; });
                 window.saveData(false);
+            }
+
+            // Sincronizar binario a la nube Firestore si es menor a 850 KB para disponibilidad inmediata en móviles
+            if (isFirebaseReady && db && globalDoc && globalSetDoc && uint8.byteLength < 850000) {
+                try {
+                    const pdfDocRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', activeSignDocCtx.pdfKey);
+                    const b64 = uint8ToBase64(uint8);
+                    globalSetDoc(pdfDocRef, {
+                        pdfKey: activeSignDocCtx.pdfKey,
+                        fileName: file.name,
+                        base64: b64,
+                        pageCount: pageCount,
+                        uploadedAt: Date.now()
+                    }, { merge: false }).catch(err => console.warn("Firestore PDF sync warning:", err));
+                } catch (e) {
+                    console.warn("Error al preparar sync de PDF:", e);
+                }
             }
 
             if (typeof window.syncCircuitSignaturesToPdf === 'function') {
@@ -18481,6 +18647,23 @@ window.renderLastPdfPage = async function() {
 
         window.renderDetectedSlotsBar();
         window.updateStampTargetVisual();
+
+        // Capturar vista previa visual de la hoja de firmas oficial (para sincronización multidispositivo y móvil)
+        try {
+            const previewDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+            if (previewDataUrl && previewDataUrl.length > 100) {
+                const item = getProjectById(activeSignDocCtx.projectId);
+                if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+                    const d = item.docs[activeSignDocCtx.docId];
+                    d.signatureSheetPreview = previewDataUrl;
+                    d.pagePdfWidth = activeSignDocCtx.pagePdfWidth || 612;
+                    d.pagePdfHeight = activeSignDocCtx.pagePdfHeight || 792;
+                    d.detectedRows = activeSignDocCtx.detectedRows || [];
+                }
+            }
+        } catch (e) {
+            console.warn("Captura de preview visual:", e);
+        }
 
         // Desplazar automáticamente el visor para centrar la tabla de firmas en la pantalla
         const viewportElem = document.getElementById('docSignPdfViewport');
@@ -19095,7 +19278,22 @@ window.stampSignatureOnActiveDocument = async function() {
 
     // Actualizar inmediatamente la vista previa para que la firma recién estampada se vea reflejada
     if (activeSignDocCtx.pdfBytes) {
+        if (isFirebaseReady && db && globalDoc && globalSetDoc && activeSignDocCtx.pdfBytes.byteLength < 850000) {
+            try {
+                const pdfDocRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', activeSignDocCtx.pdfKey);
+                const b64 = uint8ToBase64(activeSignDocCtx.pdfBytes);
+                globalSetDoc(pdfDocRef, {
+                    pdfKey: activeSignDocCtx.pdfKey,
+                    fileName: activeSignDocCtx.pdfFileName || 'Documento Oficial.pdf',
+                    base64: b64,
+                    pageCount: activeSignDocCtx.pdfPageCount || 1,
+                    uploadedAt: Date.now()
+                }, { merge: false }).catch(() => {});
+            } catch (_) {}
+        }
         await window.renderLastPdfPage();
+    } else if (docData && docData.signatureSheetPreview) {
+        await window.renderSignatureSheetFromPreview(docData.signatureSheetPreview, docData);
     }
 
     if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
@@ -19112,8 +19310,25 @@ window.downloadCurrentSignedPdf = async function() {
         return;
     }
 
+    if (!activeSignDocCtx.pdfBytes && isFirebaseReady && db && globalDoc && globalGetDoc && activeSignDocCtx.pdfKey) {
+        try {
+            window.showToast("⏳ Descargando documento original desde la nube...", false);
+            const pdfDocRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', activeSignDocCtx.pdfKey);
+            const snap = await globalGetDoc(pdfDocRef);
+            if (snap.exists() && snap.data()?.base64) {
+                const uint8 = base64ToUint8(snap.data().base64);
+                activeSignDocCtx.pdfBytes = uint8;
+                if (window.SICOM_IDB) {
+                    await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, uint8);
+                }
+            }
+        } catch (e) {
+            console.warn("Fallo al rescatar PDF para descarga:", e);
+        }
+    }
+
     if (!activeSignDocCtx.pdfBytes) {
-        window.showToast("⚠️ No hay archivo PDF disponible para descargar.", true);
+        window.showToast("⚠️ El archivo PDF original reside en la computadora donde se subió y en Google Drive. Descárgalo desde ahí con las firmas sincronizadas.", true);
         return;
     }
 

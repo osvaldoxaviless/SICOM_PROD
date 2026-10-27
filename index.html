@@ -1408,7 +1408,7 @@
       </div>
 
       <!-- FLASHLIT DISPATCH HEADER (#eeeeee Bone Card) -->
-      <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none sticky top-0 z-20">
+      <div class="factory-bone-card bg-[#eeeeee] text-[#101010] p-4 rounded-[10px] mb-4 border border-[#3d3a39]/20 shadow-none relative z-10">
         <div class="flex justify-between items-center mb-2.5">
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] shrink-0"></span>
@@ -1664,7 +1664,7 @@
                   <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39]">
-                  <div id="quickTasksList" class="space-y-2 max-h-48 md:max-h-72 overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
+                  <div id="quickTasksList" class="space-y-2 max-h-none overflow-visible md:max-h-72 md:overflow-y-auto scrollbar-thin pr-1 mb-3"></div>
                   
                   <!-- FORMULARIO DE NUEVA TAREA -->
                   <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] p-3 space-y-2.5 lector-hide" id="quickTaskInputBlock">
@@ -1709,7 +1709,7 @@
                   </div>
               </summary>
               <div class="p-3.5 pt-3 border-t border-[#3d3a39]">
-                  <div id="quickDocsContainer" class="space-y-2.5 max-h-60 md:max-h-80 overflow-y-auto scrollbar-thin pr-1"></div>
+                  <div id="quickDocsContainer" class="space-y-2.5 max-h-none overflow-visible md:max-h-96 md:overflow-y-auto scrollbar-thin pr-1"></div>
                   <input type="hidden" id="quickEditProgress" value="0">
                   <div id="quickSliderContainer" class="hidden mt-3">
                       <input type="range" id="quickEditSlider" min="0" max="100" value="0" oninput="document.getElementById('quickEditProgress').value=this.value; document.getElementById('quickEditProgressLabel').textContent=this.value+'%'; const pp = document.getElementById('infoProgressPill'); if(pp) pp.textContent=this.value+'%'; silentSaveInfoCard();" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[3px] appearance-none cursor-pointer">
@@ -2244,7 +2244,7 @@
                         <label class="font-mono text-[10px] text-[#b8b3b0] uppercase">Documentación</label>
                         <span id="editProgressLabel" class="font-mono text-[11px] text-[#a0ca92] bg-[#101010] px-2.5 py-0.5 rounded-[3px] border border-[#3d3a39]">0%</span>
                      </div>
-                     <div id="editDocsContainer" class="space-y-2.5 max-h-72 overflow-y-auto scrollbar-thin pr-1"></div>
+                     <div id="editDocsContainer" class="space-y-2.5 max-h-none overflow-visible md:max-h-96 md:overflow-y-auto scrollbar-thin pr-1"></div>
                      <input type="hidden" id="editProgress" value="0">
                      <div id="editSliderContainer" class="hidden mt-4">
                         <input type="range" id="editSlider" min="0" max="100" value="0" oninput="document.getElementById('editProgress').value=this.value; document.getElementById('editProgressLabel').textContent=this.value+'%';" class="w-full accent-[#eeeeee] h-1.5 bg-[#101010] rounded-[3px] appearance-none cursor-pointer">
@@ -3677,7 +3677,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261027_v1011"></script>
+  <script type="module" src="app.js?v=20261027_v1012"></script>
 
 </body>
 </html>
