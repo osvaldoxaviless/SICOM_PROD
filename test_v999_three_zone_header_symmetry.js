@@ -65,8 +65,8 @@ runTest('4. Menú de Perfil Popover: accesible tanto en escritorio (#userProfile
 
 // 5. Sincronización de versión en index.html y sw.js
 runTest('5. Sincronización de versión activa en index.html y sw.js', () => {
-    assert(/app\.js\?v=20261027_v1013/.test(html), 'app.js apunta a versión sincronizada en index.html');
-    assert(/SW_VERSION = '20261027_v1013'/.test(sw), 'SW_VERSION es sincronizado en sw.js');
+    assert(/app\.js\?v=20261027_v1014/.test(html), 'app.js apunta a versión sincronizada en index.html');
+    assert(/SW_VERSION = '20261027_v1014'/.test(sw), 'SW_VERSION es sincronizado en sw.js');
 });
 
 console.log('\n====================================================');

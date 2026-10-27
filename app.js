@@ -2135,7 +2135,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const btnTopExec = document.getElementById('btnTopExecutiveDashboard');
         if (btnTopExec) {
             btnTopExec.classList.remove('hidden');
-            btnTopExec.classList.add('hidden', 'md:flex');
+            btnTopExec.classList.add('flex');
         }
 
         const execMetaBlock = document.getElementById('acc-executive-metadata');

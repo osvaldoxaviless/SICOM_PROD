@@ -944,47 +944,16 @@
       </span>
     </div>
 
-    <!-- CONTROLES Y PERFIL DERECHA (BUSCADOR | DASHBOARD | CONTROL/PERFIL) -->
-    <div class="flex items-center gap-1 sm:gap-1.5 relative justify-end shrink-0 py-1">
-      <!-- CLUSTER UNIFICADO DE BÚSQUEDA Y FILTROS MINIMALISTA (CON ÍCONO LITERAL DE LUPA) -->
-      <div class="desktop-search-cluster hidden sm:flex items-center gap-1 shrink-0">
-        <div class="relative flex items-center">
-          <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="Buscar..." class="w-24 sm:w-28 md:w-32 lg:w-36 focus:w-48 bg-[#1d1a18] hover:bg-[#161413] focus:bg-[#161413] border border-[#3d3a39] focus:border-[#ee6018] rounded-[4px] py-1 pl-7 pr-2 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all duration-200">
-        </div>
-        <!-- BOTÓN FILTROS OPERATIVOS DISCRETO -->
-        <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="h-7 w-7 flex shrink-0 items-center justify-center bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[4px] text-[#eeeeee] group cursor-pointer relative" title="Filtros Operativos (Explorar)">
-            <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-            <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 py-0.2 rounded-full font-bold">1</span>
-        </button>
-      </div>
-      <!-- BOTÓN BÚSQUEDA (COMPATIBILIDAD TEST Y EVENTOS DOM) -->
-      <button id="searchBtnIcon" onclick="toggleSearch()" class="hidden" title="Buscar proyecto (Ctrl+K)"></button>
-      <datalist id="projectsDatalist"></datalist>
-
-      <!-- BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA - Visible en md: (en móvil en dock y menú) -->
-      <button id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="hidden md:flex h-7 sm:h-8 shrink-0 items-center gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#3b82f6] text-[#eeeeee] transition-all rounded-[3px] px-2 sm:px-2.5 font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] group cursor-pointer" title="Dashboard Ejecutivo, KPIs y Matriz de Auditoría">
-          <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#3b82f6] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          <span class="hidden 2xl:inline font-medium">Dashboard & Auditoría</span>
-          <span class="hidden lg:inline 2xl:hidden font-medium">Dashboard</span>
+    <!-- CONTROLES Y PERFIL DERECHA (PÍLDORA UNIFICADA DE ACCIÓN: BUSCADOR | DASHBOARD | PERFIL) -->
+    <div class="relative shrink-0 flex items-center justify-end py-1">
+      <!-- BOTÓN AVATAR MÓVIL (PANTALLAS PEQUEÑAS < 640px) -->
+      <button id="mobileMenuBtn" type="button" onclick="toggleMobileMenu(event)" class="sm:hidden w-8 h-8 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/40 hover:border-[#ee6018] flex items-center justify-center transition cursor-pointer relative group select-none shrink-0" title="Centro de Control // Perfil & Configuración">
+          <span id="mobileUserAvatarInitials" class="font-mono text-[11px] font-bold text-[#ee6018] pointer-events-none">OA</span>
+          <span id="mobileConnectionDot" class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#a0ca92] border border-[#101010]" title="En Línea"></span>
       </button>
 
-      <!-- BOTÓN PRIORIDADES (COMPATIBILIDAD DOM Y ACCESO DIRECTO AL CAJÓN LATERAL) -->
-      <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden" title="Panel de Prioridades y Cuellos de Botella"></button>
-
-      <!-- SEPARADOR DISCRETO -->
-      <div class="hidden md:block w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
-
-      <!-- MENÚ DE PERFIL Y CENTRO DE CONTROL UNIFICADO (MÓVIL Y ESCRITORIO) -->
-      <div class="relative shrink-0 flex items-center">
-          <!-- BOTÓN AVATAR MÓVIL (PANTALLAS PEQUEÑAS) -->
-          <button id="mobileMenuBtn" type="button" onclick="toggleMobileMenu(event)" class="sm:hidden w-8 h-8 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/40 hover:border-[#ee6018] flex items-center justify-center transition cursor-pointer relative group select-none shrink-0" title="Centro de Control // Perfil & Configuración">
-              <span id="mobileUserAvatarInitials" class="font-mono text-[11px] font-bold text-[#ee6018] pointer-events-none">OA</span>
-              <span id="mobileConnectionDot" class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#a0ca92] border border-[#101010]" title="En Línea"></span>
-          </button>
-
-          <!-- MENÚ DESPLEGABLE DE PERFIL Y CONTROL (POPOVER UNIFICADO) -->
-          <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-72 bg-[#101010] border border-[#3d3a39] rounded-[4px] p-2 z-[99999] flex-col gap-1 origin-top-right shadow-2xl">
+      <!-- MENÚ DESPLEGABLE DE PERFIL Y CONTROL (POPOVER UNIFICADO) -->
+      <div id="mobileMenuDropdown" class="hidden absolute top-[calc(100%+8px)] right-0 w-72 bg-[#101010] border border-[#3d3a39] rounded-[4px] p-2 z-[99999] flex-col gap-1 origin-top-right shadow-2xl">
               <!-- CABECERA DE USUARIO PERSONALIZADA -->
               <div class="px-2.5 py-2 bg-[#171514] border border-[#252220] rounded-[3px] flex items-center gap-2.5 mb-1">
                   <div id="mobileMenuAvatarBadge" class="w-8 h-8 rounded-[3px] bg-[#ee6018]/20 border border-[#ee6018]/50 text-[#ee6018] font-mono text-xs font-bold flex items-center justify-center shrink-0">
@@ -1042,23 +1011,45 @@
               </button>
           </div>
 
-          <!-- BOTÓN CENTRO DE CONTROL // CONFIGURACIÓN & PERFIL (EXTREMO SUPERIOR DERECHO - COMPACTO Y BALANCEADO) -->
-          <button id="userProfilePillBtn" type="button" onclick="toggleMobileMenu(event)" class="hidden sm:flex h-7 sm:h-8 items-center gap-1.5 px-1.5 sm:px-2 rounded-[3px] bg-[#1d1a18] hover:bg-[#161413] border border-[#3d3a39] hover:border-[#ee6018]/60 transition-all select-none group shrink-0 cursor-pointer mr-0.5 sm:mr-1" title="Centro de Control // Configuración & Perfil">
-            <div class="flex items-center gap-1.5">
-              <!-- Ícono de Configuración / Engrane -->
-              <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#8a8380] group-hover:text-[#ee6018] group-hover:rotate-45 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <span id="connectionStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] transition-all duration-200 shrink-0" title="En Línea"></span>
-              <div id="userAvatarInitials" class="w-5 h-5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] font-mono text-[10px] font-semibold flex items-center justify-center shrink-0">
-                --
-              </div>
-            </div>
-            <span id="userRoleBadgePill" class="hidden xl:inline font-mono text-[9px] uppercase tracking-wider text-[#8a8380] group-hover:text-[#b8b3b0] transition-colors">
-              CONSULTOR
-            </span>
-            <span class="hidden 2xl:inline font-mono text-[10px] text-[#eeeeee] uppercase tracking-[-0.24px] group-hover:text-[#ee6018] transition-colors">Control</span>
-            <svg class="w-3.5 h-3.5 text-[#4d4947] group-hover:text-[#eeeeee] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
+      <!-- SELECTOR DE ACCIÓN DERECHO (PÍLDORA SIMÉTRICA: [ 🔍 BUSCAR... ⚙️ ] | [ 📊 DASHBOARD ] | [ 🟧 OA ] ) -->
+      <div id="rightActionSwitcher" class="hidden sm:flex items-center p-0.5 bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] shrink-0">
+        <!-- 1. CLUSTER UNIFICADO DE BÚSQUEDA Y FILTRO -->
+        <div class="desktop-search-cluster flex items-center gap-0.5 shrink-0 px-1">
+          <div class="relative flex items-center">
+            <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="Buscar..." class="w-20 sm:w-24 md:w-28 lg:w-32 focus:w-44 bg-transparent hover:bg-[#252220] focus:bg-[#101010] rounded-[3px] py-1 pl-6 pr-1.5 font-mono text-[10px] sm:text-[11px] text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all duration-200">
+          </div>
+          <!-- BOTÓN FILTROS OPERATIVOS DISCRETO -->
+          <button type="button" id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="h-6 w-6 flex shrink-0 items-center justify-center hover:bg-[#282523] rounded-[3px] text-[#8a8380] hover:text-[#ee6018] transition-colors cursor-pointer relative" title="Filtros Operativos (Explorar)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+              <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[8px] px-1 py-0.2 rounded-full font-bold">1</span>
           </button>
+        </div>
+        <!-- BOTÓN BÚSQUEDA (COMPATIBILIDAD TEST Y EVENTOS DOM) -->
+        <button id="searchBtnIcon" onclick="toggleSearch()" class="hidden" title="Buscar proyecto (Ctrl+K)"></button>
+        <datalist id="projectsDatalist"></datalist>
+
+        <!-- 2. BOTÓN DASHBOARD EJECUTIVO & AUDITORÍA -->
+        <button type="button" id="btnTopExecutiveDashboard" onclick="openExecutiveDashboard()" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#3b82f6] hover:bg-[#3b82f6]/10 cursor-pointer" title="Dashboard Ejecutivo, KPIs y Matriz de Auditoría">
+            <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="hidden sm:inline font-medium">Dashboard</span>
+        </button>
+
+        <!-- 3. BOTÓN CENTRO DE CONTROL // PERFIL (SOLO INICIALES) -->
+        <button id="userProfilePillBtn" type="button" onclick="toggleMobileMenu(event)" class="px-1.5 py-0.5 rounded-[3px] hover:bg-[#ee6018]/15 transition flex items-center justify-center cursor-pointer group shrink-0" title="Centro de Control // Configuración & Perfil">
+          <div class="relative flex items-center justify-center">
+            <div id="userAvatarInitials" class="w-6 h-6 rounded-[3px] bg-[#ee6018]/20 border border-[#ee6018]/50 text-[#ee6018] font-mono text-[11px] font-bold flex items-center justify-center select-none group-hover:scale-105 transition-transform">
+              OA
+            </div>
+            <span id="connectionStatusDot" class="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#a0ca92] border border-[#101010]" title="En Línea"></span>
+          </div>
+          <!-- Elemento oculto de compatibilidad para sincronización de rol en app.js -->
+          <span id="userRoleBadgePill" class="hidden" style="display:none !important;"></span>
+        </button>
       </div>
+
+      <!-- BOTÓN PRIORIDADES (COMPATIBILIDAD DOM Y ACCESO DIRECTO AL CAJÓN LATERAL) -->
+      <button id="btnTopPriorityDrawer" onclick="togglePriorityDrawer()" class="hidden" title="Panel de Prioridades y Cuellos de Botella"></button>
     </div>
   </header>
   
@@ -3669,7 +3660,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261027_v1013"></script>
+  <script type="module" src="app.js?v=20261027_v1014"></script>
 
 </body>
 </html>

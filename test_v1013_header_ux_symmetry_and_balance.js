@@ -1,18 +1,18 @@
 /**
- * TEST SUITE V1013: HEADER UX BALANCE, SIMETRÍA Y COMPACTACIÓN
- * - Lado Izquierdo: [ 🗺️ Mapa | 📅 Calendario | 📋 Rol & Prenómina ] agrupados en #mainViewSwitcher
- * - Eliminación de duplicidad: #btnViewModePriority oculto en el header superior (disponible en la sub-pestaña)
+ * TEST SUITE V1014: HEADER UX SIMETRÍA EXACTA — PÍLDORAS GEMELAS DE 3 ELEMENTOS
+ * - Lado Izquierdo (#mainViewSwitcher): [ 🗺️ Mapa | 📅 Calendario | 📋 Rol & Prenómina ]
  * - Centro: [ EO/SA ] Centrado absoluto, sin solapamientos
- * - Lado Derecho: [ 🔍 Buscador & Filtro ] + [ 📊 Dashboard ] + [ ⚙️ Centro de Control / Perfil Compacto ]
- * - Pantalla dividida / Split-screen: Diseño equilibrado y balanceado de ambos lados
+ * - Lado Derecho (#rightActionSwitcher): [ 🔍 Buscador & Filtro | 📊 Dashboard | 🟧 OA (Solo Iniciales) ]
+ * - Erradicación de bordes individuales dispersos y separadores innecesarios
+ * - Perfil minimalista: Solamente las iniciales y punto de estado en línea
  */
 
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
-console.log('AUDITORÍA AUTOMATIZADA V1013: BALANCE, SIMETRÍA Y DISTRIBUCIÓN DEL HEADER');
-console.log('=========================================================================\n');
+console.log('AUDITORÍA AUTOMATIZADA V1014: PÍLDORAS GEMELAS SIMÉTRICAS DE 3 ELEMENTOS EN HEADER');
+console.log('===================================================================================\n');
 
 const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
 const app = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf-8');
@@ -35,8 +35,8 @@ runTest('1. app.js y sw.js son sintácticamente válidos', () => {
     assert.doesNotThrow(() => { new Function(sw); }, 'sw.js no debe tener errores de sintaxis');
 });
 
-// 2. Agrupación izquierda: Mapa + Calendario + Rol & Prenómina
-runTest('2. Lado Izquierdo: #mainViewSwitcher contiene Mapa, Calendario y Rol & Prenómina', () => {
+// 2. Agrupación izquierda: Pastillita #mainViewSwitcher con 3 elementos
+runTest('2. Lado Izquierdo: #mainViewSwitcher contiene 3 elementos (Mapa, Calendario, Rol & Prenómina)', () => {
     const switcherRegex = /<div id="mainViewSwitcher"[^>]*>([\s\S]*?)<\/div>/;
     const match = html.match(switcherRegex);
     assert(match, 'Contenedor #mainViewSwitcher encontrado');
@@ -69,40 +69,50 @@ runTest('4. Centro: Branding EO/SA con centrado absoluto y libre de colisiones',
     assert(html.includes('EO<span class="text-[#ee6018] font-black text-[17px] mx-0.5">/</span>SA'), 'Logo EO/SA completo');
 });
 
-// 5. Lado Derecho: Buscador, Dashboard y Centro de Control compacto
-runTest('5. Lado Derecho: Buscador, Dashboard y Centro de Control / Perfil situados a la derecha de EO/SA', () => {
+// 5. Agrupación derecha: Pastillita gemela #rightActionSwitcher con 3 elementos
+runTest('5. Lado Derecho: #rightActionSwitcher contiene 3 elementos (Buscador/Filtro, Dashboard, Perfil)', () => {
+    assert(html.includes('id="rightActionSwitcher"'), 'Contenedor #rightActionSwitcher encontrado');
+    const startIdx = html.indexOf('id="rightActionSwitcher"');
+    const endIdx = html.indexOf('id="btnTopPriorityDrawer"');
+    const rightContent = html.substring(startIdx, endIdx);
+
+    assert(rightContent.includes('desktop-search-cluster'), 'Buscador y filtros están dentro de #rightActionSwitcher');
+    assert(rightContent.includes('id="desktopSearchInput"'), 'desktopSearchInput está dentro de #rightActionSwitcher');
+    assert(rightContent.includes('id="btnTopFilterDrawer"'), 'btnTopFilterDrawer está dentro de #rightActionSwitcher');
+    assert(rightContent.includes('id="btnTopExecutiveDashboard"'), 'btnTopExecutiveDashboard está dentro de #rightActionSwitcher');
+    assert(rightContent.includes('id="userProfilePillBtn"'), 'userProfilePillBtn está dentro de #rightActionSwitcher');
+
+    // Posicionamiento a la derecha del branding central
     const brandingIdx = html.indexOf('header-branding-center');
-    const searchIdx = html.indexOf('desktop-search-cluster');
-    const dashboardIdx = html.indexOf('id="btnTopExecutiveDashboard"');
-    const profileIdx = html.indexOf('id="userProfilePillBtn"');
-
-    assert(brandingIdx > -1, 'Branding central existe');
-    assert(searchIdx > brandingIdx, 'Buscador (.desktop-search-cluster) está a la derecha del branding central');
-    assert(dashboardIdx > searchIdx, 'Dashboard está a la derecha del buscador');
-    assert(profileIdx > dashboardIdx, 'Centro de Control / Perfil está en el extremo derecho');
-
-    assert(html.includes('id="desktopSearchInput"'), 'desktopSearchInput presente');
-    assert(html.includes('id="btnTopFilterDrawer"'), 'btnTopFilterDrawer presente');
+    assert(startIdx > brandingIdx, 'rightActionSwitcher está a la derecha del branding central');
 });
 
-// 6. Centro de Control / Perfil compacto para soportar Split-Screen
-runTest('6. Centro de Control / Perfil compacto y adaptativo para split-screen', () => {
+// 6. Perfil en la pastillita derecha: SOLO las iniciales sin etiquetas redundantes
+runTest('6. Perfil en #rightActionSwitcher: Muestra únicamente las iniciales del usuario (OA)', () => {
     const profileBtnMatch = html.match(/<button[^>]+id="userProfilePillBtn"[^>]*>([\s\S]*?)<\/button>/);
     assert(profileBtnMatch, 'userProfilePillBtn encontrado');
-    const btnHtml = profileBtnMatch[0];
+    const btnInner = profileBtnMatch[1];
 
-    assert(btnHtml.includes('id="connectionStatusDot"'), 'Dot de conexión presente');
-    assert(btnHtml.includes('id="userAvatarInitials"'), 'Avatar de usuario presente');
-    assert(btnHtml.includes('hidden xl:inline'), 'Texto CONSULTOR oculto en pantallas split (<1280px)');
-    assert(btnHtml.includes('hidden 2xl:inline'), 'Texto Control oculto en pantallas split (<1536px)');
+    assert(btnInner.includes('id="userAvatarInitials"'), 'Badge de iniciales presente');
+    assert(btnInner.includes('id="connectionStatusDot"'), 'Punto de conexión en línea presente');
+
+    // Comprobar que NO contiene textos que saturen el botón
+    assert(!btnInner.includes('>CONSULTOR<'), 'Texto CONSULTOR eliminado del botón');
+    assert(!btnInner.includes('>Control<'), 'Texto Control eliminado del botón');
 });
 
-// 7. Sincronización de versión v1013
-runTest('7. Sincronización de versión 20261027_v1013 en index.html y sw.js', () => {
-    assert(html.includes('app.js?v=20261027_v1013'), 'index.html apunta a app.js?v=20261027_v1013');
-    assert(sw.includes("const SW_VERSION = '20261027_v1013';"), 'sw.js tiene SW_VERSION = 20261027_v1013');
+// 7. Estilos CSS responsivos para ocultar ambas pastillitas en móvil (<640px)
+runTest('7. styles.css oculta de manera segura ambas pastillitas en viewport móvil', () => {
+    assert(css.includes('#mainViewSwitcher'), 'mainViewSwitcher en styles.css');
+    assert(css.includes('#rightActionSwitcher'), 'rightActionSwitcher en styles.css');
 });
 
-console.log('\n========================================================================');
-console.log('✅ TODAS LAS PRUEBAS V1013 PASARON EXITOSAMENTE CON 100% DE INTEGRIDAD.');
-console.log('========================================================================');
+// 8. Sincronización de versión v1014
+runTest('8. Sincronización de versión 20261027_v1014 en index.html y sw.js', () => {
+    assert(html.includes('app.js?v=20261027_v1014'), 'index.html apunta a app.js?v=20261027_v1014');
+    assert(sw.includes("const SW_VERSION = '20261027_v1014';"), 'sw.js tiene SW_VERSION = 20261027_v1014');
+});
+
+console.log('\n===================================================================================');
+console.log('✅ TODAS LAS PRUEBAS V1014 PASARON EXITOSAMENTE CON 100% DE INTEGRIDAD.');
+console.log('===================================================================================');

@@ -1934,6 +1934,7 @@ body:has(#documentSignModal:not(.hidden)) #mobileBottomDock {
 
     /* Ocultar elementos pesados de escritorio que saturan el viewport horizontal */
     #mainViewSwitcher,
+    #rightActionSwitcher,
     .desktop-search-cluster,
     #userProfilePillBtn,
     #btnTopExecutiveDashboard,
