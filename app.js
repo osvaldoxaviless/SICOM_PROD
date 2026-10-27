@@ -16929,6 +16929,70 @@ window.isCurrentUserDocRequesterOrSuper = function(item, docData) {
     return window.isSameUserOrAlias(req, localAuthor);
 };
 
+// Conmutador ergonómico de pestañas en Móvil (Hoja y Firma vs Circuito de Firmas)
+window.switchDocSignMobileTab = function(tab) {
+    if (!activeSignDocCtx) return;
+    activeSignDocCtx.mobileActiveTab = tab;
+    const btnSign = document.getElementById('docSignMobileTabBtn_sign');
+    const btnCircuit = document.getElementById('docSignMobileTabBtn_circuit');
+    const colLeft = document.getElementById('docSignColLeft');
+    const colRight = document.getElementById('docSignColRight');
+
+    if (window.innerWidth < 1024) {
+        if (tab === 'sign') {
+            if (btnSign) {
+                btnSign.className = "flex-1 py-1 text-center font-mono text-[10px] uppercase font-bold rounded transition bg-[#ee6018] text-white shadow-sm flex items-center justify-center gap-1 cursor-pointer";
+            }
+            if (btnCircuit) {
+                btnCircuit.className = "flex-1 py-1 text-center font-mono text-[10px] uppercase font-bold rounded transition text-[#b8b3b0] hover:text-white flex items-center justify-center gap-1 cursor-pointer";
+            }
+            if (colLeft) {
+                colLeft.classList.remove('hidden');
+                colLeft.classList.add('flex');
+            }
+            if (colRight) {
+                colRight.classList.add('hidden');
+                colRight.classList.remove('flex');
+            }
+        } else {
+            if (btnCircuit) {
+                btnCircuit.className = "flex-1 py-1 text-center font-mono text-[10px] uppercase font-bold rounded transition bg-[#ee6018] text-white shadow-sm flex items-center justify-center gap-1 cursor-pointer";
+            }
+            if (btnSign) {
+                btnSign.className = "flex-1 py-1 text-center font-mono text-[10px] uppercase font-bold rounded transition text-[#b8b3b0] hover:text-white flex items-center justify-center gap-1 cursor-pointer";
+            }
+            if (colRight) {
+                colRight.classList.remove('hidden');
+                colRight.classList.add('flex');
+            }
+            if (colLeft) {
+                colLeft.classList.add('hidden');
+                colLeft.classList.remove('flex');
+            }
+        }
+    } else {
+        // En desktop siempre visibles ambos en su cuadrícula de 12 columnas sin desplazamiento
+        if (colLeft) {
+            colLeft.classList.remove('hidden');
+            colLeft.classList.add('flex');
+        }
+        if (colRight) {
+            colRight.classList.remove('hidden');
+            colRight.classList.add('flex');
+        }
+    }
+    if (tab === 'sign' && typeof window.resizeSignaturePad === 'function') {
+        setTimeout(window.resizeSignaturePad, 50);
+    }
+};
+
+window.addEventListener('resize', () => {
+    const modal = document.getElementById('documentSignModal');
+    if (modal && !modal.classList.contains('hidden') && typeof window.switchDocSignMobileTab === 'function') {
+        window.switchDocSignMobileTab(activeSignDocCtx.mobileActiveTab || 'sign');
+    }
+});
+
 // Controles ergonómicos de Zoom para el visor de la Hoja de Firmas (ideal para vista cansada / personas mayores)
 window.changeDocSignZoom = function(delta) {
     if (!activeSignDocCtx.zoomLevel) activeSignDocCtx.zoomLevel = 1.15;
@@ -17071,10 +17135,14 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
         selectedSlotLabel: '',
         userManuallyPickedCoords: false,
         lastAutoSignerId: null,
-        zoomLevel: 1.15
+        zoomLevel: 1.0,
+        mobileActiveTab: 'sign'
     };
     const initZoomLabel = document.getElementById('docSignZoomLabel');
-    if (initZoomLabel) initZoomLabel.textContent = '115%';
+    if (initZoomLabel) initZoomLabel.textContent = '100%';
+    if (typeof window.switchDocSignMobileTab === 'function') {
+        window.switchDocSignMobileTab('sign');
+    }
 
     // Recuperar binario PDF (y copia limpia original si existe) de IndexedDB
     if (window.SICOM_IDB) {
@@ -17207,6 +17275,9 @@ window.updateDocSignStatusBadge = function() {
     const requester = window.getDocSignRequester(item, docData);
     const isRequesterOrSuper = window.isCurrentUserDocRequesterOrSuper(item, docData);
 
+    const mobileCountEl = document.getElementById('docSignMobileCircuitCount');
+    if (mobileCountEl) mobileCountEl.textContent = `${signed}/${total}`;
+
     if (total === 0) {
         badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#3d3a39] bg-[#101010] text-[#8a8380]";
         badge.textContent = "⚪ SIN FIRMAS";
@@ -17321,6 +17392,9 @@ window.renderDocSignCircuitList = function() {
 };
 
 window.focusSignaturePadFor = function(name, role) {
+    if (window.innerWidth < 1024 && typeof window.switchDocSignMobileTab === 'function') {
+        window.switchDocSignMobileTab('sign');
+    }
     const padContainer = document.getElementById('docSignPadContainer');
     const scrollContainer = document.getElementById('docSignScrollContainer');
     const canvas = document.getElementById('signaturePadCanvas');
@@ -17762,7 +17836,11 @@ window.renderDetectedSlotsBar = function() {
     const curY = Number(activeSignDocCtx.stampY) || 300;
     list.innerHTML = rows.map((r, idx) => {
         const isSelected = Math.abs(r.stampY - curY) <= 10;
-        const shortName = r.name.split(/\s+/).slice(0, 3).join(' ');
+        const isMobile = (window.innerWidth < 640);
+        const nameTokens = r.name.split(/\s+/).filter(Boolean);
+        const shortName = isMobile 
+            ? (nameTokens[0] + (nameTokens[1] ? ' ' + nameTokens[1][0] + '.' : ''))
+            : nameTokens.slice(0, 2).join(' ');
         return `<button type="button" onclick="window.selectDetectedSignatureSlot(${idx})" class="px-2 py-0.5 rounded font-mono text-[9px] transition cursor-pointer border ${isSelected ? 'bg-[#ee6018] text-white border-[#ee6018] font-bold shadow-sm' : 'bg-[#101010] text-[#b8b3b0] border-[#3d3a39] hover:border-[#ee6018] hover:text-white'}" title="Colocar firma exactamente enfrente de ${escapeHtml(r.name)} (${escapeHtml(r.role)})">
             ${isSelected ? '✓ ' : ''}${escapeHtml(shortName)}
         </button>`;
@@ -18247,9 +18325,11 @@ window.resizeSignaturePad = function() {
     const computedWidth = container ? container.clientWidth : 0;
     const finalWidth = (computedWidth > 50) ? computedWidth : Math.min(window.innerWidth - 40, 500);
 
-    if (canvas.width !== finalWidth || canvas.height !== 100) {
+    const padHeight = (window.innerWidth < 640) ? 55 : 60;
+    if (canvas.width !== finalWidth || canvas.height !== padHeight) {
         canvas.width = finalWidth;
-        canvas.height = 100;
+        canvas.height = padHeight;
+        canvas.style.height = `${padHeight}px`;
         if (sigPadCtx) {
             sigPadCtx.strokeStyle = '#0055cc';
             sigPadCtx.lineWidth = 2.5;
