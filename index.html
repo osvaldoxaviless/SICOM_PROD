@@ -3521,10 +3521,14 @@
                                   <div class="text-[10px] text-[#b8b3b0]">Todas las firmas del circuito están inyectadas en la hoja oficial del PDF.</div>
                               </div>
                           </div>
-                          <div class="flex items-center gap-2 shrink-0">
-                              <button type="button" onclick="downloadCurrentSignedPdf()" class="pill-btn px-3.5 py-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-black font-mono text-[11px] uppercase font-bold transition flex items-center gap-1.5 shadow-lg shadow-[#22c55e]/20">
+                          <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                              <button type="button" onclick="downloadCurrentSignedPdf()" class="pill-btn px-3.5 py-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-black font-mono text-[11px] uppercase font-bold transition flex items-center gap-1.5 shadow-lg shadow-[#22c55e]/20 cursor-pointer">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                   <span>Descargar PDF Firmado</span>
+                              </button>
+                              <button type="button" onclick="purgeCurrentDocumentLocalPdf()" class="pill-btn px-2.5 py-1.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ef4444] text-[#8a8380] hover:text-[#ef4444] font-mono text-[10px] uppercase transition flex items-center gap-1 cursor-pointer" title="Eliminar las 146 páginas del navegador para liberar memoria local (el documento permanece 100% firmado en SICOM)">
+                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                  <span>Liberar Espacio Local</span>
                               </button>
                           </div>
                       </div>

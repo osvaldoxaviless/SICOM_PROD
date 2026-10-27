@@ -17074,10 +17074,41 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
         document.getElementById('docSignNoPdfPlaceholder')?.classList.remove('hidden');
         document.getElementById('docSignStampControls')?.classList.add('hidden');
         document.getElementById('docSignDetectedSlotsBar')?.classList.add('hidden');
+        document.getElementById('docSignPaginationControls')?.classList.add('hidden');
         const infoEl = document.getElementById('docSignPdfInfo');
-        if (infoEl) infoEl.textContent = 'Ningún PDF';
         const nameEl = document.getElementById('docSignPdfNameContainer');
-        if (nameEl) nameEl.textContent = 'Arrastra o sube el PDF para firmar';
+        const placeholderText = document.getElementById('docSignNoPdfPlaceholder');
+
+        const circuit = docData?.signatureCircuit || [];
+        const isFullySigned = (circuit.length > 0 && circuit.every(s => s.status === 'signed')) || docData.checked;
+
+        if (isFullySigned) {
+            if (infoEl) infoEl.textContent = '✓ Firmado';
+            if (nameEl) nameEl.textContent = docData.pdfFileName ? `Firmado: ${docData.pdfFileName}` : 'Documento 100% Firmado';
+            if (placeholderText) {
+                placeholderText.innerHTML = `
+                    <div class="text-center p-8 text-[#22c55e] my-auto space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-[#22c55e]/20 border border-[#22c55e] flex items-center justify-center text-[#22c55e] text-xl font-bold mx-auto">✓</div>
+                        <p class="text-xs font-mono uppercase font-bold text-[#22c55e]">Documento 100% Firmado y Autorizado</p>
+                        <p class="text-[11px] text-[#b8b3b0] max-w-md mx-auto">El circuito de firmas está completado. Para no sobrecargar la plataforma, el PDF firmado se almacena en Google Drive.</p>
+                        <div class="pt-2">
+                            <button type="button" onclick="openDocDriveLink()" class="pill-btn px-3 py-1.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#3b82f6] text-[#fafafa] font-mono text-[10px] uppercase transition inline-flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+                                <span>Abrir Documento en Google Drive ↗</span>
+                            </button>
+                        </div>
+                    </div>`;
+            }
+        } else {
+            if (infoEl) infoEl.textContent = 'Ningún PDF';
+            if (nameEl) nameEl.textContent = 'Arrastra o sube el PDF para firmar';
+            if (placeholderText) {
+                placeholderText.innerHTML = `
+                    <svg class="w-10 h-10 mx-auto mb-2 opacity-30 text-[#8a8380]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <p class="text-xs font-mono uppercase">Carga el PDF oficial para visualizar la hoja de firmas</p>
+                    <p class="text-[10px] text-[#635d5a] mt-1 font-mono">El sistema detectará automáticamente el nombre de cada firmante en la tabla</p>`;
+            }
+        }
     }
 };
 
@@ -18499,4 +18530,53 @@ window.downloadCurrentSignedPdf = async function() {
     URL.revokeObjectURL(url);
 
     window.showToast(`⬇️ Descargando ${fileName}. Súbelo a la carpeta de Drive del proyecto.`, false);
+};
+
+window.purgeCurrentDocumentLocalPdf = async function() {
+    if (!confirm("¿Deseas liberar las 146 páginas del PDF del almacenamiento local del navegador?\n\nEl documento permanecerá 100% firmado y validado en SICOM con su ticket y enlace a Drive.")) return;
+
+    if (window.SICOM_IDB && activeSignDocCtx.pdfKey) {
+        await window.SICOM_IDB.delete(activeSignDocCtx.pdfKey);
+        await window.SICOM_IDB.delete(activeSignDocCtx.pdfKey + '_clean');
+    }
+
+    activeSignDocCtx.pdfBytes = null;
+    activeSignDocCtx.cleanPdfBytes = null;
+    activeSignDocCtx.detectedRows = [];
+
+    // Ocultar visor y controles de estampado
+    document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
+    document.getElementById('docSignNoPdfPlaceholder')?.classList.remove('hidden');
+    document.getElementById('docSignStampControls')?.classList.add('hidden');
+    document.getElementById('docSignDetectedSlotsBar')?.classList.add('hidden');
+    document.getElementById('docSignPaginationControls')?.classList.add('hidden');
+
+    const infoEl = document.getElementById('docSignPdfInfo');
+    if (infoEl) infoEl.textContent = 'Espacio liberado';
+    const nameEl = document.getElementById('docSignPdfNameContainer');
+    if (nameEl) nameEl.textContent = 'PDF local liberado (Firmado en SICOM y respaldado en Drive)';
+
+    const placeholderText = document.getElementById('docSignNoPdfPlaceholder');
+    if (placeholderText) {
+        placeholderText.innerHTML = `
+            <div class="text-center p-8 text-[#22c55e] my-auto space-y-2">
+                <div class="w-12 h-12 rounded-full bg-[#22c55e]/20 border border-[#22c55e] flex items-center justify-center text-[#22c55e] text-xl font-bold mx-auto">✓</div>
+                <p class="text-xs font-mono uppercase font-bold text-[#22c55e]">Documento 100% Firmado y Autorizado</p>
+                <p class="text-[11px] text-[#b8b3b0] max-w-md mx-auto">El archivo de 146 páginas fue liberado del navegador para no consumir memoria. El registro oficial y el enlace residen en Google Drive.</p>
+                <div class="pt-2">
+                    <button type="button" onclick="openDocDriveLink()" class="pill-btn px-3 py-1.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#3b82f6] text-[#fafafa] font-mono text-[10px] uppercase transition inline-flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+                        <span>Abrir Documento en Google Drive ↗</span>
+                    </button>
+                </div>
+            </div>`;
+    }
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+        item.docs[activeSignDocCtx.docId].pdfPurged = true;
+        window.saveData(false);
+    }
+
+    window.showToast("🧹 Memoria liberada. El PDF pesado fue retirado del navegador sin perder el estatus firmado.", false);
 };
