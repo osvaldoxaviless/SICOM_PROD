@@ -77,7 +77,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v1000">
+  <link rel="stylesheet" href="styles.css?v=20261026_v1001">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -150,7 +150,7 @@
   </div>
 
   <!-- BOTÓN NOTIFICACIONES Y TRABAJO FLOTANTE (ABAJO A LA DERECHA, JUNTO AL SPEED DIAL DE CREACIÓN) -->
-  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="hidden sm:flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
+  <button id="btnDailyTasks" onclick="toggleDailyDrawer()" class="lector-hide hidden sm:flex fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-[5.75rem] z-[55] w-12 h-12 bg-[#1d1a18] hover:bg-[#eeeeee] hover:text-[#101010] items-center justify-center rounded-[3px] text-[#eeeeee] transition-all group border border-[#3d3a39] hover:border-[#eeeeee] cursor-pointer pointer-events-auto" title="Notificaciones y Trabajo">
       <svg class="w-5 h-5 text-[#ee6018] group-hover:text-[#101010] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
       <span id="dailyAlertsBadge" class="absolute -top-1.5 -right-1.5 bg-[#ee6018] text-[#fafafa] font-mono text-[10px] px-1 min-w-[16px] h-4 flex items-center justify-center rounded-[3px] hidden">0</span>
   </button>
@@ -925,6 +925,11 @@
         <button type="button" id="btnViewModeTimeline" onclick="switchMainWorkspaceView('timeline')" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer" title="Calendario mensual y semanal de entregas">
           <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span class="hidden sm:inline">Calendario</span>
+        </button>
+        <button type="button" id="btnViewModeTasks" onclick="toggleDailyDrawer()" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative" title="Notificaciones y Trabajo (Tareas y Alertas)">
+          <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <span class="hidden sm:inline">Tareas</span>
+          <span id="desktopHeaderDailyAlertsBadge" class="hidden font-mono text-[9px] bg-[#ee6018] text-[#fafafa] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold">0</span>
         </button>
       </div>
 
@@ -3380,7 +3385,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v1000"></script>
+  <script type="module" src="app.js?v=20261026_v1001"></script>
 
 </body>
 </html>

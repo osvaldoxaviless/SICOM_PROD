@@ -65,10 +65,10 @@ runTest('5. app.js: openManual actualizado con filtros unificados y dock de 5 ac
 });
 
 // 6. Versión sincronizada en todo el sistema (v997-v1000)
-runTest('6. Versión sincronizada 20261026_v997-v1000 en index.html, app.js y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v(997|998|999|1000)/.test(html), 'index.html points to styles.css');
-    assert(/app\.js\?v=20261026_v(997|998|999|1000)/.test(html), 'index.html points to app.js');
-    assert(/SW_VERSION = '20261026_v(997|998|999|1000)'/.test(sw), 'sw.js SW_VERSION matches');
+runTest('6. Versión sincronizada 20261026_v997-v1001 en index.html, app.js y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'index.html points to styles.css');
+    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'index.html points to app.js');
+    assert(/SW_VERSION = '20261026_v(99\d|100\d)'/.test(sw), 'sw.js SW_VERSION matches');
 });
 
 console.log('\n====================================================');

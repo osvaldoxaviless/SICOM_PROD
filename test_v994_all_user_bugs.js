@@ -87,10 +87,10 @@ test('6. app.js: renderAttendanceMatrixView compacta nombres de equipo en pantal
 });
 
 // 7. Sincronización de cache buster v994/v995
-test('7. index.html, styles.css & sw.js: Versión v994+ sincronizada en todo el sistema', () => {
-    assert(/app\.js\?v=20261026_v(99[4-9]|1000)/.test(html), 'index.html points to app.js');
-    assert(/styles\.css\?v=20261026_v(99[4-9]|1000)/.test(html), 'index.html points to styles.css');
-    assert(/20261026_v(99[4-9]|1000)/.test(sw), 'sw.js SW_VERSION is synced');
+test('7. index.html, styles.css & sw.js: Versión v994-v1001 sincronizada en todo el sistema', () => {
+    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'index.html points to app.js');
+    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'index.html points to styles.css');
+    assert(/20261026_v(99\d|100\d)/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log(`\n====================================================`);

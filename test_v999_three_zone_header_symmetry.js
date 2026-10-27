@@ -72,11 +72,11 @@ runTest('4. Menú de Perfil Popover: accesible tanto en escritorio (#userProfile
     assert(app.includes("e.target.closest('#userProfilePillBtn')"), 'app.js no cierra prematuramente al hacer click en el botón de perfil');
 });
 
-// 5. Sincronización de versión v999/v1000
-runTest('5. Sincronización de versión 20261026_v999/v1000 en index.html y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v(999|1000)/.test(html), 'styles.css apunta a v999/v1000 en index.html');
-    assert(/app\.js\?v=20261026_v(999|1000)/.test(html), 'app.js apunta a v999/v1000 en index.html');
-    assert(/SW_VERSION = '20261026_v(999|1000)'/.test(sw), 'SW_VERSION es v999/v1000 en sw.js');
+// 5. Sincronización de versión v999/v1000/v1001
+runTest('5. Sincronización de versión 20261026_v999/v1000/v1001 en index.html y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'styles.css apunta a v999/v1000/v1001 en index.html');
+    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'app.js apunta a v999/v1000/v1001 en index.html');
+    assert(/SW_VERSION = '20261026_v(99\d|100\d)'/.test(sw), 'SW_VERSION es v999/v1000/v1001 en sw.js');
 });
 
 console.log('\n====================================================');

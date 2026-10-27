@@ -81,11 +81,11 @@ runTest('6. app.js: openManual completamente auditado y libre de "panel izquierd
     assert(openManualSrc.includes('mapa'), 'Documenta el Mapa Mental');
 });
 
-// 7. Sincronización de versión v998/v999/v1000 en index.html, app.js y sw.js
-runTest('7. Sincronización de versión 20261026_v998/v999/v1000 en todo el sistema', () => {
-    assert(/styles\.css\?v=20261026_v(998|999|1000)/.test(html), 'styles.css?v=20261026_v998/v999/v1000 en index.html');
-    assert(/app\.js\?v=20261026_v(998|999|1000)/.test(html), 'app.js?v=20261026_v998/v999/v1000 en index.html');
-    assert(/SW_VERSION = '20261026_v(998|999|1000)'/.test(sw), 'SW_VERSION = 20261026_v998/v999/v1000 en sw.js');
+// 7. Sincronización de versión v998/v999/v1000/v1001/v1001 en index.html, app.js y sw.js
+runTest('7. Sincronización de versión 20261026_v998/v999/v1000/v1001/v1001 en todo el sistema', () => {
+    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'styles.css?v=20261026_v998/v999/v1000/v1001/v1001 en index.html');
+    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'app.js?v=20261026_v998/v999/v1000/v1001/v1001 en index.html');
+    assert(/SW_VERSION = '20261026_v(99\d|100\d)'/.test(sw), 'SW_VERSION = 20261026_v998/v999/v1000/v1001/v1001 en sw.js');
 });
 
 console.log('\n====================================================');

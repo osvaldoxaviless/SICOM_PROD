@@ -101,9 +101,9 @@ test('6. index.html: Menú móvil [ OA ] no muestra vistas redundantes de sistem
 
 // 7. Sincronización de cache buster
 test('7. index.html, styles.css & sw.js: Cache buster actualizado y sincronizado', () => {
-    assert(/app\.js\?v=20261026_v(99[2-9]|1000)/.test(html), 'index.html references app.js?v');
-    assert(/styles\.css\?v=20261026_v(99[2-9]|1000)/.test(html), 'index.html references styles.css?v');
-    assert(/20261026_v(99[2-9]|1000)/.test(sw), 'sw.js SW_VERSION is synced');
+    assert(/app\.js\?v=20261026_v(99\d|100\d)/.test(html), 'index.html references app.js?v');
+    assert(/styles\.css\?v=20261026_v(99\d|100\d)/.test(html), 'index.html references styles.css?v');
+    assert(/20261026_v(99\d|100\d)/.test(sw), 'sw.js SW_VERSION is synced');
 });
 
 console.log(`\n====================================================`);

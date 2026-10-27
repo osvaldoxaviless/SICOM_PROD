@@ -1338,6 +1338,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.showToast("Enviado correctamente");
         window.triggerCelebration();
         window.closeTaskFeedbackModal();
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
     
@@ -1868,7 +1869,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.querySelectorAll('.lector-hide').forEach(el => { 
             if (isLector) {
                 el.classList.add('hidden');
-            } else if (el.id === 'speedDial') {
+            } else if (el.id === 'speedDial' || el.id === 'btnDailyTasks') {
                 if (window.innerWidth >= 640 && (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map')) {
                     el.classList.remove('hidden');
                 } else {
@@ -1886,6 +1887,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 el.classList.add('hidden');
             }
         });
+
+        const btnDaily = document.getElementById('btnDailyTasks');
+        if (btnDaily) {
+            const isDesktop = window.innerWidth >= 640;
+            const isMapMode = (typeof mainWorkspaceViewMode === 'undefined' || mainWorkspaceViewMode === 'map');
+            if (isLector || !isDesktop || !isMapMode) {
+                btnDaily.classList.add('hidden');
+            } else {
+                btnDaily.classList.remove('hidden');
+            }
+        }
+
+        const btnTasksHeader = document.getElementById('btnViewModeTasks');
+        if (btnTasksHeader) {
+            if (isLector) {
+                btnTasksHeader.classList.add('hidden');
+            } else {
+                btnTasksHeader.classList.remove('hidden');
+            }
+        }
 
         // El botón de Dashboard & Auditoría es accesible para todos los consultores y administradores en escritorio
         const btnTopExec = document.getElementById('btnTopExecutiveDashboard');
@@ -4654,6 +4675,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             logActivity('global', 'General', approve ? `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó tarea general: "${t.text}"`, localAuthor);
             window.saveData(false);
             if (approve) window.triggerCelebration();
+            if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
         }
     };
     window.validateProjectTask = function(pType, pId, taskId, approve) {
@@ -4682,6 +4704,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 window.saveData(false);
                 if(currentSelection && currentSelection.id === item.id) window.renderTasksQuick(item);
                 if (approve) window.triggerCelebration();
+                if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
             }
         }
     };
@@ -4702,6 +4725,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         appData.globalTasks = appData.globalTasks.filter(x => x.id !== taskId);
         logActivity('global', 'General', `Eliminó la tarea general: ${t.text}`, localAuthor);
         window.saveData(false);
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
     // === LÓGICA DE TAREAS ===
@@ -4743,6 +4767,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             window.saveData(false); 
             window.renderTasksQuick(item);
+            if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
         }
     };
 
@@ -4774,6 +4799,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         logActivity(item.id, item.name, `Reabrió tarea de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
+                        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                     }
                 } else if (t.done === 'pending') {
                     // Supervisor aprueba o Consultor cancela envío
@@ -4791,12 +4817,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
                         window.triggerCelebration();
+                        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                     } else {
                         t.done = false;
                         archiveTaskFeedback(t);
                         logActivity(item.id, item.name, `Canceló envío a validación: "${t.text}"`, localAuthor); 
                         window.saveData(false); 
                         window.renderTasksQuick(item); 
+                        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                     }
                 } else {
                     // Completar / Enviar a validar (abre modal)
@@ -4825,6 +4853,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             logActivity(item.id, item.name, `Eliminó la tarea: ${t.text}`, localAuthor);
             window.saveData(false); 
             window.renderTasksQuick(item);
+            if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+            if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
         }
     };
 
@@ -7834,6 +7864,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (btnMap) btnMap.className = (activeMode === 'map') ? dAct : dInact;
             if (btnPrio) btnPrio.className = (activeMode === 'priority') ? dAct : dInact;
             if (btnTimeline) btnTimeline.className = (activeMode === 'timeline') ? dAct : dInact;
+            const btnTasks = document.getElementById('btnViewModeTasks');
+            if (btnTasks) btnTasks.className = (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) ? dAct : dInact;
 
             // Sincronizar dock inferior móvil (5 accesos)
             window.syncMobileDockState(activeMode);
@@ -10444,6 +10476,11 @@ window.closeDailyDrawer = function() {
     isDailyDrawerOpen = false;
     if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
     
+    const btnTasksHeader = document.getElementById('btnViewModeTasks');
+    if (btnTasksHeader) {
+        btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative";
+    }
+    
     // Restaurar botones al cerrar SOLO si estamos en escritorio y en el mapa mental
     const btnDaily = document.getElementById('btnDailyTasks');
     const dock = document.getElementById('canvasToolsDock');
@@ -10469,6 +10506,10 @@ window.toggleDailyDrawer = function() {
             window.closeDailyDrawer();
             isDailyDrawerOpen = false;
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState();
+            const btnTasksHeader = document.getElementById('btnViewModeTasks');
+            if (btnTasksHeader) {
+                btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative";
+            }
             
             const dock = document.getElementById('canvasToolsDock');
             const speedDial = document.getElementById('speedDial');
@@ -10496,6 +10537,10 @@ window.toggleDailyDrawer = function() {
             }
             document.getElementById('dailyDrawer').classList.remove('-translate-x-full');
             isDailyDrawerOpen = true;
+            const btnTasksHeader = document.getElementById('btnViewModeTasks');
+            if (btnTasksHeader) {
+                btnTasksHeader.className = "px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition bg-[#eeeeee] text-[#101010] font-medium cursor-pointer relative";
+            }
             if (typeof window.syncMobileDockState === 'function') window.syncMobileDockState('tasks');
             if (typeof window.pushNavigationState === 'function') window.pushNavigationState('dailyDrawer');
             
@@ -10740,6 +10785,7 @@ window.toggleDailyDrawer = function() {
         if (formDetails) formDetails.open = false;
         logActivity('daily', 'Actividades Diarias', `Asignó tarea diaria a ${assignee}: "${text}" (Asignada: ${assignDate} ${assignTime})`, localAuthor);
         window.saveData(false);
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
 // NUEVAS FUNCIONES PARA EL SPEED DIAL DE ACTIVIDAD GENERAL
@@ -10855,6 +10901,7 @@ window.toggleDailyTask = function(taskId) {
                     archiveTaskFeedback(t); delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                     logActivity('daily', 'Actividades Diarias', `Reabrió tarea diaria de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor);
                     window.saveData(false);
+                    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                 }
             } else if (t.done === 'pending') {
                 if (isSuper || isAssigner) {
@@ -10864,10 +10911,12 @@ window.toggleDailyTask = function(taskId) {
                     logActivity('daily', 'Actividades Diarias', `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
                     window.saveData(false);
                     window.triggerCelebration();
+                    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                 } else if (t.assignee === localAuthor) {
                     t.done = false; archiveTaskFeedback(t);
                     logActivity('daily', 'Actividades Diarias', `Canceló envío a validación: "${t.text}"`, localAuthor);
                     window.saveData(false);
+                    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                 }
             } else {
                 window.openTaskFeedbackModal(taskId, 'daily');
@@ -10885,6 +10934,7 @@ window.toggleDailyTask = function(taskId) {
         appData.dailyTasks = appData.dailyTasks.filter(x => x.id !== taskId); 
         logActivity('daily', 'Actividades Diarias', `Borró tarea: ${t.text}`, localAuthor);
         window.saveData(false);
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
 // === SISTEMA DE PESTAÑAS Y NOTIFICACIONES UNIFICADAS EN EL PANEL IZQUIERDO ===
@@ -10964,6 +11014,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             if (approve) window.triggerCelebration();
         }
     }
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
 };
 
 
@@ -11120,7 +11171,7 @@ window.renderDailyTasks = function() {
     if (!container) return;
 
     window.updateNotifTabsUI();
-    const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+    const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
 
     // 1. RECOLECTOR MAESTRO DE TAREAS
     let allTasks = [];
@@ -11219,6 +11270,15 @@ window.renderDailyTasks = function() {
             calBadge.classList.remove('hidden');
         } else {
             calBadge.classList.add('hidden');
+        }
+    }
+    const deskHeaderBadge = document.getElementById('desktopHeaderDailyAlertsBadge');
+    if (deskHeaderBadge) {
+        if (alertBadgeTotal > 0) {
+            deskHeaderBadge.textContent = alertBadgeTotal;
+            deskHeaderBadge.classList.remove('hidden');
+        } else {
+            deskHeaderBadge.classList.add('hidden');
         }
     }
 
@@ -11497,16 +11557,44 @@ window.renderDailyTasks = function() {
             return a.localeCompare(b);
         });
 
-        container.innerHTML = `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
-            const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
+        const topHistoryBar = `
+        <div class="flex items-center justify-between px-1 mb-2">
+            <span class="font-mono text-[10px] text-[#a0ca92] uppercase font-medium">Historial de Tareas Concluidas (${completedTasks.length})</span>
+            ${isSuper ? `<button type="button" onclick="openConfigDrawer(); switchTab('history');" class="text-[9px] font-mono uppercase text-[#b8b3b0] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] px-2 py-0.5 rounded-[3px] transition cursor-pointer flex items-center gap-1" title="Ver bitácora global de auditoría del sistema">📜 Bitácora General ↗</button>` : ''}
+        </div>`;
+
+        const parseTaskTimestamp = (t) => {
+            if (t.validatedDate) {
+                const parts = t.validatedDate.split('/');
+                if (parts.length === 3) {
+                    const timeP = (t.validatedTime || '00:00').split(':');
+                    return new Date(parts[2], parts[1]-1, parts[0], parseInt(timeP[0])||0, parseInt(timeP[1])||0).getTime();
+                }
+            }
+            if (t.submittedDate) {
+                const parts = t.submittedDate.split('/');
+                if (parts.length === 3) {
+                    const timeP = (t.submittedTime || '00:00').split(':');
+                    return new Date(parts[2], parts[1]-1, parts[0], parseInt(timeP[0])||0, parseInt(timeP[1])||0).getTime();
+                }
+            }
+            const match = (t.id || '').match(/\d{10,}/);
+            if (match) return parseInt(match[0]);
+            return 0;
+        };
+
+        container.innerHTML = topHistoryBar + `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
+            const tasks = grouped[cons].sort((a, b) => parseTaskTimestamp(b) - parseTaskTimestamp(a));
             const cData = consultants[cons] || { color: '#8a8380' };
+            const isMe = cons === localAuthor;
+            const isOpen = (isMe || sortedConsultants.length === 1) ? 'open' : '';
 
             return `
-            <details class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+            <details ${isOpen} class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
                 <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
-                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)}</span>
+                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
                         <span class="font-mono text-[9px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px] shrink-0">${tasks.length} HECHAS ✓</span>
                     </div>
                     <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
@@ -11515,16 +11603,24 @@ window.renderDailyTasks = function() {
                     ${tasks.map(t => {
                         const canRevert = isSuper || t.assignedBy === localAuthor;
                         return `
-                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-80 hover:opacity-100 transition">
-                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea' : 'Completada'}">
+                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-90 hover:opacity-100 transition">
+                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea a pendientes' : 'Completada'}">
                             <div class="flex flex-col flex-1 min-w-0">
-                                <span class="text-xs text-[#8a8380] line-through break-words">${formatTaskTextWithTicket(t.text)}</span>
+                                <span class="text-xs text-[#8a8380] line-through break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                                     <span class="font-mono text-[9px] uppercase text-[#b8b3b0] ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/10 border border-[#a0ca92]/30 px-1.5 py-0.5 rounded-[3px]">✓ ${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''}${t.validatedBy ? ' por ' + escapeHtml(t.validatedBy) : ''}</span>
+                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}${t.assignedBy ? ' por ' + escapeHtml(t.assignedBy) : ''}</span>` : ''}
+                                    ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">🚀 Entregó: ${escapeHtml(t.submittedBy || t.assignee || 'Consultor')} (${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''})</span>` : ''}
+                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/15 border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px]">✓ Validó: ${escapeHtml(t.validatedBy || 'Jefatura')} (${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''})</span>
                                 </div>
-                                ${t.feedback ? `<div class="mt-1.5 text-[10px] text-[#b8b3b0] bg-[#101010] p-2 rounded-[3px] border border-[#3d3a39]">💬 ${escapeHtml(t.feedback)}</div>` : ''}
+                                ${t.feedback ? `<div class="mt-2 text-[10px] text-[#eeeeee] bg-[#101010] p-2.5 rounded-[3px] border border-[#3d3a39] break-words">💬 <b class="text-[#a0ca92]">Evidencia / Entrega:</b> ${escapeHtml(t.feedback)}</div>` : ''}
+                                ${(Array.isArray(t.feedbackHistory) && t.feedbackHistory.length > 0) ? `
+                                <details class="mt-1.5 text-[9px] text-[#8a8380]">
+                                    <summary class="cursor-pointer hover:text-[#b8b3b0] font-mono select-none">Ver revisiones previas (${t.feedbackHistory.length})</summary>
+                                    <div class="mt-1 pl-2 border-l border-[#3d3a39] space-y-1 py-1">
+                                        ${t.feedbackHistory.map(h => `<div class="font-mono text-[9px] text-[#8a8380]">• [${escapeHtml(h.timestamp)}] ${escapeHtml(h.text)}</div>`).join('')}
+                                    </div>
+                                </details>` : ''}
                             </div>
                         </div>`;
                     }).join('')}
