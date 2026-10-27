@@ -383,6 +383,42 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window._recordDeletedProject = recordDeletedProject;
     window._unrecordDeletedProject = unrecordDeletedProject;
 
+    function getDeletedDocIds() {
+        try {
+            const raw = localStorage.getItem('sicom_deleted_docs');
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function recordDeletedDoc(id) {
+        if (!id) return;
+        try {
+            let current = getDeletedDocIds();
+            if (!current.includes(id)) {
+                current.push(id);
+                if (current.length > 500) current.splice(0, current.length - 500);
+                localStorage.setItem('sicom_deleted_docs', JSON.stringify(current));
+            }
+        } catch (_) {}
+    }
+
+    function unrecordDeletedDoc(id) {
+        if (!id) return;
+        try {
+            let current = getDeletedDocIds();
+            if (current.includes(id)) {
+                current = current.filter(x => x !== id);
+                localStorage.setItem('sicom_deleted_docs', JSON.stringify(current));
+            }
+        } catch (_) {}
+    }
+
+    window._getDeletedDocIds = getDeletedDocIds;
+    window._recordDeletedDoc = recordDeletedDoc;
+    window._unrecordDeletedDoc = unrecordDeletedDoc;
+
     // === RECONCILIACIÓN NO DESTRUCTIVA DE INSTANTÁNEAS DE FIRESTORE ===
     function reconcileCloudSnapshot(remoteAppData) {
         if (!remoteAppData || !Array.isArray(remoteAppData.modules)) {
@@ -390,6 +426,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         const deletedIds = getDeletedProjectIds();
+        const deletedDocIds = getDeletedDocIds();
+
+        // Purgar documentos eliminados de los proyectos remotos entrantes
+        const purgeDeletedDocsFromProject = (p) => {
+            if (p && p.docs && typeof p.docs === 'object') {
+                deletedDocIds.forEach(dId => {
+                    if (p.docs[dId]) delete p.docs[dId];
+                });
+            }
+        };
+        (remoteAppData.directProjects || []).forEach(purgeDeletedDocsFromProject);
+        (remoteAppData.modules || []).forEach(m => (m?.projects || []).forEach(purgeDeletedDocsFromProject));
+
         const remoteIds = new Set();
         (remoteAppData.directProjects || []).forEach(p => { if (p && p.id) remoteIds.add(p.id); });
         (remoteAppData.modules || []).forEach(m => {
@@ -467,6 +516,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (lp.docs && typeof lp.docs === 'object') {
                 if (!rp.docs) rp.docs = {};
                 Object.keys(lp.docs).forEach(dKey => {
+                    if (deletedDocIds.includes(dKey)) {
+                        delete rp.docs[dKey];
+                        delete lp.docs[dKey];
+                        return;
+                    }
                     const lDoc = lp.docs[dKey];
                     const rDoc = rp.docs[dKey];
                     if (lDoc && (!rDoc || (!rDoc.signedPdfId && lDoc.signedPdfId) || (!rDoc.checked && lDoc.checked))) {
@@ -5340,12 +5394,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             }
 
             const prevDocs = item.docs || {};
+            const deletedDocIds = getDeletedDocIds();
             item.docs = {};
             const allDocIds = new Set([
                 ...(globalDocs || []).map(d => d.id),
                 ...Object.keys(prevDocs)
             ]);
             allDocIds.forEach(docId => {
+                if (deletedDocIds.includes(docId)) return;
                 const curDoc = prevDocs[docId] || {};
                 const baseDoc = (globalDocs || []).find(g => g.id === docId);
                 const fcEl = document.getElementById(`quickFechaComp${docId}`);
@@ -5520,8 +5576,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             });
         });
 
+        const deletedDocIds = getDeletedDocIds();
         Object.keys(effectiveSavedData).forEach(docId => {
-            if (!seenIds.has(docId)) {
+            if (!seenIds.has(docId) && !deletedDocIds.includes(docId)) {
                 seenIds.add(docId);
                 const sDoc = effectiveSavedData[docId];
                 activeDocList.push({
@@ -5693,6 +5750,12 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         if (!item.docs) item.docs = {};
 
+        // Limpiar cualquier residuo de documentos eliminados previamente
+        const deletedDocIds = getDeletedDocIds();
+        deletedDocIds.forEach(dId => {
+            if (item.docs[dId]) delete item.docs[dId];
+        });
+
         let defaultName = "Documento Adicional";
         if (docType === 'plano') {
             const count = Object.values(item.docs).filter(d => (d.name || '').toLowerCase().includes('plano')).length + 1;
@@ -5706,6 +5769,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (!docName || !docName.trim()) return;
 
         const newId = `doc_custom_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        unrecordDeletedDoc(newId);
         item.docs[newId] = {
             id: newId,
             name: docName.trim(),
@@ -5728,6 +5792,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (prefix === 'quick') window.calculateQuickProgress();
         else window.calculateEditProgress();
         window.saveData(false);
+        if (typeof window.flushCloudWrite === 'function') {
+            window.flushCloudWrite(true);
+        }
         window.showToast(`✅ Documento "${docName.trim()}" agregado`);
     };
 
@@ -5768,6 +5835,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         window.renderDocChecklists(prefix, item.docs);
         window.saveData(false);
+        if (typeof window.flushCloudWrite === 'function') {
+            window.flushCloudWrite(true);
+        }
         window.showToast(`✅ Documento renombrado a "${newName.trim()}"`);
     };
 
@@ -5784,15 +5854,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         const docName = item.docs[docId].customName || item.docs[docId].name || 'este documento';
         if (!window.confirm(`¿Estás seguro de eliminar "${docName}" de este proyecto?`)) return;
 
+        recordDeletedDoc(docId);
         delete item.docs[docId];
 
+        window.renderDocChecklists(prefix, item.docs);
         if (prefix === 'quick') {
             window.silentSaveInfoCard();
         }
-        window.renderDocChecklists(prefix, item.docs);
         if (prefix === 'quick') window.calculateQuickProgress();
         else window.calculateEditProgress();
         window.saveData(false);
+        if (typeof window.flushCloudWrite === 'function') {
+            window.flushCloudWrite(true);
+        }
         window.showToast(`🗑️ Documento "${docName}" eliminado`);
     };
 
@@ -5839,6 +5913,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           item.clientReturnDate = document.getElementById('editReturnDate').value; 
           item.progress = parseInt(document.getElementById('editProgress').value);
           const prevDocs = item.docs || {};
+          const deletedDocIds = getDeletedDocIds();
           const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
           item.docs = {}; 
           const allDocIds = new Set([
@@ -5846,6 +5921,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               ...Object.keys(prevDocs)
           ]);
           allDocIds.forEach(docId => { 
+            if (deletedDocIds.includes(docId)) return;
             const curDoc = prevDocs[docId] || {};
             const baseDoc = (globalDocs || []).find(g => g.id === docId);
             const fcEl = document.getElementById(`editFechaComp${docId}`);
@@ -17462,7 +17538,23 @@ window.focusSignaturePadFor = function(name, role) {
 
     if (canvas) {
         if (typeof window.resizeSignaturePad === 'function') window.resizeSignaturePad();
-        window.clearSignaturePad();
+        if (window.activeSignatureMode === 'draw' || !window.activeSignatureMode) {
+            window.clearSignaturePad();
+        } else {
+            const input = document.getElementById('docSignTypedNameInput');
+            if (input) {
+                if (window.activeSignatureMode === 'initials') {
+                    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+                    if (parts.length <= 1) input.value = name || 'Firma';
+                    else input.value = `${parts.map(p => p[0].toUpperCase() + '.').join(' ')} ${parts[parts.length - 1]}`;
+                } else {
+                    input.value = name || 'Firmante Autorizado';
+                }
+            }
+            if (typeof window.renderTypedSignatureOnCanvas === 'function') {
+                window.renderTypedSignatureOnCanvas();
+            }
+        }
     }
 
     // Posicionar automáticamente la casilla enfrente del nombre del firmante
@@ -18503,10 +18595,10 @@ window.resizeSignaturePad = function() {
     const computedWidth = container ? container.clientWidth : 0;
     const finalWidth = (computedWidth > 50) ? computedWidth : Math.min(window.innerWidth - 40, 500);
 
-    // En pantallas táctiles móviles (< 1024px), dar una altura generosa (135px) para máxima comodidad táctil al firmar con el dedo
-    // En escritorio (>= 1024px), mantener altura balanceada (75px) para que todo quepa en una sola pantalla sin scroll
+    // En pantallas táctiles móviles (< 1024px), dar una altura holgada (160px) para máxima comodidad táctil al firmar con el dedo
+    // En escritorio (>= 1024px), altura espaciosa (150px) para firmar cómodamente con ratón o stylus
     const isMobileView = (window.innerWidth < 1024);
-    const padHeight = isMobileView ? 135 : 75;
+    const padHeight = isMobileView ? 160 : 150;
     if (canvas.width !== finalWidth || canvas.height !== padHeight) {
         canvas.width = finalWidth;
         canvas.height = padHeight;
@@ -18517,7 +18609,148 @@ window.resizeSignaturePad = function() {
             sigPadCtx.lineCap = 'round';
             sigPadCtx.lineJoin = 'round';
         }
+        if (window.activeSignatureMode && window.activeSignatureMode !== 'draw') {
+            window.renderTypedSignatureOnCanvas();
+        }
     }
+};
+
+window.activeSignatureMode = 'draw';
+
+window.switchSignatureMode = function(mode) {
+    window.activeSignatureMode = mode || 'draw';
+    const btnDraw = document.getElementById('docSignModeBtn_draw');
+    const btnType = document.getElementById('docSignModeBtn_type');
+    const btnInitials = document.getElementById('docSignModeBtn_initials');
+    const controls = document.getElementById('docSignTypeControls');
+    const input = document.getElementById('docSignTypedNameInput');
+    const helpText = document.getElementById('docSignPadHelpText');
+
+    [btnDraw, btnType, btnInitials].forEach(b => {
+        if (!b) return;
+        b.className = 'px-1.5 py-0.5 rounded font-bold transition text-[#8a8380] hover:text-white cursor-pointer';
+    });
+
+    if (mode === 'draw') {
+        if (btnDraw) btnDraw.className = 'px-1.5 py-0.5 rounded font-bold transition bg-[#0055cc] text-white cursor-pointer';
+        if (controls) {
+            controls.classList.add('hidden');
+            controls.classList.remove('flex');
+        }
+        if (helpText) helpText.textContent = '✍️ Dibuja con el dedo o ratón en tinta azul';
+        window.clearSignaturePad();
+    } else {
+        if (controls) {
+            controls.classList.remove('hidden');
+            controls.classList.add('flex');
+        }
+
+        let currentSignerName = '';
+        if (typeof getProjectById === 'function' && activeSignDocCtx && activeSignDocCtx.projectId) {
+            const item = getProjectById(activeSignDocCtx.projectId);
+            const circuit = item?.docs?.[activeSignDocCtx.docId]?.signatureCircuit || [];
+            const nextSigner = circuit.find(s => s.status !== 'signed');
+            if (nextSigner && nextSigner.name) {
+                currentSignerName = nextSigner.name;
+            }
+        }
+        if (!currentSignerName) {
+            const activeSignerEl = document.getElementById('docSignPadActiveSigner');
+            if (activeSignerEl && activeSignerEl.textContent) {
+                const match = activeSignerEl.textContent.match(/Turno:\s*([^(]+)/);
+                if (match) currentSignerName = match[1].trim();
+            }
+        }
+        if (!currentSignerName && typeof currentUserEmail !== 'undefined' && currentUserEmail) {
+            currentSignerName = currentUserEmail.split('@')[0];
+        }
+
+        if (mode === 'type') {
+            if (btnType) btnType.className = 'px-1.5 py-0.5 rounded font-bold transition bg-[#0055cc] text-white cursor-pointer';
+            if (helpText) helpText.textContent = '🖋️ Escribe tu nombre o apodo caligráfico';
+            if (input) {
+                input.value = currentSignerName || 'Firmante Autorizado';
+            }
+        } else if (mode === 'initials') {
+            if (btnInitials) btnInitials.className = 'px-1.5 py-0.5 rounded font-bold transition bg-[#0055cc] text-white cursor-pointer';
+            if (helpText) helpText.textContent = '⚡ Genera una rúbrica rápida con iniciales';
+            if (input) {
+                const parts = (currentSignerName || 'Firma Autorizada').trim().split(/\s+/).filter(Boolean);
+                let initialsText = '';
+                if (parts.length === 1) {
+                    initialsText = parts[0];
+                } else if (parts.length === 2) {
+                    initialsText = `${parts[0][0]}. ${parts[1]}`;
+                } else {
+                    initialsText = `${parts.map(p => p[0].toUpperCase() + '.').join(' ')} ${parts[parts.length - 1]}`;
+                }
+                input.value = initialsText;
+            }
+        }
+        window.renderTypedSignatureOnCanvas();
+    }
+};
+
+window.renderTypedSignatureOnCanvas = function() {
+    const canvas = document.getElementById('signaturePadCanvas');
+    if (!canvas) return;
+    if (!sigPadCtx) sigPadCtx = canvas.getContext('2d');
+    const ctx = sigPadCtx;
+
+    const input = document.getElementById('docSignTypedNameInput');
+    const fontSelect = document.getElementById('docSignTypedFontSelect');
+    const text = (input ? input.value : '') || 'Firma';
+    const fontFam = (fontSelect ? fontSelect.value : "'Dancing Script', cursive");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let fontSize = Math.min(Math.round(canvas.height * 0.44), 48);
+    ctx.font = `600 ${fontSize}px ${fontFam}`;
+    
+    const maxAllowedWidth = canvas.width * 0.82;
+    while (ctx.measureText(text).width > maxAllowedWidth && fontSize > 16) {
+        fontSize -= 2;
+        ctx.font = `600 ${fontSize}px ${fontFam}`;
+    }
+
+    ctx.fillStyle = '#0055cc';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height * 0.42;
+
+    ctx.fillText(text, centerX, centerY);
+
+    const textMetrics = ctx.measureText(text);
+    const rubWidth = Math.min(canvas.width * 0.78, Math.max(textMetrics.width * 0.95, 60));
+    const startX = centerX - rubWidth / 2;
+    const endX = centerX + rubWidth / 2;
+    const rubY = centerY + fontSize * 0.44;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = '#0055cc';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.moveTo(startX, rubY);
+    ctx.bezierCurveTo(
+        startX + rubWidth * 0.35, rubY + 10,
+        startX + rubWidth * 0.65, rubY - 6,
+        endX, rubY + 5
+    );
+    ctx.bezierCurveTo(
+        endX - 15, rubY + 14,
+        endX - 35, rubY + 7,
+        endX - 8, rubY + 3
+    );
+    ctx.stroke();
+    ctx.restore();
+
+    hasSignatureDrawn = true;
 };
 
 window.initSignaturePad = function() {
@@ -18592,6 +18825,10 @@ window.clearSignaturePad = function() {
     if (!canvas || !sigPadCtx) return;
     sigPadCtx.clearRect(0, 0, canvas.width, canvas.height);
     hasSignatureDrawn = false;
+    if (window.activeSignatureMode !== 'draw') {
+        const input = document.getElementById('docSignTypedNameInput');
+        if (input) input.value = '';
+    }
 };
 
 // Sincronizador y auto-reparador de firmas registradas en el circuito hacia el binario del PDF
@@ -18689,7 +18926,7 @@ window.syncCircuitSignaturesToPdf = async function() {
 
 window.stampSignatureOnActiveDocument = async function() {
     if (!hasSignatureDrawn) {
-        window.showToast("⚠️ Dibuja tu firma en el recuadro blanco antes de estampar.", true);
+        window.showToast("⚠️ Ingresa o dibuja tu firma antes de estampar.", true);
         return;
     }
 

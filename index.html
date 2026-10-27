@@ -47,7 +47,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cedarville+Cursive&family=Dancing+Script:wght@600;700&family=Marck+Script&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   
   <script>
@@ -3489,8 +3489,8 @@
                       </div>
                   </div>
 
-                  <!-- Visor Interactivo de la Hoja de Firmas (FLEX-1 MIN-H-0: LLENA EL ESPACIO SIN EMPUJAR EL PAD) -->
-                  <div id="docSignViewerCard" class="flex-1 min-h-[160px] max-h-[44vh] lg:max-h-none bg-[#101010] border border-[#3d3a39] rounded-[6px] p-1.5 flex flex-col relative overflow-hidden shrink-0 lg:shrink">
+                  <!-- Visor Interactivo de la Hoja de Firmas (COMPACTO PARA DAR PROTAGONISMO A LA FIRMA) -->
+                  <div id="docSignViewerCard" class="min-h-[140px] h-[34vh] sm:h-[36vh] lg:h-[38vh] max-h-[38vh] bg-[#101010] border border-[#3d3a39] rounded-[6px] p-1.5 flex flex-col relative overflow-hidden shrink-0">
                       <div class="flex items-center justify-between pb-1 px-1 border-b border-[#1d1a18] text-[9.5px] font-mono text-[#8a8380] uppercase shrink-0 gap-1.5">
                           <div class="flex items-center gap-1.5">
                               <span id="docSignViewerPageLabel">Hoja de Firmas Oficial</span>
@@ -3553,25 +3553,49 @@
                       </button>
                   </div>
 
-                  <!-- Pad de Firma Táctil (COMPACTO ~110px: SIEMPRE VISIBLE SIN SCROLL EN DESKTOP) -->
-                  <div id="docSignPadContainer" class="bg-[#101010] p-1.5 sm:p-2 rounded-[6px] border-2 border-[#3d3a39] shrink-0 transition-all duration-200 mt-auto">
-                      <div class="flex items-center justify-between mb-1">
+                  <!-- Pad de Firma Táctil y Tipográfica (AMPLIO ~160px: DIBUJO O NOMBRE CURSIVO) -->
+                  <div id="docSignPadContainer" class="flex-1 bg-[#101010] p-2 sm:p-2.5 rounded-[6px] border-2 border-[#3d3a39] shrink-0 transition-all duration-200 mt-auto">
+                      <div class="flex items-center justify-between mb-1.5 gap-1.5 flex-wrap">
                           <div class="flex items-center gap-1.5 min-w-0">
                               <span class="w-2 h-2 rounded-full bg-[#0055cc] animate-pulse shrink-0"></span>
                               <span class="font-mono text-[10px] text-[#eeeeee] uppercase font-bold truncate">2. Firma en Tinta Azul</span>
-                              <span id="docSignPadActiveSigner" class="font-mono text-[9px] text-[#38bdf8] bg-[#0055cc]/20 px-1.5 py-0.2 rounded border border-[#0055cc]/40 font-semibold truncate max-w-[170px]"></span>
+                              <span id="docSignPadActiveSigner" class="font-mono text-[9px] text-[#38bdf8] bg-[#0055cc]/20 px-1.5 py-0.2 rounded border border-[#0055cc]/40 font-semibold truncate max-w-[130px] sm:max-w-[170px]"></span>
                           </div>
-                          <button type="button" onclick="clearSignaturePad()" class="text-[#8a8380] hover:text-[#ef4444] font-mono text-[9px] uppercase transition p-0.5 cursor-pointer shrink-0">Limpiar</button>
+                          
+                          <!-- Selector de Modo de Firma: Dibujo Manual vs Nombre Tipográfico vs Iniciales -->
+                          <div class="flex items-center gap-1 bg-[#161413] p-0.5 rounded border border-[#3d3a39] text-[8.5px] font-mono shrink-0">
+                              <button type="button" id="docSignModeBtn_draw" onclick="switchSignatureMode('draw')" class="px-1.5 py-0.5 rounded font-bold transition bg-[#0055cc] text-white cursor-pointer" title="Dibujar a mano alzada con el dedo o ratón">✍️ Dibujar</button>
+                              <button type="button" id="docSignModeBtn_type" onclick="switchSignatureMode('type')" class="px-1.5 py-0.5 rounded font-bold transition text-[#8a8380] hover:text-white cursor-pointer" title="Escribir nombre con tipografía estilo firma caligráfica">🖋️ Escribir Nombre</button>
+                              <button type="button" id="docSignModeBtn_initials" onclick="switchSignatureMode('initials')" class="px-1.5 py-0.5 rounded font-bold transition text-[#8a8380] hover:text-white cursor-pointer" title="Generar rúbrica rápida con iniciales">⚡ Iniciales</button>
+                              <button type="button" onclick="clearSignaturePad()" class="text-[#8a8380] hover:text-[#ef4444] px-1 py-0.5 transition cursor-pointer ml-0.5" title="Limpiar firma">Limpiar</button>
+                          </div>
+                      </div>
+
+                      <!-- Barra de opciones cuando el modo es Escribir Nombre o Iniciales -->
+                      <div id="docSignTypeControls" class="hidden flex-wrap items-center gap-1.5 mb-1.5 p-1.5 bg-[#161413] rounded border border-[#2b2826] text-[9px] font-mono">
+                          <div class="flex items-center gap-1 flex-1 min-w-[140px]">
+                              <span class="text-[#8a8380] uppercase">Texto:</span>
+                              <input type="text" id="docSignTypedNameInput" oninput="renderTypedSignatureOnCanvas()" placeholder="Nombre o firma..." class="liquid-input flex-1 px-1.5 py-0.5 rounded text-[10px] bg-[#1d1a18] border border-[#3d3a39] text-[#fafafa] focus:border-[#0055cc] outline-none">
+                          </div>
+                          <div class="flex items-center gap-1 shrink-0">
+                              <span class="text-[#8a8380] uppercase">Estilo:</span>
+                              <select id="docSignTypedFontSelect" onchange="renderTypedSignatureOnCanvas()" class="liquid-input px-1.5 py-0.5 rounded text-[9.5px] bg-[#1d1a18] border border-[#3d3a39] text-[#38bdf8] focus:border-[#0055cc] outline-none cursor-pointer">
+                                  <option value="'Dancing Script', cursive">Caligráfica Elegante</option>
+                                  <option value="'Caveat', cursive">Pluma Natural</option>
+                                  <option value="'Cedarville Cursive', cursive">Firma Cursiva Clásica</option>
+                                  <option value="'Marck Script', cursive">Rúbrica Ejecutiva</option>
+                              </select>
+                          </div>
                       </div>
                       
                       <!-- Lienzo con margen lateral para permitir scroll táctil en móvil -->
-                      <div class="bg-[#ffffff] rounded-[4px] p-0.5 border border-[#3d3a39] overflow-hidden">
+                      <div class="bg-[#ffffff] rounded-[4px] p-0.5 border border-[#3d3a39] overflow-hidden shadow-inner">
                           <canvas id="signaturePadCanvas" class="w-full bg-[#ffffff] cursor-crosshair block" style="background-color: #ffffff !important; touch-action: none; display: block;"></canvas>
                       </div>
 
-                      <div class="flex items-center justify-between gap-2 mt-1 shrink-0">
-                          <span class="text-[8.5px] sm:text-[9px] font-mono text-[#8a8380] truncate">✍️ Dibuja con el dedo o ratón</span>
-                          <button type="button" id="btnStampSignature" onclick="stampSignatureOnActiveDocument()" class="pill-btn px-2.5 sm:px-3 py-1 bg-[#0055cc] hover:bg-[#0044aa] text-white font-mono text-[9.5px] sm:text-[10px] uppercase font-bold transition flex items-center gap-1 shadow-md cursor-pointer shrink-0">
+                      <div class="flex items-center justify-between gap-2 mt-1.5 shrink-0">
+                          <span id="docSignPadHelpText" class="text-[8.5px] sm:text-[9px] font-mono text-[#8a8380] truncate">✍️ Dibuja con el dedo o ratón en tinta azul</span>
+                          <button type="button" id="btnStampSignature" onclick="stampSignatureOnActiveDocument()" class="pill-btn px-3 sm:px-4 py-1.5 bg-[#0055cc] hover:bg-[#0044aa] text-white font-mono text-[9.5px] sm:text-[10px] uppercase font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer shrink-0">
                               <span>✍️ Estampar Firma</span>
                           </button>
                       </div>
@@ -3653,7 +3677,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261027_v1010"></script>
+  <script type="module" src="app.js?v=20261027_v1011"></script>
 
 </body>
 </html>
