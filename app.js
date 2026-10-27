@@ -204,6 +204,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     req.onerror = () => resolve(null);
                 });
             } catch (_) { return null; }
+        },
+        async delete(key) {
+            try {
+                const db = await this.getDB();
+                if (!db) return false;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(this.storeName, 'readwrite');
+                    const store = tx.objectStore(this.storeName);
+                    store.delete(key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (_) { return false; }
         }
     };
     window.SICOM_IDB = SICOM_IDB;
@@ -5145,12 +5158,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 const curDoc = prevDocs[d.id] || {};
                 const fcEl = document.getElementById(`quickFechaComp${d.id}`);
                 const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
+                const tkEl = document.getElementById(`quickTicket${d.id}`);
+                const tkVal = tkEl ? tkEl.value.trim() : (curDoc.ticket || '');
                 item.docs[d.id] = {
+                    ...curDoc,
                     checked: document.getElementById(`quickDoc${d.id}`)?.checked || false,
                     obs: document.getElementById(`quickObs${d.id}`)?.value || '',
                     na: document.getElementById(`quickNa${d.id}`)?.checked || false,
                     naValidated: document.getElementById(`quickNaValidated${d.id}`)?.value === "true",
-                    fecha_compromiso: fcVal
+                    fecha_compromiso: fcVal,
+                    ticket: tkVal
                 };
             });
 
@@ -5297,6 +5314,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 }
             }
 
+            // Gobernanza de Tickets & Firmas Digitales (Fase v1002)
+            const ticketVal = (data && data.ticket) ? data.ticket : '';
+            const circuit = (data && Array.isArray(data.signatureCircuit)) ? data.signatureCircuit : [];
+            const totalSigners = circuit.length;
+            const signedCount = circuit.filter(s => s.status === 'signed').length;
+            let sigBadge = `<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#8a8380] uppercase px-1.5 py-0.5 rounded bg-[#101010] border border-[#3d3a39]">⚪ S/Firmas</span>`;
+            if (totalSigners > 0) {
+                if (signedCount === totalSigners) {
+                    sigBadge = `<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#22c55e] uppercase px-1.5 py-0.5 rounded bg-[#22c55e]/15 border border-[#22c55e]/30 font-semibold">🟢 Firmado (${totalSigners}/${totalSigners})</span>`;
+                } else {
+                    sigBadge = `<span class="inline-flex items-center gap-1 font-mono text-[9px] text-[#eab308] uppercase px-1.5 py-0.5 rounded bg-[#eab308]/15 border border-[#eab308]/40 font-semibold">🟡 Firmas (${signedCount}/${totalSigners})</span>`;
+                }
+            }
+
             return `
             <div class="bg-[#101010] p-3 rounded-[10px] border border-[#3d3a39] mb-2.5 space-y-2">
                 <div class="flex justify-between items-start gap-2">
@@ -5318,6 +5349,20 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     <div class="shrink-0">${semBadge}</div>
                 </div>
 
+                <!-- TICKET HIJO & CIRCUITO DE FIRMAS DIGITALES (FASE v1002) -->
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-[#3d3a39]/50">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="font-mono text-[9px] text-[#8a8380] uppercase shrink-0">Ticket Doc:</span>
+                        <input type="text" id="${prefix}Ticket${doc.id}" value="${escapeHtml(ticketVal)}" placeholder="Ej: 63768" onchange="${prefix === 'quick' ? "silentSaveInfoCard();" : ""}" class="liquid-input text-[10px] px-2 py-0.5 rounded-[3px] font-mono text-[#fafafa] w-24 [color-scheme:dark] border border-[#3d3a39] focus:border-[#ee6018] outline-none" ${currentUserRole==='Lector'?'disabled':''} title="Ticket o Folio hijo de este documento">
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${sigBadge}
+                        <button type="button" onclick="window.openSignatureWorkflowModal('${prefix}', '${doc.id}')" class="pill-btn px-2 py-0.5 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] font-mono text-[9px] uppercase transition flex items-center gap-1" title="Gestionar circuito de firmas y PDF">
+                            <span>✍️ Firmas / PDF</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div id="${prefix}ObsContainer${doc.id}" class="flex flex-col gap-2 hidden pt-2 border-t border-[#3d3a39]">
                     <input type="text" id="${prefix}Obs${doc.id}" oninput="handleObsInput('${prefix}', '${doc.id}')" placeholder="Motivo N/A..." class="w-full liquid-input rounded-[3px] p-2 text-xs focus:outline-none text-[#eeeeee]" ${currentUserRole==='Lector'?'readonly':''}>
                     <button id="${prefix}BtnNa${doc.id}" type="button" onclick="confirmNa('${prefix}', '${doc.id}')" class="hidden pill-btn w-full py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] font-mono text-[10px] uppercase text-[#101010] transition">Validar N/A</button>
@@ -5330,6 +5375,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const data = savedData ? savedData[doc.id] : null;
             if(data) {
                 if(data.checked) document.getElementById(`${prefix}Doc${doc.id}`).checked = true;
+                if(data.ticket) {
+                    const tkEl = document.getElementById(`${prefix}Ticket${doc.id}`);
+                    if(tkEl) tkEl.value = data.ticket;
+                }
                 if(data.na) {
                     document.getElementById(`${prefix}Na${doc.id}`).checked = true;
                     const obsCont = document.getElementById(`${prefix}ObsContainer${doc.id}`);
@@ -5391,12 +5440,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const curDoc = prevDocs[d.id] || {};
             const fcEl = document.getElementById(`editFechaComp${d.id}`);
             const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
+            const tkEl = document.getElementById(`editTicket${d.id}`);
+            const tkVal = tkEl ? tkEl.value.trim() : (curDoc.ticket || '');
             item.docs[d.id] = { 
+              ...curDoc,
               checked: document.getElementById(`editDoc${d.id}`)?.checked || false, 
               obs: document.getElementById(`editObs${d.id}`)?.value || '', 
               na: document.getElementById(`editNa${d.id}`)?.checked || false, 
               naValidated: document.getElementById(`editNaValidated${d.id}`)?.value === "true",
-              fecha_compromiso: fcVal
+              fecha_compromiso: fcVal,
+              ticket: tkVal
             }; 
           });
           item.consultants = Array.from(document.querySelectorAll('.editProjCons-chk:checked')).map(cb => cb.value);
@@ -11196,11 +11249,53 @@ window.renderDailyTasks = function() {
         });
     }
 
+    // 1.1 RECOLECTOR DE TAREAS DE FIRMA DIGITAL (GOBERNANZA STGT v1002)
+    const scanProjectSignatures = (p, strictType) => {
+        if (!p || !p.docs) return;
+        Object.keys(p.docs).forEach(docId => {
+            const d = p.docs[docId];
+            if (!d || !Array.isArray(d.signatureCircuit) || d.signatureCircuit.length === 0) return;
+            const nextPending = d.signatureCircuit.find(s => s.status !== 'signed');
+            if (nextPending) {
+                const gDoc = (globalDocs || []).find(gd => gd.id === docId);
+                const docName = gDoc?.name || 'Documento';
+                const tkMadre = p.ticket || 'S/T';
+                const tkHijo = d.ticket || 'S/T';
+                allTasks.push({
+                    id: `sig_${p.id}_${docId}_${nextPending.id || nextPending.name}`,
+                    sourceType: 'signature',
+                    projectId: p.id,
+                    strictType: strictType,
+                    docId: docId,
+                    docName: docName,
+                    pName: p.name,
+                    text: `✍️ Requiere firma de [${nextPending.role}]: ${nextPending.name} en ${docName} (Ticket: ${tkHijo !== 'S/T' ? tkHijo : tkMadre})`,
+                    assignee: nextPending.name,
+                    assignedBy: p.consultant || 'Coordinación',
+                    done: false,
+                    date: d.pdfUploadedAt || '',
+                    deadline: d.fecha_compromiso || p.deadline || '',
+                    ticket: tkHijo !== 'S/T' ? tkHijo : tkMadre
+                });
+            }
+        });
+    };
+
+    if (appData.directProjects) {
+        appData.directProjects.forEach(p => scanProjectSignatures(p, 'direct-project'));
+    }
+    if (appData.modules) {
+        appData.modules.forEach(m => {
+            if (m.projects) m.projects.forEach(p => scanProjectSignatures(p, 'project'));
+        });
+    }
+
     // 2. ALERTAS (de proyectos vencidos, No Iniciados, etc. calculadas por renderAlerts)
     const alertsList = window.__lastAlerts || [];
 
     // 3. CLASIFICACIÓN DE TAREAS SEGÚN PERMISOS Y ESTADO
-    const canViewTask = (t) => isSuper || t.assignee === localAuthor || t.assignedBy === localAuthor;
+    const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+    const canViewTask = (t) => isSuper || isSameUser(t.assignee, localAuthor) || isSameUser(t.assignedBy, localAuthor);
     const visibleTasks = allTasks.filter(canViewTask);
 
     const pendingTasks = visibleTasks.filter(t => t.done === false);
@@ -11223,10 +11318,10 @@ window.renderDailyTasks = function() {
     let alertBadgeTotal = alertsList.length;
     if (isSuper) {
         alertBadgeTotal += validationTasks.length;
-        alertBadgeTotal += pendingTasks.filter(t => t.assignee === localAuthor).length;
+        alertBadgeTotal += pendingTasks.filter(t => isSameUser(t.assignee, localAuthor)).length;
     } else {
-        alertBadgeTotal += validationTasks.filter(t => t.assignedBy === localAuthor).length;
-        alertBadgeTotal += pendingTasks.filter(t => t.assignee === localAuthor).length;
+        alertBadgeTotal += validationTasks.filter(t => isSameUser(t.assignedBy, localAuthor)).length;
+        alertBadgeTotal += pendingTasks.filter(t => isSameUser(t.assignee, localAuthor)).length;
     }
     if (badge) {
         if (alertBadgeTotal > 0) {
@@ -11440,17 +11535,22 @@ window.renderDailyTasks = function() {
                         let openAction = '';
                         if (t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`;
                         if (t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}', '${t.projectId}')`;
-                        if (t.sourceType === 'project' || t.sourceType === 'global') {
+                        if (t.sourceType === 'signature') {
+                            openAction = `window.openSignatureWorkflowModalForProject('${t.projectId}', '${t.docId}');`;
+                        } else if (t.sourceType === 'project' || t.sourceType === 'global') {
                             openAction = t.sourceType === 'project' ? `window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}');` : `window.openProjectTaskModal();`;
                         } else if (t.sourceType === 'daily') {
                             openAction = `window.openFastDailyTaskModal('${t.id}');`;
                         }
 
-                        let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
+                        let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : (t.sourceType === 'signature' ? 'text-[#0055cc]' : 'text-[#ee6018]'));
 
                         return `
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] hover:border-[#4d4947] group transition" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
-                            <input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">
+                            ${t.sourceType === 'signature' 
+                                ? `<button type="button" onclick="event.stopPropagation(); ${openAction}" class="px-2 py-0.5 rounded-[3px] bg-[#0055cc]/20 border border-[#0055cc]/50 text-[#0055cc] hover:bg-[#0055cc] hover:text-white font-mono text-[9px] uppercase font-bold shrink-0 mt-0.5 transition" title="Firmar documento digital">✍️ Firmar</button>`
+                                : `<input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">`
+                            }
                             <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
                                 <span class="text-xs text-[#eeeeee] break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -16338,3 +16438,784 @@ window.addEventListener('resize', function() {
         }
     } catch(e) {}
 })();
+
+// ==========================================================================
+// SISTEMA DE GOBERNANZA DE DOCUMENTOS, TICKETS Y FIRMAS DIGITALES // STGT (v1002)
+// ==========================================================================
+
+window.isSameUserOrAlias = function(nameA, nameB) {
+    if (!nameA || !nameB) return false;
+    const a = nameA.trim().toLowerCase();
+    const b = nameB.trim().toLowerCase();
+    if (a === b) return true;
+    if ((a.includes('osvaldo') || a.includes('emmanuel')) && (b.includes('osvaldo') || b.includes('emmanuel'))) return true;
+    if (a.includes('rafael') && b.includes('rafael')) return true;
+    if (a.includes('barbosa') && b.includes('barbosa')) return true;
+    if (a.includes('islas') && b.includes('islas')) return true;
+    if (a.includes('gutierrez') && b.includes('gutierrez')) return true;
+    if (a.includes('gonzalez') && b.includes('gonzalez')) return true;
+    return false;
+};
+
+function getProjectById(id) {
+    if (!id) return null;
+    let found = (appData.directProjects || []).find(p => p.id === id);
+    if (found) return found;
+    (appData.modules || []).forEach(m => {
+        const p = (m.projects || []).find(proj => proj.id === id);
+        if (p) found = p;
+    });
+    return found;
+}
+
+let activeSignDocCtx = {
+    prefix: 'quick',
+    projectId: null,
+    pType: null,
+    docId: null,
+    docName: '',
+    parentTicket: '',
+    childTicket: '',
+    driveDocLink: '',
+    pdfBytes: null,
+    pdfKey: null,
+    pdfFileName: '',
+    pdfPageCount: 1,
+    pagePdfWidth: 612,
+    pagePdfHeight: 792,
+    stampX: 410,
+    stampY: 120,
+    stampWidth: 110,
+    stampHeight: 38
+};
+
+let isDrawingSignature = false;
+let sigPadCtx = null;
+let lastSigX = 0;
+let lastSigY = 0;
+let hasSignatureDrawn = false;
+
+window.openSignatureWorkflowModalForProject = function(projectId, docId) {
+    let item = (appData.directProjects || []).find(p => p.id === projectId);
+    let pType = 'direct-project';
+    if (!item) {
+        (appData.modules || []).forEach(m => {
+            const found = (m.projects || []).find(p => p.id === projectId);
+            if (found) { item = found; pType = 'project'; }
+        });
+    }
+    if (!item) {
+        window.showToast("⚠️ Proyecto no encontrado", true);
+        return;
+    }
+    window.openSignatureWorkflowModal('quick', docId, item, pType);
+};
+
+window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem = null, overridePType = null) {
+    let item = overrideItem || getSelectedItem();
+    if (!item) {
+        window.showToast("⚠️ Selecciona un proyecto para gestionar firmas", true);
+        return;
+    }
+    const pType = overridePType || (item.pType || (appData.directProjects && appData.directProjects.some(p => p.id === item.id) ? 'direct-project' : 'project'));
+    
+    if (!item.docs) item.docs = {};
+    if (!item.docs[docId]) {
+        item.docs[docId] = {
+            checked: false,
+            obs: '',
+            na: false,
+            naValidated: false,
+            fecha_compromiso: '',
+            ticket: '',
+            driveDocLink: '',
+            signatureCircuit: []
+        };
+    }
+    const docData = item.docs[docId];
+    const gDoc = (globalDocs || []).find(d => d.id === docId);
+    const docName = gDoc ? gDoc.name : docId;
+
+    // Circuito predeterminado inteligente si está vacío
+    if (!Array.isArray(docData.signatureCircuit) || docData.signatureCircuit.length === 0) {
+        const defaultConsultant = (item.consultants && item.consultants[0]) || item.consultor || localAuthor || 'Osvaldo Avilés';
+        docData.signatureCircuit = [
+            { id: 'sig_1', role: 'Elaboró', name: defaultConsultant, status: 'pending' },
+            { id: 'sig_2', role: 'Revisó / Vo.Bo.', name: 'Rafael Romero', status: 'pending' },
+            { id: 'sig_3', role: 'Autorizó', name: 'Miguel Barbosa', status: 'pending' }
+        ];
+    }
+
+    const pdfKey = docData.pdfKey || `doc_pdf_${item.id}_${docId}`;
+    docData.pdfKey = pdfKey;
+
+    activeSignDocCtx = {
+        prefix: prefix,
+        projectId: item.id,
+        pType: pType,
+        docId: docId,
+        docName: docName,
+        parentTicket: item.ticket || '',
+        childTicket: docData.ticket || '',
+        driveDocLink: docData.driveDocLink || '',
+        pdfBytes: null,
+        pdfKey: pdfKey,
+        pdfFileName: docData.pdfFileName || '',
+        pdfPageCount: docData.pdfPageCount || 1,
+        pagePdfWidth: 612,
+        pagePdfHeight: 792,
+        stampX: (typeof docData.lastStampX === 'number') ? docData.lastStampX : 410,
+        stampY: (typeof docData.lastStampY === 'number') ? docData.lastStampY : 120,
+        stampWidth: 110,
+        stampHeight: 38
+    };
+
+    // Recuperar binario PDF de IndexedDB
+    if (window.SICOM_IDB) {
+        try {
+            const cachedBytes = await window.SICOM_IDB.get(pdfKey);
+            if (cachedBytes) {
+                activeSignDocCtx.pdfBytes = (cachedBytes instanceof Uint8Array) ? cachedBytes : new Uint8Array(cachedBytes);
+            }
+        } catch (e) {
+            console.warn("Fallo al leer PDF de IndexedDB:", e);
+        }
+    }
+
+    const modal = document.getElementById('documentSignModal');
+    if (!modal) return;
+
+    document.getElementById('docSignModalDocTitle').textContent = docName;
+    document.getElementById('docSignProjectTicket').textContent = activeSignDocCtx.parentTicket || 'S/T';
+    document.getElementById('docSignChildTicket').value = activeSignDocCtx.childTicket;
+    document.getElementById('docSignDriveDocLink').value = activeSignDocCtx.driveDocLink;
+
+    window.updateDocSignStatusBadge();
+    window.renderDocSignCircuitList();
+    window.initSignaturePad();
+
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        const inner = modal.querySelector('.liquid-glass');
+        if (inner) {
+            inner.classList.remove('scale-95');
+            inner.classList.add('scale-100');
+        }
+    });
+
+    if (activeSignDocCtx.pdfBytes) {
+        window.renderLastPdfPage();
+    } else {
+        document.getElementById('docSignCanvasWrapper')?.classList.add('hidden');
+        document.getElementById('docSignNoPdfPlaceholder')?.classList.remove('hidden');
+        document.getElementById('docSignStampControls')?.classList.add('hidden');
+        document.getElementById('docSignPdfInfo').textContent = 'Ningún PDF cargado';
+        document.getElementById('docSignPdfNameContainer').textContent = 'Arrastra o sube el PDF para firmar';
+    }
+};
+
+window.closeDocumentSignModal = function() {
+    const modal = document.getElementById('documentSignModal');
+    if (!modal) return;
+    modal.classList.add('opacity-0');
+    const inner = modal.querySelector('.liquid-glass');
+    if (inner) {
+        inner.classList.remove('scale-100');
+        inner.classList.add('scale-95');
+    }
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 200);
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (item && item.docs && activeSignDocCtx.docId) {
+        if (activeSignDocCtx.prefix === 'quick') {
+            window.renderDocChecklists('quick', item.docs);
+        } else if (activeSignDocCtx.prefix === 'edit') {
+            window.renderDocChecklists('edit', item.docs);
+        }
+    }
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+};
+
+window.updateDocSignStatusBadge = function() {
+    const badge = document.getElementById('docSignStatusBadge');
+    if (!badge) return;
+    const item = getProjectById(activeSignDocCtx.projectId);
+    const docData = item?.docs?.[activeSignDocCtx.docId];
+    const circuit = docData?.signatureCircuit || [];
+    const total = circuit.length;
+    const signed = circuit.filter(s => s.status === 'signed').length;
+
+    if (total === 0) {
+        badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#3d3a39] bg-[#101010] text-[#8a8380]";
+        badge.textContent = "⚪ SIN FIRMAS";
+    } else if (signed === total) {
+        badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#22c55e]/40 bg-[#22c55e]/15 text-[#22c55e] font-bold";
+        badge.textContent = `🟢 100% FIRMADO (${total}/${total})`;
+    } else {
+        badge.className = "font-mono text-[9px] px-2 py-0.5 rounded border border-[#eab308]/40 bg-[#eab308]/15 text-[#eab308] font-bold";
+        badge.textContent = `🟡 EN PROCESO (${signed}/${total})`;
+    }
+};
+
+window.renderDocSignCircuitList = function() {
+    const container = document.getElementById('docSignCircuitList');
+    if (!container) return;
+    const item = getProjectById(activeSignDocCtx.projectId);
+    const docData = item?.docs?.[activeSignDocCtx.docId];
+    const circuit = docData?.signatureCircuit || [];
+
+    if (circuit.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-[#8a8380] font-mono border border-dashed border-[#3d3a39] rounded">No hay firmantes asignados al circuito.</div>`;
+        return;
+    }
+
+    const firstPendingIdx = circuit.findIndex(s => s.status !== 'signed');
+    const isSuper = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor');
+
+    container.innerHTML = circuit.map((signer, idx) => {
+        const isSigned = signer.status === 'signed';
+        const isTurn = !isSigned && idx === firstPendingIdx;
+        const isWaiting = !isSigned && idx > firstPendingIdx;
+        const canSignThis = isTurn && (isSuper || window.isSameUserOrAlias(signer.name, localAuthor));
+
+        let statusHtml = '';
+        if (isSigned) {
+            statusHtml = `<span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#22c55e]/15 text-[#22c55e] border border-[#22c55e]/30 font-semibold shrink-0">🟢 FIRMADO</span>`;
+        } else if (isTurn) {
+            statusHtml = `<span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#eab308]/15 text-[#eab308] border border-[#eab308]/40 font-semibold animate-pulse shrink-0">🟡 TURNO DE FIRMA</span>`;
+        } else {
+            statusHtml = `<span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-[#101010] text-[#8a8380] border border-[#3d3a39] shrink-0">⚪ EN ESPERA</span>`;
+        }
+
+        return `
+        <div class="p-2.5 rounded-[8px] border transition ${isTurn ? 'border-[#ee6018]/60 bg-[#1d1a18]' : 'border-[#3d3a39] bg-[#101010]'}">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-4 h-4 rounded-full bg-[#1d1a18] border border-[#3d3a39] text-[#ee6018] font-mono text-[9px] flex items-center justify-center font-bold shrink-0">${idx + 1}</span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-semibold text-[#fafafa] truncate leading-tight">${escapeHtml(signer.name)}</div>
+                        <div class="font-mono text-[9px] text-[#8a8380] uppercase truncate">${escapeHtml(signer.role)}</div>
+                    </div>
+                </div>
+                ${statusHtml}
+            </div>
+
+            ${isSigned ? `
+                <div class="mt-2 pt-1.5 border-t border-[#3d3a39]/50 flex items-center justify-between text-[9px] font-mono text-[#8a8380]">
+                    <span>📅 ${signer.signedAt || 'Completado'}</span>
+                    <span class="text-[#a0ca92]">Por: ${escapeHtml(signer.signedBy || signer.name)}</span>
+                </div>
+            ` : `
+                <div class="mt-2 pt-1.5 border-t border-[#3d3a39]/50 flex items-center justify-between gap-2">
+                    <span class="text-[9px] font-mono text-[#8a8380]">${isTurn ? (canSignThis ? '👉 Tu turno para firmar abajo' : `Esperando firma de ${signer.name}`) : 'Esperará a que firme el anterior'}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${canSignThis ? `
+                            <button type="button" onclick="window.focusSignaturePadFor('${signer.name}', '${signer.role}')" class="pill-btn px-2 py-0.5 bg-[#0055cc] hover:bg-[#0044aa] text-white font-mono text-[9px] uppercase font-bold transition">
+                                ✍️ Firmar Aquí
+                            </button>
+                        ` : ''}
+                        ${!isSigned && isSuper ? `
+                            <button type="button" onclick="window.removeSignerFromCircuit(${idx})" class="p-1 text-[#8a8380] hover:text-[#ef4444] transition" title="Quitar firmante del circuito">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `}
+        </div>`;
+    }).join('');
+
+    // Actualizar indicador de firmante activo en el pad
+    const activeSignerEl = document.getElementById('docSignPadActiveSigner');
+    if (activeSignerEl) {
+        if (firstPendingIdx !== -1) {
+            const next = circuit[firstPendingIdx];
+            activeSignerEl.textContent = `Turno: ${next.name} (${next.role})`;
+        } else {
+            activeSignerEl.textContent = `100% Firmado`;
+        }
+    }
+};
+
+window.focusSignaturePadFor = function(name, role) {
+    const pad = document.getElementById('signaturePadCanvas');
+    if (pad) {
+        pad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.clearSignaturePad();
+        window.showToast(`✍️ Listo. Dibuja la firma para ${name} (${role})`, false);
+    }
+};
+
+window.addSignerToCircuitPrompt = function() {
+    const role = prompt("Puesto o Rol del firmante (ej: Elaboró, Revisó, Vo.Bo., Autorizó):", "Revisó");
+    if (!role || !role.trim()) return;
+    const name = prompt("Nombre completo del firmante (o alias de usuario):", localAuthor || "Rafael Romero");
+    if (!name || !name.trim()) return;
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+    if (!Array.isArray(docData.signatureCircuit)) docData.signatureCircuit = [];
+
+    docData.signatureCircuit.push({
+        id: `sig_${Date.now()}`,
+        role: role.trim(),
+        name: name.trim(),
+        status: 'pending'
+    });
+
+    window.saveData(false);
+    window.renderDocSignCircuitList();
+    window.updateDocSignStatusBadge();
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+    window.showToast(`✅ Firmante [${role}] agregado al circuito.`, false);
+};
+
+window.removeSignerFromCircuit = function(idx) {
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+    const circuit = docData.signatureCircuit || [];
+
+    if (circuit[idx]?.status === 'signed') {
+        window.showToast("⚠️ No se puede quitar un firmante que ya estampó su firma.", true);
+        return;
+    }
+
+    circuit.splice(idx, 1);
+    window.saveData(false);
+    window.renderDocSignCircuitList();
+    window.updateDocSignStatusBadge();
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+};
+
+window.loadStandardCircuit = function(circuitType) {
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+    const defaultConsultant = (item.consultants && item.consultants[0]) || item.consultor || localAuthor || 'Osvaldo Avilés';
+
+    if (circuitType === 'validacion') {
+        docData.signatureCircuit = [
+            { id: 'sig_1', role: 'Vo.Bo. / Coordinador', name: 'Rafael Romero', status: 'pending' },
+            { id: 'sig_2', role: 'Autorizó / Consultor', name: defaultConsultant, status: 'pending' }
+        ];
+    } else if (circuitType === 'plano') {
+        docData.signatureCircuit = [
+            { id: 'sig_1', role: 'Elaboró / Consultor', name: defaultConsultant, status: 'pending' },
+            { id: 'sig_2', role: 'Revisó / Coordinador', name: 'Rafael Romero', status: 'pending' },
+            { id: 'sig_3', role: 'Autorizó / Gerente', name: 'Miguel Barbosa', status: 'pending' }
+        ];
+    } else if (circuitType === 'completo') {
+        docData.signatureCircuit = [
+            { id: 'sig_1', role: 'Elaboró / Consultor', name: defaultConsultant, status: 'pending' },
+            { id: 'sig_2', role: 'Revisó / Testing', name: 'Sue Oyuqui', status: 'pending' },
+            { id: 'sig_3', role: 'Vo.Bo. / Coordinador', name: 'Rafael Romero', status: 'pending' },
+            { id: 'sig_4', role: 'Autorizó / Gerencia', name: 'Miguel Barbosa', status: 'pending' }
+        ];
+    }
+
+    window.saveData(false);
+    window.renderDocSignCircuitList();
+    window.updateDocSignStatusBadge();
+    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+    window.showToast("📋 Plantilla de circuito cargada con éxito.", false);
+};
+
+window.handleDocSignChildTicketChange = function(val) {
+    activeSignDocCtx.childTicket = val.trim();
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+        item.docs[activeSignDocCtx.docId].ticket = activeSignDocCtx.childTicket;
+        window.saveData(false);
+        const quickEl = document.getElementById(`quickTicket${activeSignDocCtx.docId}`);
+        if (quickEl) quickEl.value = activeSignDocCtx.childTicket;
+        const editEl = document.getElementById(`editTicket${activeSignDocCtx.docId}`);
+        if (editEl) editEl.value = activeSignDocCtx.childTicket;
+    }
+};
+
+window.handleDocSignDriveDocLinkChange = function(val) {
+    activeSignDocCtx.driveDocLink = val.trim();
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+        item.docs[activeSignDocCtx.docId].driveDocLink = activeSignDocCtx.driveDocLink;
+        window.saveData(false);
+    }
+};
+
+window.openProjectDriveFolder = function() {
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item) return;
+    const link = item.driveLink ? item.driveLink.trim() : '';
+    if (link) {
+        window.open(link, '_blank');
+    } else {
+        window.showToast("⚠️ Este proyecto aún no tiene configurada una carpeta de Google Drive en sus datos.", true);
+    }
+};
+
+window.openDocDriveLink = function() {
+    const link = activeSignDocCtx.driveDocLink ? activeSignDocCtx.driveDocLink.trim() : '';
+    if (link) {
+        window.open(link, '_blank');
+    } else {
+        window.showToast("⚠️ Pega primero la URL del archivo en Drive para abrirlo.", true);
+    }
+};
+
+window.handleDocPdfFileSelected = async function(event) {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+
+    if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+        window.showToast("⚠️ Solo se admiten archivos formato PDF.", true);
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const arrayBuffer = e.target.result;
+            const uint8 = new Uint8Array(arrayBuffer);
+
+            if (typeof PDFLib === 'undefined') {
+                window.showToast("⚠️ Biblioteca PDFLib no cargada.", true);
+                return;
+            }
+            const pdfDoc = await PDFLib.PDFDocument.load(uint8);
+            const pageCount = pdfDoc.getPageCount();
+
+            activeSignDocCtx.pdfBytes = uint8;
+            activeSignDocCtx.pdfFileName = file.name;
+            activeSignDocCtx.pdfPageCount = pageCount;
+
+            // Guardar binario exclusivamente en IndexedDB nativo (sin saturar localStorage)
+            if (window.SICOM_IDB) {
+                await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, uint8);
+            }
+
+            // Guardar metadatos ligeros en el proyecto
+            const item = getProjectById(activeSignDocCtx.projectId);
+            if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+                const d = item.docs[activeSignDocCtx.docId];
+                d.pdfFileName = file.name;
+                d.pdfUploadedAt = new Date().toLocaleDateString('es-MX');
+                d.pdfPageCount = pageCount;
+                d.pdfKey = activeSignDocCtx.pdfKey;
+                window.saveData(false);
+            }
+
+            window.renderLastPdfPage();
+            window.showToast(`📄 PDF cargado con éxito (${pageCount} páginas).`, false);
+        } catch (err) {
+            console.error("Error al procesar PDF:", err);
+            window.showToast("⚠️ Error al leer el archivo PDF.", true);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+};
+
+window.renderLastPdfPage = async function() {
+    if (!activeSignDocCtx.pdfBytes) return;
+    const canvas = document.getElementById('docSignPdfCanvas');
+    const wrapper = document.getElementById('docSignCanvasWrapper');
+    const placeholder = document.getElementById('docSignNoPdfPlaceholder');
+    const controls = document.getElementById('docSignStampControls');
+    const info = document.getElementById('docSignPdfInfo');
+    const nameCont = document.getElementById('docSignPdfNameContainer');
+
+    if (placeholder) placeholder.classList.add('hidden');
+    if (wrapper) wrapper.classList.remove('hidden');
+    if (controls) controls.classList.remove('hidden');
+
+    if (info) info.textContent = `${activeSignDocCtx.pdfPageCount} pág${activeSignDocCtx.pdfPageCount > 1 ? 's' : ''} (Última hoja)`;
+    if (nameCont) nameCont.textContent = activeSignDocCtx.pdfFileName || 'Documento Oficial.pdf';
+
+    try {
+        if (typeof pdfjsLib === 'undefined') {
+            console.error("pdfjsLib no está disponible");
+            return;
+        }
+        if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        const loadingTask = pdfjsLib.getDocument({ data: activeSignDocCtx.pdfBytes.slice() });
+        const pdf = await loadingTask.promise;
+        activeSignDocCtx.pdfPageCount = pdf.numPages;
+        const page = await pdf.getPage(pdf.numPages); // Siempre la última página donde firman
+
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        activeSignDocCtx.pagePdfWidth = unscaledViewport.width;
+        activeSignDocCtx.pagePdfHeight = unscaledViewport.height;
+
+        const targetWidth = Math.min(520, (wrapper.parentElement?.clientWidth || 480) - 24);
+        const scale = targetWidth / unscaledViewport.width;
+        const viewport = page.getViewport({ scale: scale > 0.35 ? scale : 0.75 });
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const renderCtx = {
+            canvasContext: canvas.getContext('2d'),
+            viewport: viewport
+        };
+        await page.render(renderCtx).promise;
+
+        window.updateStampTargetVisual();
+
+        canvas.onclick = function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const pdfX = (clickX * scaleX / canvas.width) * activeSignDocCtx.pagePdfWidth;
+            const pdfY = activeSignDocCtx.pagePdfHeight - ((clickY * scaleY / canvas.height) * activeSignDocCtx.pagePdfHeight);
+
+            activeSignDocCtx.stampX = Math.round(pdfX - (activeSignDocCtx.stampWidth / 2));
+            activeSignDocCtx.stampY = Math.round(pdfY - (activeSignDocCtx.stampHeight / 2));
+
+            const item = getProjectById(activeSignDocCtx.projectId);
+            if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+                item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
+                item.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
+            }
+
+            window.updateStampTargetVisual();
+        };
+
+    } catch (err) {
+        console.error("Error al renderizar PDF con pdf.js:", err);
+    }
+};
+
+window.updateStampTargetVisual = function() {
+    const target = document.getElementById('docSignStampTarget');
+    const canvas = document.getElementById('docSignPdfCanvas');
+    const label = document.getElementById('docSignPosLabel');
+    if (!target || !canvas) return;
+
+    if (label) {
+        label.textContent = `X: ${activeSignDocCtx.stampX}, Y: ${activeSignDocCtx.stampY}`;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+        target.style.display = 'none';
+        return;
+    }
+
+    const cssX = ((activeSignDocCtx.stampX) / activeSignDocCtx.pagePdfWidth) * rect.width;
+    const cssY = ((activeSignDocCtx.pagePdfHeight - (activeSignDocCtx.stampY + activeSignDocCtx.stampHeight)) / activeSignDocCtx.pagePdfHeight) * rect.height;
+    const cssWidth = (activeSignDocCtx.stampWidth / activeSignDocCtx.pagePdfWidth) * rect.width;
+    const cssHeight = (activeSignDocCtx.stampHeight / activeSignDocCtx.pagePdfHeight) * rect.height;
+
+    target.style.display = 'flex';
+    target.style.left = `${Math.round(cssX)}px`;
+    target.style.top = `${Math.round(cssY)}px`;
+    target.style.width = `${Math.round(cssWidth)}px`;
+    target.style.height = `${Math.round(cssHeight)}px`;
+};
+
+window.adjustStampPos = function(dx, dy) {
+    activeSignDocCtx.stampX = Math.max(0, activeSignDocCtx.stampX + dx);
+    activeSignDocCtx.stampY = Math.max(0, activeSignDocCtx.stampY + dy);
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (item && item.docs && item.docs[activeSignDocCtx.docId]) {
+        item.docs[activeSignDocCtx.docId].lastStampX = activeSignDocCtx.stampX;
+        item.docs[activeSignDocCtx.docId].lastStampY = activeSignDocCtx.stampY;
+    }
+    window.updateStampTargetVisual();
+};
+
+window.initSignaturePad = function() {
+    const canvas = document.getElementById('signaturePadCanvas');
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width > 0 ? rect.width : 450;
+    canvas.height = 85;
+
+    sigPadCtx = canvas.getContext('2d');
+    sigPadCtx.strokeStyle = '#0055cc'; // Tinta azul corporativa idéntica al documento STGT
+    sigPadCtx.lineWidth = 2.5;
+    sigPadCtx.lineCap = 'round';
+    sigPadCtx.lineJoin = 'round';
+
+    window.clearSignaturePad();
+
+    const getPos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+            return {
+                x: (e.touches[0].clientX - r.left) * (canvas.width / r.width),
+                y: (e.touches[0].clientY - r.top) * (canvas.height / r.height)
+            };
+        }
+        return {
+            x: (e.clientX - r.left) * (canvas.width / r.width),
+            y: (e.clientY - r.top) * (canvas.height / r.height)
+        };
+    };
+
+    const startDraw = (e) => {
+        e.preventDefault();
+        isDrawingSignature = true;
+        const pos = getPos(e);
+        lastSigX = pos.x;
+        lastSigY = pos.y;
+        sigPadCtx.beginPath();
+        sigPadCtx.moveTo(lastSigX, lastSigY);
+    };
+
+    const draw = (e) => {
+        if (!isDrawingSignature) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        sigPadCtx.lineTo(pos.x, pos.y);
+        sigPadCtx.stroke();
+        lastSigX = pos.x;
+        lastSigY = pos.y;
+        hasSignatureDrawn = true;
+    };
+
+    const stopDraw = (e) => {
+        if (!isDrawingSignature) return;
+        e.preventDefault();
+        isDrawingSignature = false;
+        sigPadCtx.closePath();
+    };
+
+    canvas.onmousedown = startDraw;
+    canvas.onmousemove = draw;
+    canvas.onmouseup = stopDraw;
+    canvas.onmouseleave = stopDraw;
+
+    canvas.ontouchstart = startDraw;
+    canvas.ontouchmove = draw;
+    canvas.ontouchend = stopDraw;
+    canvas.ontouchcancel = stopDraw;
+};
+
+window.clearSignaturePad = function() {
+    const canvas = document.getElementById('signaturePadCanvas');
+    if (!canvas || !sigPadCtx) return;
+    sigPadCtx.clearRect(0, 0, canvas.width, canvas.height);
+    hasSignatureDrawn = false;
+};
+
+window.stampSignatureOnActiveDocument = async function() {
+    if (!activeSignDocCtx.pdfBytes) {
+        window.showToast("⚠️ Primero sube un archivo PDF para firmar.", true);
+        return;
+    }
+    if (!hasSignatureDrawn) {
+        window.showToast("⚠️ Dibuja tu firma en el recuadro antes de estampar.", true);
+        return;
+    }
+
+    const item = getProjectById(activeSignDocCtx.projectId);
+    if (!item || !item.docs || !item.docs[activeSignDocCtx.docId]) return;
+    const docData = item.docs[activeSignDocCtx.docId];
+    const circuit = docData.signatureCircuit || [];
+
+    const activeSignerIndex = circuit.findIndex(s => s.status !== 'signed');
+    if (activeSignerIndex === -1) {
+        window.showToast("El circuito de firmas ya está 100% completado.", false);
+        return;
+    }
+    const signer = circuit[activeSignerIndex];
+
+    const canSign = (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || window.isSameUserOrAlias(signer.name, localAuthor));
+    if (!canSign) {
+        window.showToast(`⚠️ Turno exclusivo de firma para: ${signer.name} (${signer.role}).`, true);
+        return;
+    }
+
+    try {
+        const padCanvas = document.getElementById('signaturePadCanvas');
+        const signaturePngDataUrl = padCanvas.toDataURL('image/png');
+
+        const pdfDoc = await PDFLib.PDFDocument.load(activeSignDocCtx.pdfBytes);
+        const signatureImage = await pdfDoc.embedPng(signaturePngDataUrl);
+        const pages = pdfDoc.getPages();
+        const lastPage = pages[pages.length - 1];
+
+        lastPage.drawImage(signatureImage, {
+            x: activeSignDocCtx.stampX,
+            y: activeSignDocCtx.stampY,
+            width: activeSignDocCtx.stampWidth,
+            height: activeSignDocCtx.stampHeight
+        });
+
+        const newPdfBytes = await pdfDoc.save();
+        activeSignDocCtx.pdfBytes = newPdfBytes;
+
+        if (window.SICOM_IDB) {
+            await window.SICOM_IDB.save(activeSignDocCtx.pdfKey, newPdfBytes);
+        }
+
+        const now = new Date();
+        const stampDateStr = `${now.toLocaleDateString('es-MX')} ${now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
+        signer.status = 'signed';
+        signer.signedAt = stampDateStr;
+        signer.signedBy = localAuthor;
+        signer.coords = { x: activeSignDocCtx.stampX, y: activeSignDocCtx.stampY };
+
+        logActivity(item.id, item.name, `Estampó firma digital [${signer.role}]: ${signer.name} en ${activeSignDocCtx.docName}`, localAuthor);
+
+        const remaining = circuit.filter(s => s.status !== 'signed').length;
+        if (remaining === 0) {
+            docData.checked = true;
+            window.showToast("🎉 ¡Documento 100% firmado por todos los involucrados!", false);
+            window.triggerCelebration();
+        } else {
+            activeSignDocCtx.stampY = Math.max(20, activeSignDocCtx.stampY - 40);
+            docData.lastStampX = activeSignDocCtx.stampX;
+            docData.lastStampY = activeSignDocCtx.stampY;
+            window.showToast(`✅ Firma de ${signer.name} estampada. Turno del siguiente firmante.`, false);
+        }
+
+        window.saveData(false);
+        window.clearSignaturePad();
+        window.renderDocSignCircuitList();
+        window.updateDocSignStatusBadge();
+        window.renderLastPdfPage();
+
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
+
+    } catch (err) {
+        console.error("Error al estampar firma en PDF:", err);
+        window.showToast("⚠️ Falló la inyección de la firma en el PDF.", true);
+    }
+};
+
+window.downloadCurrentSignedPdf = function() {
+    if (!activeSignDocCtx.pdfBytes) {
+        window.showToast("⚠️ No hay archivo PDF disponible para descargar.", true);
+        return;
+    }
+    const cleanStr = (s) => (s || '').replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/_+/g, '_');
+    const tkMadre = cleanStr(activeSignDocCtx.parentTicket || 'S_T');
+    const tkHijo = cleanStr(activeSignDocCtx.childTicket || 'DOC');
+    const dName = cleanStr(activeSignDocCtx.docName || 'Documento');
+    const fileName = `${tkMadre}_${tkHijo}_${dName}_FIRMADO.pdf`;
+
+    const blob = new Blob([activeSignDocCtx.pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    window.showToast(`⬇️ Descargando ${fileName}. Súbelo a la carpeta de Drive del proyecto.`, false);
+};

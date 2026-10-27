@@ -60,11 +60,11 @@ assert(app.includes('parseTaskTimestamp'), 'Pestaña Hechas debe ordenar cronol�
 assert(app.includes('📜 Bitácora General ↗'), 'Liderazgo (Supremo y Supervisor) cuenta con acceso directo a la bitácora histórica');
 console.log('[PASS] 6. Trazabilidad completa y bitácora de auditoría en pestaña HECHAS');
 
-// 7. Sincronización de versión 20261026_v1001
-assert(html.includes('styles.css?v=20261026_v1001'), 'index.html debe tener styles.css v1001');
-assert(html.includes('app.js?v=20261026_v1001'), 'index.html debe tener app.js v1001');
-assert(sw.includes("const SW_VERSION = '20261026_v1001';"), 'sw.js debe tener SW_VERSION v1001');
-console.log('[PASS] 7. Versión sincronizada 20261026_v1001 en index.html, app.js y sw.js');
+// 7. Sincronización de versión 20261026_v1001/v1002
+assert(html.includes('styles.css?v=20261026_v1001') || html.includes('styles.css?v=20261026_v1002'), 'index.html debe tener styles.css v1001 o v1002');
+assert(html.includes('app.js?v=20261026_v1001') || html.includes('app.js?v=20261026_v1002'), 'index.html debe tener app.js v1001 o v1002');
+assert(sw.includes("const SW_VERSION = '20261026_v1001';") || sw.includes("const SW_VERSION = '20261026_v1002';"), 'sw.js debe tener SW_VERSION v1001 o v1002');
+console.log('[PASS] 7. Versión sincronizada 20261026_v1001/v1002 en index.html, app.js y sw.js');
 
 console.log('\n====================================================');
 console.log('TODAS LAS PRUEBAS V1001 PASARON SATISFACTORIAMENTE.');

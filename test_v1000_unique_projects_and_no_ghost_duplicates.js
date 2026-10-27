@@ -58,11 +58,11 @@ runTest('3. Programa de Lealtad reside exclusivamente en Módulo Comercial (MC) 
     assert(mcHasLealtad, 'Módulo Comercial (MC) es el dueño único de Programa de Lealtad');
 });
 
-// 4. Sincronización de versión v1000/v1001
-runTest('4. Sincronización de versión 20261026_v1000/v1001 en index.html, app.js y sw.js', () => {
-    assert(/styles\.css\?v=20261026_v(1000|1001)/.test(html), 'styles.css apunta a v1000/v1001 en index.html');
-    assert(/app\.js\?v=20261026_v(1000|1001)/.test(html), 'app.js apunta a v1000/v1001 en index.html');
-    assert(/SW_VERSION = '20261026_v(1000|1001)'/.test(sw), 'sw.js SW_VERSION es v1000/v1001');
+// 4. Sincronización de versión v1000/v1001/v1002
+runTest('4. Sincronización de versión 20261026_v1000/v1001/v1002 en index.html, app.js y sw.js', () => {
+    assert(/styles\.css\?v=20261026_v(1000|1001|1002)/.test(html), 'styles.css apunta a v1000/v1001/v1002 en index.html');
+    assert(/app\.js\?v=20261026_v(1000|1001|1002)/.test(html), 'app.js apunta a v1000/v1001/v1002 en index.html');
+    assert(/SW_VERSION = '20261026_v(1000|1001|1002)'/.test(sw), 'sw.js SW_VERSION es v1000/v1001/v1002');
 });
 
 console.log('\n====================================================');
