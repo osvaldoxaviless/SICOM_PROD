@@ -61,10 +61,10 @@ assert(app.includes('📜 Bitácora General ↗'), 'Liderazgo (Supremo y Supervi
 console.log('[PASS] 6. Trazabilidad completa y bitácora de auditoría en pestaña HECHAS');
 
 // 7. Sincronización de versión 20261026_v1001/v1002/v1003
-assert(/styles\.css\?v=20261026_v(1001|1002|1003)/.test(html), 'index.html debe tener styles.css v1001, v1002 o v1003');
-assert(/app\.js\?v=20261026_v(1001|1002|1003)/.test(html), 'index.html debe tener app.js v1001, v1002 o v1003');
-assert(/const SW_VERSION = '20261026_v(1001|1002|1003)'/.test(sw), 'sw.js debe tener SW_VERSION v1001, v1002 o v1003');
-console.log('[PASS] 7. Versión sincronizada 20261026_v1001/v1002/v1003 en index.html, app.js y sw.js');
+assert(/styles\.css\?v=20261026_v100[1-9]/.test(html), 'index.html debe tener styles.css v1001+');
+assert(/app\.js\?v=20261026_v100[1-9]/.test(html), 'index.html debe tener app.js v1001+');
+assert(/const SW_VERSION = '20261026_v100[1-9]'/.test(sw), 'sw.js debe tener SW_VERSION v1001+');
+console.log('[PASS] 7. Versión sincronizada v1001+ en index.html, app.js y sw.js');
 
 console.log('\n====================================================');
 console.log('TODAS LAS PRUEBAS V1001 PASARON SATISFACTORIAMENTE.');

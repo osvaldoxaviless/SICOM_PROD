@@ -39,16 +39,16 @@ async function runAll() {
     const indexHtmlContent = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
     const swJsContent = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
 
-    // --- 1. VERIFICACIÓN DE VERSIONES (v1003) ---
-    console.log("--- 1. VERIFICACIÓN DE VERSIONES (v1003) ---");
-    runTest("index.html referencia styles.css?v=20261026_v1003", () => {
-        assert(indexHtmlContent.includes('styles.css?v=20261026_v1003'), "Debe referenciar styles.css con versión 20261026_v1003");
+    // --- 1. VERIFICACIÓN DE VERSIONES (v1003+) ---
+    console.log("--- 1. VERIFICACIÓN DE VERSIONES (v1003+) ---");
+    runTest("index.html referencia styles.css con versión v1003+", () => {
+        assert(/styles\.css\?v=20261026_v100[3-9]/.test(indexHtmlContent), "Debe referenciar styles.css con versión 20261026_v1003 o superior");
     });
-    runTest("index.html referencia app.js?v=20261026_v1003", () => {
-        assert(indexHtmlContent.includes('app.js?v=20261026_v1003'), "Debe referenciar app.js con versión 20261026_v1003");
+    runTest("index.html referencia app.js con versión v1003+", () => {
+        assert(/app\.js\?v=20261026_v100[3-9]/.test(indexHtmlContent), "Debe referenciar app.js con versión 20261026_v1003 o superior");
     });
-    runTest("sw.js define SW_VERSION = '20261026_v1003'", () => {
-        assert(swJsContent.includes("SW_VERSION = '20261026_v1003'"), "Debe tener SW_VERSION = '20261026_v1003'");
+    runTest("sw.js define SW_VERSION v1003+", () => {
+        assert(/SW_VERSION\s*=\s*'20261026_v100[3-9]'/.test(swJsContent), "Debe tener SW_VERSION v1003 o superior");
     });
 
     // --- 2. VERIFICACIÓN DE CÓDIGO Y ESTRUCTURA DE RECONCILIACIÓN ---

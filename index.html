@@ -41,7 +41,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.9/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,7 +79,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v1003">
+  <link rel="stylesheet" href="styles.css?v=20261026_v1004">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -928,7 +928,7 @@
           <svg class="w-3.5 h-3.5 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span class="hidden sm:inline">Calendario</span>
         </button>
-        <button type="button" id="btnViewModeTasks" onclick="toggleDailyDrawer()" class="px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] flex items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative" title="Notificaciones y Trabajo (Tareas y Alertas)">
+        <button type="button" id="btnViewModeTasks" onclick="toggleDailyDrawer()" class="hidden px-2 sm:px-2.5 py-1 rounded-[3px] font-mono uppercase text-[10px] sm:text-[11px] tracking-[-0.24px] items-center gap-1.5 transition text-[#b8b3b0] hover:text-[#eeeeee] cursor-pointer relative" title="Notificaciones y Trabajo (Tareas y Alertas)">
           <svg class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
           <span class="hidden sm:inline">Tareas</span>
           <span id="desktopHeaderDailyAlertsBadge" class="hidden font-mono text-[9px] bg-[#ee6018] text-[#fafafa] px-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-[3px] font-bold">0</span>
@@ -938,17 +938,16 @@
       <!-- SEPARADOR DISCRETO IZQUIERDA -->
       <div class="hidden sm:block w-px h-5 bg-[#3d3a39] shrink-0 mx-0.5 sm:mx-1"></div>
 
-      <!-- CLUSTER UNIFICADO DE BÚSQUEDA Y FILTROS EN ESCRITORIO (ZONA IZQUIERDA - BALANCEADA) -->
-      <div class="desktop-search-cluster hidden sm:flex items-center gap-1 shrink-0 max-w-[190px] lg:max-w-[230px] 2xl:max-w-[260px]">
-        <div class="relative flex-1 flex items-center">
-          <svg class="w-3.5 h-3.5 text-[#8a8380] absolute left-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="BUSCAR... (Ctrl+K)" class="w-full bg-[#1d1a18] hover:bg-[#1a1816] focus:bg-[#1d1a18] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] py-1 pl-7 pr-2 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all">
+      <!-- CLUSTER UNIFICADO DE BÚSQUEDA Y FILTROS MINIMALISTA (CON ÍCONO LITERAL DE LUPA) -->
+      <div class="desktop-search-cluster hidden sm:flex items-center gap-1 shrink-0">
+        <div class="relative flex items-center">
+          <svg class="w-3.5 h-3.5 text-[#ee6018] absolute left-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="desktopSearchInput" list="projectsDatalist" oninput="handleDesktopSearch(this.value)" placeholder="Buscar..." class="w-28 sm:w-32 lg:w-40 focus:w-56 bg-[#1d1a18] hover:bg-[#161413] focus:bg-[#161413] border border-[#3d3a39] focus:border-[#ee6018] rounded-[4px] py-1 pl-7 pr-2 font-mono text-xs text-[#eeeeee] placeholder-[#8a8380] focus:outline-none transition-all duration-200">
         </div>
-        <!-- BOTÓN FILTROS OPERATIVOS (ACOPLADO DIRECTAMENTE AL BUSCADOR) -->
-        <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 bg-[#1d1a18] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[3px] px-0 sm:px-2 text-[#eeeeee] font-mono uppercase text-[11px] tracking-[-0.24px] group cursor-pointer relative" title="Filtros Operativos (Explorar)">
-            <svg class="w-4 h-4 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-            <span class="hidden 2xl:inline font-medium">Filtros</span>
-            <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 sm:static sm:top-auto sm:right-auto bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 sm:px-1.5 py-0.2 rounded-[3px] sm:ml-0.5 font-bold">1</span>
+        <!-- BOTÓN FILTROS OPERATIVOS DISCRETO -->
+        <button id="btnTopFilterDrawer" onclick="toggleFilterDrawer()" class="h-7 w-7 flex shrink-0 items-center justify-center bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] transition-all rounded-[4px] text-[#eeeeee] group cursor-pointer relative" title="Filtros Operativos (Explorar)">
+            <svg class="w-3.5 h-3.5 text-[#8a8380] group-hover:text-[#ee6018] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            <span id="activeFiltersBadge" class="hidden absolute -top-1 -right-1 bg-[#ee6018] text-[#fafafa] font-mono text-[9px] px-1 py-0.2 rounded-full font-bold">1</span>
         </button>
       </div>
       <!-- BOTÓN BÚSQUEDA (COMPATIBILIDAD TEST Y EVENTOS DOM) -->
@@ -2260,8 +2259,11 @@
               </div>
               
               <div class="space-y-1.5">
-                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores</label>
-                <div id="editConsultantsChecks" class="bg-[#1d1a18] border border-[#3d3a39] p-3 rounded-[10px] grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto scrollbar-thin"></div>
+                <div class="flex items-center justify-between">
+                  <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores Asignados</label>
+                  <span class="font-mono text-[9px] text-[#8a8380] uppercase">Punto por punto</span>
+                </div>
+                <div id="editConsultantsChecks" class="bg-[#101010] border border-[#2e2a28] p-2 rounded-[6px] flex flex-wrap gap-1.5"></div>
               </div>
               
               <div class="space-y-2">
@@ -2486,8 +2488,11 @@
             </div>
 
             <div class="space-y-1.5">
-                <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores</label>
-                <div id="newProjConsultantsChecks" class="bg-[#1d1a18] border border-[#3d3a39] p-3 rounded-[10px] grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin"></div>
+                <div class="flex items-center justify-between">
+                    <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider block">Consultores Asignados</label>
+                    <span class="font-mono text-[9px] text-[#8a8380] uppercase">Punto por punto</span>
+                </div>
+                <div id="newProjConsultantsChecks" class="bg-[#101010] border border-[#2e2a28] p-2 rounded-[6px] flex flex-wrap gap-1.5"></div>
             </div>
 
             <button onclick="createNewProject()" class="pill-btn w-full py-3 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] mt-4 flex items-center justify-center gap-2">
@@ -3570,7 +3575,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261026_v1003"></script>
+  <script type="module" src="app.js?v=20261026_v1004"></script>
 
 </body>
 </html>

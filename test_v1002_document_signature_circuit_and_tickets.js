@@ -31,9 +31,9 @@ async function runTests() {
 
     // 1. Verificación de versiones desplegadas
     console.log("--- 1. VERIFICACIÓN DE VERSIONES (v1002/v1003) ---");
-    assert(/styles\.css\?v=20261026_v(1002|1003)/.test(indexHtmlContent), "index.html referencia styles.css?v=20261026_v1002 o v1003");
-    assert(/app\.js\?v=20261026_v(1002|1003)/.test(indexHtmlContent), "index.html referencia app.js?v=20261026_v1002 o v1003");
-    assert(/SW_VERSION = '20261026_v(1002|1003)'/.test(swJsContent), "sw.js define SW_VERSION = '20261026_v1002' o '20261026_v1003'");
+    assert(/styles\.css\?v=20261026_v100[2-9]/.test(indexHtmlContent), "index.html referencia styles.css v1002+");
+    assert(/app\.js\?v=20261026_v100[2-9]/.test(indexHtmlContent), "index.html referencia app.js v1002+");
+    assert(/SW_VERSION = '20261026_v100[2-9]'/.test(swJsContent), "sw.js define SW_VERSION v1002+");
 
     // 2. Verificación de CDN y Modal de Firmas en index.html
     console.log("\n--- 2. VERIFICACIÓN DE MODAL Y LIQUID GLASS EN index.html ---");

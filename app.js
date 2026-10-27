@@ -3872,7 +3872,23 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     });
 
-    function hasUnvalidatedNA(prefix) { return globalDocs.some(d => { const na = document.getElementById(`${prefix}Na${d.id}`), val = document.getElementById(`${prefix}NaValidated${d.id}`); return (na && na.checked && val && val.value !== "true"); }); }
+    function hasUnvalidatedNA(prefix) { 
+        let item = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!item && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        }
+        const allDocIds = new Set([
+            ...(globalDocs || []).map(d => d.id),
+            ...(item && item.docs ? Object.keys(item.docs) : [])
+        ]);
+        return Array.from(allDocIds).some(docId => { 
+            const na = document.getElementById(`${prefix}Na${docId}`), 
+                  val = document.getElementById(`${prefix}NaValidated${docId}`); 
+            return (na && na.checked && val && val.value !== "true"); 
+        }); 
+    }
     let infoCardHideTimer = null;
     window.closeInfoCardSafe = function(keepSelection = false) { 
         if(hasUnvalidatedNA('quick')) { window.showToast("⚠️ Tienes N/A sin validar.", true); return false; } 
@@ -5316,18 +5332,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
             const prevDocs = item.docs || {};
             item.docs = {};
-            globalDocs.forEach(d => {
-                const curDoc = prevDocs[d.id] || {};
-                const fcEl = document.getElementById(`quickFechaComp${d.id}`);
+            const allDocIds = new Set([
+                ...(globalDocs || []).map(d => d.id),
+                ...Object.keys(prevDocs)
+            ]);
+            allDocIds.forEach(docId => {
+                const curDoc = prevDocs[docId] || {};
+                const baseDoc = (globalDocs || []).find(g => g.id === docId);
+                const fcEl = document.getElementById(`quickFechaComp${docId}`);
                 const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
-                const tkEl = document.getElementById(`quickTicket${d.id}`);
+                const tkEl = document.getElementById(`quickTicket${docId}`);
                 const tkVal = tkEl ? tkEl.value.trim() : (curDoc.ticket || '');
-                item.docs[d.id] = {
+                item.docs[docId] = {
                     ...curDoc,
-                    checked: document.getElementById(`quickDoc${d.id}`)?.checked || false,
-                    obs: document.getElementById(`quickObs${d.id}`)?.value || '',
-                    na: document.getElementById(`quickNa${d.id}`)?.checked || false,
-                    naValidated: document.getElementById(`quickNaValidated${d.id}`)?.value === "true",
+                    id: docId,
+                    name: curDoc.customName || curDoc.name || (baseDoc ? baseDoc.name : 'Documento'),
+                    customName: curDoc.customName || curDoc.name || (baseDoc ? baseDoc.name : 'Documento'),
+                    isCustom: (typeof curDoc.isCustom === 'boolean') ? curDoc.isCustom : !baseDoc,
+                    checked: document.getElementById(`quickDoc${docId}`)?.checked || false,
+                    obs: document.getElementById(`quickObs${docId}`)?.value || '',
+                    na: document.getElementById(`quickNa${docId}`)?.checked || false,
+                    naValidated: document.getElementById(`quickNaValidated${docId}`)?.value === "true",
                     fecha_compromiso: fcVal,
                     ticket: tkVal
                 };
@@ -5398,15 +5423,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
     // Cálculo matemático riguroso de avance: Documentos completados entre documentos aplicables reales (LOG-06)
     window.calculateDocProgress = function(prefix) {
-        if (!globalDocs || globalDocs.length === 0) return 0;
-        let totalDocs = globalDocs.length;
+        let item = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!item && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        }
+        const allDocIds = new Set([
+            ...(globalDocs || []).map(d => d.id),
+            ...(item && item.docs ? Object.keys(item.docs) : [])
+        ]);
+
+        let totalDocs = allDocIds.size;
+        if (totalDocs === 0) return 0;
         let completedDocs = 0;
         let naValidatedDocs = 0;
 
-        globalDocs.forEach(d => {
-            const isChecked = document.getElementById(`${prefix}Doc${d.id}`)?.checked;
-            const isNa = document.getElementById(`${prefix}Na${d.id}`)?.checked;
-            const isNaValidated = document.getElementById(`${prefix}NaValidated${d.id}`)?.value === "true";
+        allDocIds.forEach(docId => {
+            const isChecked = document.getElementById(`${prefix}Doc${docId}`)?.checked;
+            const isNa = document.getElementById(`${prefix}Na${docId}`)?.checked;
+            const isNaValidated = document.getElementById(`${prefix}NaValidated${docId}`)?.value === "true";
 
             if (isNa && isNaValidated) {
                 naValidatedDocs++;
@@ -5451,11 +5487,44 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         document.getElementById(`${prefix}SliderContainer`)?.classList.add('hidden');
 
-          const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
+        const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
         const today = new Date(); today.setHours(0,0,0,0);
 
-        c.innerHTML = globalDocs.map(doc => {
-            const data = savedData ? savedData[doc.id] : null;
+        let currentItem = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!currentItem && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') currentItem = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) currentItem = p; });
+        }
+        const effectiveSavedData = savedData || (currentItem ? currentItem.docs : {}) || {};
+
+        const activeDocList = [];
+        const seenIds = new Set();
+
+        (globalDocs || []).forEach(gDoc => {
+            seenIds.add(gDoc.id);
+            const sDoc = effectiveSavedData[gDoc.id];
+            activeDocList.push({
+                id: gDoc.id,
+                name: (sDoc && (sDoc.customName || sDoc.name)) || gDoc.name,
+                isCustom: false
+            });
+        });
+
+        Object.keys(effectiveSavedData).forEach(docId => {
+            if (!seenIds.has(docId)) {
+                seenIds.add(docId);
+                const sDoc = effectiveSavedData[docId];
+                activeDocList.push({
+                    id: docId,
+                    name: (sDoc && (sDoc.customName || sDoc.name)) || 'Documento Adicional',
+                    isCustom: true
+                });
+            }
+        });
+
+        const cardsHtml = activeDocList.map(doc => {
+            const data = effectiveSavedData ? effectiveSavedData[doc.id] : null;
             const isChecked = data ? !!data.checked : false;
             const isNa = data ? !!data.na : false;
             const isNaVal = data ? !!data.naValidated : false;
@@ -5493,13 +5562,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             return `
             <div class="bg-[#101010] p-3 rounded-[10px] border border-[#3d3a39] mb-2.5 space-y-2">
                 <div class="flex justify-between items-start gap-2">
-                    <label class="flex items-start gap-2.5 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
+                    <label class="flex items-start gap-2 text-xs text-[#eeeeee] cursor-pointer flex-1 group">
                         <input type="checkbox" id="${prefix}Doc${doc.id}" onchange="handleMainCheck('${prefix}', '${doc.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4 mt-0.5 shrink-0 transition" ${currentUserRole==='Lector'?'disabled':''}>
-                        <span class="break-words whitespace-normal leading-relaxed group-hover:text-[#fafafa] transition" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
+                        <span class="break-words whitespace-normal leading-relaxed group-hover:text-[#fafafa] transition font-medium" style="word-break: break-word;">${escapeHtml(doc.name)}</span>
                     </label>
-                    <label class="flex items-center gap-1 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer shrink-0 mt-0.5">
-                        <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
-                    </label>
+                    <div class="flex items-center gap-1.5 shrink-0 mt-0.5">
+                        ${currentUserRole !== 'Lector' ? `
+                            <button type="button" onclick="window.renameProjectDocumentPrompt('${prefix}', '${doc.id}')" class="text-[#8a8380] hover:text-[#fafafa] p-0.5 rounded transition text-[11px]" title="Renombrar documento">✏️</button>
+                            ${doc.isCustom ? `<button type="button" onclick="window.deleteProjectDocumentPrompt('${prefix}', '${doc.id}')" class="text-[#8a8380] hover:text-[#ef4444] p-0.5 rounded transition text-[11px]" title="Eliminar documento adicional">🗑️</button>` : ''}
+                        ` : ''}
+                        <label class="flex items-center gap-1 font-mono text-[10px] text-[#8a8380] uppercase cursor-pointer ml-1">
+                            <input type="checkbox" id="${prefix}Na${doc.id}" onchange="handleNaCheck('${prefix}', '${doc.id}')" class="rounded-[3px] border-[#3d3a39] bg-[#1d1a18] text-[#8a8380] h-3.5 w-3.5 transition" ${currentUserRole==='Lector'?'disabled':''}>N/A
+                        </label>
+                    </div>
                 </div>
 
                 <!-- FECHA COMPROMISO Y SEMÁFORO DE AUDITORÍA (FASE 2) -->
@@ -5532,26 +5607,185 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 <input type="hidden" id="${prefix}NaValidated${doc.id}" value="false">
             </div>`;
         }).join('');
-        
-        globalDocs.forEach(doc => {
-            const data = savedData ? savedData[doc.id] : null;
+
+        const actionsFooterHtml = (currentUserRole !== 'Lector') ? `
+            <div class="mt-3 p-2.5 rounded-[8px] bg-[#141211] border border-[#2e2a28] flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-[10px] text-[#8a8380] uppercase tracking-wider font-semibold">Añadir Documentos al Proyecto</span>
+                    <span class="font-mono text-[9px] text-[#ee6018] uppercase">Múltiples Planos / Testing</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="window.addProjectDocumentPrompt('${prefix}', 'plano')" class="pill-btn py-1.5 px-2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#ee6018] text-[#ee6018] font-mono text-[10px] uppercase transition flex items-center justify-center gap-1 text-center cursor-pointer" title="Agregar otro Plano de Negocio">
+                        <span>+ Plano</span>
+                    </button>
+                    <button type="button" onclick="window.addProjectDocumentPrompt('${prefix}', 'testing')" class="pill-btn py-1.5 px-2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#3b82f6] text-[#3b82f6] font-mono text-[10px] uppercase transition flex items-center justify-center gap-1 text-center cursor-pointer" title="Agregar otra fase de Testing">
+                        <span>+ Testing</span>
+                    </button>
+                    <button type="button" onclick="window.addProjectDocumentPrompt('${prefix}', 'custom')" class="pill-btn py-1.5 px-2 bg-[#1d1a18] hover:bg-[#282523] border border-[#3d3a39] hover:border-[#fafafa] text-[#cccccc] hover:text-[#fafafa] font-mono text-[10px] uppercase transition flex items-center justify-center gap-1 text-center cursor-pointer" title="Agregar documento personalizado">
+                        <span>+ Otro Doc</span>
+                    </button>
+                </div>
+            </div>
+        ` : '';
+
+        c.innerHTML = cardsHtml + actionsFooterHtml;
+
+        activeDocList.forEach(doc => {
+            const data = effectiveSavedData ? effectiveSavedData[doc.id] : null;
             if(data) {
-                if(data.checked) document.getElementById(`${prefix}Doc${doc.id}`).checked = true;
+                if(data.checked) {
+                    const elChk = document.getElementById(`${prefix}Doc${doc.id}`);
+                    if (elChk) elChk.checked = true;
+                }
                 if(data.ticket) {
                     const tkEl = document.getElementById(`${prefix}Ticket${doc.id}`);
                     if(tkEl) tkEl.value = data.ticket;
                 }
                 if(data.na) {
-                    document.getElementById(`${prefix}Na${doc.id}`).checked = true;
+                    const elNa = document.getElementById(`${prefix}Na${doc.id}`);
+                    if (elNa) elNa.checked = true;
                     const obsCont = document.getElementById(`${prefix}ObsContainer${doc.id}`);
                     if(obsCont) obsCont.classList.remove('hidden');
-                    if(data.obs) document.getElementById(`${prefix}Obs${doc.id}`).value = data.obs;
+                    if(data.obs) {
+                        const elObs = document.getElementById(`${prefix}Obs${doc.id}`);
+                        if (elObs) elObs.value = data.obs;
+                    }
                 }
-                if(data.naValidated) document.getElementById(`${prefix}NaValidated${doc.id}`).value = "true";
-                if(data.na && data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "✓ Validado"; btn.className = "pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2"; } else if(data.na && !data.naValidated) { const btn = document.getElementById(`${prefix}BtnNa${doc.id}`); btn.classList.remove('hidden'); btn.textContent = "Validar N/A"; }
+                if(data.naValidated) {
+                    const elVal = document.getElementById(`${prefix}NaValidated${doc.id}`);
+                    if (elVal) elVal.value = "true";
+                }
+                const btn = document.getElementById(`${prefix}BtnNa${doc.id}`);
+                if (btn) {
+                    if(data.na && data.naValidated) {
+                        btn.classList.remove('hidden');
+                        btn.textContent = "✓ Validado";
+                        btn.className = "pill-btn w-full py-2 bg-[#1d1a18] border border-[#a0ca92] text-[#a0ca92] font-mono text-[10px] uppercase mt-2";
+                    } else if(data.na && !data.naValidated) {
+                        btn.classList.remove('hidden');
+                        btn.textContent = "Validar N/A";
+                    }
+                }
             }
         });
-    }
+    };
+
+    window.addProjectDocumentPrompt = function(prefix, docType) {
+        if (currentUserRole === 'Lector') return;
+        let item = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!item && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        }
+        if (!item) {
+            window.showToast("⚠️ Selecciona un proyecto para agregar documentos", true);
+            return;
+        }
+        if (!item.docs) item.docs = {};
+
+        let defaultName = "Documento Adicional";
+        if (docType === 'plano') {
+            const count = Object.values(item.docs).filter(d => (d.name || '').toLowerCase().includes('plano')).length + 1;
+            defaultName = `Plano de negocio ${count}`;
+        } else if (docType === 'testing') {
+            const count = Object.values(item.docs).filter(d => (d.name || '').toLowerCase().includes('testing')).length + 1;
+            defaultName = `Testing ${count}`;
+        }
+
+        const docName = window.prompt("Nombre del documento a agregar en este proyecto:", defaultName);
+        if (!docName || !docName.trim()) return;
+
+        const newId = `doc_custom_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        item.docs[newId] = {
+            id: newId,
+            name: docName.trim(),
+            customName: docName.trim(),
+            isCustom: true,
+            type: docType,
+            checked: false,
+            na: false,
+            naValidated: false,
+            obs: '',
+            fecha_compromiso: '',
+            ticket: '',
+            signatureCircuit: []
+        };
+
+        if (prefix === 'quick') {
+            window.silentSaveInfoCard();
+        }
+        window.renderDocChecklists(prefix, item.docs);
+        if (prefix === 'quick') window.calculateQuickProgress();
+        else window.calculateEditProgress();
+        window.saveData(false);
+        window.showToast(`✅ Documento "${docName.trim()}" agregado`);
+    };
+
+    window.renameProjectDocumentPrompt = function(prefix, docId) {
+        if (currentUserRole === 'Lector') return;
+        let item = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!item && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        }
+        if (!item) return;
+        if (!item.docs) item.docs = {};
+        const curDoc = item.docs[docId] || {};
+        const baseDoc = (globalDocs || []).find(g => g.id === docId);
+        const curName = curDoc.customName || curDoc.name || (baseDoc ? baseDoc.name : 'Documento');
+
+        const newName = window.prompt("Editar nombre de este documento:", curName);
+        if (!newName || !newName.trim() || newName.trim() === curName) return;
+
+        if (!item.docs[docId]) {
+            item.docs[docId] = {
+                id: docId,
+                checked: false,
+                na: false,
+                naValidated: false,
+                obs: '',
+                fecha_compromiso: '',
+                ticket: '',
+                signatureCircuit: []
+            };
+        }
+        item.docs[docId].name = newName.trim();
+        item.docs[docId].customName = newName.trim();
+
+        if (prefix === 'quick') {
+            window.silentSaveInfoCard();
+        }
+        window.renderDocChecklists(prefix, item.docs);
+        window.saveData(false);
+        window.showToast(`✅ Documento renombrado a "${newName.trim()}"`);
+    };
+
+    window.deleteProjectDocumentPrompt = function(prefix, docId) {
+        if (currentUserRole === 'Lector') return;
+        let item = (prefix === 'quick') ? getSelectedItem() : null;
+        if (!item && prefix === 'edit' && currentSelection && currentSelection.id) {
+            let { type, id } = currentSelection;
+            if (type === 'direct-project') item = appData.directProjects.find(p => p.id === id);
+            else (appData.modules || []).forEach(m => { const p = (m.projects || []).find(proj => proj.id === id); if (p) item = p; });
+        }
+        if (!item || !item.docs || !item.docs[docId]) return;
+
+        const docName = item.docs[docId].customName || item.docs[docId].name || 'este documento';
+        if (!window.confirm(`¿Estás seguro de eliminar "${docName}" de este proyecto?`)) return;
+
+        delete item.docs[docId];
+
+        if (prefix === 'quick') {
+            window.silentSaveInfoCard();
+        }
+        window.renderDocChecklists(prefix, item.docs);
+        if (prefix === 'quick') window.calculateQuickProgress();
+        else window.calculateEditProgress();
+        window.saveData(false);
+        window.showToast(`🗑️ Documento "${docName}" eliminado`);
+    };
 
     window.saveEditChanges = function() { 
       if (currentUserRole === 'Lector') return;
@@ -5598,18 +5832,27 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           const prevDocs = item.docs || {};
           const canAudit = (typeof window.canManageAuditAndStrategy === 'function') ? window.canManageAuditAndStrategy() : (currentUserRole === 'Supremo');
           item.docs = {}; 
-          globalDocs.forEach(d => { 
-            const curDoc = prevDocs[d.id] || {};
-            const fcEl = document.getElementById(`editFechaComp${d.id}`);
+          const allDocIds = new Set([
+              ...(globalDocs || []).map(d => d.id),
+              ...Object.keys(prevDocs)
+          ]);
+          allDocIds.forEach(docId => { 
+            const curDoc = prevDocs[docId] || {};
+            const baseDoc = (globalDocs || []).find(g => g.id === docId);
+            const fcEl = document.getElementById(`editFechaComp${docId}`);
             const fcVal = canAudit ? (fcEl ? fcEl.value : (curDoc.fecha_compromiso || '')) : (curDoc.fecha_compromiso || '');
-            const tkEl = document.getElementById(`editTicket${d.id}`);
+            const tkEl = document.getElementById(`editTicket${docId}`);
             const tkVal = tkEl ? tkEl.value.trim() : (curDoc.ticket || '');
-            item.docs[d.id] = { 
+            item.docs[docId] = { 
               ...curDoc,
-              checked: document.getElementById(`editDoc${d.id}`)?.checked || false, 
-              obs: document.getElementById(`editObs${d.id}`)?.value || '', 
-              na: document.getElementById(`editNa${d.id}`)?.checked || false, 
-              naValidated: document.getElementById(`editNaValidated${d.id}`)?.value === "true",
+              id: docId,
+              name: curDoc.customName || curDoc.name || (baseDoc ? baseDoc.name : 'Documento'),
+              customName: curDoc.customName || curDoc.name || (baseDoc ? baseDoc.name : 'Documento'),
+              isCustom: (typeof curDoc.isCustom === 'boolean') ? curDoc.isCustom : !baseDoc,
+              checked: document.getElementById(`editDoc${docId}`)?.checked || false, 
+              obs: document.getElementById(`editObs${docId}`)?.value || '', 
+              na: document.getElementById(`editNa${docId}`)?.checked || false, 
+              naValidated: document.getElementById(`editNaValidated${docId}`)?.value === "true",
               fecha_compromiso: fcVal,
               ticket: tkVal
             }; 
@@ -6264,7 +6507,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.calculateEditProgress(); 
         document.getElementById('editSlider').value = item.progress || 0;
         const consultNames = getProjectConsultants(item); 
-        document.querySelectorAll('.editProjCons-chk').forEach(chk => chk.checked = consultNames.includes(chk.value));
+        document.querySelectorAll('.editProjCons-chk').forEach(chk => {
+            chk.checked = consultNames.includes(chk.value);
+            if (chk.parentElement) chk.parentElement.classList.toggle('active', chk.checked);
+        });
       }
       if (isModule) { 
         document.getElementById('editModuleFields').classList.remove('hidden'); 
@@ -6515,7 +6761,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       if (document.getElementById('newProjDeadline')) document.getElementById('newProjDeadline').value = '';
       if (document.getElementById('newProjStatus')) document.getElementById('newProjStatus').value = 'Autorizado, sin iniciar';
       if (document.getElementById('newProjPriority')) document.getElementById('newProjPriority').value = '1';
-      document.querySelectorAll('.newProjCons-chk').forEach(cb => cb.checked = false); 
+      document.querySelectorAll('.newProjCons-chk').forEach(cb => {
+          cb.checked = false;
+          if (cb.parentElement) cb.parentElement.classList.remove('active');
+      }); 
       document.querySelectorAll('.newProjSecMod-chk').forEach(cb => cb.checked = false);
       document.querySelectorAll('.newProjComp-chk').forEach(cb => cb.checked = false);
       if (typeof window.populateCompanyChecklist === 'function') window.populateCompanyChecklist('newProj', []);
@@ -7349,9 +7598,19 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
     window.populateConsultantSelects = function() {
       const all = Object.keys(consultants).filter(k => consultants[k].role !== 'Lector');
-      const mkChk = (pr) => all.map(n => `<label class="flex items-center gap-3 text-xs font-normal text-[#eeeeee] cursor-pointer p-2.5 bg-[#101010] hover:bg-[#1d1a18] rounded-[3px] transition border border-[#3d3a39] hover:border-[#4d4947]"><input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk rounded-[3px] border-[#3d3a39] bg-[#101010] text-[#ee6018] focus:ring-[#ee6018] h-4 w-4"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${consultants[n].color}"></span>${escapeHtml(n)}</label>`).join('');
-      document.getElementById('editConsultantsChecks').innerHTML = mkChk('editProjCons'); document.getElementById('newProjConsultantsChecks').innerHTML = mkChk('newProjCons');
-    }
+      const mkChips = (pr) => all.map(n => {
+        const cColor = consultants[n]?.color || '#ee6018';
+        return `<label class="filter-chip cursor-pointer select-none inline-flex items-center gap-1.5 py-1.5 px-2.5 rounded-[4px] border border-[#3d3a39] bg-[#1a1816] hover:bg-[#24211f] text-[11px] font-mono uppercase text-[#cccccc] transition">
+          <input type="checkbox" value="${escapeHtml(n)}" class="${pr}-chk hidden" onchange="this.parentElement.classList.toggle('active', this.checked)">
+          <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${cColor};"></span>
+          <span>${escapeHtml(n)}</span>
+        </label>`;
+      }).join('');
+      const elEdit = document.getElementById('editConsultantsChecks');
+      const elNew = document.getElementById('newProjConsultantsChecks');
+      if (elEdit) elEdit.innerHTML = mkChips('editProjCons'); 
+      if (elNew) elNew.innerHTML = mkChips('newProjCons');
+    };
     let activeConsultantRoleFilter = 'ALL';
     window.setConsultantRoleFilter = function(role) {
         activeConsultantRoleFilter = role;
@@ -16727,7 +16986,7 @@ window.openSignatureWorkflowModal = async function(prefix, docId, overrideItem =
     }
     const docData = item.docs[docId];
     const gDoc = (globalDocs || []).find(d => d.id === docId);
-    const docName = gDoc ? gDoc.name : docId;
+    const docName = docData.customName || docData.name || (gDoc ? gDoc.name : docId);
 
     // Circuito predeterminado inteligente si está vacío
     if (!Array.isArray(docData.signatureCircuit) || docData.signatureCircuit.length === 0) {
@@ -17069,12 +17328,24 @@ window.handleDocPdfFileSelected = async function(event) {
         return;
     }
 
+    window.ensurePdfLibReady = async function() {
+        if (typeof PDFLib !== 'undefined' && PDFLib.PDFDocument) return true;
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+            s.onload = () => resolve(typeof PDFLib !== 'undefined');
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    };
+
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
             const arrayBuffer = e.target.result;
             const uint8 = new Uint8Array(arrayBuffer);
 
+            await window.ensurePdfLibReady();
             if (typeof PDFLib === 'undefined') {
                 window.showToast("⚠️ Biblioteca PDFLib no cargada.", true);
                 return;
@@ -17332,6 +17603,12 @@ window.stampSignatureOnActiveDocument = async function() {
     }
 
     try {
+        await window.ensurePdfLibReady();
+        if (typeof PDFLib === 'undefined') {
+            window.showToast("⚠️ Biblioteca PDFLib no disponible para firmar.", true);
+            return;
+        }
+
         const padCanvas = document.getElementById('signaturePadCanvas');
         const signaturePngDataUrl = padCanvas.toDataURL('image/png');
 
