@@ -1424,7 +1424,7 @@
             <button onclick="closeInfoCardSafe()" class="text-[#4d4947] hover:text-[#101010] p-1 rounded-[3px] hover:bg-[#101010]/10 transition cursor-pointer" title="Cerrar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
           </div>
         </div>
-        <h3 id="infoTitle" class="text-[20px] font-medium text-[#101010] tracking-[-0.03em] leading-[1.2] break-words">Nombre</h3>
+        <h3 id="infoTitle" class="text-[20px] font-medium text-[#101010] tracking-[-0.03em] leading-[1.2] break-words [overflow-wrap:anywhere] line-clamp-3 min-w-0">Nombre</h3>
       </div>
 
       <!-- CONTEXTO: EMPRESA Y MÓDULO BASE EN LA MISMA LÍNEA -->
@@ -2151,7 +2151,7 @@
             
             <div class="space-y-1.5">
               <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Nombre</label>
-              <input type="text" id="editName" class="w-full liquid-input rounded-[3px] p-3 text-sm">
+              <input type="text" id="editName" maxlength="120" class="w-full liquid-input rounded-[3px] p-3 text-sm">
             </div>
             
             <div id="editProjectFields" class="space-y-3 hidden">
@@ -2455,7 +2455,7 @@
 
             <div class="space-y-1.5">
                 <label class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-wider">Nombre del Proyecto</label>
-                <input type="text" id="newProjName" placeholder="Ej. Implementación Módulo Contable" class="w-full liquid-input rounded-[3px] p-3 text-sm">
+                <input type="text" id="newProjName" maxlength="120" placeholder="Ej. Implementación Módulo Contable" class="w-full liquid-input rounded-[3px] p-3 text-sm">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

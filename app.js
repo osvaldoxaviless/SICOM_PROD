@@ -570,8 +570,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js");
-            const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js");
-            const { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
+            const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js");
+            const { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, deleteDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
             
             globalDoc = doc; globalSetDoc = setDoc; globalGetDoc = getDoc; globalDeleteDoc = deleteDoc;
 
@@ -585,7 +585,46 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             };
 
             const app = initializeApp(firebaseConfig);
-            auth = getAuth(app); db = getFirestore(app); appId = 'sicom-stgt';
+            auth = getAuth(app);
+            // Persistencia offline: cola durable de escrituras en IndexedDB (se reenvian al volver la red)
+            try {
+                db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+            } catch (persistErr) {
+                console.warn('[SICOM] Persistencia Firestore no disponible, usando modo estandar:', persistErr && persistErr.code);
+                db = getFirestore(app);
+            }
+            appId = 'sicom-stgt';
+
+            // --- EXPULSION ROBUSTA DE SESION (token revocado / usuario deshabilitado) ---
+            const AUTH_FATAL = new Set(['permission-denied', 'unauthenticated', 'auth/user-token-expired', 'auth/user-disabled',
+                'auth/user-not-found', 'auth/id-token-revoked', 'auth/invalid-user-token', 'auth/requires-recent-login']);
+            window._sicomIsAuthFatal = (code) => !!code && AUTH_FATAL.has(String(code).replace('firestore/', ''));
+            let isExpelling = false;
+            window._sicomExpel = function expelSession(reason) {
+                if (isExpelling) return;
+                isExpelling = true;
+                window._sicomExpelled = true;
+                console.info('[SICOM] Sesion finalizada:', reason);
+                try { if (unsubscribeSnapshot) unsubscribeSnapshot(); } catch (_) {}
+                unsubscribeSnapshot = null;
+                try { clearTimeout(cloudWriteTimer); } catch (_) {}
+                cloudWritePending = false;
+                isFirebaseReady = false; globalSetDoc = null;
+                try { clearTimeout(inactivityTimeout); } catch (_) {}
+                ['sicom_active_user', 'sicom_author', 'sicom_role'].forEach(k => localStorage.removeItem(k));
+                localAuthor = ''; currentUserRole = 'Consultor';
+                currentSelection = { type: null, id: null };
+                try { if (typeof window.closeInfoCardSafe === 'function') window.closeInfoCardSafe(true); } catch (_) {}
+                try { if (typeof window.closePriorityDrawer === 'function') window.closePriorityDrawer(); } catch (_) {}
+                const loader = document.getElementById('cloudLoader');
+                if (loader) { loader.style.opacity = '0'; loader.style.display = 'none'; }
+                showLoginScreen();
+                if (typeof window.showToast === 'function') window.showToast('🔒 Tu sesión fue cerrada por un administrador. Inicia sesión de nuevo.', true);
+                setTimeout(() => { isExpelling = false; }, 1500);
+            };
+            onAuthStateChanged(auth, (user) => {
+                if (!user && isFirebaseReady) window._sicomExpel('auth-state-null');
+            });
 
             await signInAnonymously(auth);
 
@@ -593,7 +632,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                 isFirebaseReady = true;
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
                 
+                // N snapshots consecutivos -> 1 solo repintado por frame
+                let _uiRaf = 0;
+                const scheduleRefreshUI = () => {
+                    if (_uiRaf) return;
+                    _uiRaf = requestAnimationFrame(() => { _uiRaf = 0; try { refreshUI(); } catch (e) { console.error('refreshUI', e); } });
+                };
                 unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.metadata && snapshot.metadata.hasPendingWrites) return; // eco de mi propia escritura
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         
@@ -616,12 +662,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                             }
                         } else {
                             console.warn("⚠️ [SICOM Cloud] Portafolio incompleto detectado en nube (" + cloudProjCount + " proys). Restaurando los 80 proyectos maestros a la nube...");
-                            appData = JSON.parse(JSON.stringify(defaultTestingData));
+                            // Seguro: NUNCA sobrescribir la nube automaticamente. Conservar el estado local si esta completo;
+                            // si no, usar datos maestros solo en local. Restauracion manual con forceCloudSync().
+                            const localProjCount = (Array.isArray(appData?.directProjects) ? appData.directProjects.length : 0) +
+                                (Array.isArray(appData?.modules) ? appData.modules.reduce((acc, m) => acc + (Array.isArray(m?.projects) ? m.projects.length : 0), 0) : 0);
+                            if (!(Array.isArray(appData?.modules) && appData.modules.length >= 12 && localProjCount >= 50)) {
+                                appData = JSON.parse(JSON.stringify(defaultTestingData));
+                            }
                             window._sicomCloudHydrated = true;
                             try { localStorage.setItem('sicom_data', JSON.stringify(appData)); } catch (_) {}
-                            if (globalSetDoc && docRef) {
-                                globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false });
-                            }
+                            if (typeof window.showToast === 'function') window.showToast('⚠️ La nube está incompleta. No se sobrescribió; usa "Rescate" si deseas restaurarla.', true);
                         }
                         
                         if(data.consultants && Object.keys(data.consultants).length > 2) {
@@ -709,7 +759,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         }
                         
                         if(localAuthor) {
-                            refreshUI();
+                            scheduleRefreshUI();
                             if (!window._initialCloudRecentered) {
                                 window._initialCloudRecentered = true;
                                 setTimeout(() => { try { window.recenterCanvas(); } catch (e) {} }, 80);
@@ -722,7 +772,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         loadLocalFallback(); 
                         setDoc(docRef, { appData, consultants, globalDocs }, { merge: true });
                     }
-                }, (error) => { console.error("Error Firebase:", error); loadLocalFallback(); });
+                }, (error) => {
+                    if (window._sicomIsAuthFatal && window._sicomIsAuthFatal(error && error.code)) {
+                        window._sicomExpel(error.code);
+                    } else {
+                        console.warn("[SICOM] Firestore listener:", error && error.code, error && error.message);
+                        loadLocalFallback();
+                    }
+                });
             }
         } catch (e) { 
             console.error("Fallo inicialización Firebase:", e); 
@@ -1388,6 +1445,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             logActivity('login', 'Control de Accesos', `Inició sesión en el sistema`, val);
         }
         
+        // Tras una expulsion de sesion, recargar para re-autenticar y re-suscribir el listener
+        if (window._sicomExpelled) { setTimeout(() => location.reload(), 250); return; }
+
         // Ocultar overlay de forma inmediata y disparar la interfaz principal
         const overlay = document.getElementById('loginOverlay'); 
         if (overlay) {
@@ -1696,6 +1756,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     });
 
     window.logout = function() { 
+        try { window.flushCloudWrite && window.flushCloudWrite(); } catch (_) {}
+        try { if (unsubscribeSnapshot) unsubscribeSnapshot(); } catch (_) {}
+        unsubscribeSnapshot = null;
         document.getElementById('cloudLoader').style.display = 'flex'; 
         document.getElementById('cloudLoader').style.opacity = '1'; 
         localStorage.removeItem('sicom_active_user');
@@ -2421,8 +2484,37 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             return;
         }
         const docRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
-        globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false }).catch(e => console.warn('Firestore write:', e));
+        if (!navigator.onLine) { window.queueBackgroundSync(); }
+        globalSetDoc(docRef, { appData, consultants, globalDocs }, { merge: false })
+            .then(() => { if (window.SICOM_IDB) window.SICOM_IDB.save('outbox', { dirty: false, at: Date.now() }).catch(() => {}); })
+            .catch(e => {
+                if (window._sicomIsAuthFatal && window._sicomIsAuthFatal(e && e.code)) return window._sicomExpel(e.code);
+                console.warn('Firestore write:', e);
+                window.queueBackgroundSync();
+            });
     };
+
+    // Outbox durable + Background Sync (Chromium). El SW despierta una pestana abierta para vaciar la cola.
+    window.queueBackgroundSync = async function () {
+        try {
+            if (window.SICOM_IDB) await window.SICOM_IDB.save('outbox', { dirty: true, at: Date.now() });
+            if ('serviceWorker' in navigator) {
+                const reg = await navigator.serviceWorker.ready;
+                if (reg && 'sync' in reg) await reg.sync.register('sicom-sync');
+            }
+        } catch (e) { console.warn('[SICOM] Background Sync no disponible:', e); }
+    };
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (ev) => {
+            if (ev.data && ev.data.type === 'SICOM_FLUSH') window.flushCloudWrite(true);
+        });
+    }
+    window.addEventListener('online', async () => {
+        try {
+            const ob = window.SICOM_IDB ? await window.SICOM_IDB.get('outbox') : null;
+            if (ob && ob.dirty) window.flushCloudWrite(true);
+        } catch (_) {}
+    });
 
     window.scheduleCloudWrite = function() {
         cloudWritePending = true;
@@ -6117,7 +6209,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             chip.className = "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded-[3px] text-[#eeeeee] bg-[#1d1a18] hover:bg-[#101010] border transition";
             chip.style.borderColor = parentColor || '#3d3a39';
             chip.title = "Ir al proyecto vinculado";
-            chip.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${parentColor}"></span><span>🔗 ${escapeHtml(proj.name)}</span><span class="text-[9px] text-[#8a8380] ml-0.5">↗</span>`;
+            chip.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${parentColor}"></span><span class="truncate max-w-[200px]" title="${escapeHtml(proj.name)}">🔗 ${escapeHtml(proj.name)}</span><span class="text-[9px] text-[#8a8380] ml-0.5">↗</span>`;
             chip.onclick = () => {
               const modKey = type === 'module' ? id : 'hub-direct';
               if (collapsedModules.has(modKey)) {
@@ -6428,7 +6520,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (typeof window.setNoteTag === 'function') window.setNoteTag('comentario', 'info');
         }
       }
-      document.getElementById('infoTitle').textContent = item.name; 
+      document.getElementById('infoTitle').textContent = item.name; document.getElementById('infoTitle').title = item.name; 
       const progPill = document.getElementById('infoProgressPill');
       if (progPill) {
         if (type === 'project' || type === 'direct-project') {
@@ -8201,7 +8293,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             const tk = (typeof getProjectTicket === 'function' ? getProjectTicket(p) : (p.ticket || '')).trim().replace(/^#+/, '');
             const tkBadge = tk ? `<span class="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-[3px] bg-yellow-200 text-yellow-900 font-semibold border border-yellow-400 shrink-0">🎫 #${escapeHtml(tk)}</span>` : '';
             const prioVal = parseInt(p.priority, 10) || 1;
-            return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]'} rounded-[10px] p-3.5 flex gap-3 transition-colors cursor-pointer group select-none" style="border-left: 3px solid ${over ? '#ee6018' : cData.color};" onclick="window.selectNode('${p.pType}', '${p.id}')"><div class="flex flex-col items-center shrink-0 w-9 pt-0.5" onclick="event.stopPropagation()"><div class="font-mono text-base font-bold text-center" style="color: ${cData.color}">*${prioVal}</div><div class="flex items-center mt-1 bg-[#101010] border border-[#3d3a39] rounded-[3px] overflow-hidden"><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', -1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition" title="Subir prioridad (ej. *2 ➔ *1)">▲</button><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', 1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition border-l border-[#3d3a39]" title="Bajar prioridad (ej. *1 ➔ *2)">▼</button></div></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-1 mb-1"><h4 class="text-sm font-normal text-[#eeeeee] leading-tight group-hover:text-[#fafafa] transition truncate">${over ? '⚠️ ' : ''}${escapeHtml(p.name)}</h4><div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()"><button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] hover:bg-[#ee6018] hover:text-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[8px] uppercase transition" title="Ver en el mapa">Mapa ↗</button></div></div><p class="font-mono text-[10px] text-[#8a8380] uppercase truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-1.5 mt-2">${tkBadge}${compBadges}<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0]">${sIco} ${p.status || 'Pendiente'} (${p.progress || 0}%)</span>${p.deadline ? `<span class="font-mono text-[9px] uppercase ${over ? 'text-[#ee6018] border-[#ee6018]/50' : 'text-[#b8b3b0] border-[#3d3a39]'} bg-[#101010] border px-2 py-0.5 rounded-[3px]">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
+            return `<div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]' : 'border-[#3d3a39] hover:border-[#eeeeee]'} rounded-[10px] p-3.5 flex gap-3 transition-colors cursor-pointer group select-none" style="border-left: 3px solid ${over ? '#ee6018' : cData.color};" onclick="window.selectNode('${p.pType}', '${p.id}')"><div class="flex flex-col items-center shrink-0 w-9 pt-0.5" onclick="event.stopPropagation()"><div class="font-mono text-base font-bold text-center" style="color: ${cData.color}">*${prioVal}</div><div class="flex items-center mt-1 bg-[#101010] border border-[#3d3a39] rounded-[3px] overflow-hidden"><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', -1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition" title="Subir prioridad (ej. *2 ➔ *1)">▲</button><button type="button" onclick="window.adjustProjectPriority('${p.pType}', '${p.id}', 1, event)" class="px-1 py-0.5 hover:bg-[#3d3a39] text-[#b8b3b0] hover:text-[#fafafa] text-[9px] leading-none transition border-l border-[#3d3a39]" title="Bajar prioridad (ej. *1 ➔ *2)">▼</button></div></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between gap-1 mb-1"><h4 class="text-sm font-normal text-[#eeeeee] leading-tight group-hover:text-[#fafafa] transition truncate min-w-0 flex-1" title="${escapeHtml(p.name)}">${over ? '⚠️ ' : ''}${escapeHtml(p.name)}</h4><div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()"><button type="button" onclick="window.jumpToMapNode('${p.pType}', '${p.id}', event)" class="px-1.5 py-0.5 rounded-[3px] bg-[#101010] hover:bg-[#ee6018] hover:text-[#101010] border border-[#3d3a39] text-[#b8b3b0] font-mono text-[8px] uppercase transition" title="Ver en el mapa">Mapa ↗</button></div></div><p class="font-mono text-[10px] text-[#8a8380] uppercase truncate">└ ${escapeHtml(p.parentName)}</p><div class="flex flex-wrap items-center gap-1.5 mt-2">${tkBadge}${compBadges}<span class="font-mono text-[9px] uppercase px-2 py-0.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#b8b3b0]">${sIco} ${p.status || 'Pendiente'} (${p.progress || 0}%)</span>${p.deadline ? `<span class="font-mono text-[9px] uppercase ${over ? 'text-[#ee6018] border-[#ee6018]/50' : 'text-[#b8b3b0] border-[#3d3a39]'} bg-[#101010] border px-2 py-0.5 rounded-[3px]">📅 ${p.deadline}</span>` : ''}</div></div></div>`;
         }).join('');
 
         let h = '';
@@ -8638,19 +8730,31 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.logSystemActivity === 'function') {
             window.logSystemActivity(`Prioridad de "${target.name}" actualizada a *${newPrio}`, 'priority');
         }
-        window.saveData(false);
-
-        if (typeof window.renderPriorityBoard === 'function' && document.getElementById('priorityBoardView') && !document.getElementById('priorityBoardView').classList.contains('hidden')) {
-            window.renderPriorityBoard();
+        // Rafaga de cambios (p. ej. 20 clics seguidos): los datos se mutan al instante, pero guardado y repintado
+        // se agrupan en UN solo ciclo por frame para no bloquear el hilo principal.
+        const batch = window._prioBatch || (window._prioBatch = { raf: 0, ids: new Map(), last: null });
+        batch.ids.set(id, type);
+        batch.last = { name: target.name, prio: newPrio };
+        if (!batch.raf) {
+            batch.raf = requestAnimationFrame(() => {
+                const b = window._prioBatch; b.raf = 0;
+                const ids = b.ids; const last = b.last; b.ids = new Map();
+                try {
+                    window.saveData(false);
+                    if (typeof window.renderPriorityBoard === 'function' && document.getElementById('priorityBoardView') && !document.getElementById('priorityBoardView').classList.contains('hidden')) {
+                        window.renderPriorityBoard();
+                    }
+                    if (typeof window.renderPriorityDrawer === 'function' && isPriorityDrawerOpen) {
+                        window.renderPriorityDrawer();
+                    }
+                    window.renderMindMap();
+                    if (currentSelection && ids.has(currentSelection.id) && typeof window.showInfoCard === 'function') {
+                        window.showInfoCard(ids.get(currentSelection.id), currentSelection.id);
+                    }
+                    if (last) window.showToast(`🎯 Prioridad de "${last.name}" cambiada a *${last.prio}`, false);
+                } catch (e) { console.error('[SICOM] refresco de prioridad', e); }
+            });
         }
-        if (typeof window.renderPriorityDrawer === 'function' && isPriorityDrawerOpen) {
-            window.renderPriorityDrawer();
-        }
-        window.renderMindMap();
-        if (currentSelection && currentSelection.id === id && typeof window.showInfoCard === 'function') {
-            window.showInfoCard(type, id);
-        }
-        window.showToast(`🎯 Prioridad de "${target.name}" cambiada a *${newPrio}`, false);
     };
 
     window.jumpToMapNode = function(type, id, event) {
@@ -10387,6 +10491,21 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           canvasGroup.innerHTML = '';
           canvasGroup.appendChild(mapFrag);
       }
+
+      // Recorte por ancho real en pixeles (el recorte por caracteres no cubre letras anchas)
+      canvasGroup.querySelectorAll('text.svg-text-bold').forEach(t => {
+          try {
+              const rect = t.parentNode && t.parentNode.querySelector('rect');
+              if (!rect || !t.x.baseVal.numberOfItems) return;
+              const maxW = rect.width.baseVal.value - t.x.baseVal.getItem(0).value - 14;
+              if (!(maxW > 20)) return;
+              let txt = t.textContent;
+              while (txt.length > 4 && t.getComputedTextLength() > maxW) {
+                  txt = txt.slice(0, -2);
+                  t.textContent = txt.replace(/\s+$/, '') + '…';
+              }
+          } catch (_) {}
+      });
 
       // Calcular caja delimitadora exacta de los módulos y proyectos filtrados para auto-enfoque de cámara
       if (!isDefaultState) {
@@ -13042,10 +13161,17 @@ window.renderDailyTasks = function() {
             });
             isCollapsingAnim = true;
             setTimeout(() => {
-                collapsedModules.add(modId);
-                isCollapsingAnim = false;
-                window.updateCollapseAllButtonState();
-                window.renderMindMap();
+                try {
+                    collapsedModules.add(modId);
+                    window.updateCollapseAllButtonState();
+                    window.renderMindMap();
+                } catch (e) {
+                    console.error('[SICOM] toggleModuleCollapse', e);
+                    if (canvasGroup) canvasGroup.querySelectorAll('.proj-animate-out,.connector-animate-out')
+                        .forEach(el => el.classList.remove('proj-animate-out', 'connector-animate-out'));
+                } finally {
+                    isCollapsingAnim = false; // siempre se libera
+                }
             }, 270);
         }
     };
@@ -16409,7 +16535,7 @@ window.renderExecutiveTable = function() {
             </td>
             <td class="p-3 font-medium text-[#eeeeee]">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="hover:text-[#ee6018] transition font-sans text-xs">${escapeHtml(p.name)}</span>
+                    <span class="hover:text-[#ee6018] transition font-sans text-xs line-clamp-2 [overflow-wrap:anywhere] max-w-[320px]" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
                     ${p.ticket ? `<span class="bg-yellow-200 text-yellow-900 font-medium border border-yellow-400 px-1 py-0.2 rounded text-[9px]">#${escapeHtml(p.ticket)}</span>` : ''}
                     ${p.area_solicitante === 'Dir. General' ? '<span class="bg-[#ef4444] text-white px-1 py-0.2 rounded text-[8px] font-bold">DIR. GEN</span>' : ''}
                 </div>
