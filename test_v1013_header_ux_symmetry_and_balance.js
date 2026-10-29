@@ -112,10 +112,12 @@ runTest('7. styles.css unifica tipografía (BUSCAR... y DASHBOARD) y oculta en m
     assert(html.includes('placeholder="BUSCAR..."'), 'Placeholder unificado a BUSCAR... en mayúsculas');
 });
 
-// 8. Sincronización de versión v1015
-runTest('8. Sincronización de versión 20261027_v1015 en index.html y sw.js', () => {
-    assert(html.includes('app.js?v=20261027_v1015'), 'index.html apunta a app.js?v=20261027_v1015');
-    assert(sw.includes("const SW_VERSION = '20261027_v1015';"), 'sw.js tiene SW_VERSION = 20261027_v1015');
+// 8. Sincronización de versión en index.html y sw.js
+runTest('8. Sincronización de versión en index.html y sw.js', () => {
+    const swMatch = sw.match(/const SW_VERSION = '([^']+)';/);
+    assert(swMatch, 'sw.js debe definir SW_VERSION');
+    const swVersion = swMatch[1];
+    assert(html.includes(`app.js?v=${swVersion}`), `index.html debe apuntar a app.js?v=${swVersion}`);
 });
 
 console.log('\n===================================================================================');

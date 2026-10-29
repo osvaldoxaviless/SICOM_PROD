@@ -3,7 +3,7 @@
  * EO/SA — Enterprise Operations & Systems Architecture // STGT
  */
 
-const SW_VERSION = '20261027_v1015';
+const SW_VERSION = '20261028_v1016';
 const STATIC_CACHE_NAME = `eosa-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA

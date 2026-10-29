@@ -1473,56 +1473,52 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             return;
         }
 
-        const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
-        const finalStatus = isSuper ? true : 'pending';
+        const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
         const now = new Date();
         const dateStr = now.toLocaleDateString('es-MX');
         const timeStr = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+
+        const applyTaskValidation = (t, projName, projId) => {
+            const isSelfAssigned = isSameUser(t.assignee, localAuthor) && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+            const canValidateDirectly = isSuper || isSelfAssigned;
+            t.done = canValidateDirectly ? true : 'pending';
+            t.feedback = feedback;
+            if (canValidateDirectly) {
+                t.validatedDate = dateStr; 
+                t.validatedTime = timeStr; 
+                t.validatedBy = localAuthor;
+                const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
+                logActivity(projId, projName, `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
+                window.sendExternalAlert('TASK_VALIDATED', { project: projName, task: t.text, validatedBy: localAuthor, consultant: t.assignee || 'Consultor' });
+                window.triggerCelebration();
+            } else {
+                t.submittedDate = dateStr; 
+                t.submittedTime = timeStr; 
+                t.submittedBy = localAuthor;
+                logActivity(projId, projName, `Envió tarea a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
+                window.sendExternalAlert('VALIDATION_SUBMITTED', { project: projName, task: t.text, feedback: feedback, consultant: localAuthor });
+            }
+        };
         
         if (taskType === 'global') {
-            const t = appData.globalTasks.find(x => x.id === taskId);
+            const t = (appData.globalTasks || []).find(x => x.id === taskId);
             if (t) {
-                t.done = finalStatus;
-                t.feedback = feedback;
-                if (isSuper) {
-                    t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
-                    const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
-                    logActivity('global', 'General', `Validó tarea general de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
-                    window.sendExternalAlert('TASK_VALIDATED', { project: 'General', task: t.text, validatedBy: localAuthor, consultant: t.assignee || 'Consultor' });
-                } else {
-                    t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
-                    logActivity('global', 'General', `Envió tarea a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
-                    window.sendExternalAlert('VALIDATION_SUBMITTED', { project: 'General', task: t.text, feedback: feedback, consultant: localAuthor });
-                }
+                applyTaskValidation(t, 'General', 'global');
                 window.saveData(false);
             }
         } else if (taskType === 'daily') {
-            const t = appData.dailyTasks.find(x => x.id === taskId);
+            const t = (appData.dailyTasks || []).find(x => x.id === taskId);
             if (t) {
-                t.done = finalStatus;
-                t.feedback = feedback;
-                if (isSuper) {
-                    t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
-                    const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
-                    logActivity('daily', 'Actividades Diarias', `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
-                } else {
-                    t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
-                    logActivity('daily', 'Actividades Diarias', `Envió tarea diaria a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
-                    window.sendExternalAlert('VALIDATION_SUBMITTED', {
-                        project: 'Actividad Diaria',
-                        task: t.text,
-                        feedback: feedback,
-                        consultant: localAuthor
-                    });
-                }
+                applyTaskValidation(t, 'Actividades Diarias', 'daily');
                 window.saveData(false);
             }
         } else {
             let item = null;
             if (projectId) {
-                item = appData.directProjects.find(p => p.id === projectId);
+                item = (appData.directProjects || []).find(p => p.id === projectId);
                 if (!item) {
-                    appData.modules.forEach(m => {
+                    (appData.modules || []).forEach(m => {
                         const p = (m.projects||[]).find(proj => proj.id === projectId);
                         if (p) item = p;
                     });
@@ -1534,28 +1530,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             if (item && item.tasks) {
                 const t = item.tasks.find(x => x.id === taskId);
                 if (t) {
-                    t.done = finalStatus;
-                    t.feedback = feedback;
-                    if (isSuper) {
-                        t.validatedDate = dateStr; t.validatedTime = timeStr; t.validatedBy = localAuthor;
-                        const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${dateStr} ${timeStr}]` : '';
-                        logActivity(item.id, item.name, `Validó tarea de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}`, localAuthor);
-                        window.sendExternalAlert('TASK_VALIDATED', {
-                            project: item.name,
-                            task: t.text,
-                            validatedBy: localAuthor,
-                            consultant: t.assignee || 'Consultor'
-                        });
-                    } else {
-                        t.submittedDate = dateStr; t.submittedTime = timeStr; t.submittedBy = localAuthor;
-                        logActivity(item.id, item.name, `Envió tarea a validación: "${t.text}" (Evidencia: "${feedback}")`, localAuthor);
-                        window.sendExternalAlert('VALIDATION_SUBMITTED', {
-                            project: item.name,
-                            task: t.text,
-                            feedback: feedback,
-                            consultant: localAuthor
-                        });
-                    }
+                    applyTaskValidation(t, item.name, item.id);
                     window.saveData(false); 
                     window.renderTasksQuick(item); 
                 }
@@ -1563,7 +1538,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         
         window.showToast("Enviado correctamente");
-        window.triggerCelebration();
         window.closeTaskFeedbackModal();
         if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
@@ -5052,14 +5026,17 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if(item && item.tasks) {
             const t = item.tasks.find(x => x.id === taskId);
             if(t) {
-                const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
+                const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
+                const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+                const isSelfAssigned = isSameUser(t.assignee, localAuthor) && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+                const canValidate = isSuper || isSelfAssigned;
                 const now = new Date();
                 const valDate = now.toLocaleDateString('es-MX');
                 const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
                 if (t.done === true) {
                     // Desmarcar / Reabrir
-                    if (isSuper) {
+                    if (canValidate) {
                         t.done = false;
                         archiveTaskFeedback(t); delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                         logActivity(item.id, item.name, `Reabrió tarea de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor); 
@@ -5068,8 +5045,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                     }
                 } else if (t.done === 'pending') {
-                    // Supervisor aprueba o Consultor cancela envío
-                    if (isSuper) {
+                    // Superior o auto-asignado aprueba
+                    if (canValidate) {
                         t.done = true;
                         t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
                         const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
@@ -5084,7 +5061,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         window.renderTasksQuick(item); 
                         window.triggerCelebration();
                         if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
-                    } else {
+                    } else if (isSameUser(t.assignee, localAuthor)) {
                         t.done = false;
                         archiveTaskFeedback(t);
                         logActivity(item.id, item.name, `Canceló envío a validación: "${t.text}"`, localAuthor); 
@@ -11354,15 +11331,18 @@ window.toggleDailyDrawer = function() {
 
     window.populateDailyAssignee = function() {
         const sel = document.getElementById('newDailyTaskAssignee'); if (!sel) return;
-        sel.innerHTML = '';
-        if (currentUserRole === 'Supremo' || currentUserRole === 'Supervisor') {
-            sel.innerHTML = '<option value="">(Asignar a mí mismo)</option>';
-            Object.keys(consultants).filter(k => consultants[k].role !== 'Lector').sort().forEach(c => { sel.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
-            sel.disabled = false;
+        const currentVal = sel.value;
+        let html = `<option value="${escapeHtml(localAuthor)}">⭐ Para mí (${escapeHtml(localAuthor)})</option>`;
+        Object.keys(consultants).filter(k => consultants[k].role !== 'Lector' && k !== localAuthor).sort().forEach(c => {
+            html += `<option value="${escapeHtml(c)}">👤 ${escapeHtml(c)}</option>`;
+        });
+        sel.innerHTML = html;
+        if (currentVal && Object.keys(consultants).includes(currentVal)) {
+            sel.value = currentVal;
         } else {
-            sel.innerHTML = `<option value="${escapeHtml(localAuthor)}">Para: ${escapeHtml(localAuthor)}</option>`;
-            sel.disabled = true;
+            sel.value = localAuthor;
         }
+        sel.disabled = (currentUserRole === 'Lector');
     };
 
     window.addDailyTask = function() {
@@ -11401,14 +11381,25 @@ window.toggleDailyDrawer = function() {
         const idInput = document.getElementById('fdtTaskId');
         const descInput = document.getElementById('fdtDescription');
         const dateInput = document.getElementById('fdtCommitmentDate');
+        const assigneeSel = document.getElementById('fdtAssignee');
         const noticeEl = document.getElementById('fdtDateNotice');
         const isSupremo = (currentUserRole || '').toLowerCase() === 'supremo';
+
+        if (assigneeSel) {
+            let html = `<option value="${escapeHtml(localAuthor)}">⭐ Para mí (${escapeHtml(localAuthor)})</option>`;
+            Object.keys(consultants).filter(k => consultants[k].role !== 'Lector' && k !== localAuthor).sort().forEach(c => {
+                html += `<option value="${escapeHtml(c)}">👤 ${escapeHtml(c)}</option>`;
+            });
+            assigneeSel.innerHTML = html;
+            assigneeSel.disabled = (currentUserRole === 'Lector');
+        }
 
         if (taskId) {
             const t = (appData.dailyTasks || []).find(x => x.id === taskId);
             if (!t) return;
             if (idInput) idInput.value = t.id;
             if (descInput) descInput.value = t.text || '';
+            if (assigneeSel && t.assignee) assigneeSel.value = t.assignee;
             if (dateInput) {
                 dateInput.value = t.fecha_compromiso || t.deadline || '';
                 dateInput.disabled = !isSupremo;
@@ -11425,6 +11416,7 @@ window.toggleDailyDrawer = function() {
         } else {
             if (idInput) idInput.value = '';
             if (descInput) descInput.value = '';
+            if (assigneeSel) assigneeSel.value = localAuthor;
             if (dateInput) {
                 dateInput.value = '';
                 dateInput.disabled = false;
@@ -11455,6 +11447,8 @@ window.toggleDailyDrawer = function() {
         const commitDate = dateInput ? dateInput.value : '';
         const idInput = document.getElementById('fdtTaskId');
         const taskId = idInput ? idInput.value : '';
+        const assigneeSel = document.getElementById('fdtAssignee');
+        const assignee = (assigneeSel && assigneeSel.value) ? assigneeSel.value : localAuthor;
         const isSupremo = (currentUserRole || '').toLowerCase() === 'supremo';
 
         appData.dailyTasks = appData.dailyTasks || [];
@@ -11463,6 +11457,7 @@ window.toggleDailyDrawer = function() {
             const t = appData.dailyTasks.find(x => x.id === taskId);
             if (t) {
                 t.text = text;
+                t.assignee = assignee;
                 if (isSupremo) {
                     t.fecha_compromiso = commitDate;
                 }
@@ -11472,10 +11467,12 @@ window.toggleDailyDrawer = function() {
             const now = new Date();
             const assignDate = now.toLocaleDateString('es-MX');
             const assignTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+            const isSelf = isSameUser(assignee, localAuthor);
             appData.dailyTasks.push({ 
                 id: 'dt_' + Date.now(), 
                 text: text, 
-                assignee: localAuthor, 
+                assignee: assignee, 
                 assignedBy: localAuthor, 
                 assignDate: assignDate,
                 assignTime: assignTime,
@@ -11483,26 +11480,32 @@ window.toggleDailyDrawer = function() {
                 fecha_compromiso: commitDate,
                 done: false 
             });
-            logActivity('daily', 'Actividades Diarias', `Se auto-asignó tarea general: "${text}"${commitDate ? ` (Compromiso: ${commitDate})` : ''}`, localAuthor);
+            logActivity('daily', 'Actividades Diarias', isSelf 
+                ? `Se auto-asignó tarea general: "${text}"${commitDate ? ` (Compromiso: ${commitDate})` : ''}` 
+                : `Asignó tarea diaria a ${assignee}: "${text}"${commitDate ? ` (Compromiso: ${commitDate})` : ''}`, 
+                localAuthor);
         }
         
         window.saveData(true); 
-      window.flushCloudWrite(true);
+        window.flushCloudWrite(true);
         window.closeFastDailyTaskModal();
+        if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
 window.toggleDailyTask = function(taskId) {
         if (currentUserRole === 'Lector') return;
-        const t = appData.dailyTasks.find(x => x.id === taskId);
+        const t = (appData.dailyTasks || []).find(x => x.id === taskId);
         if (t) {
-            const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor';
-            const isAssigner = t.assignedBy === localAuthor;
+            const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+            const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
+            const isSelfAssigned = isSameUser(t.assignee, localAuthor) && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+            const canValidate = isSuper || isSelfAssigned;
             const now = new Date();
             const valDate = now.toLocaleDateString('es-MX');
             const valTime = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             
             if (t.done === true) {
-                if (isSuper || isAssigner) {
+                if (canValidate) {
                     t.done = false; 
                     archiveTaskFeedback(t); delete t.validatedDate; delete t.validatedTime; delete t.validatedBy;
                     logActivity('daily', 'Actividades Diarias', `Reabrió tarea diaria de ${t.assignee||'consultor'}: "${t.text}"`, localAuthor);
@@ -11510,7 +11513,7 @@ window.toggleDailyTask = function(taskId) {
                     if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
                 }
             } else if (t.done === 'pending') {
-                if (isSuper || isAssigner) {
+                if (canValidate) {
                     t.done = true;
                     t.validatedDate = valDate; t.validatedTime = valTime; t.validatedBy = localAuthor;
                     const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
@@ -11518,7 +11521,7 @@ window.toggleDailyTask = function(taskId) {
                     window.saveData(false);
                     window.triggerCelebration();
                     if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
-                } else if (t.assignee === localAuthor) {
+                } else if (isSameUser(t.assignee, localAuthor)) {
                     t.done = false; archiveTaskFeedback(t);
                     logActivity('daily', 'Actividades Diarias', `Canceló envío a validación: "${t.text}"`, localAuthor);
                     window.saveData(false);
@@ -11543,50 +11546,148 @@ window.toggleDailyTask = function(taskId) {
         if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
-// === SISTEMA DE PESTAÑAS Y NOTIFICACIONES UNIFICADAS EN EL PANEL IZQUIERDO ===
-let currentNotifTab = 'pending'; // 'alerts' | 'pending' | 'validation' | 'completed'
+// === SISTEMA DE PESTAÑAS Y NOTIFICACIONES UNIFICADAS (ARQUITECTURA DE 2 NIVELES) ===
+let currentDailyMainTab = 'tasks'; // 'tasks' | 'projects' | 'alerts'
+let currentTaskSubTab = 'pending'; // 'pending' | 'validation' | 'completed'
+let currentNotifTab = 'pending';   // 'alerts' | 'projects' | 'pending' | 'validation' | 'completed'
+
+window.setDailyMainTab = function(mainTab) {
+    currentDailyMainTab = mainTab;
+    if (mainTab === 'tasks') {
+        currentNotifTab = currentTaskSubTab || 'pending';
+    } else {
+        currentNotifTab = mainTab;
+    }
+    window.updateNotifTabsUI();
+    window.renderDailyTasks();
+};
+
+window.setTaskSubTab = function(subTab) {
+    currentDailyMainTab = 'tasks';
+    currentTaskSubTab = subTab;
+    currentNotifTab = subTab;
+    window.updateNotifTabsUI();
+    window.renderDailyTasks();
+};
 
 window.setNotifTab = function(tabName) {
-    currentNotifTab = tabName;
+    if (tabName === 'alerts') {
+        currentDailyMainTab = 'alerts';
+        currentNotifTab = 'alerts';
+    } else if (tabName === 'projects') {
+        currentDailyMainTab = 'projects';
+        currentNotifTab = 'projects';
+    } else {
+        currentDailyMainTab = 'tasks';
+        currentTaskSubTab = tabName;
+        currentNotifTab = tabName;
+    }
     window.updateNotifTabsUI();
     window.renderDailyTasks();
 };
 
 window.updateNotifTabsUI = function() {
+    // Sincronizar estado si currentNotifTab fue alterado externamente
+    if (currentNotifTab === 'alerts') {
+        currentDailyMainTab = 'alerts';
+    } else if (currentNotifTab === 'projects') {
+        currentDailyMainTab = 'projects';
+    } else if (currentNotifTab === 'pending' || currentNotifTab === 'validation' || currentNotifTab === 'completed') {
+        currentDailyMainTab = 'tasks';
+        currentTaskSubTab = currentNotifTab;
+    }
+
+    // 1. Sub-navegador de flujo de tareas (Nivel 2)
+    const subNav = document.getElementById('dailyTasksSubNavSection');
+    if (subNav) {
+        if (currentDailyMainTab === 'tasks') {
+            subNav.classList.remove('hidden');
+        } else {
+            subNav.classList.add('hidden');
+        }
+    }
+
+    // 2. Formulario de captura rápida (solo en tareas pendientes)
     const formSection = document.getElementById('dailyTaskFormSection');
     if (formSection) {
-        // Solo mostrar la sección de creación rápida en la pestaña de pendientes y si no es rol Lector
-        if (currentNotifTab === 'pending' && currentUserRole !== 'Lector') {
+        if (currentDailyMainTab === 'tasks' && currentTaskSubTab === 'pending' && currentUserRole !== 'Lector') {
             formSection.classList.remove('hidden');
         } else {
             formSection.classList.add('hidden');
         }
     }
 
-    const activeThemes = {
-        alerts: 'bg-[#ee6018]/15 border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
-        pending: 'bg-[#eeeeee] border-[#eeeeee] text-[#101010] font-medium shadow-none',
-        validation: 'bg-[#ee6018]/15 border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
-        completed: 'bg-[#a0ca92]/15 border-[#a0ca92] text-[#eeeeee] font-medium shadow-none'
-    };
-    const activeBadgeThemes = {
-        alerts: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
-        pending: 'bg-[#101010] text-[#eeeeee] border-[#101010]',
-        validation: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
-        completed: 'bg-[#a0ca92] text-[#101010] border-[#a0ca92]'
-    };
-    const inactiveTheme = 'bg-transparent border-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18]';
-    const inactiveBadgeTheme = 'bg-[#101010] text-[#8a8380] border-[#3d3a39]';
-    const baseClasses = 'py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition border cursor-pointer';
+    // 3. Proyectos asignados (solo en pestaña proyectos)
+    const pSec = document.getElementById('dailyAssignedProjectsSection');
+    if (pSec) {
+        if (currentDailyMainTab === 'projects') {
+            pSec.classList.remove('hidden');
+        } else {
+            pSec.classList.add('hidden');
+        }
+    }
 
-    ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
+    // 4. Estilos Nivel 1: Tareas, Proyectos, Alertas
+    const mainBtnTasks = document.getElementById('dailyMainTabBtn-tasks');
+    const mainBadgeTasks = document.getElementById('dailyMainTabCount-tasks');
+    if (mainBtnTasks) {
+        const isTasksActive = (currentDailyMainTab === 'tasks');
+        mainBtnTasks.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isTasksActive ? 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
+        if (mainBadgeTasks) {
+            mainBadgeTasks.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isTasksActive ? 'bg-[#101010] text-[#eeeeee] border-[#101010]' : 'bg-[#101010] text-[#8a8380] border-[#3d3a39]'}`;
+        }
+    }
+
+    const mainBtnProjects = document.getElementById('notifTabBtn-projects');
+    const mainBadgeProjects = document.getElementById('notifTabCount-projects');
+    if (mainBtnProjects) {
+        const isProjectsActive = (currentDailyMainTab === 'projects');
+        mainBtnProjects.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isProjectsActive ? 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
+        if (mainBadgeProjects) {
+            mainBadgeProjects.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isProjectsActive ? 'bg-[#101010] text-[#eeeeee] border-[#101010]' : 'bg-[#101010] text-[#30d158] border-[#3d3a39]'}`;
+        }
+    }
+
+    const mainBtnAlerts = document.getElementById('notifTabBtn-alerts');
+    const mainBadgeAlerts = document.getElementById('notifTabCount-alerts');
+    if (mainBtnAlerts) {
+        const isAlertsActive = (currentDailyMainTab === 'alerts');
+        mainBtnAlerts.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isAlertsActive ? 'bg-[#ee6018]/15 border border-[#ee6018] text-[#eeeeee] font-medium shadow-none' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
+        if (mainBadgeAlerts) {
+            mainBadgeAlerts.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isAlertsActive ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]' : 'bg-[#101010] text-[#ee6018] border-[#3d3a39]'}`;
+        }
+    }
+
+    // 5. Estilos Nivel 2: Sub-pestañas de Tareas (Pendientes, Validación, Hechas)
+    const subThemes = {
+        pending: {
+            activeBtn: 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]',
+            activeBadge: 'bg-[#101010] text-[#eeeeee] border-[#101010]',
+            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
+            inactiveBadge: 'bg-[#101010] text-[#8a8380] border-[#3d3a39]'
+        },
+        validation: {
+            activeBtn: 'bg-[#ee6018]/15 border border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
+            activeBadge: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
+            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
+            inactiveBadge: 'bg-[#101010] text-[#ee6018] border-[#3d3a39]'
+        },
+        completed: {
+            activeBtn: 'bg-[#a0ca92]/15 border border-[#a0ca92] text-[#eeeeee] font-medium shadow-none',
+            activeBadge: 'bg-[#a0ca92] text-[#101010] border-[#a0ca92]',
+            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
+            inactiveBadge: 'bg-[#101010] text-[#a0ca92] border-[#3d3a39]'
+        }
+    };
+
+    ['pending', 'validation', 'completed'].forEach(t => {
         const btn = document.getElementById(`notifTabBtn-${t}`);
         const badgeEl = document.getElementById(`notifTabCount-${t}`);
         if (!btn) return;
-        const isActive = (t === currentNotifTab);
-        btn.className = `${baseClasses} ${isActive ? activeThemes[t] : inactiveTheme}`;
+        const isActive = (t === currentTaskSubTab);
+        btn.className = `py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition cursor-pointer ${isActive ? subThemes[t].activeBtn : subThemes[t].inactiveBtn}`;
         if (badgeEl) {
-            badgeEl.className = `text-[9px] font-mono px-1 py-0.2 rounded-[3px] border ${isActive ? activeBadgeThemes[t] : inactiveBadgeTheme}`;
+            badgeEl.className = `text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] border ${isActive ? subThemes[t].activeBadge : subThemes[t].inactiveBadge}`;
         }
     });
 };
@@ -11636,6 +11737,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
         const sel = document.getElementById('dailyAssignedConsultantSelect');
         if (!sel) return;
 
+        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
         const counts = {};
         const countProj = (p) => {
             const cList = getProjectConsultants(p);
@@ -11644,7 +11746,10 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
         (appData.directProjects || []).forEach(p => countProj(p));
         (appData.modules || []).forEach(m => (m.projects || []).forEach(p => countProj(p)));
 
-        const myCount = counts[localAuthor] || 0;
+        let myCount = 0;
+        Object.keys(counts).forEach(c => {
+            if (isSameUser(c, localAuthor)) myCount += counts[c];
+        });
         const isLeadership = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
 
         if (isLeadership && myCount === 0 && assignedProjectsFilter === 'ME') {
@@ -11674,7 +11779,7 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
         const hTitle = document.getElementById('dailyAssignedHeaderTitle');
         if (!pList || !pBadge) return;
 
-        if (currentNotifTab !== 'pending') {
+        if (currentNotifTab !== 'projects') {
             if (pSec) pSec.classList.add('hidden');
             return;
         }
@@ -11692,16 +11797,17 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             return new Date(y, m - 1, d) < todayMidnight; 
         };
 
+        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
         let filteredProjects = [];
         const checkProj = (proj, pType, parentName) => {
             const projCons = getProjectConsultants(proj);
             let match = false;
             if (assignedProjectsFilter === 'ME') {
-                match = projCons.includes(localAuthor);
+                match = projCons.some(c => isSameUser(c, localAuthor));
             } else if (assignedProjectsFilter === 'ALL') {
                 match = projCons.length > 0;
             } else {
-                match = projCons.includes(assignedProjectsFilter);
+                match = projCons.some(c => isSameUser(c, assignedProjectsFilter));
             }
             if (match) {
                 filteredProjects.push({ ...proj, pType, parentName, projCons });
@@ -11848,24 +11954,50 @@ window.renderDailyTasks = function() {
 
     // 3. CLASIFICACIÓN DE TAREAS SEGÚN PERMISOS Y ESTADO
     const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
-    const canViewTask = (t) => isSuper || isSameUser(t.assignee, localAuthor) || isSameUser(t.assignedBy, localAuthor);
-    const visibleTasks = allTasks.filter(canViewTask);
 
-    const pendingTasks = visibleTasks.filter(t => t.done === false);
-    const validationTasks = visibleTasks.filter(t => t.done === 'pending');
-    const completedTasks = visibleTasks.filter(t => t.done === true);
+    // Tareas pendientes: para líderes todas, para consultor estrictamente sus propias tareas
+    const canViewPendingTask = (t) => isSuper ? true : isSameUser(t.assignee, localAuthor);
+    const pendingTasks = allTasks.filter(t => t.done === false && canViewPendingTask(t));
+
+    // Tareas en validación:
+    // Líderes ven todas las que esperan visto bueno
+    // Consultor ve solo las que le corresponden (esperando revisión o auto-asignadas que puede validar)
+    const canViewValidationTask = (t) => {
+        if (isSuper) return true;
+        const isSelfAssigned = isSameUser(t.assignee, localAuthor) && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+        return isSameUser(t.assignee, localAuthor) || isSelfAssigned;
+    };
+    const validationTasks = allTasks.filter(t => t.done === 'pending' && canViewValidationTask(t));
+
+    // Tareas concluidas (Hechas): Estrictamente personales
+    const myCompletedTasks = allTasks.filter(t => t.done === true && isSameUser(t.assignee, localAuthor));
+    const completedTasks = myCompletedTasks;
+
+    // Conteo de proyectos asignados para la pestaña dedicada
+    let myProjectsCount = 0;
+    const countProjForBadge = (p) => {
+        const cList = getProjectConsultants(p);
+        if (cList.some(c => isSameUser(c, localAuthor))) myProjectsCount++;
+    };
+    (appData.directProjects || []).forEach(p => countProjForBadge(p));
+    (appData.modules || []).forEach(m => (m.projects || []).forEach(p => countProjForBadge(p)));
 
     // 4. ACTUALIZACIÓN DE CONTADORES EN LAS PESTAÑAS
     const tabCounts = {
         alerts: alertsList.length,
+        projects: myProjectsCount,
         pending: pendingTasks.length,
         validation: validationTasks.length,
         completed: completedTasks.length
     };
-    ['alerts', 'pending', 'validation', 'completed'].forEach(t => {
+    ['alerts', 'projects', 'pending', 'validation', 'completed'].forEach(t => {
         const el = document.getElementById(`notifTabCount-${t}`);
         if (el) el.textContent = tabCounts[t];
     });
+    const mainTasksBadge = document.getElementById('dailyMainTabCount-tasks');
+    if (mainTasksBadge) {
+        mainTasksBadge.textContent = tabCounts.pending;
+    }
 
     // 5. GLOBO FLOTANTE DE ATENCIÓN (suma alertas críticas + validaciones pendientes + mis pendientes)
     let alertBadgeTotal = alertsList.length;
@@ -11926,6 +12058,12 @@ window.renderDailyTasks = function() {
     }
 
     // 6. RENDERIZADO DEL CONTENIDO DE LA PESTAÑA SELECCIONADA
+
+    // --- PESTAÑA PROYECTOS: SEPARADA EXCLUSIVAMENTE ---
+    if (currentNotifTab === 'projects') {
+        container.innerHTML = '';
+        return;
+    }
 
     // --- PESTAÑA A: ALERTAS & MENCIONES ---
     if (currentNotifTab === 'alerts') {
@@ -12052,15 +12190,15 @@ window.renderDailyTasks = function() {
 
         // Ordenar: primero yo, luego alfabéticamente
         const sortedConsultants = Object.keys(grouped).sort((a, b) => {
-            if (a === localAuthor) return -1;
-            if (b === localAuthor) return 1;
+            if (isSameUser(a, localAuthor)) return -1;
+            if (isSameUser(b, localAuthor)) return 1;
             return a.localeCompare(b);
         });
 
         container.innerHTML = `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
             const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
             const cData = consultants[cons] || { color: '#8a8380' };
-            const isMe = cons === localAuthor;
+            const isMe = isSameUser(cons, localAuthor);
 
             return `
             <details open class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
@@ -12074,10 +12212,11 @@ window.renderDailyTasks = function() {
                 </summary>
                 <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
                     ${tasks.map(t => {
-                        const isMyTask = t.assignee === localAuthor;
-                        const isAssigner = t.assignedBy === localAuthor;
+                        const isMyTask = isSameUser(t.assignee, localAuthor);
+                        const isAssigner = isSameUser(t.assignedBy, localAuthor);
+                        const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
                         const canEdit = isSuper || isMyTask || isAssigner;
-                        const canDel = (isSuper || isAssigner) && t.sourceType === 'daily';
+                        const canDel = (isSuper || (isAssigner && isSelfAssigned)) && t.sourceType === 'daily';
 
                         let toggleAction = `toggleDailyTask('${t.id}')`;
                         let openAction = '';
@@ -12134,9 +12273,11 @@ window.renderDailyTasks = function() {
         <div class="space-y-2.5 pb-6">
             <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Esperando Aprobación (${validationTasks.length})</p>
             ${validationTasks.map(t => {
-                const isAssigner = t.assignedBy === localAuthor;
-                const canApprove = isSuper || isAssigner;
-                const isMyTask = t.assignee === localAuthor;
+                const isMyTask = isSameUser(t.assignee, localAuthor);
+                const isAssigner = isSameUser(t.assignedBy, localAuthor);
+                const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+                // Para consultores: sólo superiores pueden validar, O si se la auto-asignó él mismo:
+                const canApprove = isSuper || isSelfAssigned;
 
                 let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
 
@@ -12200,14 +12341,14 @@ window.renderDailyTasks = function() {
         });
 
         const sortedConsultants = Object.keys(grouped).sort((a, b) => {
-            if (a === localAuthor) return -1;
-            if (b === localAuthor) return 1;
+            if (isSameUser(a, localAuthor)) return -1;
+            if (isSameUser(b, localAuthor)) return 1;
             return a.localeCompare(b);
         });
 
         const topHistoryBar = `
         <div class="flex items-center justify-between px-1 mb-2">
-            <span class="font-mono text-[10px] text-[#a0ca92] uppercase font-medium">Historial de Tareas Concluidas (${completedTasks.length})</span>
+            <span class="font-mono text-[10px] text-[#a0ca92] uppercase font-medium">Mi Historial Personal (${completedTasks.length} Concluidas)</span>
             ${isSuper ? `<button type="button" onclick="openConfigDrawer(); switchTab('history');" class="text-[9px] font-mono uppercase text-[#b8b3b0] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] px-2 py-0.5 rounded-[3px] transition cursor-pointer flex items-center gap-1" title="Ver bitácora global de auditoría del sistema">📜 Bitácora General ↗</button>` : ''}
         </div>`;
 
@@ -12234,7 +12375,7 @@ window.renderDailyTasks = function() {
         container.innerHTML = topHistoryBar + `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
             const tasks = grouped[cons].sort((a, b) => parseTaskTimestamp(b) - parseTaskTimestamp(a));
             const cData = consultants[cons] || { color: '#8a8380' };
-            const isMe = cons === localAuthor;
+            const isMe = isSameUser(cons, localAuthor);
             const isOpen = (isMe || sortedConsultants.length === 1) ? 'open' : '';
 
             return `
@@ -12249,7 +12390,10 @@ window.renderDailyTasks = function() {
                 </summary>
                 <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
                     ${tasks.map(t => {
-                        const canRevert = isSuper || t.assignedBy === localAuthor;
+                        const isMyTask = isSameUser(t.assignee, localAuthor);
+                        const isAssigner = isSameUser(t.assignedBy, localAuthor);
+                        const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+                        const canRevert = isSuper || isSelfAssigned || (isAssigner && isSuper);
                         return `
                         <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-90 hover:opacity-100 transition">
                             <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea a pendientes' : 'Completada'}">
@@ -16997,8 +17141,17 @@ window.isSameUserOrAlias = function(nameA, nameB) {
     const a = norm(nameA);
     const b = norm(nameB);
     if (a === b) return true;
-    if ((a.includes('osvaldo') || a.includes('emmanuel') || a.includes('sanchez') || a.includes('aviles')) && 
-        (b.includes('osvaldo') || b.includes('emmanuel') || b.includes('sanchez') || b.includes('aviles'))) return true;
+
+    // Reglas estrictas e independientes por usuario / iniciales / alias
+    // Osvaldo Avilés (OS / OA)
+    const isOsvaldo = (s) => (s.includes('osvaldo') || s.includes('aviles') || s === 'os' || s === 'oa') && !s.includes('emmanuel') && !s.includes('sanchez') && s !== 'els' && s !== 'es';
+    if (isOsvaldo(a) && isOsvaldo(b)) return true;
+
+    // Emmanuel Sánchez (ELS / ES)
+    const isEmmanuel = (s) => (s.includes('emmanuel') || s.includes('sanchez') || s === 'els' || s === 'es') && !s.includes('osvaldo') && !s.includes('aviles') && s !== 'os' && s !== 'oa';
+    if (isEmmanuel(a) && isEmmanuel(b)) return true;
+
+    // Otros integrantes del equipo
     if (a.includes('rafael') && b.includes('rafael')) return true;
     if (a.includes('barbosa') && b.includes('barbosa')) return true;
     if (a.includes('jesus') && b.includes('jesus')) return true;
@@ -17006,6 +17159,9 @@ window.isSameUserOrAlias = function(nameA, nameB) {
     if (a.includes('islas') && b.includes('islas')) return true;
     if (a.includes('gutierrez') && b.includes('gutierrez')) return true;
     if (a.includes('gonzalez') && b.includes('gonzalez')) return true;
+    if (a.includes('cristobal') && b.includes('cristobal')) return true;
+    if (a.includes('munoz') && b.includes('munoz')) return true;
+    if (a.includes('lira') && b.includes('lira')) return true;
     return false;
 };
 

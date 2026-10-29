@@ -531,8 +531,22 @@
           <p class="text-xs text-[#8a8380] mb-5">Agrega una tarea operativa a tu lista general.</p>
           <div class="space-y-4 mb-6">
               <div>
-                  <input type="hidden" id="fdtTaskId"><label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">Descripción de la Tarea <span class="text-[#ee6018]">*</span></label>
-                  <input type="text" id="fdtDescription" placeholder="Ej. Actualizar formato o trámite operativo..." class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none text-[#eeeeee]"></div><div><label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase flex items-center justify-between"><span>Fecha Compromiso</span><span id="fdtDateNotice" class="text-[9px] text-[#8a8380] font-mono lowercase">(opcional)</span></label><input type="date" id="fdtCommitmentDate" lang="es-MX" class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none [color-scheme:dark] text-[#eeeeee]">
+                  <input type="hidden" id="fdtTaskId">
+                  <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">Descripción de la Tarea <span class="text-[#ee6018]">*</span></label>
+                  <input type="text" id="fdtDescription" placeholder="Ej. Actualizar formato o trámite operativo..." class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none text-[#eeeeee]">
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                      <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase">Asignar a</label>
+                      <select id="fdtAssignee" class="w-full liquid-input rounded-[3px] p-3 text-xs appearance-none focus:outline-none text-[#eeeeee] cursor-pointer"></select>
+                  </div>
+                  <div>
+                      <label class="block font-mono text-[11px] text-[#b8b3b0] mb-1.5 uppercase flex items-center justify-between">
+                          <span>Fecha Compromiso</span>
+                          <span id="fdtDateNotice" class="text-[9px] text-[#8a8380] font-mono lowercase">(opcional)</span>
+                      </label>
+                      <input type="date" id="fdtCommitmentDate" lang="es-MX" class="w-full liquid-input rounded-[3px] p-3 text-xs focus:outline-none [color-scheme:dark] text-[#eeeeee]">
+                  </div>
               </div>
           </div>
           <div class="flex gap-3">
@@ -1780,27 +1794,45 @@
       <button onclick="closeDailyDrawer()" class="text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] p-2 rounded-[3px] border border-[#3d3a39]" title="Cerrar notificaciones"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
 
-    <!-- PESTAÑAS DE CONTROL COMPACTAS (1 FILA FACTORY) -->
+    <!-- NIVEL 1: SELECTOR PRINCIPAL DE MODO (3 PESTAÑAS AMPLIAS Y ERGONÓMICAS) -->
     <div class="p-2 border-b border-[#1d1a18] bg-[#101010] shrink-0">
-      <div class="grid grid-cols-4 gap-1 p-1 bg-[#1d1a18] rounded-[3px] border border-[#3d3a39]">
-        <button type="button" onclick="setNotifTab('alerts')" id="notifTabBtn-alerts" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
-          <span class="truncate">Alertas & @</span>
-          <span id="notifTabCount-alerts" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
+      <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#161413] rounded-[5px] border border-[#2d2a28]">
+        <!-- 1. TAREAS (Principal) -->
+        <button type="button" onclick="setDailyMainTab('tasks')" id="dailyMainTabBtn-tasks" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#101010] bg-[#eeeeee] font-medium shadow-sm cursor-pointer">
+          <span>📋 Tareas</span>
+          <span id="dailyMainTabCount-tasks" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('pending')" id="notifTabBtn-pending" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition bg-[#eeeeee] text-[#101010] font-medium">
+        <!-- 2. PROYECTOS (Dedicado) -->
+        <button type="button" onclick="setDailyMainTab('projects')" id="notifTabBtn-projects" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+          <span>📁 Proyectos</span>
+          <span id="notifTabCount-projects" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#30d158] border border-[#3d3a39]">0</span>
+        </button>
+
+        <!-- 3. ALERTAS (Buzón) -->
+        <button type="button" onclick="setDailyMainTab('alerts')" id="notifTabBtn-alerts" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+          <span>🔔 Alertas</span>
+          <span id="notifTabCount-alerts" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NIVEL 2: SUB-SELECTOR ERGONÓMICO DE FLUJO DE TAREAS (Solo visible en Tareas) -->
+    <div id="dailyTasksSubNavSection" class="px-3 py-2 bg-[#12100f] border-b border-[#1d1a18] shrink-0 transition-all">
+      <div class="grid grid-cols-3 gap-1 p-0.5 bg-[#1a1715] rounded-[5px] border border-[#2d2a28]">
+        <button type="button" onclick="setTaskSubTab('pending')" id="notifTabBtn-pending" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition bg-[#eeeeee] text-[#101010] font-medium shadow-sm cursor-pointer">
           <span class="truncate">Pendientes</span>
-          <span id="notifTabCount-pending" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
+          <span id="notifTabCount-pending" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('validation')" id="notifTabBtn-validation" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
+        <button type="button" onclick="setTaskSubTab('validation')" id="notifTabBtn-validation" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
           <span class="truncate">Validación</span>
-          <span id="notifTabCount-validation" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#b8b3b0] border border-[#3d3a39]">0</span>
+          <span id="notifTabCount-validation" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
         </button>
 
-        <button type="button" onclick="setNotifTab('completed')" id="notifTabBtn-completed" class="py-1.5 px-1 rounded-[3px] font-mono text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#b8b3b0] hover:text-[#eeeeee]">
+        <button type="button" onclick="setTaskSubTab('completed')" id="notifTabBtn-completed" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
           <span class="truncate">Hechas</span>
-          <span id="notifTabCount-completed" class="text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39]">0</span>
+          <span id="notifTabCount-completed" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39]">0</span>
         </button>
       </div>
     </div>
@@ -1832,20 +1864,19 @@
         </details>
       </div>
 
-      <!-- ACORDEÓN MIS PROYECTOS ASIGNADOS (MIGRADO AL PANEL DE TRABAJO CON FILTRO TÁCTIL) -->
-      <div id="dailyAssignedProjectsSection" class="shrink-0">
-        <details id="dailyAssignedProjectsDetails" class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition" open>
-          <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
+      <!-- SECCIÓN DEDICADA: MIS PROYECTOS ASIGNADOS (Solo visible en pestaña Proyectos) -->
+      <div id="dailyAssignedProjectsSection" class="shrink-0 hidden">
+        <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
+          <div class="flex justify-between items-center p-3 select-none bg-[#1d1a18] border-b border-[#3d3a39]">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
               <span id="dailyAssignedHeaderTitle" class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px] truncate">Proyectos Asignados</span>
-              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#1d1a18] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">0 PROYECTOS</span>
+              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#101010] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">0 PROYECTOS</span>
             </div>
-            <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-          </summary>
+          </div>
 
           <!-- BARRA DE SELECCIÓN RÁPIDA POR CONSULTOR -->
-          <div class="px-3 py-2 bg-[#101010] border-t border-b border-[#3d3a39] flex items-center gap-2">
+          <div class="px-3 py-2 bg-[#101010] border-b border-[#3d3a39] flex items-center gap-2">
             <label for="dailyAssignedConsultantSelect" class="font-mono text-[9px] uppercase text-[#8a8380] shrink-0">Consultor:</label>
             <select id="dailyAssignedConsultantSelect" onchange="window.handleAssignedConsultantChange(this.value)" class="flex-1 bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer truncate">
               <option value="ME">⭐ Mis Proyectos</option>
@@ -1854,7 +1885,7 @@
           </div>
 
           <div id="dailyMyProjectsList" class="p-2.5 space-y-2"></div>
-        </details>
+        </div>
       </div>
 
       <!-- LISTA DE TAREAS Y ALERTAS -->
@@ -3662,7 +3693,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261027_v1015"></script>
+  <script type="module" src="app.js?v=20261028_v1016"></script>
 
 </body>
 </html>
