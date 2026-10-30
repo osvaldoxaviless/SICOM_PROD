@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es-MX">
 <head>
   <meta charset="UTF-8">
@@ -80,7 +80,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261026_v1006">
+  <link rel="stylesheet" href="styles.css?v=20261028_v1019">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
@@ -120,6 +120,59 @@
               <div id="loginPasswordDiv" class="hidden overflow-hidden transition-all duration-200 opacity-0 transform translate-y-1">
                   <label id="loginPasswordLabel" class="block font-mono text-[11px] mb-2 flex items-center gap-1.5 uppercase tracking-[-0.24px] text-[#101010]">
                       <svg width="14" height="14" style="width:14px;height:14px;flex-shrink:0;" class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+
+    <!-- SKELETON SCREEN DEL MAPA MENTAL (ARQUITECTURA EO/SA EN CARGA) -->
+    <div id="mapSkeleton" class="absolute inset-0 pointer-events-none z-[15] flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden select-none">
+      <div class="absolute top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1 rounded-[4px] bg-[#12100f]/95 border border-[#2d2927] shadow-xl backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
+        <span class="font-mono text-[10px] uppercase tracking-wider text-[#b8b3b0] font-semibold">Cargando Arquitectura EO/SA...</span>
+      </div>
+      <div class="relative w-full max-w-4xl h-[420px] flex items-center justify-center px-4">
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-50" viewBox="0 0 800 420" fill="none">
+          <path d="M 400 210 C 310 210, 240 120, 150 120" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+          <path d="M 400 210 C 310 210, 240 210, 150 210" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+          <path d="M 400 210 C 310 210, 240 300, 150 300" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+          <path d="M 400 210 C 490 210, 560 120, 650 120" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+          <path d="M 400 210 C 490 210, 560 210, 650 210" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+          <path d="M 400 210 C 490 210, 560 300, 650 300" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
+        </svg>
+        <div class="z-10 map-skeleton-node map-skeleton-pulse rounded-[8px] p-3.5 w-48 flex flex-col items-center justify-center gap-2 border border-[#3d3a39] bg-[#1d1a18]/95 backdrop-blur-md shadow-2xl">
+          <div class="w-7 h-7 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/40 flex items-center justify-center">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] animate-pulse"></span>
+          </div>
+          <div class="h-3.5 w-28 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-2 w-20 rounded-[2px] map-skeleton-shimmer opacity-70"></div>
+        </div>
+        <div class="absolute left-6 sm:left-12 top-14 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-80">
+          <div class="h-2.5 w-20 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-28 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+          <div class="h-1.5 w-16 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
+        </div>
+        <div class="absolute left-2 sm:left-8 top-[185px] w-38 sm:w-44 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-90">
+          <div class="h-2.5 w-24 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-32 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+          <div class="h-1.5 w-20 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
+        </div>
+        <div class="absolute left-6 sm:left-12 bottom-10 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-75">
+          <div class="h-2.5 w-18 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-24 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+        </div>
+        <div class="absolute right-6 sm:right-12 top-14 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-80">
+          <div class="h-2.5 w-22 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-28 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+          <div class="h-1.5 w-16 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
+        </div>
+        <div class="absolute right-2 sm:right-8 top-[185px] w-38 sm:w-44 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-90">
+          <div class="h-2.5 w-26 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-32 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+          <div class="h-1.5 w-20 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
+        </div>
+        <div class="absolute right-6 sm:right-12 bottom-10 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-75">
+          <div class="h-2.5 w-20 rounded-[2px] map-skeleton-shimmer"></div>
+          <div class="h-1.5 w-24 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
+        </div>
+      </div>
+    </div>
                       Credencial de Acceso
                   </label>
                   <div class="relative">
@@ -2992,10 +3045,11 @@
 
   
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA -->
-  <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[99995] bg-[#101010]/85 hidden flex items-center justify-center opacity-0 transition-opacity duration-150 p-2 sm:p-4 ">
-      <div class="bg-[#101010] rounded-[10px] w-full max-w-[97vw] xl:max-w-7xl h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39]">
+  <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (VIEWPORT FIT ESTRICTO) -->
+  <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[100050] bg-[#101010]/95 backdrop-blur-md hidden flex flex-col items-center justify-start opacity-0 transition-opacity duration-150 p-2 sm:p-4 md:p-6 overflow-y-auto">
+      <div class="bg-[#101010] rounded-[10px] w-full max-w-[97vw] xl:max-w-7xl h-full max-h-[96vh] sm:max-h-[94vh] flex flex-col overflow-hidden border border-[#3d3a39] my-auto shadow-2xl shrink-0">
           <!-- HEADER DEL DASHBOARD -->
-          <div class="relative p-3.5 sm:p-4 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div class="sticky top-0 z-30 p-3.5 sm:p-4 pr-14 sm:pr-16 border-b border-[#3d3a39] bg-[#1d1a18] flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div class="flex items-center gap-3">
                   <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shrink-0 animate-pulse"></span>
                   <div>
@@ -3176,7 +3230,7 @@
                               💡 Clic en cualquier celda para activar <span class="text-[#3b82f6] font-semibold">Drill-Down</span> en Tablas de Control
                           </div>
                       </div>
-                      <div id="execMatrixContainer" class="overflow-x-auto scrollbar-thin max-h-[460px]"></div>
+                      <div id="execMatrixContainer" class="overflow-x-auto scrollbar-thin max-h-[380px] sm:max-h-[440px]"></div>
                   </div>
               </div>
 
@@ -3693,7 +3747,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261028_v1018"></script>
+  <script type="module" src="app.js?v=20261028_v1019"></script>
 
 </body>
 </html>

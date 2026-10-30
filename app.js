@@ -2103,6 +2103,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
         try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
         setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
+        if (typeof window.hideMapSkeleton === 'function') setTimeout(window.hideMapSkeleton, 250);
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
         if (typeof window.initPushNotificationSystem === 'function') {
             window.initPushNotificationSystem();
@@ -3939,6 +3940,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         setTimeout(() => { if (typeof window.focusFilteredMindMap === 'function') window.focusFilteredMindMap(); }, 40);
         if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+      if (typeof window.hideMapSkeleton === 'function') window.hideMapSkeleton();
     };
 
     window.updateDatalist = function() {
@@ -9079,6 +9081,26 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (typeof window.bindPriorityBoardScroll === 'function') window.bindPriorityBoardScroll();
         } catch (err) {
             console.error('⚠️ [Prioridades] Error al renderizar tablero:', err);
+        }
+    };
+
+    window.hideMapSkeleton = function() {
+        const skel = document.getElementById('mapSkeleton');
+        if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
+            skel.classList.add('opacity-0');
+            setTimeout(() => {
+                try { skel.style.display = 'none'; } catch (_) {}
+            }, 400);
+        }
+    };
+
+    window.showMapSkeleton = function() {
+        const skel = document.getElementById('mapSkeleton');
+        if (skel) {
+            skel.style.display = 'flex';
+            requestAnimationFrame(() => {
+                skel.classList.remove('opacity-0');
+            });
         }
     };
 

@@ -1827,7 +1827,6 @@ div[id$="Modal"].hidden,
 #attendanceModal:not(.hidden),
 #commissionModal:not(.hidden),
 #vacationModal:not(.hidden),
-#executiveDashboardModal:not(.hidden),
 #pwaInstallGuideModal:not(.hidden),
 #calendarDayModal:not(.hidden),
 #loginOverlay:not(.hidden) {
@@ -1844,6 +1843,83 @@ div[id$="Modal"].hidden,
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+}
+
+/* Blindaje de pantalla completa y Viewport Fit para Dashboard Ejecutivo & Auditoría */
+#executiveDashboardModal:not(.hidden) {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    z-index: 100050 !important;
+    background-color: rgba(16, 16, 16, 0.96) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+}
+
+@media (min-width: 640px) {
+    #executiveDashboardModal:not(.hidden) {
+        padding: 18px !important;
+    }
+}
+
+/* Ocultar controles y botones flotantes del mapa mientras el Dashboard esté activo */
+body:has(#executiveDashboardModal:not(.hidden)) #canvasQuickControls,
+body:has(#executiveDashboardModal:not(.hidden)) #btnDailyTasks,
+body:has(#executiveDashboardModal:not(.hidden)) #speedDial,
+body:has(#executiveDashboardModal:not(.hidden)) #canvasToolsDock {
+    display: none !important;
+}
+
+/* ==========================================================================
+   SKELETON SCREEN DEL MAPA MENTAL (ARQUITECTURA EO/SA)
+   ========================================================================== */
+@keyframes mapSkeletonShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.map-skeleton-shimmer {
+    background: linear-gradient(90deg, #1d1a18 20%, #2e2926 50%, #1d1a18 80%);
+    background-size: 250% 100%;
+    animation: mapSkeletonShimmer 2s infinite linear;
+}
+
+.map-skeleton-node {
+    background: #171514;
+    border: 1px solid #2d2927;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.map-skeleton-pulse {
+    animation: mapSkeletonPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes mapSkeletonPulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
 }
 
 body:has(#loginOverlay:not(.hidden)) #mobileBottomDock,
