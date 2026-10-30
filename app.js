@@ -2056,8 +2056,10 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.getElementById('cloudLoader').style.display = 'none';
         if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
         try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
-        setTimeout(() => { try { window.recenterCanvas(); } catch (e) { console.error(e); } }, 100);
-        if (typeof window.hideMapSkeleton === 'function') setTimeout(window.hideMapSkeleton, 250);
+        setTimeout(() => { try { window.recenterCanvas(0); } catch (e) { console.error(e); } }, 20);
+        if (typeof window.hideMapSkeleton === 'function') {
+            requestAnimationFrame(() => window.hideMapSkeleton());
+        }
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
         if (typeof window.initPushNotificationSystem === 'function') {
             window.initPushNotificationSystem();
@@ -9137,11 +9139,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.hideMapSkeleton = function() {
         const skel = document.getElementById('mapSkeleton');
         if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
-            skel.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            skel.style.transition = 'opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1)';
             skel.classList.add('opacity-0');
             setTimeout(() => {
                 try { skel.style.display = 'none'; } catch (_) {}
-            }, 420);
+            }, 240);
         }
     };
 
@@ -10807,9 +10809,30 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           });
       });
       window._currentMapBounds = { minX: totalMinX, maxX: totalMaxX, minY: totalMinY, maxY: totalMaxY };
-
       lastExpandedModuleId = null;
       if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
+
+      // SINCRONIZACIÓN ATÓMICA Y CROSS-FADE IMPERCEPTIBLE ENTRE ESQUELETO Y MAPA
+      if (!window._initialMapPositioned) {
+          window._initialMapPositioned = true;
+          // Colocar el mapa real exactamente en sus coordenadas de reposo sin demora (0ms)
+          if (typeof window.recenterCanvas === 'function') {
+              window.recenterCanvas(0);
+          }
+          // Iniciar desvanecimiento suave del esqueleto en el siguiente frame sin saltos
+          requestAnimationFrame(() => {
+              if (typeof window.hideMapSkeleton === 'function') {
+                  window.hideMapSkeleton();
+              }
+          });
+      } else {
+          const skel = document.getElementById('mapSkeleton');
+          if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
+              if (typeof window.hideMapSkeleton === 'function') {
+                  window.hideMapSkeleton();
+              }
+          }
+      }
     };
 
     let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
