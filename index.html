@@ -595,18 +595,18 @@
                   <div id="attValidationButtonContainer" class="flex items-center"></div>
 
                   <!-- BOTONES ACCIÓN FACTORY (CHROME NEUTRO MONOCROMO) -->
-                  <button type="button" onclick="openCommissionModal()" class="px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] flex items-center gap-1 transition whitespace-nowrap">
+                  <button type="button" onclick="openCommissionModal()" class="hidden sm:inline-flex px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] items-center gap-1 transition whitespace-nowrap">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
                       <span>+ Comisión</span>
                   </button>
 
-                  <button type="button" onclick="openVacationModal()" class="px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] flex items-center gap-1 transition whitespace-nowrap">
+                  <button type="button" onclick="openVacationModal()" class="hidden sm:inline-flex px-2 py-0.5 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] items-center gap-1 transition whitespace-nowrap">
                       <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
                       <span>+ Vacaciones</span>
                   </button>
 
                   <!-- BOTÓN ALTA PRIORIDAD / FACTORY LIGHT FILLED BUTTON (EXCLUSIVO AUDITORÍA OSVALDO AVILÉS) -->
-                  <button type="button" id="btnExportPrenomina" onclick="exportPrenominaXLSX()" class="hidden px-2 py-0.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium uppercase text-[9.5px] rounded-[3px] flex items-center gap-1 transition whitespace-nowrap" title="Descargar archivo Excel oficial FOPR-RHU-02-02 con fórmulas y códigos (Exclusivo Osvaldo Avilés)">
+                  <button type="button" id="btnExportPrenomina" onclick="exportPrenominaXLSX()" class="hidden sm:inline-flex px-2 py-0.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium uppercase text-[9.5px] rounded-[3px] items-center gap-1 transition whitespace-nowrap" title="Descargar archivo Excel oficial FOPR-RHU-02-02 con fórmulas y códigos (Exclusivo Osvaldo Avilés)">
                       <svg class="w-3 h-3 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                       <span>.XLSX</span>
                   </button>
@@ -661,6 +661,22 @@
               <!-- Renderizado dinámico desde app.js -->
           </div>
 
+          <!-- BARRA DE ACCIÓN INFERIOR MÓVIL (PULGAR Y FÁCIL ACCESO EN PARTE BAJA) -->
+          <div class="sm:hidden px-2.5 py-1.5 bg-[#171514] border-t border-[#3d3a39] flex items-center justify-between gap-2 shrink-0 select-none">
+              <button type="button" onclick="openCommissionModal()" class="flex-1 py-1.5 px-2 bg-[#1d1a18] hover:bg-[#252220] border border-[#ee6018]/50 text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+                  <span>+ Comisión</span>
+              </button>
+              <button type="button" onclick="openVacationModal()" class="flex-1 py-1.5 px-2 bg-[#1d1a18] hover:bg-[#252220] border border-[#a0ca92]/50 text-[#eeeeee] font-mono text-[10px] uppercase rounded-[3px] flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
+                  <span>+ Vacaciones</span>
+              </button>
+              <button type="button" id="btnExportPrenominaMobile" onclick="exportPrenominaXLSX()" class="hidden py-1.5 px-2.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono font-medium uppercase text-[10px] rounded-[3px] items-center justify-center gap-1 transition active:scale-95 shadow-sm" title="Descargar .XLSX">
+                  <svg class="w-3 h-3 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  <span>.XLSX</span>
+              </button>
+          </div>
+
           <!-- FOOTER / LEYENDA FACTORY DE CÓDIGOS OFICIALES RH (COMPACTO Y VISIBLE EN MÓVIL) -->
           <div class="py-1.5 px-3 sm:px-4 border-t border-[#1d1a18] bg-[#121110] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 text-[9px] sm:text-[9.5px] font-mono shrink-0 select-none">
               <div class="flex items-center gap-1 overflow-x-auto scrollbar-none whitespace-nowrap py-0.5 max-w-full">
@@ -687,7 +703,16 @@
               <span class="font-mono text-[10px] text-[#b8b3b0] uppercase tracking-[-0.24px]">TRABAJO FUERA DE OFICINA // CÓDIGO PT</span>
           </div>
           <h3 class="text-xl font-normal text-[#eeeeee] tracking-tight leading-tight mb-1">Registrar Comisión a Cliente</h3>
-          <p class="text-xs text-[#8a8380] mb-4">Registra la visita a cliente con motivo y notifica a su jefe inmediato.</p>
+          <p class="text-xs text-[#8a8380] mb-3">Registra la visita a cliente con motivo y notifica a su jefe inmediato.</p>
+
+          <!-- AVISO QUINCENA VALIDADA (DINÁMICO) -->
+          <div id="commLockedWarning" class="hidden mb-3 p-2.5 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/50 text-[#ee6018] font-mono text-[10px] space-y-1">
+              <div class="flex items-center gap-1.5 font-bold uppercase">
+                  <svg class="w-3.5 h-3.5 shrink-0 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <span>Quincena Validada y Cerrada</span>
+              </div>
+              <p class="text-[#eeeeee] leading-tight font-sans text-[11px]">Este periodo quincenal ya fue validado y auditado. Solo el administrador (Osvaldo Avilés) puede registrar comisiones en periodos cerrados.</p>
+          </div>
 
           <div class="space-y-3.5 mb-5 text-xs">
               <div>
@@ -713,7 +738,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Inicio</label>
-                      <input type="date" id="commStartDate" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
+                      <input type="date" id="commStartDate" onchange="window.checkCommissionLockState && window.checkCommissionLockState()" class="w-full bg-[#1d1a18] border border-[#3d3a39] focus:border-[#eeeeee] rounded-[3px] p-2.5 text-xs text-[#eeeeee] outline-none [color-scheme:dark]">
                   </div>
                   <div>
                       <label class="block font-mono text-[10px] text-[#b8b3b0] mb-1 uppercase">Fecha de Fin</label>
@@ -1122,7 +1147,7 @@
   </div>
 
   <!-- MARQUESINA / BANNER DE ANUNCIOS Y COMUNICADOS GLOBALES (FACTORY TICKER) -->
-  <div id="announcementTickerBar" onclick="window.openAnnouncementsModal()" class="hidden relative z-30 w-full bg-[#101010] hover:bg-[#141211] border-b border-[#3d3a39] px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center justify-between gap-2 sm:gap-2.5 text-xs overflow-hidden select-none cursor-pointer transition" title="Clic para ver comunicados y confirmar lectura">
+  <div id="announcementTickerBar" class="hidden relative z-30 w-full bg-[#101010] border-b border-[#3d3a39] px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center justify-between gap-2 sm:gap-2.5 text-xs overflow-hidden select-none">
     <!-- Etiqueta compacta de aviso a la izquierda -->
     <div class="flex items-center gap-1.5 shrink-0 z-10 bg-[#101010] pr-2 border-r border-[#2d2a29]">
       <span class="relative flex h-2 w-2">
@@ -2981,34 +3006,6 @@
   </div>
 
   
-
-  <!-- MODAL DE CONSULTA Y CONFIRMACIÓN DE AVISOS Y COMUNICADOS OPERATIVOS -->
-  <div id="announcementsModal" onclick="if(event.target === this) window.closeAnnouncementsModal()" class="fixed inset-0 z-[100060] bg-[#101010]/95 backdrop-blur-md hidden flex flex-col items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-6 overflow-y-auto">
-    <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[#3d3a39] my-auto shadow-2xl relative">
-      <!-- HEADER -->
-      <div class="p-3.5 sm:p-4 border-b border-[#3d3a39] bg-[#1d1a18] flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] animate-ping shrink-0"></span>
-          <div class="min-w-0">
-            <h3 class="font-mono text-xs uppercase tracking-wider text-[#fafafa] font-bold truncate">Avisos y Comunicados Operativos</h3>
-            <p class="font-mono text-[10px] text-[#8a8380] truncate">Confirmaciones de lectura y trazabilidad del equipo en tiempo real</p>
-          </div>
-        </div>
-        <button type="button" onclick="window.closeAnnouncementsModal()" class="w-8 h-8 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] hover:text-[#fafafa] hover:border-[#ee6018] flex items-center justify-center transition shrink-0 ml-2" title="Cerrar">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <!-- LISTA DE AVISOS -->
-      <div id="announcementsModalList" class="p-4 overflow-y-auto space-y-3.5 flex-1">
-        <!-- Inyección dinámica -->
-      </div>
-      <!-- FOOTER -->
-      <div class="p-3 border-t border-[#3d3a39] bg-[#171514] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
-        <span>Al pulsar "Confirmar lectura" se registra tu acuse de recibo</span>
-        <button type="button" onclick="window.closeAnnouncementsModal()" class="px-3 py-1 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] rounded-[3px] text-[#eeeeee] transition">Cerrar</button>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA -->
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (VIEWPORT FIT ESTRICTO) -->

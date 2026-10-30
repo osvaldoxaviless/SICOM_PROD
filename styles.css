@@ -898,6 +898,33 @@ body:has(#filterDrawer:not(.translate-x-full)) #btnDailyTasks {
         display: flex !important;
         flex-direction: column !important;
     }
+
+    /* Ajuste vertical fluido para vista por consultor y diaria en móvil (cero compresión) */
+    .att-consultant-fit,
+    .att-daily-fit {
+        height: auto !important;
+        min-height: 100% !important;
+        flex: 1 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .att-consultant-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        flex: none !important;
+    }
+
+    /* Tabla matriz en móvil con scroll horizontal fluido y touch suave */
+    .att-matrix-wrap {
+        -webkit-overflow-scrolling: touch !important;
+        overflow-x: auto !important;
+        max-width: 100% !important;
+    }
 }
 
 /* Ocultamiento absoluto de la pastilla de filtro cuando no se está en el Mapa Mental */

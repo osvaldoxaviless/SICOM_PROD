@@ -13429,197 +13429,6 @@ window.renderDailyTasks = function() {
     };
 
 
-    // ==========================================================================
-    // SISTEMA DE CONFIRMACIÓN DE LECTURA Y TRAZABILIDAD DE AVISOS (STGT / EO/SA)
-    // ==========================================================================
-
-    window.getAnnouncementReceiptHtml = function(ann) {
-        ensureDataStructure();
-        const readBy = Array.isArray(ann.readBy) ? ann.readBy : [];
-        const readUserNames = new Set(readBy.map(r => (typeof r === 'string' ? r : (r && r.user))).filter(Boolean));
-        if (ann.createdBy && ann.createdBy !== 'Sistema') readUserNames.add(ann.createdBy);
-
-        const uniqueReaders = Array.from(readUserNames);
-        const isReadByMe = localAuthor ? readUserNames.has(localAuthor) : false;
-        const isAuthor = localAuthor && ann.createdBy === localAuthor;
-
-        const allTeam = Object.keys(consultants || {}).filter(c => c !== 'Lector' && c !== 'Admin');
-        const pendingCons = allTeam.filter(c => !readUserNames.has(c));
-
-        const readerChipsHtml = uniqueReaders.map(rName => {
-            const cData = (consultants && consultants[rName]) ? consultants[rName] : null;
-            const cColor = cData?.color || '#ee6018';
-            const shortName = rName.split(' ')[0];
-            const receiptObj = readBy.find(r => (typeof r === 'string' ? r : (r && r.user)) === rName);
-            const receiptTime = (receiptObj && typeof receiptObj === 'object' && receiptObj.at) ? receiptObj.at : '';
-            return `
-                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] text-[#eeeeee] font-mono text-[9px]" title="Visto por ${escapeHtml(rName)}${receiptTime ? ' el ' + escapeHtml(receiptTime) : ''}">
-                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${cColor};"></span>
-                    <span>${escapeHtml(shortName)}</span>
-                </span>
-            `;
-        }).join('');
-
-        const pendingBadgeHtml = pendingCons.length > 0
-            ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] bg-[#ee6018]/10 border border-[#ee6018]/30 text-[#ee6018] font-mono text-[9px]" title="Pendientes de confirmar lectura: ${escapeHtml(pendingCons.join(', '))}">⏳ Falta: ${escapeHtml(pendingCons.map(c => c.split(' ')[0]).join(', '))}</span>`
-            : '';
-
-        let receiptSection = '';
-        if (!isReadByMe) {
-            receiptSection = `
-                <div class="mt-2.5 pt-2 border-t border-[#3d3a39] flex flex-col gap-2">
-                    <div class="flex items-center justify-between gap-2 flex-wrap">
-                        <div class="flex items-center gap-1.5 font-mono text-[9px] uppercase text-[#eeeeee]">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92] animate-ping shrink-0"></span>
-                            <span>Pendiente de tu lectura</span>
-                        </div>
-                        <button type="button" onclick="event.stopPropagation(); window.confirmAnnouncementRead('${ann.id}')" class="px-2.5 py-1 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-bold rounded-[3px] transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-md active:scale-95">
-                            <svg class="w-3 h-3 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Confirmar lectura</span>
-                        </button>
-                    </div>
-                    ${uniqueReaders.length > 0 ? `
-                    <div class="flex items-center gap-1 flex-wrap pt-1">
-                        <span class="font-mono text-[9px] text-[#8a8380] uppercase mr-0.5">👁 Visto (${uniqueReaders.length}):</span>
-                        ${readerChipsHtml}
-                        ${pendingBadgeHtml}
-                    </div>` : ''}
-                </div>
-            `;
-        } else {
-            const myReceipt = readBy.find(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
-            const myReceiptDate = (myReceipt && typeof myReceipt === 'object' && myReceipt.at) ? myReceipt.at : '';
-
-            receiptSection = `
-                <div class="mt-2 pt-2 border-t border-[#3d3a39]/70 flex flex-col gap-1.5">
-                    <div class="flex items-center justify-between gap-2 text-[9px]">
-                        <span class="flex items-center gap-1 text-[#a0ca92] font-mono uppercase font-bold">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            ${isAuthor ? 'Publicado por ti' : `Enterado (${myReceiptDate || 'Confirmado'})`}
-                        </span>
-                        <span class="font-mono text-[9px] text-[#8a8380] uppercase ml-auto">
-                            👁 ${uniqueReaders.length} ${uniqueReaders.length === 1 ? 'enterado' : 'enterados'}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-1 flex-wrap">
-                        ${readerChipsHtml}
-                        ${pendingBadgeHtml}
-                    </div>
-                </div>
-            `;
-        }
-        return receiptSection;
-    };
-
-    window.confirmAnnouncementRead = function(annId) {
-        if (!localAuthor) {
-            window.showToast("Debes seleccionar tu perfil de usuario para confirmar lectura", true);
-            return;
-        }
-        ensureDataStructure();
-        let ann = (appData.announcements || []).find(a => a.id === annId);
-        
-        // Si es un anuncio de regla automática (quincenal o fin de mes), registrar en config
-        if (!ann && (annId === 'ann_biweekly_auto' || annId === 'ann_monthend_auto')) {
-            if (!appData.announcementConfig) appData.announcementConfig = {};
-            if (!appData.announcementConfig.ruleReadBy) appData.announcementConfig.ruleReadBy = {};
-            if (!Array.isArray(appData.announcementConfig.ruleReadBy[annId])) {
-                appData.announcementConfig.ruleReadBy[annId] = [];
-            }
-            const already = appData.announcementConfig.ruleReadBy[annId].some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
-            if (!already) {
-                const nowStr = new Date().toLocaleString('es-MX', { hour12: false });
-                appData.announcementConfig.ruleReadBy[annId].push({ user: localAuthor, at: nowStr });
-                window.saveData(false);
-                if (typeof window.renderAnnouncementsTicker === 'function') window.renderAnnouncementsTicker();
-                if (typeof window.renderAnnouncementsModalContent === 'function') window.renderAnnouncementsModalContent();
-                window.showToast("✓ Acuse de lectura confirmado", false);
-            }
-            return;
-        }
-
-        if (!ann) return;
-
-        if (!Array.isArray(ann.readBy)) {
-            ann.readBy = (ann.createdBy && ann.createdBy !== 'Sistema') ? [{ user: ann.createdBy, at: ann.createdAt || '' }] : [];
-        }
-
-        const already = ann.readBy.some(r => (typeof r === 'string' ? r : (r && r.user)) === localAuthor);
-        if (!already) {
-            const nowStr = new Date().toLocaleString('es-MX', { hour12: false });
-            ann.readBy.push({ user: localAuthor, at: nowStr });
-            logActivity('announcement', 'Acuse Comunicado', `Confirmó lectura de aviso: "${(ann.text || '').slice(0, 30)}..."`, localAuthor);
-            window.saveData(false);
-            if (typeof window.renderAnnouncementsTicker === 'function') window.renderAnnouncementsTicker();
-            if (typeof window.renderAnnouncementsManager === 'function') window.renderAnnouncementsManager();
-            if (typeof window.renderAnnouncementsModalContent === 'function') window.renderAnnouncementsModalContent();
-            window.showToast("✓ Acuse de lectura confirmado", false);
-        }
-    };
-
-    window.openAnnouncementsModal = function() {
-        const modal = document.getElementById('announcementsModal');
-        if (!modal) return;
-        window.renderAnnouncementsModalContent();
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-        });
-    };
-
-    window.closeAnnouncementsModal = function() {
-        const modal = document.getElementById('announcementsModal');
-        if (!modal) return;
-        modal.classList.add('opacity-0');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 150);
-    };
-
-    window.renderAnnouncementsModalContent = function() {
-        const listContainer = document.getElementById('announcementsModalList');
-        if (!listContainer) return;
-
-        const items = (typeof window.getActiveAnnouncements === 'function') ? window.getActiveAnnouncements() : (appData.announcements || []);
-        if (!items || items.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-12 text-[#8a8380]">
-                    <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                    <p class="font-mono text-xs uppercase">No hay avisos activos en este momento</p>
-                </div>
-            `;
-            return;
-        }
-
-        listContainer.innerHTML = items.map(ann => {
-            let tagStyle = 'bg-[#0071e3]/20 text-[#2997ff] border-[#0071e3]/40';
-            let tagLabel = ann.tag || 'INFORMATIVO';
-            if (ann.type === 'urgent') {
-                tagStyle = 'bg-[#ee6018]/25 text-[#ee6018] border-[#ee6018]/50';
-                if (!ann.tag) tagLabel = 'URGENTE';
-            } else if (ann.type === 'reminder') {
-                tagStyle = 'bg-[#f59e0b]/20 text-[#fbbf24] border-[#f59e0b]/40';
-                if (!ann.tag) tagLabel = 'RECORDATORIO';
-            }
-
-            const receiptHtml = window.getAnnouncementReceiptHtml(ann);
-
-            return `
-                <div class="p-3.5 bg-[#171514] border border-[#3d3a39] rounded-[10px] space-y-2">
-                    <div class="flex items-center justify-between gap-2 flex-wrap">
-                        <span class="px-2 py-0.5 rounded-[3px] text-[9.5px] font-mono uppercase font-bold tracking-wider ${tagStyle} border">${escapeHtml(tagLabel)}</span>
-                        <span class="font-mono text-[9.5px] text-[#8a8380]">${ann.createdAt ? 'Emitido: ' + ann.createdAt : ''}</span>
-                    </div>
-                    <p class="text-xs text-[#eeeeee] font-mono leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(ann.text)}</p>
-                    <div class="text-[9.5px] font-mono text-[#8a8380]">
-                        <span>Emisor: ${escapeHtml(ann.createdBy || 'Sistema')}</span>
-                    </div>
-                    ${receiptHtml}
-                </div>
-            `;
-        }).join('');
-    };
-
     window.renderAnnouncementsTicker = function() {
         const bar = document.getElementById('announcementTickerBar');
         const track = document.getElementById('tickerTrack');
@@ -13645,25 +13454,9 @@ window.renderDailyTasks = function() {
                 if (!ann.tag) tagLabel = 'RECORDATORIO';
             }
 
-            const readBy = Array.isArray(ann.readBy) ? ann.readBy : [];
-            const readUserNames = new Set(readBy.map(r => (typeof r === 'string' ? r : (r && r.user))).filter(Boolean));
-            if (ann.createdBy && ann.createdBy !== 'Sistema') readUserNames.add(ann.createdBy);
-            const isReadByMe = localAuthor ? readUserNames.has(localAuthor) : false;
-
-            const readPillHtml = !isReadByMe
-                ? `<button type="button" onclick="event.stopPropagation(); window.confirmAnnouncementRead('${ann.id}')" class="shrink-0 ml-1.5 px-2 py-0.5 rounded-[3px] bg-[#ee6018] hover:bg-[#ff742e] text-[#101010] font-mono text-[8.5px] uppercase font-bold transition flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer" title="Confirmar lectura de este aviso">
-                    <svg class="w-2.5 h-2.5 text-[#101010]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    <span>Confirmar lectura</span>
-                   </button>`
-                : `<span class="shrink-0 ml-1.5 px-1.5 py-0.5 rounded-[3px] bg-[#a0ca92]/15 border border-[#a0ca92]/30 text-[#a0ca92] font-mono text-[8px] uppercase flex items-center gap-0.5">
-                    <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    <span>Enterado</span>
-                   </span>`;
-
-            return `<span class="inline-flex items-center gap-2 mx-6 shrink-0 cursor-pointer" onclick="window.openAnnouncementsModal()">
+            return `<span class="inline-flex items-center gap-2 mx-6 shrink-0">
                 <span class="shrink-0 whitespace-nowrap px-2 py-0.5 w-auto rounded-[3px] text-[9px] font-mono uppercase font-bold tracking-wider ${tagStyle} border inline-block" style="flex-shrink: 0; white-space: nowrap; padding: 2px 8px; width: auto;">${escapeHtml(tagLabel)}</span>
                 <span class="text-[#f5f5f4]">${escapeHtml(ann.text)}</span>
-                ${readPillHtml}
                 <span class="text-[#55504c] font-light select-none ml-2">//</span>
             </span>`;
         }).join('');
@@ -14004,7 +13797,6 @@ window.renderDailyTasks = function() {
                     <span>Por: ${escapeHtml(a.createdBy || 'Supervisor')}${a.createdAt ? ' (' + a.createdAt + ')' : ''}</span>
                     <span>${a.validTo ? 'Vence: ' + a.validTo : 'Permanente'}</span>
                 </div>
-                ${window.getAnnouncementReceiptHtml(a)}
             </div>`;
         }).join('');
     };
@@ -14378,11 +14170,19 @@ window.renderDailyTasks = function() {
 
         // 3. Control de Visibilidad del Botón de Descarga de Prenómina (Exclusivo para Osvaldo Avilés)
         const btnExport = document.getElementById('btnExportPrenomina');
+        const btnExportMob = document.getElementById('btnExportPrenominaMobile');
         if (btnExport) {
             if (isMaster) {
                 btnExport.classList.remove('hidden');
             } else {
                 btnExport.classList.add('hidden');
+            }
+        }
+        if (btnExportMob) {
+            if (isMaster) {
+                btnExportMob.classList.remove('hidden');
+            } else {
+                btnExportMob.classList.add('hidden');
             }
         }
 
@@ -15277,6 +15077,40 @@ window.renderDailyTasks = function() {
         }
     };
 
+    // --- VALIDACIÓN DE ESTADO DE BLOQUEO DE QUINCENA EN COMISIÓN ---
+    window.checkCommissionLockState = function() {
+        const isMaster = window.isAttendanceMasterAdmin ? window.isAttendanceMasterAdmin() : false;
+        const startVal = document.getElementById('commStartDate')?.value;
+        const warnEl = document.getElementById('commLockedWarning');
+        const submitBtn = document.querySelector('#commissionModal button[onclick="saveCommission()"]');
+
+        if (!startVal) return;
+        const parts = startVal.split('-');
+        if (parts.length !== 3) return;
+        const y = parts[0];
+        const m = parts[1];
+        const d = parseInt(parts[2], 10);
+        const q = d <= 15 ? 'Q1' : 'Q2';
+        const periodKey = `${y}-${m}-${q}`;
+
+        const isLocked = window.isPeriodLocked ? window.isPeriodLocked(periodKey) : false;
+        if (isLocked && !isMaster) {
+            if (warnEl) warnEl.classList.remove('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-40', 'cursor-not-allowed');
+                submitBtn.title = 'Periodo cerrado y auditado. Solo administradores pueden registrar comisiones.';
+            }
+        } else {
+            if (warnEl) warnEl.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+                submitBtn.title = '';
+            }
+        }
+    };
+
     // --- MODAL DE COMISIONES RÁPIDAS ---
     window.openCommissionModal = function(defaultConsultant, defaultDate, defaultClient) {
         const m = document.getElementById('commissionModal');
@@ -15349,6 +15183,7 @@ window.renderDailyTasks = function() {
         }
 
         window.updateCommissionLeadPreview();
+        if (typeof window.checkCommissionLockState === 'function') window.checkCommissionLockState();
 
         m.classList.remove('hidden');
         if (typeof window.pushNavigationState === 'function') window.pushNavigationState('commissionModal');
