@@ -108,58 +108,6 @@
                   <label id="loginPasswordLabel" class="block font-mono text-[11px] mb-2 flex items-center gap-1.5 uppercase tracking-[-0.24px] text-[#101010]">
                       <svg width="14" height="14" style="width:14px;height:14px;flex-shrink:0;" class="w-3.5 h-3.5 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
 
-    <!-- SKELETON SCREEN DEL MAPA MENTAL (ARQUITECTURA EO/SA EN CARGA) -->
-    <div id="mapSkeleton" class="absolute inset-0 pointer-events-none z-[15] flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden select-none">
-      <div class="absolute top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1 rounded-[4px] bg-[#12100f]/95 border border-[#2d2927] shadow-xl backdrop-blur-md">
-        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
-        <span class="font-mono text-[10px] uppercase tracking-wider text-[#b8b3b0] font-semibold">Cargando Arquitectura EO/SA...</span>
-      </div>
-      <div class="relative w-full max-w-4xl h-[420px] flex items-center justify-center px-4">
-        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-50" viewBox="0 0 800 420" fill="none">
-          <path d="M 400 210 C 310 210, 240 120, 150 120" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-          <path d="M 400 210 C 310 210, 240 210, 150 210" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-          <path d="M 400 210 C 310 210, 240 300, 150 300" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-          <path d="M 400 210 C 490 210, 560 120, 650 120" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-          <path d="M 400 210 C 490 210, 560 210, 650 210" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-          <path d="M 400 210 C 490 210, 560 300, 650 300" stroke="#3d3734" stroke-width="1.5" stroke-dasharray="4 4" />
-        </svg>
-        <div class="z-10 map-skeleton-node map-skeleton-pulse rounded-[8px] p-3.5 w-48 flex flex-col items-center justify-center gap-2 border border-[#3d3a39] bg-[#1d1a18]/95 backdrop-blur-md shadow-2xl">
-          <div class="w-7 h-7 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/40 flex items-center justify-center">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] animate-pulse"></span>
-          </div>
-          <div class="h-3.5 w-28 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-2 w-20 rounded-[2px] map-skeleton-shimmer opacity-70"></div>
-        </div>
-        <div class="absolute left-6 sm:left-12 top-14 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-80">
-          <div class="h-2.5 w-20 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-28 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-          <div class="h-1.5 w-16 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
-        </div>
-        <div class="absolute left-2 sm:left-8 top-[185px] w-38 sm:w-44 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-90">
-          <div class="h-2.5 w-24 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-32 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-          <div class="h-1.5 w-20 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
-        </div>
-        <div class="absolute left-6 sm:left-12 bottom-10 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-75">
-          <div class="h-2.5 w-18 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-24 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-        </div>
-        <div class="absolute right-6 sm:right-12 top-14 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-80">
-          <div class="h-2.5 w-22 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-28 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-          <div class="h-1.5 w-16 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
-        </div>
-        <div class="absolute right-2 sm:right-8 top-[185px] w-38 sm:w-44 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-90">
-          <div class="h-2.5 w-26 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-32 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-          <div class="h-1.5 w-20 rounded-[2px] map-skeleton-shimmer opacity-40"></div>
-        </div>
-        <div class="absolute right-6 sm:right-12 bottom-10 w-36 sm:w-40 p-2.5 rounded-[6px] map-skeleton-node border border-[#2d2927] space-y-1.5 opacity-75">
-          <div class="h-2.5 w-20 rounded-[2px] map-skeleton-shimmer"></div>
-          <div class="h-1.5 w-24 rounded-[2px] map-skeleton-shimmer opacity-60"></div>
-        </div>
-      </div>
-    </div>
                       Credencial de Acceso
                   </label>
                   <div class="relative">
@@ -1213,6 +1161,111 @@
       <defs id="svgDefs"></defs>
       <g id="canvasGroup" class="pointer-events-auto"></g>
     </svg>
+
+    <!-- SKELETON SCREEN DEL MAPA MENTAL (ESTILO INSTAGRAM SHIMMER / EO/SA ARCHITECTURE) -->
+    <div id="mapSkeleton" class="absolute inset-0 pointer-events-none z-[15] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-350">
+      <!-- Badge de carga superior flotante -->
+      <div class="absolute top-4 sm:top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] bg-[#12100f]/90 border border-[#2d2927] shadow-xl backdrop-blur-md z-20">
+        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
+        <span class="font-mono text-[10px] uppercase tracking-wider text-[#b8b3b0] font-semibold">Cargando Mapa Mental...</span>
+      </div>
+
+      <!-- Lienzo Esquelético Vectorial y Siluetas de Nodos -->
+      <div class="relative w-full max-w-5xl h-[520px] flex items-center justify-center px-4">
+        <!-- Conectores SVG orgánicos que simulan la red sináptica del mapa -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 900 520" fill="none">
+          <!-- Conexiones Izquierda -->
+          <path d="M 450 260 C 350 260, 270 140, 180 140" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+          <path d="M 450 260 C 350 260, 270 260, 180 260" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+          <path d="M 450 260 C 350 260, 270 380, 180 380" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+          <!-- Conexiones Derecha -->
+          <path d="M 450 260 C 550 260, 630 140, 720 140" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+          <path d="M 450 260 C 550 260, 630 260, 720 260" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+          <path d="M 450 260 C 550 260, 630 380, 720 380" stroke="#3d3734" stroke-width="1.75" stroke-dasharray="4 4" />
+        </svg>
+
+        <!-- Nodo Central Esqueleto (Core Hub EO/SA) -->
+        <div class="z-10 insta-skeleton-card rounded-[10px] p-4 w-48 sm:w-52 flex flex-col items-center justify-center gap-2 border border-[#3d3a39] bg-[#1d1a18]/95 shadow-2xl relative">
+          <div class="w-8 h-8 rounded-[4px] bg-[#ee6018]/15 border border-[#ee6018]/30 flex items-center justify-center">
+            <span class="w-3 h-3 rounded-full bg-[#ee6018] animate-pulse"></span>
+          </div>
+          <div class="h-3.5 w-32 rounded-[3px] insta-skeleton"></div>
+          <div class="h-2 w-20 rounded-[3px] insta-skeleton opacity-60"></div>
+        </div>
+
+        <!-- Módulos Columna Izquierda (3 Niveles con Proyectos Hijos) -->
+        <!-- Módulo Superior Izq -->
+        <div class="absolute left-4 sm:left-12 top-10 w-44 sm:w-48 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-28 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+            <div class="h-2 w-3/4 rounded-[2px] insta-skeleton opacity-50"></div>
+          </div>
+        </div>
+
+        <!-- Módulo Centro Izq -->
+        <div class="absolute left-2 sm:left-8 top-[215px] w-48 sm:w-52 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-32 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+            <div class="h-2 w-4/5 rounded-[2px] insta-skeleton opacity-50"></div>
+          </div>
+        </div>
+
+        <!-- Módulo Inferior Izq -->
+        <div class="absolute left-4 sm:left-12 bottom-10 w-44 sm:w-48 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-24 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+          </div>
+        </div>
+
+        <!-- Módulos Columna Derecha (3 Niveles con Proyectos Hijos) -->
+        <!-- Módulo Superior Der -->
+        <div class="absolute right-4 sm:right-12 top-10 w-44 sm:w-48 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-28 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+            <div class="h-2 w-3/4 rounded-[2px] insta-skeleton opacity-50"></div>
+          </div>
+        </div>
+
+        <!-- Módulo Centro Der -->
+        <div class="absolute right-2 sm:right-8 top-[215px] w-48 sm:w-52 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-32 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+            <div class="h-2 w-4/5 rounded-[2px] insta-skeleton opacity-50"></div>
+          </div>
+        </div>
+
+        <!-- Módulo Inferior Der -->
+        <div class="absolute right-4 sm:right-12 bottom-10 w-44 sm:w-48 p-3 rounded-[8px] insta-skeleton-card space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full insta-skeleton"></div>
+            <div class="h-3 w-24 rounded-[2px] insta-skeleton"></div>
+          </div>
+          <div class="space-y-1.5 pl-3 border-l border-[#2d2927]">
+            <div class="h-2 w-full rounded-[2px] insta-skeleton opacity-70"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     
     <!-- TABLERO KANBAN DE PRIORIDADES A PANTALLA COMPLETA (VISTA PRIORIDADES) -->

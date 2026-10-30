@@ -9041,10 +9041,11 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     window.hideMapSkeleton = function() {
         const skel = document.getElementById('mapSkeleton');
         if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
+            skel.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
             skel.classList.add('opacity-0');
             setTimeout(() => {
                 try { skel.style.display = 'none'; } catch (_) {}
-            }, 400);
+            }, 420);
         }
     };
 
