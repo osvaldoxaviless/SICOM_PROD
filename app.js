@@ -570,8 +570,8 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
 
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js");
-            const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js");
-            const { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, deleteDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
+            const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js");
+            const { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js");
             
             globalDoc = doc; globalSetDoc = setDoc; globalGetDoc = getDoc; globalDeleteDoc = deleteDoc;
 
@@ -585,59 +585,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
             };
 
             const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            // Persistencia offline: cola durable de escrituras en IndexedDB (se reenvian al volver la red)
-            try {
-                db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
-            } catch (persistErr) {
-                console.warn('[SICOM] Persistencia Firestore no disponible, usando modo estandar:', persistErr && persistErr.code);
-                db = getFirestore(app);
-            }
-            appId = 'sicom-stgt';
-
-            // --- EXPULSION ROBUSTA DE SESION (token revocado / usuario deshabilitado) ---
-            const AUTH_FATAL = new Set(['permission-denied', 'unauthenticated', 'auth/user-token-expired', 'auth/user-disabled',
-                'auth/user-not-found', 'auth/id-token-revoked', 'auth/invalid-user-token', 'auth/requires-recent-login']);
-            window._sicomIsAuthFatal = (code) => !!code && AUTH_FATAL.has(String(code).replace('firestore/', ''));
-            let isExpelling = false;
-            window._sicomExpel = function expelSession(reason) {
-                if (isExpelling) return;
-                isExpelling = true;
-                window._sicomExpelled = true;
-                console.info('[SICOM] Sesion finalizada:', reason);
-                try { if (unsubscribeSnapshot) unsubscribeSnapshot(); } catch (_) {}
-                unsubscribeSnapshot = null;
-                try { clearTimeout(cloudWriteTimer); } catch (_) {}
-                cloudWritePending = false;
-                isFirebaseReady = false; globalSetDoc = null;
-                try { clearTimeout(inactivityTimeout); } catch (_) {}
-                ['sicom_active_user', 'sicom_author', 'sicom_role'].forEach(k => localStorage.removeItem(k));
-                localAuthor = ''; currentUserRole = 'Consultor';
-                currentSelection = { type: null, id: null };
-                try { if (typeof window.closeInfoCardSafe === 'function') window.closeInfoCardSafe(true); } catch (_) {}
-                try { if (typeof window.closePriorityDrawer === 'function') window.closePriorityDrawer(); } catch (_) {}
-                const loader = document.getElementById('cloudLoader');
-                if (loader) { loader.style.opacity = '0'; loader.style.display = 'none'; }
-                showLoginScreen();
-                if (typeof window.showToast === 'function') window.showToast('🔒 Tu sesión fue cerrada por un administrador. Inicia sesión de nuevo.', true);
-                setTimeout(() => { isExpelling = false; }, 1500);
-            };
-            onAuthStateChanged(auth, (user) => {
-                if (!user && isFirebaseReady) window._sicomExpel('auth-state-null');
-            });
+            auth = getAuth(app); db = getFirestore(app); appId = 'sicom-stgt';
 
             await signInAnonymously(auth);
 
             if(auth.currentUser) {
                 isFirebaseReady = true;
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'sicom_state', 'main');
-                
-                // N snapshots consecutivos -> 1 solo repintado por frame
-                let _uiRaf = 0;
-                const scheduleRefreshUI = () => {
-                    if (_uiRaf) return;
-                    _uiRaf = requestAnimationFrame(() => { _uiRaf = 0; try { refreshUI(); } catch (e) { console.error('refreshUI', e); } });
-                };
                 unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.data();
@@ -758,7 +712,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                         }
                         
                         if(localAuthor) {
-                            scheduleRefreshUI();
+                            refreshUI();
                             if (!window._initialCloudRecentered) {
                                 window._initialCloudRecentered = true;
                                 setTimeout(() => { try { window.recenterCanvas(); } catch (e) {} }, 80);
@@ -1445,7 +1399,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
         
         // Tras una expulsion de sesion, recargar para re-autenticar y re-suscribir el listener
-        if (window._sicomExpelled) { setTimeout(() => location.reload(), 250); return; }
+        
 
         // Ocultar overlay de forma inmediata y disparar la interfaz principal
         const overlay = document.getElementById('loginOverlay'); 
