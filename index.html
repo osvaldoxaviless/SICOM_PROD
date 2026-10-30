@@ -1122,7 +1122,7 @@
   </div>
 
   <!-- MARQUESINA / BANNER DE ANUNCIOS Y COMUNICADOS GLOBALES (FACTORY TICKER) -->
-  <div id="announcementTickerBar" class="hidden relative z-30 w-full bg-[#101010] border-b border-[#3d3a39] px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center justify-between gap-2 sm:gap-2.5 text-xs overflow-hidden select-none">
+  <div id="announcementTickerBar" onclick="window.openAnnouncementsModal()" class="hidden relative z-30 w-full bg-[#101010] hover:bg-[#141211] border-b border-[#3d3a39] px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center justify-between gap-2 sm:gap-2.5 text-xs overflow-hidden select-none cursor-pointer transition" title="Clic para ver comunicados y confirmar lectura">
     <!-- Etiqueta compacta de aviso a la izquierda -->
     <div class="flex items-center gap-1.5 shrink-0 z-10 bg-[#101010] pr-2 border-r border-[#2d2a29]">
       <span class="relative flex h-2 w-2">
@@ -3133,6 +3133,35 @@
   </div>
 
   
+
+  <!-- MODAL DE CONSULTA Y CONFIRMACIÓN DE AVISOS Y COMUNICADOS OPERATIVOS -->
+  <div id="announcementsModal" onclick="if(event.target === this) window.closeAnnouncementsModal()" class="fixed inset-0 z-[100060] bg-[#101010]/95 backdrop-blur-md hidden flex flex-col items-center justify-center opacity-0 transition-opacity duration-150 p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-[#101010] rounded-[10px] w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-[#3d3a39] my-auto shadow-2xl relative">
+      <!-- HEADER -->
+      <div class="p-3.5 sm:p-4 border-b border-[#3d3a39] bg-[#1d1a18] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#ee6018] animate-ping shrink-0"></span>
+          <div class="min-w-0">
+            <h3 class="font-mono text-xs uppercase tracking-wider text-[#fafafa] font-bold truncate">Avisos y Comunicados Operativos</h3>
+            <p class="font-mono text-[10px] text-[#8a8380] truncate">Confirmaciones de lectura y trazabilidad del equipo en tiempo real</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeAnnouncementsModal()" class="w-8 h-8 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] hover:text-[#fafafa] hover:border-[#ee6018] flex items-center justify-center transition shrink-0 ml-2" title="Cerrar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- LISTA DE AVISOS -->
+      <div id="announcementsModalList" class="p-4 overflow-y-auto space-y-3.5 flex-1">
+        <!-- Inyección dinámica -->
+      </div>
+      <!-- FOOTER -->
+      <div class="p-3 border-t border-[#3d3a39] bg-[#171514] flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
+        <span>Al pulsar "Confirmar lectura" se registra tu acuse de recibo</span>
+        <button type="button" onclick="window.closeAnnouncementsModal()" class="px-3 py-1 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] rounded-[3px] text-[#eeeeee] transition">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA -->
   <!-- MODAL PRINCIPAL: DASHBOARD EJECUTIVO & MATRIZ DE AUDITORÍA (VIEWPORT FIT ESTRICTO) -->
   <div id="executiveDashboardModal" onclick="if(event.target === this) closeExecutiveDashboard()" class="fixed inset-0 z-[100050] bg-[#101010]/95 backdrop-blur-md hidden flex flex-col items-center justify-start opacity-0 transition-opacity duration-150 p-2 sm:p-4 md:p-6 overflow-y-auto">
