@@ -11716,153 +11716,157 @@ window.toggleDailyTask = function(taskId) {
         if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
     };
 
-// === SISTEMA DE PESTAÑAS Y NOTIFICACIONES UNIFICADAS (ARQUITECTURA DE 2 NIVELES) ===
-let currentDailyMainTab = 'tasks'; // 'tasks' | 'projects' | 'alerts'
-let currentTaskSubTab = 'pending'; // 'pending' | 'validation' | 'completed'
-let currentNotifTab = 'pending';   // 'alerts' | 'projects' | 'pending' | 'validation' | 'completed'
+// === CENTRO DE MANDO // INBOX & MI TRABAJO (ARQUITECTURA LINEAR / GITHUB MOBILE) ===
+let currentCockpitTab = 'work'; // 'inbox' | 'work'
+let currentCockpitWorkFilter = 'pending'; // 'pending' | 'validation' | 'completed' | 'all'
+let isCockpitProjectsOpen = false;
 
-window.setDailyMainTab = function(mainTab) {
-    currentDailyMainTab = mainTab;
-    if (mainTab === 'tasks') {
-        currentNotifTab = currentTaskSubTab || 'pending';
-    } else {
-        currentNotifTab = mainTab;
-    }
-    window.updateNotifTabsUI();
+window.setDailyCockpitTab = function(tab) {
+    currentCockpitTab = tab;
+    window.updateCockpitUI();
     window.renderDailyTasks();
 };
 
-window.setTaskSubTab = function(subTab) {
-    currentDailyMainTab = 'tasks';
-    currentTaskSubTab = subTab;
-    currentNotifTab = subTab;
-    window.updateNotifTabsUI();
+window.setCockpitWorkFilter = function(filter) {
+    currentCockpitWorkFilter = filter;
+    window.updateCockpitUI();
     window.renderDailyTasks();
 };
 
-window.setNotifTab = function(tabName) {
-    if (tabName === 'alerts') {
-        currentDailyMainTab = 'alerts';
-        currentNotifTab = 'alerts';
-    } else if (tabName === 'projects') {
-        currentDailyMainTab = 'projects';
-        currentNotifTab = 'projects';
-    } else {
-        currentDailyMainTab = 'tasks';
-        currentTaskSubTab = tabName;
-        currentNotifTab = tabName;
+window.toggleCockpitProjectsSection = function() {
+    isCockpitProjectsOpen = !isCockpitProjectsOpen;
+    const box = document.getElementById('cockpitAssignedProjectsBox');
+    if (box) {
+        if (isCockpitProjectsOpen) {
+            box.classList.remove('hidden');
+            window.renderCockpitProjectsList();
+        } else {
+            box.classList.add('hidden');
+        }
     }
-    window.updateNotifTabsUI();
-    window.renderDailyTasks();
 };
 
-window.updateNotifTabsUI = function() {
-    // Sincronizar estado si currentNotifTab fue alterado externamente
-    if (currentNotifTab === 'alerts') {
-        currentDailyMainTab = 'alerts';
-    } else if (currentNotifTab === 'projects') {
-        currentDailyMainTab = 'projects';
-    } else if (currentNotifTab === 'pending' || currentNotifTab === 'validation' || currentNotifTab === 'completed') {
-        currentDailyMainTab = 'tasks';
-        currentTaskSubTab = currentNotifTab;
-    }
+window.renderCockpitProjectsList = function() {
+    const listCont = document.getElementById('cockpitProjectsList');
+    if (!listCont) return;
 
-    // 1. Sub-navegador de flujo de tareas (Nivel 2)
-    const subNav = document.getElementById('dailyTasksSubNavSection');
-    if (subNav) {
-        if (currentDailyMainTab === 'tasks') {
-            subNav.classList.remove('hidden');
-        } else {
-            subNav.classList.add('hidden');
-        }
-    }
+    let myProjects = [];
+    const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
 
-    // 2. Formulario de captura rápida (solo en tareas pendientes)
-    const formSection = document.getElementById('dailyTaskFormSection');
-    if (formSection) {
-        if (currentDailyMainTab === 'tasks' && currentTaskSubTab === 'pending' && currentUserRole !== 'Lector') {
-            formSection.classList.remove('hidden');
-        } else {
-            formSection.classList.add('hidden');
-        }
-    }
-
-    // 3. Proyectos asignados (solo en pestaña proyectos)
-    const pSec = document.getElementById('dailyAssignedProjectsSection');
-    if (pSec) {
-        if (currentDailyMainTab === 'projects') {
-            pSec.classList.remove('hidden');
-        } else {
-            pSec.classList.add('hidden');
-        }
-    }
-
-    // 4. Estilos Nivel 1: Tareas, Proyectos, Alertas
-    const mainBtnTasks = document.getElementById('dailyMainTabBtn-tasks');
-    const mainBadgeTasks = document.getElementById('dailyMainTabCount-tasks');
-    if (mainBtnTasks) {
-        const isTasksActive = (currentDailyMainTab === 'tasks');
-        mainBtnTasks.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isTasksActive ? 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
-        if (mainBadgeTasks) {
-            mainBadgeTasks.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isTasksActive ? 'bg-[#101010] text-[#eeeeee] border-[#101010]' : 'bg-[#101010] text-[#8a8380] border-[#3d3a39]'}`;
-        }
-    }
-
-    const mainBtnProjects = document.getElementById('notifTabBtn-projects');
-    const mainBadgeProjects = document.getElementById('notifTabCount-projects');
-    if (mainBtnProjects) {
-        const isProjectsActive = (currentDailyMainTab === 'projects');
-        mainBtnProjects.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isProjectsActive ? 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
-        if (mainBadgeProjects) {
-            mainBadgeProjects.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isProjectsActive ? 'bg-[#101010] text-[#eeeeee] border-[#101010]' : 'bg-[#101010] text-[#30d158] border-[#3d3a39]'}`;
-        }
-    }
-
-    const mainBtnAlerts = document.getElementById('notifTabBtn-alerts');
-    const mainBadgeAlerts = document.getElementById('notifTabCount-alerts');
-    if (mainBtnAlerts) {
-        const isAlertsActive = (currentDailyMainTab === 'alerts');
-        mainBtnAlerts.className = `py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isAlertsActive ? 'bg-[#ee6018]/15 border border-[#ee6018] text-[#eeeeee] font-medium shadow-none' : 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#1d1a18] border border-transparent'}`;
-        if (mainBadgeAlerts) {
-            mainBadgeAlerts.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isAlertsActive ? 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]' : 'bg-[#101010] text-[#ee6018] border-[#3d3a39]'}`;
-        }
-    }
-
-    // 5. Estilos Nivel 2: Sub-pestañas de Tareas (Pendientes, Validación, Hechas)
-    const subThemes = {
-        pending: {
-            activeBtn: 'bg-[#eeeeee] text-[#101010] font-medium shadow-sm border border-[#eeeeee]',
-            activeBadge: 'bg-[#101010] text-[#eeeeee] border-[#101010]',
-            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
-            inactiveBadge: 'bg-[#101010] text-[#8a8380] border-[#3d3a39]'
-        },
-        validation: {
-            activeBtn: 'bg-[#ee6018]/15 border border-[#ee6018] text-[#eeeeee] font-medium shadow-none',
-            activeBadge: 'bg-[#ee6018] text-[#fafafa] border-[#ee6018]',
-            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
-            inactiveBadge: 'bg-[#101010] text-[#ee6018] border-[#3d3a39]'
-        },
-        completed: {
-            activeBtn: 'bg-[#a0ca92]/15 border border-[#a0ca92] text-[#eeeeee] font-medium shadow-none',
-            activeBadge: 'bg-[#a0ca92] text-[#101010] border-[#a0ca92]',
-            inactiveBtn: 'bg-transparent text-[#8a8380] hover:text-[#eeeeee] hover:bg-[#252220] border border-transparent',
-            inactiveBadge: 'bg-[#101010] text-[#a0ca92] border-[#3d3a39]'
+    const scanProj = (p, pType) => {
+        const cList = getProjectConsultants(p);
+        if (cList.some(c => isSameUser(c, localAuthor))) {
+            myProjects.push({ ...p, pType });
         }
     };
 
-    ['pending', 'validation', 'completed'].forEach(t => {
-        const btn = document.getElementById(`notifTabBtn-${t}`);
-        const badgeEl = document.getElementById(`notifTabCount-${t}`);
-        if (!btn) return;
-        const isActive = (t === currentTaskSubTab);
-        btn.className = `py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition cursor-pointer ${isActive ? subThemes[t].activeBtn : subThemes[t].inactiveBtn}`;
-        if (badgeEl) {
-            badgeEl.className = `text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] border ${isActive ? subThemes[t].activeBadge : subThemes[t].inactiveBadge}`;
-        }
-    });
+    (appData.directProjects || []).forEach(p => scanProj(p, 'direct-project'));
+    (appData.modules || []).forEach(m => (m.projects || []).forEach(p => scanProj(p, 'project')));
+
+    if (myProjects.length === 0) {
+        listCont.innerHTML = `<p class="p-3 text-center text-xs text-[#8a8380] font-mono">No tienes proyectos asignados actualmente.</p>`;
+        return;
+    }
+
+    listCont.innerHTML = myProjects.map(p => {
+        const tasks = p.tasks || [];
+        const pendingCount = tasks.filter(t => t.done === false).length;
+        const progress = p.progress || 0;
+        return `
+        <div onclick="window.navigateToProjectFromNotif('${p.pType}', '${p.id}')" class="p-2.5 rounded-[6px] bg-[#101010] border border-[#3d3a39] hover:border-[#ee6018] cursor-pointer transition flex items-center justify-between gap-2.5">
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#30d158] shrink-0"></span>
+                    <h5 class="text-xs text-[#eeeeee] font-medium truncate">${escapeHtml(p.name)}</h5>
+                </div>
+                <div class="flex items-center gap-2 mt-1 font-mono text-[9px] text-[#8a8380]">
+                    <span>${p.parentName || 'Directo'}</span>
+                    <span>·</span>
+                    <span>${progress}% avance</span>
+                    <span>·</span>
+                    <span class="${pendingCount > 0 ? 'text-[#ee6018]' : 'text-[#a0ca92]'}">${pendingCount} pendientes</span>
+                </div>
+            </div>
+            <span class="font-mono text-[9px] text-[#8a8380] hover:text-[#eeeeee]">VER ↗</span>
+        </div>`;
+    }).join('');
 };
 
-// Helper universal para validar o rechazar cualquier tarea (diaria, global o de proyecto)
+window.updateCockpitUI = function() {
+    const btnInbox = document.getElementById('cockpitTabBtn-inbox');
+    const badgeInbox = document.getElementById('cockpitBadge-inbox');
+    const btnWork = document.getElementById('cockpitTabBtn-work');
+    const badgeWork = document.getElementById('cockpitBadge-work');
+
+    const isInbox = (currentCockpitTab === 'inbox');
+
+    if (btnInbox) {
+        btnInbox.className = `py-2 px-2 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${isInbox ? 'bg-[#eeeeee] text-[#101010] font-bold shadow-sm' : 'text-[#8a8380] hover:text-[#eeeeee]'}`;
+    }
+    if (badgeInbox) {
+        badgeInbox.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${isInbox ? 'bg-[#101010] text-[#ee6018] border-[#ee6018]/40' : 'bg-[#101010] text-[#ee6018] border-[#ee6018]/25'}`;
+    }
+
+    if (btnWork) {
+        btnWork.className = `py-2 px-2 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer ${!isInbox ? 'bg-[#eeeeee] text-[#101010] font-bold shadow-sm' : 'text-[#8a8380] hover:text-[#eeeeee]'}`;
+    }
+    if (badgeWork) {
+        badgeWork.className = `text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] border ${!isInbox ? 'bg-[#101010] text-[#eeeeee] border-[#101010]' : 'bg-[#101010] text-[#8a8380] border-[#3d3a39]'}`;
+    }
+
+    const subNav = document.getElementById('cockpitWorkSubNav');
+    const quickBox = document.getElementById('cockpitQuickTaskBox');
+    const projBox = document.getElementById('cockpitAssignedProjectsBox');
+
+    if (subNav) {
+        if (!isInbox) subNav.classList.remove('hidden');
+        else subNav.classList.add('hidden');
+    }
+    if (quickBox) {
+        if (!isInbox && currentUserRole !== 'Lector') quickBox.classList.remove('hidden');
+        else quickBox.classList.add('hidden');
+    }
+    if (projBox && isInbox) {
+        projBox.classList.add('hidden');
+        isCockpitProjectsOpen = false;
+    }
+
+    const chips = ['pending', 'validation', 'completed', 'all'];
+    chips.forEach(c => {
+        const btn = document.getElementById(`workChip-${c}`);
+        if (!btn) return;
+        const isActive = (currentCockpitWorkFilter === c);
+        btn.className = `px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 cursor-pointer ${isActive ? 'bg-[#fafafa] text-[#101010] font-bold shadow-sm' : 'text-[#8a8380] hover:text-[#eeeeee] bg-transparent'}`;
+    });
+
+    const userSub = document.getElementById('cockpitUserSubtitle');
+    if (userSub) {
+        userSub.textContent = `${localAuthor || 'Colaborador'} · ${isInbox ? 'Bandeja de Novedades' : 'Tareas & Enfoque'}`;
+    }
+};
+
+// Compatibilidad con interfaces anteriores
+window.setDailyMainTab = function(t) {
+    if (t === 'alerts') window.setDailyCockpitTab('inbox');
+    else if (t === 'projects') {
+        window.setDailyCockpitTab('work');
+        if (!isCockpitProjectsOpen) window.toggleCockpitProjectsSection();
+    } else {
+        window.setDailyCockpitTab('work');
+    }
+};
+window.setTaskSubTab = function(sub) {
+    window.setDailyCockpitTab('work');
+    window.setCockpitWorkFilter(sub);
+};
+window.setNotifTab = function(t) {
+    window.setDailyMainTab(t);
+};
+window.updateNotifTabsUI = function() {
+    window.updateCockpitUI();
+};
+
+// Helper universal para validar o rechazar cualquier tarea
 window.validateAnyTask = function(sourceType, strictType, projectId, taskId, approve) {
     if (sourceType === 'global') {
         window.validateGlobalTask(taskId, approve);
@@ -11878,187 +11882,33 @@ window.validateAnyTask = function(sourceType, strictType, projectId, taskId, app
             if (approve) {
                 t.validatedDate = valDate;
                 t.validatedTime = valTime;
-                t.validatedBy = localAuthor;
+                t.validatedBy = localAuthor || 'Jefatura';
             } else {
-                delete t.validatedDate;
-                delete t.validatedTime;
-                delete t.validatedBy;
-                archiveTaskFeedback(t);
+                delete t.submittedDate;
+                delete t.submittedTime;
+                delete t.submittedBy;
+                delete t.feedback;
             }
-            const timeTrace = t.assignDate ? ` [Asignada: ${t.assignDate} ${t.assignTime||''} ➔ Validada: ${valDate} ${valTime}]` : '';
-            logActivity('daily', 'Actividades Diarias', approve ? `Validó tarea diaria de ${t.assignee||'consultor'}: "${t.text}"${timeTrace}` : `Rechazó o reabrió tarea diaria: "${t.text}"`, localAuthor);
-            window.saveData(false);
-            if (approve) window.triggerCelebration();
+            logActivity('daily', 'Actividades Diarias', `${approve ? 'Aprobó' : 'Rechazó'} tarea: ${t.text}`, localAuthor);
+            window.saveData(true);
+            window.flushCloudWrite(true);
+            if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
         }
     }
-    if (typeof window.renderDailyTasks === 'function') window.renderDailyTasks();
 };
 
-
-    // === RENDERIZADO DE PROYECTOS ASIGNADOS CON SELECTOR MULTI-CONSULTOR ===
-    let assignedProjectsFilter = 'ME';
-
-    window.handleAssignedConsultantChange = function(val) {
-        assignedProjectsFilter = val;
-        window.renderMyAssignedProjects();
-    };
-
-    window.populateAssignedConsultantsSelect = function() {
-        const sel = document.getElementById('dailyAssignedConsultantSelect');
-        if (!sel) return;
-
-        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
-        const counts = {};
-        const countProj = (p) => {
-            const cList = getProjectConsultants(p);
-            cList.forEach(c => { counts[c] = (counts[c] || 0) + 1; });
-        };
-        (appData.directProjects || []).forEach(p => countProj(p));
-        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => countProj(p)));
-
-        let myCount = 0;
-        Object.keys(counts).forEach(c => {
-            if (isSameUser(c, localAuthor)) myCount += counts[c];
-        });
-        const isLeadership = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
-
-        if (isLeadership && myCount === 0 && assignedProjectsFilter === 'ME') {
-            assignedProjectsFilter = 'ALL';
-        }
-
-        let html = `
-            <option value="ME" ${assignedProjectsFilter === 'ME' ? 'selected' : ''}>⭐ Mis Proyectos (${myCount})</option>
-            <option value="ALL" ${assignedProjectsFilter === 'ALL' ? 'selected' : ''}>🌐 Todos los Asignados</option>
-        `;
-
-        const sortedConsultants = Object.keys(consultants).sort();
-        sortedConsultants.forEach(cName => {
-            const cCount = counts[cName] || 0;
-            if (cCount > 0) {
-                html += `<option value="${escapeHtml(cName)}" ${assignedProjectsFilter === cName ? 'selected' : ''}>👤 ${escapeHtml(cName)} (${cCount})</option>`;
-            }
-        });
-
-        sel.innerHTML = html;
-    };
-
-    window.renderMyAssignedProjects = function() {
-        const pList = document.getElementById('dailyMyProjectsList');
-        const pBadge = document.getElementById('dailyMyProjectsBadge');
-        const pSec = document.getElementById('dailyAssignedProjectsSection');
-        const hTitle = document.getElementById('dailyAssignedHeaderTitle');
-        if (!pList || !pBadge) return;
-
-        if (currentNotifTab !== 'projects') {
-            if (pSec) pSec.classList.add('hidden');
-            return;
-        }
-        if (pSec) pSec.classList.remove('hidden');
-
-        if (typeof window.populateAssignedConsultantsSelect === 'function') {
-            window.populateAssignedConsultantsSelect();
-        }
-
-        const now = new Date();
-        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const isOver = (proj) => { 
-            if (!proj.deadline || isCompletedStatus(proj.status)) return false; 
-            const [y, m, d] = proj.deadline.split('-'); 
-            return new Date(y, m - 1, d) < todayMidnight; 
-        };
-
-        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
-        let filteredProjects = [];
-        const checkProj = (proj, pType, parentName) => {
-            const projCons = getProjectConsultants(proj);
-            let match = false;
-            if (assignedProjectsFilter === 'ME') {
-                match = projCons.some(c => isSameUser(c, localAuthor));
-            } else if (assignedProjectsFilter === 'ALL') {
-                match = projCons.length > 0;
-            } else {
-                match = projCons.some(c => isSameUser(c, assignedProjectsFilter));
-            }
-            if (match) {
-                filteredProjects.push({ ...proj, pType, parentName, projCons });
-            }
-        };
-
-        (appData.directProjects || []).forEach(p => checkProj(p, 'direct-project', appData.directHub ? appData.directHub.name : 'Directos'));
-        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => checkProj(p, 'project', m.name)));
-
-        pBadge.textContent = `${filteredProjects.length} PROYECTO${filteredProjects.length === 1 ? '' : 'S'}`;
-        if (hTitle) {
-            if (assignedProjectsFilter === 'ME') {
-                hTitle.textContent = 'Mis Proyectos Asignados';
-            } else if (assignedProjectsFilter === 'ALL') {
-                hTitle.textContent = 'Todos los Proyectos Asignados';
-            } else {
-                hTitle.textContent = `Proyectos de ${assignedProjectsFilter}`;
-            }
-        }
-
-        if (filteredProjects.length === 0) {
-            const msg = assignedProjectsFilter === 'ME' 
-                ? 'No tienes proyectos asignados actualmente' 
-                : `Sin proyectos asignados para ${escapeHtml(assignedProjectsFilter)}`;
-            pList.innerHTML = `<div class="p-3 rounded-[10px] border border-[#3d3a39] bg-[#1d1a18] text-center font-mono text-[11px] text-[#8a8380] uppercase">${msg}</div>`;
-            return;
-        }
-
-        filteredProjects.sort((a, b) => {
-            const aOver = isOver(a) ? 1 : 0;
-            const bOver = isOver(b) ? 1 : 0;
-            if (bOver !== aOver) return bOver - aOver;
-            const prioA = parseInt(a.priority, 10) || 99;
-            const prioB = parseInt(b.priority, 10) || 99;
-            if (prioA !== prioB) return prioA - prioB;
-            return (a.progress || 0) - (b.progress || 0);
-        });
-
-        pList.innerHTML = filteredProjects.map(proj => {
-            const over = isOver(proj);
-            const statusCol = isCompletedStatus(proj.status) ? '#a0ca92' : (over ? '#ee6018' : '#eeeeee');
-            const sIco = isCompletedStatus(proj.status) ? '✓' : (proj.status === 'En Progreso' ? '⚡' : (proj.status === 'No Iniciado' ? '⏸' : '⏳'));
-            const prioVal = parseInt(proj.priority, 10) || 1;
-            const consDisplay = assignedProjectsFilter === 'ALL' && proj.projCons && proj.projCons.length > 0 
-                ? `<span class="text-[#ee6018] font-bold">👤 ${escapeHtml(proj.projCons.join(', '))}</span><span>·</span>` 
-                : '';
-
-            return `
-            <div class="bg-[#1d1a18] border ${over ? 'border-[#ee6018]/60' : 'border-[#3d3a39]'} hover:border-[#eeeeee] rounded-[10px] p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer group" onclick="window.navigateToProjectFromNotif('${proj.pType}', '${proj.id}')">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${statusCol}"></span>
-                        <span class="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#ee6018] shrink-0">* ${prioVal}</span>
-                        <h5 class="text-xs font-normal text-[#eeeeee] group-hover:text-[#fafafa] truncate">${over ? '⚠️ ' : ''}${escapeHtml(proj.name)}</h5>
-                    </div>
-                    <div class="flex items-center gap-2 font-mono text-[9px] text-[#8a8380] uppercase truncate">
-                        ${consDisplay}
-                        <span class="truncate">${escapeHtml(proj.parentName || 'Directo')}</span>
-                        <span>·</span>
-                        <span>${sIco} ${proj.status || 'Pendiente'} (${proj.progress || 0}%)</span>
-                        ${proj.deadline ? `<span>·</span><span class="${over ? 'text-[#ee6018]' : ''}">⏱ ${proj.deadline}</span>` : ''}
-                    </div>
-                </div>
-                <span class="font-mono text-[9px] text-[#8a8380] group-hover:text-[#eeeeee] shrink-0">VER →</span>
-            </div>`;
-        }).join('');
-    };
-
 window.renderDailyTasks = function() {
-    if (typeof window.renderMyAssignedProjects === "function") window.renderMyAssignedProjects();
     const container = document.getElementById('dailyTasksContainer'); 
     const badge = document.getElementById('dailyAlertsBadge');
     if (!container) return;
 
-    window.updateNotifTabsUI();
+    window.updateCockpitUI();
     const isSuper = currentUserRole === 'Supremo' || currentUserRole === 'Supervisor' || currentUserRole === 'Gestor de Proyectos';
 
     // 1. RECOLECTOR MAESTRO DE TAREAS
     let allTasks = [];
     if (appData.dailyTasks) {
-        appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea General'}));
+        appData.dailyTasks.forEach(t => allTasks.push({...t, sourceType: 'daily', pName: 'Tarea Rápida'}));
     }
     if (appData.globalTasks) {
         appData.globalTasks.forEach(t => allTasks.push({...t, sourceType: 'global', pName: 'Asignación Global'}));
@@ -12078,7 +11928,7 @@ window.renderDailyTasks = function() {
         });
     }
 
-    // 1.1 RECOLECTOR DE TAREAS DE FIRMA DIGITAL (GOBERNANZA STGT v1002)
+    // 1.1 RECOLECTOR DE TAREAS DE FIRMA DIGITAL
     const scanProjectSignatures = (p, strictType) => {
         if (!p || !p.docs) return;
         Object.keys(p.docs).forEach(docId => {
@@ -12119,31 +11969,28 @@ window.renderDailyTasks = function() {
         });
     }
 
-    // 2. ALERTAS (de proyectos vencidos, No Iniciados, etc. calculadas por renderAlerts)
+    // 2. ALERTAS (Menciones y operativas)
     const alertsList = window.__lastAlerts || [];
+    const mentionAlerts = alertsList.filter(a => a.alertType === 'mention');
+    const otherAlerts = alertsList.filter(a => a.alertType !== 'mention');
 
-    // 3. CLASIFICACIÓN DE TAREAS SEGÚN PERMISOS Y ESTADO
+    // 3. CLASIFICACIÓN DE TAREAS
     const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
 
-    // Tareas pendientes: para líderes todas, para consultor estrictamente sus propias tareas
     const canViewPendingTask = (t) => isSuper ? true : isSameUser(t.assignee, localAuthor);
     const pendingTasks = allTasks.filter(t => t.done === false && canViewPendingTask(t));
 
-    // Tareas en validación:
-    // Líderes ven todas las que esperan visto bueno
-    // Consultor ve solo las que le corresponden (esperando revisión o auto-asignadas que puede validar)
     const canViewValidationTask = (t) => {
         if (isSuper) return true;
         const isSelfAssigned = isSameUser(t.assignee, localAuthor) && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
-        return isSameUser(t.assignee, localAuthor) || isSelfAssigned;
+        return isSameUser(t.assignee, localAuthor) || isSelfAssigned || isSameUser(t.assignedBy, localAuthor);
     };
     const validationTasks = allTasks.filter(t => t.done === 'pending' && canViewValidationTask(t));
 
-    // Tareas concluidas (Hechas): Estrictamente personales
     const myCompletedTasks = allTasks.filter(t => t.done === true && isSameUser(t.assignee, localAuthor));
-    const completedTasks = myCompletedTasks;
+    const signatureTasks = allTasks.filter(t => t.sourceType === 'signature' && (isSuper || isSameUser(t.assignee, localAuthor)));
 
-    // Conteo de proyectos asignados para la pestaña dedicada
+    // Conteo de proyectos asignados
     let myProjectsCount = 0;
     const countProjForBadge = (p) => {
         const cList = getProjectConsultants(p);
@@ -12152,184 +11999,195 @@ window.renderDailyTasks = function() {
     (appData.directProjects || []).forEach(p => countProjForBadge(p));
     (appData.modules || []).forEach(m => (m.projects || []).forEach(p => countProjForBadge(p)));
 
-    // 4. ACTUALIZACIÓN DE CONTADORES EN LAS PESTAÑAS
-    const tabCounts = {
-        alerts: alertsList.length,
-        projects: myProjectsCount,
-        pending: pendingTasks.length,
-        validation: validationTasks.length,
-        completed: completedTasks.length
-    };
-    ['alerts', 'projects', 'pending', 'validation', 'completed'].forEach(t => {
-        const el = document.getElementById(`notifTabCount-${t}`);
-        if (el) el.textContent = tabCounts[t];
-    });
-    const mainTasksBadge = document.getElementById('dailyMainTabCount-tasks');
-    if (mainTasksBadge) {
-        mainTasksBadge.textContent = tabCounts.pending;
-    }
+    // 4. CÁLCULO DE CONTADORES TOTALES
+    // En Inbox: menciones + validaciones para mi revisión + firmas pendientes + alertas operativas
+    const inboxReviewValidations = isSuper 
+        ? validationTasks 
+        : validationTasks.filter(t => isSameUser(t.assignedBy, localAuthor) && !isSameUser(t.assignee, localAuthor));
+    
+    const inboxCount = mentionAlerts.length + inboxReviewValidations.length + signatureTasks.length + otherAlerts.length;
 
-    // 5. GLOBO FLOTANTE DE ATENCIÓN (suma alertas críticas + validaciones pendientes + mis pendientes)
-    let alertBadgeTotal = alertsList.length;
-    if (isSuper) {
-        alertBadgeTotal += validationTasks.length;
-        alertBadgeTotal += pendingTasks.filter(t => isSameUser(t.assignee, localAuthor)).length;
-    } else {
-        alertBadgeTotal += validationTasks.filter(t => isSameUser(t.assignedBy, localAuthor)).length;
-        alertBadgeTotal += pendingTasks.filter(t => isSameUser(t.assignee, localAuthor)).length;
-    }
-    if (badge) {
-        if (alertBadgeTotal > 0) {
-            badge.textContent = alertBadgeTotal;
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
-        }
-    }
-    const pBadge = document.getElementById('priorityDailyAlertsBadge');
-    const calBadge = document.getElementById('calendarDailyAlertsBadge');
-    const mobTopBadge = document.getElementById('mobileTopDailyAlertsBadge');
-    if (mobTopBadge) {
-        if (alertBadgeTotal > 0) {
-            mobTopBadge.textContent = alertBadgeTotal;
-            mobTopBadge.classList.remove('hidden');
-        } else {
-            mobTopBadge.classList.add('hidden');
-        }
-    }
+    // En Mi Trabajo:
+    const myOwnPending = pendingTasks.filter(t => isSameUser(t.assignee, localAuthor));
+    const myOwnValidation = validationTasks.filter(t => isSameUser(t.assignee, localAuthor));
+    const workPendingCount = isSuper ? pendingTasks.length : myOwnPending.length;
+    const workValidationCount = isSuper ? validationTasks.length : myOwnValidation.length;
+    const workCompletedCount = myCompletedTasks.length;
+    const workAllCount = workPendingCount + workValidationCount + workCompletedCount;
+
+    // Actualizar badges en interfaz
+    const badgeInboxEl = document.getElementById('cockpitBadge-inbox');
+    if (badgeInboxEl) badgeInboxEl.textContent = inboxCount;
+
+    const badgeWorkEl = document.getElementById('cockpitBadge-work');
+    if (badgeWorkEl) badgeWorkEl.textContent = workPendingCount;
+
+    const chipPending = document.getElementById('workChipCount-pending');
+    if (chipPending) chipPending.textContent = workPendingCount;
+
+    const chipVal = document.getElementById('workChipCount-validation');
+    if (chipVal) chipVal.textContent = workValidationCount;
+
+    const chipDone = document.getElementById('workChipCount-completed');
+    if (chipDone) chipDone.textContent = workCompletedCount;
+
+    const chipAll = document.getElementById('workChipCount-all');
+    if (chipAll) chipAll.textContent = workAllCount;
+
+    const projBadgeEl = document.getElementById('cockpitProjectsCount');
+    if (projBadgeEl) projBadgeEl.textContent = myProjectsCount;
+
+    // Globo general flotante y en barra móvil
+    const globalAttentionTotal = inboxCount + workPendingCount;
     const mobBottomBadge = document.getElementById('mobileBottomDailyAlertsBadge');
     if (mobBottomBadge) {
-        if (alertBadgeTotal > 0) {
-            mobBottomBadge.textContent = alertBadgeTotal;
+        if (globalAttentionTotal > 0) {
+            mobBottomBadge.textContent = globalAttentionTotal;
             mobBottomBadge.classList.remove('hidden');
         } else {
             mobBottomBadge.classList.add('hidden');
         }
     }
-    if (pBadge) {
-        if (alertBadgeTotal > 0) {
-            pBadge.textContent = alertBadgeTotal;
-            pBadge.classList.remove('hidden');
+    if (badge) {
+        if (globalAttentionTotal > 0) {
+            badge.textContent = globalAttentionTotal;
+            badge.classList.remove('hidden');
         } else {
-            pBadge.classList.add('hidden');
+            badge.classList.add('hidden');
         }
     }
-    if (calBadge) {
-        if (alertBadgeTotal > 0) {
-            calBadge.textContent = alertBadgeTotal;
-            calBadge.classList.remove('hidden');
-        } else {
-            calBadge.classList.add('hidden');
-        }
-    }
-    const deskHeaderBadge = document.getElementById('desktopHeaderDailyAlertsBadge');
-    if (deskHeaderBadge) {
-        deskHeaderBadge.classList.add('hidden');
-    }
 
-    // 6. RENDERIZADO DEL CONTENIDO DE LA PESTAÑA SELECCIONADA
+    // 5. RENDERIZADO DEL PILAR ACTIVO
 
-    // --- PESTAÑA PROYECTOS: SEPARADA EXCLUSIVAMENTE ---
-    if (currentNotifTab === 'projects') {
-        container.innerHTML = '';
-        return;
-    }
-
-    // --- PESTAÑA A: ALERTAS & MENCIONES ---
-    if (currentNotifTab === 'alerts') {
-        if (alertsList.length === 0) {
+    // ==========================================
+    // PILAR 1: 🔔 INBOX
+    // ==========================================
+    if (currentCockpitTab === 'inbox') {
+        if (inboxCount === 0) {
             container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#1d1a18] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
-                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja de Alertas Limpia</h3>
-                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes menciones nuevas en foros ni proyectos en situación crítica.</p>
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center bg-[#141211] border border-[#2d2a28] rounded-[10px] space-y-2.5">
+                <div class="w-10 h-10 rounded-full bg-[#101010] border border-[#3d3a39] flex items-center justify-center text-sm text-[#a0ca92]">✓</div>
+                <h3 class="font-mono text-xs uppercase text-[#fafafa] font-bold">Bandeja al día</h3>
+                <p class="font-mono text-[10px] text-[#8a8380] max-w-[240px] leading-relaxed">No tienes menciones nuevas en foros, tareas por validar ni alertas críticas.</p>
             </div>`;
             return;
         }
 
-        const mentionAlerts = alertsList.filter(a => a.alertType === 'mention');
-        const otherAlerts = alertsList.filter(a => a.alertType !== 'mention');
+        let html = '<div class="space-y-3 pb-6">';
 
-        const style = { 
-            danger: ['text-[#ee6018]', 'bg-[#1d1a18]', 'border-[#ee6018]/50'], 
-            warning: ['text-[#ee6018]', 'bg-[#1d1a18]', 'border-[#ee6018]/30'], 
-            info: ['text-[#a0ca92]', 'bg-[#1d1a18]', 'border-[#3d3a39]']
-        };
-
-        let html = '<div class="space-y-4 pb-6">';
-
-        // 1. SECCIÓN PRINCIPAL: MENCIONES EN EL FORO
+        // 1. MENCIONES EN EL FORO (@Nombre)
         if (mentionAlerts.length > 0) {
             html += `
-            <div class="space-y-2.5">
+            <div class="space-y-2">
                 <div class="flex items-center justify-between px-1">
-                    <span class="font-mono text-[10px] text-[#ee6018] uppercase font-semibold flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#ee6018] uppercase font-bold flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
-                        Menciones para ti en el Foro (${mentionAlerts.length})
+                        Menciones para ti (${mentionAlerts.length})
                     </span>
-                    <span class="font-mono text-[9px] text-[#8a8380] uppercase">Toca para responder</span>
+                    <span class="font-mono text-[8.5px] text-[#8a8380] uppercase">Toca para responder</span>
                 </div>
-                ${mentionAlerts.map(a => {
-                    return `
-                    <div class="bg-[#1d1a18] border border-[#ee6018]/60 rounded-[10px] p-3.5 transition hover:border-[#ee6018] shadow-none cursor-pointer" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" title="Clic para ir al comentario en el foro">
-                        <div class="flex items-start gap-2.5">
-                            <span class="text-lg leading-none mt-0.5">💬</span>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-xs font-semibold text-[#fafafa] leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                    <span class="font-mono text-[9px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/50 px-1.5 py-0.5 rounded-[3px] uppercase shrink-0 font-bold">@ Mención</span>
-                                </div>
-                                <div class="flex items-center gap-2 mt-1 text-[9px] text-[#8a8380] font-mono">
-                                    <span>👤 Por: <b class="text-[#eeeeee]">${escapeHtml(a.author || (a.users && a.users[0]) || 'Consultor')}</b></span>
-                                    ${a.date ? `<span>· ${escapeHtml(a.date)}</span>` : ''}
-                                </div>
-                                <div class="mt-2.5 p-2.5 rounded-[3px] bg-[#101010] border border-[#3d3a39] text-[#eeeeee] text-[11px] leading-relaxed break-words font-sans">
-                                    "${escapeHtml(a.noteText || a.reason)}"
-                                </div>
-                                <div class="flex items-center gap-2 mt-3 pt-2 border-t border-[#1d1a18]">
-                                    <button type="button" onclick="event.stopPropagation(); window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-3 bg-[#ee6018] hover:bg-[#ff7836] text-white font-mono uppercase text-[9px] font-semibold transition flex items-center gap-1.5">
-                                        <span>Ir al Foro & Responder</span>
-                                        <span>↗</span>
-                                    </button>
-                                    <button type="button" onclick="event.stopPropagation(); window.confirmNoteReadDirect('${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="pill-btn py-1 px-2.5 bg-[#1d1a18] hover:bg-[#1d1a18] text-[#b8b3b0] hover:text-[#fafafa] border border-[#3d3a39] font-mono uppercase text-[9px] transition">
-                                        <span>✓ Marcar Visto</span>
-                                    </button>
-                                </div>
-                            </div>
+                ${mentionAlerts.map(a => `
+                <div class="bg-[#141211] border border-[#ee6018]/50 rounded-[8px] p-3 transition hover:border-[#ee6018] cursor-pointer space-y-2" onclick="window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="text-xs">💬</span>
+                            <h4 class="text-xs font-semibold text-[#fafafa] truncate">${escapeHtml(a.name)}</h4>
                         </div>
-                    </div>`;
-                }).join('')}
+                        <span class="font-mono text-[8.5px] bg-[#ee6018]/20 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.2 rounded-[2px] uppercase shrink-0 font-bold">@ Mención</span>
+                    </div>
+                    <div class="text-[9.5px] text-[#8a8380] font-mono">
+                        Por: <b class="text-[#eeeeee]">${escapeHtml(a.author || 'Consultor')}</b> ${a.date ? '· ' + escapeHtml(a.date) : ''}
+                    </div>
+                    <p class="p-2 bg-[#101010] border border-[#2d2a28] rounded-[3px] text-xs text-[#eeeeee] font-sans leading-relaxed break-words italic">
+                        "${escapeHtml(a.noteText || a.reason)}"
+                    </p>
+                    <div class="flex items-center gap-2 pt-1 border-t border-[#22201e]">
+                        <button type="button" onclick="event.stopPropagation(); window.goToProjectForum('${jsArg(a.pType)}', '${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="flex-1 py-1 px-2 bg-[#ee6018] hover:bg-[#ff742e] text-[#101010] font-mono uppercase text-[9.5px] font-bold rounded-[3px] transition flex items-center justify-center gap-1">
+                            <span>Ir al Foro ↗</span>
+                        </button>
+                        <button type="button" onclick="event.stopPropagation(); window.confirmNoteReadDirect('${jsArg(a.id)}', '${jsArg(a.noteId || '')}')" class="py-1 px-2.5 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] font-mono uppercase text-[9px] rounded-[3px] transition">
+                            <span>✓ Visto</span>
+                        </button>
+                    </div>
+                </div>`).join('')}
             </div>`;
         }
 
-        // 2. SECCIÓN: ALERTAS OPERATIVAS (VENCIDOS, NO INICIADOS, ETC.)
+        // 2. VALIDACIONES PENDIENTES DE REVISIÓN
+        if (inboxReviewValidations.length > 0) {
+            html += `
+            <div class="space-y-2 ${mentionAlerts.length > 0 ? 'mt-3 pt-3 border-t border-[#1d1a18]' : ''}">
+                <div class="flex items-center justify-between px-1">
+                    <span class="font-mono text-[10px] text-[#a0ca92] uppercase font-bold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#a0ca92]"></span>
+                        Requieren tu Aprobación (${inboxReviewValidations.length})
+                    </span>
+                    <span class="font-mono text-[8.5px] text-[#8a8380] uppercase">Visto Bueno</span>
+                </div>
+                ${inboxReviewValidations.map(t => `
+                <div class="bg-[#141211] border border-[#a0ca92]/40 rounded-[8px] p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/30">👀 Por Validar</span>
+                        <span class="font-mono text-[9px] text-[#8a8380] truncate">${escapeHtml(t.pName)}</span>
+                    </div>
+                    <h5 class="text-xs text-[#fafafa] font-semibold leading-snug break-words">${formatTaskTextWithTicket(t.text)}</h5>
+                    <div class="text-[9.5px] font-mono text-[#8a8380]">
+                        Entregó: <b class="text-[#eeeeee]">${escapeHtml(t.submittedBy || t.assignee || 'Consultor')}</b> ${t.submittedDate ? '· ' + escapeHtml(t.submittedDate) : ''}
+                    </div>
+                    ${t.feedback ? `<p class="p-2 bg-[#101010] border border-[#2d2a28] rounded-[3px] text-xs text-[#eeeeee] font-mono break-words">💬 Evidencia: ${escapeHtml(t.feedback)}</p>` : ''}
+                    <div class="flex items-center gap-2 pt-1 border-t border-[#22201e]">
+                        <button type="button" onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', true)" class="flex-1 py-1.5 px-3 bg-[#a0ca92] hover:bg-[#b0dba2] text-[#101010] font-mono uppercase text-[9.5px] font-bold rounded-[3px] transition flex items-center justify-center gap-1 active:scale-95 shadow-sm">
+                            <span>✓ Aprobar</span>
+                        </button>
+                        <button type="button" onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="flex-1 py-1.5 px-3 bg-[#1d1a18] hover:bg-[#252220] border border-[#ee6018]/40 text-[#ee6018] font-mono uppercase text-[9.5px] rounded-[3px] transition flex items-center justify-center gap-1 active:scale-95">
+                            <span>✕ Devolver</span>
+                        </button>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // 3. FIRMAS DE GOBERNANZA STGT
+        if (signatureTasks.length > 0) {
+            html += `
+            <div class="space-y-2 mt-3 pt-3 border-t border-[#1d1a18]">
+                <div class="flex items-center justify-between px-1">
+                    <span class="font-mono text-[10px] text-[#2997ff] uppercase font-bold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#2997ff]"></span>
+                        Firmas Pendientes (${signatureTasks.length})
+                    </span>
+                    <span class="font-mono text-[8.5px] text-[#8a8380] uppercase">Circuito STGT</span>
+                </div>
+                ${signatureTasks.map(t => `
+                <div onclick="window.openSignatureWorkflowModalForProject('${t.projectId}', '${t.docId}')" class="bg-[#141211] border border-[#0071e3]/40 rounded-[8px] p-3 transition hover:border-[#2997ff] cursor-pointer space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#0071e3]/20 text-[#2997ff] border border-[#0071e3]/40">✍️ Firma Requerida</span>
+                        <span class="font-mono text-[9px] text-[#8a8380] truncate">${escapeHtml(t.pName)}</span>
+                    </div>
+                    <h5 class="text-xs text-[#fafafa] font-semibold leading-snug">${escapeHtml(t.docName)}</h5>
+                    <p class="text-[10px] text-[#8a8380] font-mono">${escapeHtml(t.text)}</p>
+                    <div class="pt-1 flex justify-end">
+                        <button type="button" class="py-1 px-3 bg-[#0071e3] hover:bg-[#2997ff] text-[#ffffff] font-mono uppercase text-[9px] font-bold rounded-[3px] transition">Firmar Documento ➔</button>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // 4. ALERTAS OPERATIVAS DE PROYECTOS
         if (otherAlerts.length > 0) {
             html += `
-            <div class="space-y-2.5 ${mentionAlerts.length > 0 ? 'mt-4 pt-3 border-t border-[#1d1a18]' : ''}">
-                <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Alertas de Proyectos (${otherAlerts.length})</p>
-                ${otherAlerts.map(a => {
-                    const [txt, bg, br] = style[a.alertType] || style.info;
-                    const users = (a.users && a.users.length > 0) ? (Array.isArray(a.users) ? a.users.join(', ') : a.users) : 'Sin asignar';
-                    const canOpen = a.pType && a.pType !== 'global';
-                    const click = canOpen ? ` onclick="window.navigateToProjectFromNotif('${jsArg(a.pType)}', '${jsArg(a.id)}');"` : '';
-                    return `
-                    <div class="${bg} border ${br} rounded-[10px] p-3.5 ${canOpen ? 'cursor-pointer hover:border-[#eeeeee]' : 'cursor-default'} transition" ${click} title="${canOpen ? 'Clic para ir al proyecto' : ''}">
-                        <div class="flex items-start gap-2.5">
-                            <span class="text-base leading-none mt-0.5">${a.icon}</span>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-xs font-normal ${txt} leading-tight truncate">${escapeHtml(a.name)}</h4>
-                                    ${canOpen ? `<span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] px-1.5 py-0.5 rounded-[3px] border border-[#3d3a39] shrink-0 uppercase">Mapa & Ficha ↗</span>` : ''}
-                                </div>
-                                <p class="font-mono text-[9px] text-[#8a8380] uppercase truncate mt-0.5">└ ${escapeHtml(a.parentName || 'Proyectos')}</p>
-                                <p class="text-[11px] ${txt} mt-2 leading-snug break-words">${escapeHtml(a.reason)}</p>
-                                <div class="flex items-center gap-2 mt-2 flex-wrap text-[9px] text-[#b8b3b0] font-mono">
-                                    <span class="bg-[#1d1a18] px-2 py-0.5 rounded-[3px] border border-[#3d3a39]">👤 ${escapeHtml(users)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('')}
+            <div class="space-y-2 mt-3 pt-3 border-t border-[#1d1a18]">
+                <div class="flex items-center justify-between px-1">
+                    <span class="font-mono text-[10px] text-[#8a8380] uppercase font-bold">Alertas Operativas (${otherAlerts.length})</span>
+                </div>
+                ${otherAlerts.map(a => `
+                <div class="bg-[#141211] border border-[#3d3a39] rounded-[8px] p-2.5 transition hover:border-[#8a8380] space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <h5 class="text-xs font-medium text-[#eeeeee] truncate">${escapeHtml(a.name)}</h5>
+                        <span class="font-mono text-[8.5px] uppercase text-[#ee6018]">${a.alertType === 'danger' ? 'Vencido' : 'Atención'}</span>
+                    </div>
+                    <p class="text-[10px] text-[#8a8380] font-mono leading-tight">${escapeHtml(a.reason)}</p>
+                </div>`).join('')}
             </div>`;
         }
 
@@ -12338,261 +12196,94 @@ window.renderDailyTasks = function() {
         return;
     }
 
-    // --- PESTAÑA B: PENDIENTES (DESPLEGABLES POR CONSULTOR) ---
-    if (currentNotifTab === 'pending') {
-        if (pendingTasks.length === 0) {
-            container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#eeeeee] mb-3">00</div>
-                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Bandeja despejada</h3>
-                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No tienes tareas pendientes asignadas en este momento.</p>
-            </div>`;
-            return;
-        }
-
-        // Agrupar por consultor asignado
-        let grouped = {};
-        pendingTasks.forEach(t => {
-            const key = t.assignee || 'Sin Asignar';
-            if (!grouped[key]) grouped[key] = [];
-            grouped[key].push(t);
-        });
-
-        // Ordenar: primero yo, luego alfabéticamente
-        const sortedConsultants = Object.keys(grouped).sort((a, b) => {
-            if (isSameUser(a, localAuthor)) return -1;
-            if (isSameUser(b, localAuthor)) return 1;
-            return a.localeCompare(b);
-        });
-
-        container.innerHTML = `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
-            const tasks = grouped[cons].sort((a, b) => (parseInt(b.id.split('_')[1]) || 0) - (parseInt(a.id.split('_')[1]) || 0));
-            const cData = consultants[cons] || { color: '#8a8380' };
-            const isMe = isSameUser(cons, localAuthor);
-
-            return `
-            <details open class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
-                <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
-                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
-                        <span class="font-mono text-[9px] bg-[#1d1a18] text-[#b8b3b0] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">${tasks.length} PDTES</span>
-                    </div>
-                    <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
-                    ${tasks.map(t => {
-                        const isMyTask = isSameUser(t.assignee, localAuthor);
-                        const isAssigner = isSameUser(t.assignedBy, localAuthor);
-                        const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
-                        const canEdit = isSuper || isMyTask || isAssigner;
-                        const canDel = (isSuper || (isAssigner && isSelfAssigned)) && t.sourceType === 'daily';
-
-                        let toggleAction = `toggleDailyTask('${t.id}')`;
-                        let openAction = '';
-                        if (t.sourceType === 'global') toggleAction = `validateGlobalTask('${t.id}', true)`;
-                        if (t.sourceType === 'project') toggleAction = `toggleQuickTask('${t.id}', '${t.projectId}')`;
-                        if (t.sourceType === 'signature') {
-                            openAction = `window.openSignatureWorkflowModalForProject('${t.projectId}', '${t.docId}');`;
-                        } else if (t.sourceType === 'project' || t.sourceType === 'global') {
-                            openAction = t.sourceType === 'project' ? `window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}');` : `window.openProjectTaskModal();`;
-                        } else if (t.sourceType === 'daily') {
-                            openAction = `window.openFastDailyTaskModal('${t.id}');`;
-                        }
-
-                        let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : (t.sourceType === 'signature' ? 'text-[#0055cc]' : 'text-[#ee6018]'));
-
-                        return `
-                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] hover:border-[#4d4947] group transition" onclick="if(!event.target.closest('input') && !event.target.closest('button') && '${openAction}'!=='') { ${openAction} }">
-                            ${t.sourceType === 'signature' 
-                                ? `<button type="button" onclick="event.stopPropagation(); ${openAction}" class="px-2 py-0.5 rounded-[3px] bg-[#0055cc]/20 border border-[#0055cc]/50 text-[#0055cc] hover:bg-[#0055cc] hover:text-white font-mono text-[9px] uppercase font-bold shrink-0 mt-0.5 transition" title="Firmar documento digital">✍️ Firmar</button>`
-                                : `<input type="checkbox" onchange="${t.sourceType === 'global' ? `completeGlobalTask('${t.id}')` : toggleAction}" class="rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] h-4 w-4 shrink-0 mt-0.5 ${canEdit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}" ${!canEdit ? 'disabled' : ''} title="Marcar para completar">`
-                            }
-                            <div class="flex flex-col flex-1 min-w-0 ${openAction !== '' ? 'cursor-pointer' : ''}">
-                                <span class="text-xs text-[#eeeeee] break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
-                                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                    <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                                    ${t.deadline ? `<span class="text-[9px] text-[#ee6018] font-mono">⏱ Límite: ${escapeHtml(t.deadline)}</span>` : ''}
-                                    ${t.fecha_compromiso ? `<span class="text-[9px] text-[#a0ca92] font-mono">📅 Compromiso: ${escapeHtml(t.fecha_compromiso)}</span>` : ''}
-                                    ${t.assignedBy && t.assignedBy !== t.assignee ? `<span class="font-mono text-[9px] bg-[#101010] text-[#8a8380] px-1.5 py-0.5 rounded-[3px] border border-[#3d3a39]">De: ${escapeHtml(t.assignedBy)}</span>` : ''}
-                                </div>
-                            </div>
-                            ${canDel ? `<button onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] opacity-0 group-hover:opacity-100 transition p-1 shrink-0" title="Borrar tarea"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
-                        </div>`;
-                    }).join('')}
-                </div>
-            </details>`;
-        }).join('')}</div>`;
-        return;
+    // ==========================================
+    // PILAR 2: ⚡ MI TRABAJO
+    // ==========================================
+    let tasksToDisplay = [];
+    if (currentCockpitWorkFilter === 'pending') {
+        tasksToDisplay = isSuper ? pendingTasks : myOwnPending;
+    } else if (currentCockpitWorkFilter === 'validation') {
+        tasksToDisplay = isSuper ? validationTasks : myOwnValidation;
+    } else if (currentCockpitWorkFilter === 'completed') {
+        tasksToDisplay = myCompletedTasks;
+    } else {
+        // 'all'
+        tasksToDisplay = isSuper ? allTasks.filter(t => t.sourceType !== 'signature') : allTasks.filter(t => isSameUser(t.assignee, localAuthor) && t.sourceType !== 'signature');
     }
 
-    // --- PESTAÑA C: EN VALIDACIÓN ---
-    if (currentNotifTab === 'validation') {
-        if (validationTasks.length === 0) {
-            container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#b8b3b0] mb-3">⏳</div>
-                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sin entregas pendientes</h3>
-                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">No hay tareas esperando revisión o visto bueno de jefatura.</p>
-            </div>`;
-            return;
-        }
+    if (tasksToDisplay.length === 0) {
+        let emptyLabel = 'No tienes tareas pendientes';
+        if (currentCockpitWorkFilter === 'validation') emptyLabel = 'Cero tareas en revisión';
+        else if (currentCockpitWorkFilter === 'completed') emptyLabel = 'Sin tareas concluidas en este periodo';
+        else if (currentCockpitWorkFilter === 'all') emptyLabel = 'No se encontraron tareas registradas';
 
         container.innerHTML = `
-        <div class="space-y-2.5 pb-6">
-            <p class="font-mono text-[10px] text-[#8a8380] uppercase px-1">Esperando Aprobación (${validationTasks.length})</p>
-            ${validationTasks.map(t => {
-                const isMyTask = isSameUser(t.assignee, localAuthor);
-                const isAssigner = isSameUser(t.assignedBy, localAuthor);
-                const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
-                // Para consultores: sólo superiores pueden validar, O si se la auto-asignó él mismo:
-                const canApprove = isSuper || isSelfAssigned;
-
-                let srcColor = t.sourceType === 'daily' ? 'text-[#b8b3b0]' : (t.sourceType === 'global' ? 'text-[#a0ca92]' : 'text-[#ee6018]');
-
-                return `
-                <div class="bg-[#101010] border border-[#ee6018]/60 rounded-[10px] p-3.5">
-                    <div class="flex items-start justify-between gap-2">
-                        <span class="text-xs text-[#eeeeee] font-normal break-words">${formatTaskTextWithTicket(t.text)}</span>
-                        <span class="font-mono text-[8px] bg-[#ee6018]/15 text-[#ee6018] border border-[#ee6018]/40 px-1.5 py-0.5 rounded-[3px] uppercase shrink-0">⏳ Validación</span>
-                    </div>
-
-                    <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                        <span class="font-mono text-[9px] uppercase ${srcColor} ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                        <span class="text-[9px] text-[#eeeeee] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">👤 ${escapeHtml(t.assignee || 'Sin asignar')}</span>
-                        ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}</span>` : ''}
-                        ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">🚀 Entregada: ${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''}</span>` : ''}
-                        ${t.assignedBy ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#1d1a18] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">Asignó: ${escapeHtml(t.assignedBy)}</span>` : ''}
-                    </div>
-
-                    ${t.feedback ? `<div class="mt-2.5 text-[10px] text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] p-2.5 rounded-[3px] break-words">💬 <b>Evidencia:</b> ${escapeHtml(t.feedback)}</div>` : ''}
-
-                    <div class="mt-3 pt-2.5 border-t border-[#3d3a39] flex items-center justify-between gap-2">
-                        ${canApprove ? `
-                            <div class="flex gap-2 w-full">
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', true)" class="flex-1 py-1.5 px-3 bg-[#a0ca92]/15 hover:bg-[#a0ca92] text-[#a0ca92] hover:text-[#101010] border border-[#a0ca92]/40 font-mono uppercase text-[10px] rounded-[3px] transition flex items-center justify-center gap-1">
-                                    ✓ Aprobar
-                                </button>
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="flex-1 py-1.5 px-3 bg-[#ee6018]/15 hover:bg-[#ee6018] text-[#ee6018] hover:text-[#fafafa] border border-[#ee6018]/40 font-mono uppercase text-[10px] rounded-[3px] transition flex items-center justify-center gap-1">
-                                    ✕ Rechazar
-                                </button>
-                            </div>
-                        ` : (isMyTask ? `
-                            <div class="flex items-center justify-between w-full">
-                                <span class="text-[10px] text-[#8a8380]">Esperando revisión de supervisión...</span>
-                                <button onclick="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="py-1 px-2.5 bg-[#1d1a18] hover:border-[#eeeeee] text-[#b8b3b0] hover:text-[#eeeeee] border border-[#3d3a39] font-mono uppercase text-[9px] rounded-[3px] transition">Cancelar envío</button>
-                            </div>
-                        ` : '<span class="font-mono text-[9px] text-[#8a8380] uppercase">Pendiente de revisión</span>')}
-                    </div>
-                </div>`;
-            }).join('')}
+        <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#141211] border border-[#2d2a28] rounded-[10px] space-y-2">
+            <div class="w-9 h-9 rounded-full bg-[#101010] border border-[#3d3a39] flex items-center justify-center text-xs text-[#8a8380]">⚡</div>
+            <h4 class="font-mono text-xs uppercase text-[#eeeeee] font-medium">${emptyLabel}</h4>
+            <p class="font-mono text-[10px] text-[#8a8380] max-w-[220px]">Usa la barra superior para registrar un nuevo pendiente rápido.</p>
         </div>`;
         return;
     }
 
-    // --- PESTAÑA D: COMPLETADAS / HECHAS ---
-    if (currentNotifTab === 'completed') {
-        if (completedTasks.length === 0) {
-            container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-[#101010] border border-[#3d3a39] rounded-[10px]">
-                <div class="w-10 h-10 rounded-[3px] bg-[#1d1a18] border border-[#3d3a39] flex items-center justify-center font-mono text-sm text-[#a0ca92] mb-3">✓</div>
-                <h3 class="font-mono text-xs uppercase text-[#eeeeee]">Sin historial reciente</h3>
-                <p class="text-xs text-[#8a8380] mt-1 max-w-[240px] leading-relaxed">Las tareas completadas y validadas aparecerán organizadas aquí.</p>
-            </div>`;
-            return;
+    let workHtml = '<div class="space-y-2 pb-6">';
+
+    workHtml += tasksToDisplay.map(t => {
+        const isMyTask = isSameUser(t.assignee, localAuthor);
+        const isAssigner = isSameUser(t.assignedBy, localAuthor);
+        const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
+        const canDel = (isSuper || (isAssigner && isSelfAssigned)) && t.sourceType === 'daily';
+
+        let isOverdue = false;
+        if (t.deadline && t.done !== true) {
+            const [y, m, d] = (t.deadline || '').split('-');
+            if (y && m && d) {
+                if (new Date(y, m - 1, d) < new Date(new Date().setHours(0, 0, 0, 0))) isOverdue = true;
+            }
         }
 
-        let grouped = {};
-        completedTasks.forEach(t => {
-            const key = t.assignee || 'Sin Asignar';
-            if (!grouped[key]) grouped[key] = [];
-            grouped[key].push(t);
-        });
+        let checkUI = '';
+        if (t.done === true) {
+            checkUI = `<input type="checkbox" checked onchange="validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)" class="h-4 w-4 rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] shrink-0 mt-0.5 cursor-pointer" title="Completada. Clic para reabrir">`;
+        } else if (t.done === 'pending') {
+            checkUI = `<span class="w-4 h-4 rounded-[3px] bg-[#ee6018]/20 border border-[#ee6018]/60 text-[#ee6018] flex items-center justify-center text-[10px] shrink-0 mt-0.5" title="En espera de visto bueno">⏳</span>`;
+        } else {
+            let toggleClick = `toggleDailyTask('${t.id}')`;
+            if (t.sourceType === 'global') toggleClick = `validateGlobalTask('${t.id}', true)`;
+            else if (t.sourceType === 'project') toggleClick = `toggleQuickTask('${t.id}', '${t.projectId}')`;
+            checkUI = `<input type="checkbox" onchange="${toggleClick}" class="h-4 w-4 rounded-[3px] border-[#3d3a39] bg-[#101010] accent-[#ee6018] shrink-0 mt-0.5 cursor-pointer" title="Marcar como hecha">`;
+        }
 
-        const sortedConsultants = Object.keys(grouped).sort((a, b) => {
-            if (isSameUser(a, localAuthor)) return -1;
-            if (isSameUser(b, localAuthor)) return 1;
-            return a.localeCompare(b);
-        });
+        const projectClick = t.sourceType === 'project' 
+            ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" class="cursor-pointer hover:underline text-[#eeeeee]"`
+            : 'class="text-[#8a8380]"';
 
-        const topHistoryBar = `
-        <div class="flex items-center justify-between px-1 mb-2">
-            <span class="font-mono text-[10px] text-[#a0ca92] uppercase font-medium">Mi Historial Personal (${completedTasks.length} Concluidas)</span>
-            ${isSuper ? `<button type="button" onclick="openConfigDrawer(); switchTab('history');" class="text-[9px] font-mono uppercase text-[#b8b3b0] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] hover:border-[#eeeeee] px-2 py-0.5 rounded-[3px] transition cursor-pointer flex items-center gap-1" title="Ver bitácora global de auditoría del sistema">📜 Bitácora General ↗</button>` : ''}
-        </div>`;
-
-        const parseTaskTimestamp = (t) => {
-            if (t.validatedDate) {
-                const parts = t.validatedDate.split('/');
-                if (parts.length === 3) {
-                    const timeP = (t.validatedTime || '00:00').split(':');
-                    return new Date(parts[2], parts[1]-1, parts[0], parseInt(timeP[0])||0, parseInt(timeP[1])||0).getTime();
-                }
-            }
-            if (t.submittedDate) {
-                const parts = t.submittedDate.split('/');
-                if (parts.length === 3) {
-                    const timeP = (t.submittedTime || '00:00').split(':');
-                    return new Date(parts[2], parts[1]-1, parts[0], parseInt(timeP[0])||0, parseInt(timeP[1])||0).getTime();
-                }
-            }
-            const match = (t.id || '').match(/\d{10,}/);
-            if (match) return parseInt(match[0]);
-            return 0;
-        };
-
-        container.innerHTML = topHistoryBar + `<div class="space-y-2.5 pb-6">${sortedConsultants.map(cons => {
-            const tasks = grouped[cons].sort((a, b) => parseTaskTimestamp(b) - parseTaskTimestamp(a));
-            const cData = consultants[cons] || { color: '#8a8380' };
-            const isMe = isSameUser(cons, localAuthor);
-            const isOpen = (isMe || sortedConsultants.length === 1) ? 'open' : '';
-
-            return `
-            <details ${isOpen} class="group bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
-                <summary class="flex justify-between items-center cursor-pointer p-3 select-none hover:bg-[#1d1a18] transition list-none [&::-webkit-details-marker]:hidden">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${cData.color}"></span>
-                        <span class="font-mono text-[11px] uppercase text-[#eeeeee] truncate">${escapeHtml(cons)} ${isMe ? '(Mis Tareas)' : ''}</span>
-                        <span class="font-mono text-[9px] bg-[#a0ca92]/15 text-[#a0ca92] border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px] shrink-0">${tasks.length} HECHAS ✓</span>
-                    </div>
-                    <svg class="w-4 h-4 text-[#8a8380] group-open:rotate-180 transition-transform shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <div class="p-2.5 space-y-2 border-t border-[#3d3a39]">
-                    ${tasks.map(t => {
-                        const isMyTask = isSameUser(t.assignee, localAuthor);
-                        const isAssigner = isSameUser(t.assignedBy, localAuthor);
-                        const isSelfAssigned = isMyTask && (!t.assignedBy || isSameUser(t.assignedBy, localAuthor));
-                        const canRevert = isSuper || isSelfAssigned || (isAssigner && isSuper);
-                        return `
-                        <div class="flex items-start gap-2.5 bg-[#1d1a18] p-2.5 rounded-[10px] border border-[#3d3a39] opacity-90 hover:opacity-100 transition">
-                            <input type="checkbox" checked onchange="${canRevert ? `validateAnyTask('${t.sourceType}', '${t.strictType||''}', '${t.projectId||''}', '${t.id}', false)` : ''}" class="rounded-[3px] border-[#a0ca92] bg-[#101010] accent-[#a0ca92] h-4 w-4 shrink-0 mt-0.5 ${canRevert ? 'cursor-pointer' : 'cursor-not-allowed'}" ${!canRevert ? 'disabled' : ''} title="${canRevert ? 'Click para reabrir tarea a pendientes' : 'Completada'}">
-                            <div class="flex flex-col flex-1 min-w-0">
-                                <span class="text-xs text-[#8a8380] line-through break-words leading-snug">${formatTaskTextWithTicket(t.text)}</span>
-                                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                    <span class="font-mono text-[9px] uppercase text-[#b8b3b0] ${t.sourceType === 'project' ? 'cursor-pointer hover:underline' : ''}" ${t.sourceType === 'project' ? `onclick="event.stopPropagation(); window.navigateToProjectFromNotif('${t.strictType}', '${t.projectId}')" title="Ver proyecto en el mapa y abrir detalles"` : ''}>${escapeHtml(t.pName)}${t.sourceType === 'project' ? ' ↗' : ''}</span>
-                                    ${(t.assignDate || t.date) ? `<span class="text-[9px] text-[#8a8380] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">📅 Asignada: ${escapeHtml(t.assignDate || t.date)}${t.assignTime ? ' ' + escapeHtml(t.assignTime) : ''}${t.assignedBy ? ' por ' + escapeHtml(t.assignedBy) : ''}</span>` : ''}
-                                    ${t.submittedDate ? `<span class="text-[9px] text-[#ee6018] font-mono bg-[#101010] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px]">🚀 Entregó: ${escapeHtml(t.submittedBy || t.assignee || 'Consultor')} (${escapeHtml(t.submittedDate)}${t.submittedTime ? ' ' + escapeHtml(t.submittedTime) : ''})</span>` : ''}
-                                    <span class="text-[9px] text-[#a0ca92] font-mono bg-[#a0ca92]/15 border border-[#a0ca92]/40 px-1.5 py-0.5 rounded-[3px]">✓ Validó: ${escapeHtml(t.validatedBy || 'Jefatura')} (${escapeHtml(t.validatedDate || t.date || 'S/F')}${t.validatedTime ? ' ' + escapeHtml(t.validatedTime) : ''})</span>
-                                </div>
-                                ${t.feedback ? `<div class="mt-2 text-[10px] text-[#eeeeee] bg-[#101010] p-2.5 rounded-[3px] border border-[#3d3a39] break-words">💬 <b class="text-[#a0ca92]">Evidencia / Entrega:</b> ${escapeHtml(t.feedback)}</div>` : ''}
-                                ${(Array.isArray(t.feedbackHistory) && t.feedbackHistory.length > 0) ? `
-                                <details class="mt-1.5 text-[9px] text-[#8a8380]">
-                                    <summary class="cursor-pointer hover:text-[#b8b3b0] font-mono select-none">Ver revisiones previas (${t.feedbackHistory.length})</summary>
-                                    <div class="mt-1 pl-2 border-l border-[#3d3a39] space-y-1 py-1">
-                                        ${t.feedbackHistory.map(h => `<div class="font-mono text-[9px] text-[#8a8380]">• [${escapeHtml(h.timestamp)}] ${escapeHtml(h.text)}</div>`).join('')}
-                                    </div>
-                                </details>` : ''}
-                            </div>
-                        </div>`;
-                    }).join('')}
+        return `
+        <div class="bg-[#141211] border ${isOverdue ? 'border-[#ee6018]/60 bg-[#ee6018]/5' : 'border-[#2d2a28]'} hover:border-[#3d3a39] rounded-[8px] p-2.5 transition flex items-start gap-2.5">
+            ${checkUI}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1.5">
+                    <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] truncate" ${projectClick}>
+                        ${escapeHtml(t.pName)}
+                    </span>
+                    ${canDel ? `<button type="button" onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] text-xs font-mono px-1" title="Eliminar tarea">✕</button>` : ''}
                 </div>
-            </details>`;
-        }).join('')}</div>`;
-        return;
-    }
-};
+                <h5 class="text-xs text-[#fafafa] font-normal leading-snug break-words mt-1 ${t.done === true ? 'line-through opacity-60 text-[#8a8380]' : ''}">
+                    ${formatTaskTextWithTicket(t.text)}
+                </h5>
+                <div class="flex items-center gap-2 mt-1.5 flex-wrap font-mono text-[9px] text-[#8a8380]">
+                    <span>👤 ${escapeHtml(t.assignee || 'Personal')}</span>
+                    ${t.deadline ? `<span class="${isOverdue ? 'text-[#ee6018] font-bold' : ''}">⏱ ${t.deadline}${isOverdue ? ' (Vencida)' : ''}</span>` : ''}
+                    ${t.done === 'pending' ? '<span class="text-[#ee6018] bg-[#ee6018]/15 px-1 rounded-[2px]">En revisión</span>' : ''}
+                    ${t.done === true ? '<span class="text-[#a0ca92] bg-[#a0ca92]/15 px-1 rounded-[2px]">Completada ✓</span>' : ''}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
 
+    workHtml += '</div>';
+    container.innerHTML = workHtml;
+};
 
 // === LÓGICA DE FILTROS AVANZADOS Y MODO ENFOQUE ===
     window.focusFilteredMindMap = function() {

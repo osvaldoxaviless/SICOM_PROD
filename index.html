@@ -1798,110 +1798,104 @@
   </main>
 
   <!-- DRAWER ACTIVIDADES DIARIAS -->
-  <div id="dailyDrawer" class="fixed top-0 left-0 h-full max-h-screen w-full md:w-[420px] liquid-glass-panel z-[70] transform -translate-x-full drawer-transition flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-[#1d1a18] bg-[#101010] shrink-0">
-      <div class="flex items-center gap-2.5 text-[#eeeeee]">
-        <span class="w-2 h-2 rounded-full bg-[#ee6018]"></span>
-        <h2 class="font-mono text-[12px] uppercase tracking-[-0.24px]">Notificaciones y Trabajo</h2>
+  <div id="dailyDrawer" class="fixed top-0 left-0 h-full max-h-screen w-full md:w-[440px] liquid-glass-panel z-[70] transform -translate-x-full drawer-transition flex flex-col overflow-hidden">
+    <!-- HEADER -->
+    <div class="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 border-b border-[#1d1a18] bg-[#101010] shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-pulse shrink-0"></span>
+        <div class="min-w-0">
+          <h2 class="font-mono text-[11px] sm:text-[12px] uppercase tracking-[-0.24px] text-[#fafafa] font-bold truncate">Centro de Mando</h2>
+          <p id="cockpitUserSubtitle" class="font-mono text-[9px] sm:text-[9.5px] text-[#8a8380] truncate">Inbox &amp; Mi Trabajo</p>
+        </div>
       </div>
-      <button onclick="closeDailyDrawer()" class="text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] p-2 rounded-[3px] border border-[#3d3a39]" title="Cerrar notificaciones"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      <button type="button" onclick="closeDailyDrawer()" class="text-[#8a8380] hover:text-[#eeeeee] transition bg-[#1d1a18] p-1.5 sm:p-2 rounded-[3px] border border-[#3d3a39] shrink-0 cursor-pointer" title="Cerrar panel">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
     </div>
 
-    <!-- NIVEL 1: SELECTOR PRINCIPAL DE MODO (3 PESTAÑAS AMPLIAS Y ERGONÓMICAS) -->
-    <div class="p-2 border-b border-[#1d1a18] bg-[#101010] shrink-0">
-      <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#161413] rounded-[5px] border border-[#2d2a28]">
-        <!-- 1. TAREAS (Principal) -->
-        <button type="button" onclick="setDailyMainTab('tasks')" id="dailyMainTabBtn-tasks" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#101010] bg-[#eeeeee] font-medium shadow-sm cursor-pointer">
-          <span>📋 Tareas</span>
-          <span id="dailyMainTabCount-tasks" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
+    <!-- SELECTOR DE 2 PILARES: INBOX vs MI TRABAJO (LINEAR STYLE) -->
+    <div class="p-2 sm:p-2.5 border-b border-[#1d1a18] bg-[#101010] shrink-0">
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-[#161413] rounded-[6px] border border-[#2d2a28]">
+        <!-- 1. INBOX -->
+        <button type="button" onclick="setDailyCockpitTab('inbox')" id="cockpitTabBtn-inbox" class="py-2 px-2 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer bg-[#eeeeee] text-[#101010] font-bold shadow-sm">
+          <span class="flex items-center gap-1.5 truncate">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018]"></span>
+            <span>🔔 Inbox</span>
+          </span>
+          <span id="cockpitBadge-inbox" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#ee6018]/40">0</span>
         </button>
 
-        <!-- 2. PROYECTOS (Dedicado) -->
-        <button type="button" onclick="setDailyMainTab('projects')" id="notifTabBtn-projects" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
-          <span>📁 Proyectos</span>
-          <span id="notifTabCount-projects" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#30d158] border border-[#3d3a39]">0</span>
-        </button>
-
-        <!-- 3. ALERTAS (Buzón) -->
-        <button type="button" onclick="setDailyMainTab('alerts')" id="notifTabBtn-alerts" class="py-2 px-1.5 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
-          <span>🔔 Alertas</span>
-          <span id="notifTabCount-alerts" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- NIVEL 2: SUB-SELECTOR ERGONÓMICO DE FLUJO DE TAREAS (Solo visible en Tareas) -->
-    <div id="dailyTasksSubNavSection" class="px-3 py-2 bg-[#12100f] border-b border-[#1d1a18] shrink-0 transition-all">
-      <div class="grid grid-cols-3 gap-1 p-0.5 bg-[#1a1715] rounded-[5px] border border-[#2d2a28]">
-        <button type="button" onclick="setTaskSubTab('pending')" id="notifTabBtn-pending" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition bg-[#eeeeee] text-[#101010] font-medium shadow-sm cursor-pointer">
-          <span class="truncate">Pendientes</span>
-          <span id="notifTabCount-pending" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee]">0</span>
-        </button>
-
-        <button type="button" onclick="setTaskSubTab('validation')" id="notifTabBtn-validation" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
-          <span class="truncate">Validación</span>
-          <span id="notifTabCount-validation" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#ee6018] border border-[#3d3a39]">0</span>
-        </button>
-
-        <button type="button" onclick="setTaskSubTab('completed')" id="notifTabBtn-completed" class="py-1 px-1.5 rounded-[3px] font-mono text-[9px] sm:text-[10px] uppercase flex items-center justify-center gap-1 transition text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
-          <span class="truncate">Hechas</span>
-          <span id="notifTabCount-completed" class="text-[8px] sm:text-[9px] font-mono px-1 py-0.2 rounded-[3px] bg-[#101010] text-[#a0ca92] border border-[#3d3a39]">0</span>
+        <!-- 2. MI TRABAJO -->
+        <button type="button" onclick="setDailyCockpitTab('work')" id="cockpitTabBtn-work" class="py-2 px-2 rounded-[4px] font-mono text-[10px] sm:text-[11px] uppercase flex items-center justify-center gap-1.5 transition cursor-pointer text-[#8a8380] hover:text-[#eeeeee]">
+          <span class="flex items-center gap-1.5 truncate">
+            <span>⚡ Mi Trabajo</span>
+          </span>
+          <span id="cockpitBadge-work" class="text-[9px] font-mono px-1.5 py-0.2 rounded-[3px] bg-[#101010] text-[#eeeeee] border border-[#3d3a39]">0</span>
         </button>
       </div>
     </div>
 
-    <!-- CUERPO DESLIZABLE COMPLETO CON RETRACCIÓN NATURAL -->
-    <div id="dailyDrawerScrollBody" class="flex-1 min-h-0 overflow-y-auto p-4 scrollbar-thin flex flex-col space-y-3" style="overscroll-behavior: contain; touch-action: pan-y;">
-      <!-- FORMULARIO RETRÁCTIL: ANOTAR TAREA RÁPIDA (Solo visible en pestaña Pendientes) -->
-      <div id="dailyTaskFormSection" class="lector-hide shrink-0">
-        <details id="dailyTaskFormDetails" class="group bg-[#1d1a18] border border-[#3d3a39] rounded-[3px] overflow-hidden">
-          <summary class="flex justify-between items-center cursor-pointer px-3 py-2 text-[10px] font-mono uppercase text-[#b8b3b0] hover:text-[#eeeeee] select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[#3d3a39]/20 transition">
-            <span class="flex items-center gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
-              <span class="tracking-[-0.24px]">Anotar Tarea Rápida Personal</span>
-            </span>
-            <div class="flex items-center gap-1.5 text-[#8a8380]">
-              <span class="font-mono text-[9px] group-open:hidden">+ REDACTAR</span>
-              <svg class="w-3.5 h-3.5 text-[#8a8380] group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-          </summary>
-          <div class="p-3 pt-2.5 border-t border-[#3d3a39] flex flex-col gap-2 bg-[#101010]">
-              <input type="text" id="newDailyTaskInput" placeholder="Ej. Revisar reportes de nómina..." class="w-full liquid-input rounded-[3px] px-3 py-2 text-xs focus:outline-none text-[#eeeeee]">
-              <div class="flex gap-2">
-                  <select id="newDailyTaskAssignee" class="flex-1 liquid-input rounded-[3px] px-3 py-2 text-[11px] focus:outline-none appearance-none cursor-pointer text-[#eeeeee]"></select>
-                  <button onclick="addDailyTask()" class="px-4 py-2 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[11px] rounded-[3px] transition shrink-0 flex items-center gap-1.5">
-                      <span>+ Añadir</span>
-                  </button>
-              </div>
-          </div>
-        </details>
+    <!-- SUB-BARRA DE ESTADOS DE TAREAS (SOLO VISIBLE EN "MI TRABAJO") -->
+    <div id="cockpitWorkSubNav" class="hidden px-3 py-1.5 bg-[#12100f] border-b border-[#1d1a18] shrink-0 flex items-center justify-between gap-1 overflow-x-auto scrollbar-none select-none">
+      <div class="flex items-center gap-1">
+        <button type="button" onclick="setCockpitWorkFilter('pending')" id="workChip-pending" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 bg-[#fafafa] text-[#101010] font-bold">
+          <span>Por Hacer</span>
+          <span id="workChipCount-pending" class="text-[8.5px] font-mono opacity-80">0</span>
+        </button>
+        <button type="button" onclick="setCockpitWorkFilter('validation')" id="workChip-validation" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
+          <span>En Revisión</span>
+          <span id="workChipCount-validation" class="text-[8.5px] font-mono opacity-80">0</span>
+        </button>
+        <button type="button" onclick="setCockpitWorkFilter('completed')" id="workChip-completed" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
+          <span>Hechas</span>
+          <span id="workChipCount-completed" class="text-[8.5px] font-mono opacity-80">0</span>
+        </button>
+        <button type="button" onclick="setCockpitWorkFilter('all')" id="workChip-all" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
+          <span>Todas</span>
+          <span id="workChipCount-all" class="text-[8.5px] font-mono opacity-80">0</span>
+        </button>
       </div>
 
-      <!-- SECCIÓN DEDICADA: MIS PROYECTOS ASIGNADOS (Solo visible en pestaña Proyectos) -->
-      <div id="dailyAssignedProjectsSection" class="shrink-0 hidden">
-        <div class="bg-[#101010] border border-[#3d3a39] rounded-[10px] overflow-hidden transition">
-          <div class="flex justify-between items-center p-3 select-none bg-[#1d1a18] border-b border-[#3d3a39]">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
-              <span id="dailyAssignedHeaderTitle" class="font-mono text-[11px] uppercase text-[#eeeeee] tracking-[-0.24px] truncate">Proyectos Asignados</span>
-              <span id="dailyMyProjectsBadge" class="font-mono text-[9px] uppercase bg-[#101010] text-[#eeeeee] border border-[#3d3a39] px-1.5 py-0.5 rounded-[3px] shrink-0">0 PROYECTOS</span>
-            </div>
-          </div>
+      <!-- BOTÓN PROYECTOS ACTIVOS -->
+      <button type="button" onclick="toggleCockpitProjectsSection()" id="btnToggleCockpitProjects" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] flex items-center gap-1 shrink-0 ml-auto cursor-pointer" title="Ver proyectos asignados">
+        <span>📁 Proyectos</span>
+        <span id="cockpitProjectsCount" class="text-[8.5px] text-[#30d158]">0</span>
+      </button>
+    </div>
 
-          <!-- BARRA DE SELECCIÓN RÁPIDA POR CONSULTOR -->
-          <div class="px-3 py-2 bg-[#101010] border-b border-[#3d3a39] flex items-center gap-2">
-            <label for="dailyAssignedConsultantSelect" class="font-mono text-[9px] uppercase text-[#8a8380] shrink-0">Consultor:</label>
-            <select id="dailyAssignedConsultantSelect" onchange="window.handleAssignedConsultantChange(this.value)" class="flex-1 bg-[#101010] border border-[#3d3a39] text-[#eeeeee] font-mono text-[10px] rounded-[3px] px-2 py-1 focus:outline-none focus:border-[#ee6018] cursor-pointer truncate">
-              <option value="ME">⭐ Mis Proyectos</option>
-              <option value="ALL">🌐 Todos los Asignados</option>
-            </select>
-          </div>
-
-          <div id="dailyMyProjectsList" class="p-2.5 space-y-2"></div>
+    <!-- CUERPO DESLIZABLE COMPLETO -->
+    <div id="dailyDrawerScrollBody" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 scrollbar-thin flex flex-col space-y-3" style="overscroll-behavior: contain; touch-action: pan-y;">
+      
+      <!-- FORMULARIO DIRECTO DE CAPTURA RÁPIDA (SOLO EN "MI TRABAJO") -->
+      <div id="cockpitQuickTaskBox" class="hidden lector-hide shrink-0 bg-[#161413] border border-[#3d3a39] rounded-[6px] p-2.5 space-y-2">
+        <div class="flex items-center gap-2">
+          <input type="text" id="newDailyTaskInput" onkeydown="if(event.key==='Enter') addDailyTask()" placeholder="+ Anotar nueva tarea personal o asignación..." class="flex-1 bg-[#101010] border border-[#3d3a39] focus:border-[#ee6018] rounded-[3px] px-2.5 py-1.5 text-xs text-[#eeeeee] outline-none">
+          <button type="button" onclick="addDailyTask()" class="px-3 py-1.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono uppercase text-[10px] font-bold rounded-[3px] transition shrink-0 active:scale-95 shadow-sm cursor-pointer">
+            <span>+ Añadir</span>
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-[10px] font-mono text-[#8a8380]">
+          <span class="flex items-center gap-1.5">
+            <span>Asignar a:</span>
+            <select id="newDailyTaskAssignee" class="bg-[#101010] border border-[#3d3a39] text-[#eeeeee] rounded-[3px] px-1.5 py-0.5 outline-none cursor-pointer max-w-[160px] truncate"></select>
+          </span>
+          <span class="text-[9px] text-[#6d6865] hidden sm:inline">Enter para guardar</span>
         </div>
       </div>
 
-      <!-- LISTA DE TAREAS Y ALERTAS -->
+      <!-- SECCIÓN COLAPSABLE DE PROYECTOS ASIGNADOS (DENTRO DE "MI TRABAJO") -->
+      <div id="cockpitAssignedProjectsBox" class="hidden shrink-0 bg-[#141211] border border-[#3d3a39] rounded-[8px] overflow-hidden">
+        <div class="p-2.5 bg-[#1d1a18] border-b border-[#3d3a39] flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#30d158]"></span>
+            <span class="font-mono text-[10.5px] uppercase font-bold text-[#fafafa]">Proyectos Donde Colaboras</span>
+          </div>
+          <button type="button" onclick="toggleCockpitProjectsSection()" class="text-[#8a8380] hover:text-[#fafafa] text-xs font-mono cursor-pointer">✕ Ocultar</button>
+        </div>
+        <div id="cockpitProjectsList" class="p-2 space-y-2 max-h-56 overflow-y-auto"></div>
+      </div>
+
+      <!-- LISTA DINÁMICA DE ITEMS (INBOX o MI TRABAJO) -->
       <div id="dailyTasksContainer" class="flex-1 min-h-0 flex flex-col space-y-2.5"></div>
     </div>
   </div>
