@@ -11836,7 +11836,7 @@ window.updateCockpitUI = function() {
         const btn = document.getElementById(`workChip-${c}`);
         if (!btn) return;
         const isActive = (currentCockpitWorkFilter === c);
-        btn.className = `px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 cursor-pointer ${isActive ? 'bg-[#fafafa] text-[#101010] font-bold shadow-sm' : 'text-[#8a8380] hover:text-[#eeeeee] bg-transparent'}`;
+        btn.className = `h-7 rounded-[4px] font-mono text-[9px] sm:text-[10px] uppercase transition flex items-center justify-center gap-1 cursor-pointer ${isActive ? 'bg-[#fafafa] text-[#101010] font-bold shadow-sm' : 'text-[#8a8380] hover:text-[#eeeeee] bg-transparent'}`;
     });
 
     const userSub = document.getElementById('cockpitUserSubtitle');
@@ -12259,23 +12259,28 @@ window.renderDailyTasks = function() {
             : 'class="text-[#8a8380]"';
 
         return `
-        <div class="bg-[#141211] border ${isOverdue ? 'border-[#ee6018]/60 bg-[#ee6018]/5' : 'border-[#2d2a28]'} hover:border-[#3d3a39] rounded-[8px] p-2.5 transition flex items-start gap-2.5">
-            ${checkUI}
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between gap-1.5">
-                    <span class="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#3d3a39] text-[#8a8380] truncate" ${projectClick}>
-                        ${escapeHtml(t.pName)}
-                    </span>
-                    ${canDel ? `<button type="button" onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] text-xs font-mono px-1" title="Eliminar tarea">✕</button>` : ''}
-                </div>
-                <h5 class="text-xs text-[#fafafa] font-normal leading-snug break-words mt-1 ${t.done === true ? 'line-through opacity-60 text-[#8a8380]' : ''}">
+        <div class="h-[76px] bg-[#141211] border ${isOverdue ? 'border-[#ee6018]/60 bg-[#ee6018]/5' : 'border-[#2d2a28]'} hover:border-[#3d3a39] rounded-[6px] p-2.5 transition flex flex-col justify-between select-none shadow-sm">
+            <!-- FILA 1: CHECKBOX + TÍTULO UNIFORME DE 1 LÍNEA + BOTÓN ACCIÓN -->
+            <div class="flex items-center gap-2.5 min-w-0">
+                ${checkUI}
+                <h5 class="text-xs text-[#fafafa] font-normal truncate flex-1 min-w-0 leading-tight ${t.done === true ? 'line-through opacity-60 text-[#8a8380]' : ''}" title="${escapeHtml(t.text)}">
                     ${formatTaskTextWithTicket(t.text)}
                 </h5>
-                <div class="flex items-center gap-2 mt-1.5 flex-wrap font-mono text-[9px] text-[#8a8380]">
-                    <span>👤 ${escapeHtml(t.assignee || 'Personal')}</span>
-                    ${t.deadline ? `<span class="${isOverdue ? 'text-[#ee6018] font-bold' : ''}">⏱ ${t.deadline}${isOverdue ? ' (Vencida)' : ''}</span>` : ''}
-                    ${t.done === 'pending' ? '<span class="text-[#ee6018] bg-[#ee6018]/15 px-1 rounded-[2px]">En revisión</span>' : ''}
-                    ${t.done === true ? '<span class="text-[#a0ca92] bg-[#a0ca92]/15 px-1 rounded-[2px]">Completada ✓</span>' : ''}
+                ${canDel ? `<button type="button" onclick="deleteDailyTask('${t.id}')" class="text-[#8a8380] hover:text-[#ee6018] text-xs font-mono px-1 shrink-0 transition" title="Eliminar tarea">✕</button>` : ''}
+            </div>
+
+            <!-- FILA 2: METADATOS EN PIE DE TARJETA CON ESTRUCTURA UNIFORME -->
+            <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#1d1a18] font-mono text-[9px] text-[#8a8380]">
+                <div class="flex items-center gap-1.5 min-w-0 truncate">
+                    <span class="uppercase px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#2d2a28] text-[#8a8380] truncate max-w-[130px] sm:max-w-[170px]" ${projectClick}>
+                        ${escapeHtml(t.pName)}
+                    </span>
+                    <span class="truncate">👤 ${escapeHtml(t.assignee || 'Personal')}</span>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    ${t.deadline ? `<span class="${isOverdue ? 'text-[#ee6018] font-bold' : 'text-[#8a8380]'}">⏱ ${t.deadline}</span>` : '<span class="text-[#4d4947]">Sin fecha</span>'}
+                    ${t.done === 'pending' ? '<span class="text-[#ee6018] bg-[#ee6018]/15 border border-[#ee6018]/30 px-1 rounded-[2px]">En revisión</span>' : ''}
+                    ${t.done === true ? '<span class="text-[#a0ca92] bg-[#a0ca92]/15 border border-[#a0ca92]/30 px-1 rounded-[2px]">Hecha ✓</span>' : ''}
                 </div>
             </div>
         </div>`;

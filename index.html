@@ -1835,31 +1835,34 @@
       </div>
     </div>
 
-    <!-- SUB-BARRA DE ESTADOS DE TAREAS (SOLO VISIBLE EN "MI TRABAJO") -->
-    <div id="cockpitWorkSubNav" class="hidden px-3 py-1.5 bg-[#12100f] border-b border-[#1d1a18] shrink-0 flex items-center justify-between gap-1 overflow-x-auto scrollbar-none select-none">
-      <div class="flex items-center gap-1">
-        <button type="button" onclick="setCockpitWorkFilter('pending')" id="workChip-pending" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 bg-[#fafafa] text-[#101010] font-bold">
-          <span>Por Hacer</span>
+    <!-- SUB-BARRA DE ESTADOS DE TAREAS (CUADRÍCULA 100% SIMÉTRICA Y UNIFORME) -->
+    <div id="cockpitWorkSubNav" class="hidden px-3 py-2 bg-[#12100f] border-b border-[#1d1a18] shrink-0 space-y-1.5 select-none">
+      <div class="grid grid-cols-4 gap-1.5 w-full">
+        <button type="button" onclick="setCockpitWorkFilter('pending')" id="workChip-pending" class="h-7 rounded-[4px] font-mono text-[9px] sm:text-[10px] uppercase transition flex items-center justify-center gap-1 bg-[#fafafa] text-[#101010] font-bold shadow-sm cursor-pointer">
+          <span class="truncate">Por Hacer</span>
           <span id="workChipCount-pending" class="text-[8.5px] font-mono opacity-80">0</span>
         </button>
-        <button type="button" onclick="setCockpitWorkFilter('validation')" id="workChip-validation" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
-          <span>En Revisión</span>
+        <button type="button" onclick="setCockpitWorkFilter('validation')" id="workChip-validation" class="h-7 rounded-[4px] font-mono text-[9px] sm:text-[10px] uppercase transition flex items-center justify-center gap-1 text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+          <span class="truncate">En Revisión</span>
           <span id="workChipCount-validation" class="text-[8.5px] font-mono opacity-80">0</span>
         </button>
-        <button type="button" onclick="setCockpitWorkFilter('completed')" id="workChip-completed" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
-          <span>Hechas</span>
+        <button type="button" onclick="setCockpitWorkFilter('completed')" id="workChip-completed" class="h-7 rounded-[4px] font-mono text-[9px] sm:text-[10px] uppercase transition flex items-center justify-center gap-1 text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+          <span class="truncate">Hechas</span>
           <span id="workChipCount-completed" class="text-[8.5px] font-mono opacity-80">0</span>
         </button>
-        <button type="button" onclick="setCockpitWorkFilter('all')" id="workChip-all" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase transition flex items-center gap-1 text-[#8a8380] hover:text-[#eeeeee]">
-          <span>Todas</span>
+        <button type="button" onclick="setCockpitWorkFilter('all')" id="workChip-all" class="h-7 rounded-[4px] font-mono text-[9px] sm:text-[10px] uppercase transition flex items-center justify-center gap-1 text-[#8a8380] hover:text-[#eeeeee] cursor-pointer">
+          <span class="truncate">Todas</span>
           <span id="workChipCount-all" class="text-[8.5px] font-mono opacity-80">0</span>
         </button>
       </div>
 
-      <!-- BOTÓN PROYECTOS ACTIVOS -->
-      <button type="button" onclick="toggleCockpitProjectsSection()" id="btnToggleCockpitProjects" class="px-2 py-0.5 rounded-[3px] font-mono text-[9.5px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#1d1a18] border border-[#3d3a39] flex items-center gap-1 shrink-0 ml-auto cursor-pointer" title="Ver proyectos asignados">
-        <span>📁 Proyectos</span>
-        <span id="cockpitProjectsCount" class="text-[8.5px] text-[#30d158]">0</span>
+      <!-- BOTÓN PROYECTOS ACTIVOS DE ANCHO COMPLETO Y ALTURA CALIBRADA -->
+      <button type="button" onclick="toggleCockpitProjectsSection()" id="btnToggleCockpitProjects" class="w-full h-6 px-2.5 rounded-[4px] font-mono text-[9.5px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] hover:bg-[#1d1a18] border border-[#2d2a28] flex items-center justify-between transition cursor-pointer" title="Ver proyectos asignados">
+        <span class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#30d158]"></span>
+          <span>Proyectos Asignados</span>
+        </span>
+        <span id="cockpitProjectsCount" class="text-[9px] font-mono text-[#30d158] font-bold">0 PROYECTOS</span>
       </button>
     </div>
 
