@@ -25,17 +25,16 @@
   </script>
   <title>EO/SA v9.3 — Enterprise Operations & Systems Architecture</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cedarville+Cursive&family=Dancing+Script:wght@600;700&family=Marck+Script&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   
   <script>
     tailwind.config = {
@@ -67,13 +66,14 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=20261028_v1020">
+  <link rel="stylesheet" href="styles.css?v=20261029_v1024">
 </head>
 <body class="flex flex-col h-screen w-screen bg-[#101010] text-[#eeeeee]">
 
   <!-- LOADER -->
   <div id="cloudLoader">
-    <div class="spinner mb-4"></div>
+    <span class="font-mono text-[15px] tracking-[0.35em] text-[#eeeeee] font-semibold select-none">EO<span class="text-[#ee6018] mx-1">/</span>SA</span>
+  </div>
     <h2 class="text-[#eeeeee] font-mono text-[12px] tracking-[-0.24px] uppercase">Inicializando Superficie EO/SA...</h2>
   </div>
   
@@ -1162,159 +1162,7 @@
       <g id="canvasGroup" class="pointer-events-auto"></g>
     </svg>
 
-    <!-- SKELETON SCREEN AUTÉNTICO EO/SA ARCHITECTURE (NÚCLEO CIRCULAR SICOM, CONECTORES BÉZIER Y MÓDULOS) -->
-    <div id="mapSkeleton" class="absolute inset-0 pointer-events-none z-[15] flex flex-col items-center justify-center overflow-hidden select-none transition-opacity duration-200 ease-out">
-      <!-- Badge de carga superior flotante -->
-      <div class="absolute top-4 sm:top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] bg-[#12100f]/95 border border-[#3d3734] shadow-2xl backdrop-blur-md z-20">
-        <span class="w-2 h-2 rounded-full bg-[#ee6018] animate-ping"></span>
-        <span class="font-mono text-[10px] uppercase tracking-wider text-[#ee6018] font-bold">EO / SA</span>
-        <span class="text-[#4d4947] text-xs">|</span>
-        <span class="font-mono text-[10px] uppercase tracking-wider text-[#b8b3b0]">Sincronizando Sistema...</span>
-      </div>
-
-      <!-- Lienzo Esquelético Vectorial y Nodos Auténticos del Sistema -->
-      <div class="relative w-full max-w-5xl h-[560px] flex items-center justify-center px-4">
-        <!-- Conectores SVG orgánicos idénticos a los del mapa mental -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 960 560" fill="none">
-          <defs>
-            <linearGradient id="skel-grad-amber" x1="480" y1="280" x2="220" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.25" />
-              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8" />
-            </linearGradient>
-            <linearGradient id="skel-grad-blue" x1="480" y1="280" x2="200" y2="280" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.2" />
-              <stop offset="100%" stop-color="#0071e3" stop-opacity="0.75" />
-            </linearGradient>
-            <linearGradient id="skel-grad-green" x1="480" y1="280" x2="220" y2="460" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.2" />
-              <stop offset="100%" stop-color="#30d158" stop-opacity="0.75" />
-            </linearGradient>
-            <linearGradient id="skel-grad-orange" x1="480" y1="280" x2="740" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.25" />
-              <stop offset="100%" stop-color="#ee6018" stop-opacity="0.85" />
-            </linearGradient>
-            <linearGradient id="skel-grad-purple" x1="480" y1="280" x2="760" y2="280" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.2" />
-              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.75" />
-            </linearGradient>
-            <linearGradient id="skel-grad-red" x1="480" y1="280" x2="740" y2="460" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ee6018" stop-opacity="0.2" />
-              <stop offset="100%" stop-color="#ef4444" stop-opacity="0.75" />
-            </linearGradient>
-          </defs>
-
-          <!-- Fibras Conectoras Izquierda -->
-          <path d="M 440 250 C 340 210, 280 120, 220 100" stroke="url(#skel-grad-amber)" stroke-width="1.8" opacity="0.6" stroke-dasharray="6 4" />
-          <path d="M 425 280 C 330 280, 270 280, 190 280" stroke="url(#skel-grad-blue)" stroke-width="1.8" opacity="0.6" />
-          <path d="M 440 310 C 340 350, 280 440, 220 460" stroke="url(#skel-grad-green)" stroke-width="1.8" opacity="0.6" stroke-dasharray="6 4" />
-
-          <!-- Fibras Conectoras Derecha -->
-          <path d="M 520 250 C 620 210, 680 120, 740 100" stroke="url(#skel-grad-orange)" stroke-width="1.8" opacity="0.6" stroke-dasharray="6 4" />
-          <path d="M 535 280 C 630 280, 690 280, 770 280" stroke="url(#skel-grad-purple)" stroke-width="1.8" opacity="0.6" />
-          <path d="M 520 310 C 620 350, 680 440, 740 460" stroke="url(#skel-grad-red)" stroke-width="1.8" opacity="0.6" stroke-dasharray="6 4" />
-        </svg>
-
-        <!-- NÚCLEO CENTRAL CIRCULAR SICOM (RÉPLICA AUTÉNTICA DEL CORE) -->
-        <div class="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full eosa-skeleton-core flex flex-col items-center justify-center p-2">
-          <!-- Anillo orbital exterior concéntrico rotativo sutil -->
-          <div class="absolute -inset-2.5 rounded-full border border-[#3d3a39] border-dashed eosa-skeleton-orbit pointer-events-none"></div>
-
-          <!-- Puertos cardinales N, S, E, O -->
-          <span class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2 h-2 rounded-full bg-[#101010] border border-[#8a8380]"></span>
-          <span class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-2 h-2 rounded-full bg-[#101010] border border-[#8a8380]"></span>
-          <span class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rounded-full bg-[#101010] border border-[#8a8380]"></span>
-          <span class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-2 h-2 rounded-full bg-[#101010] border border-[#8a8380]"></span>
-
-          <!-- Cápsula STGT superior -->
-          <div class="px-2 py-0.5 rounded-full bg-[#ee6018] text-[#101010] font-mono text-[8px] font-black tracking-widest uppercase mb-1 shadow-md">
-            STGT
-          </div>
-
-          <!-- Logotipo / Título SICOM con pulso sutil -->
-          <span class="font-mono text-base sm:text-lg font-black tracking-widest text-[#fafafa] drop-shadow">SICOM</span>
-          <span class="font-mono text-[9px] text-[#8a8380] tracking-wider font-semibold">EO / SA</span>
-
-          <!-- LED de estado central pulsante -->
-          <div class="absolute bottom-2 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#ee6018] animate-ping"></span>
-          </div>
-        </div>
-
-        <!-- MÓDULOS IZQUIERDA (PASTILLAS AUTÉNTICAS EO/SA) -->
-        <!-- Módulo Superior Izq (Directos) -->
-        <div class="absolute left-3 sm:left-10 top-14 w-44 sm:w-56 h-12 rounded-[10px] eosa-skeleton-pill border border-[#f59e0b]/50 border-dashed flex items-center justify-between px-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_6px_#f59e0b]"></span>
-            <div class="w-24 sm:w-32 h-3 rounded-[3px] eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#f59e0b]/40 eosa-skeleton"></div>
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#f59e0b] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-          </div>
-        </div>
-
-        <!-- Módulo Centro Izq (Web / Operativo) -->
-        <div class="absolute left-1 sm:left-6 top-[256px] w-48 sm:w-60 h-12 rounded-[10px] eosa-skeleton-pill border border-[#0071e3]/50 flex items-center justify-between px-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#0071e3] shadow-[0_0_6px_#0071e3]"></span>
-            <div class="w-28 sm:w-36 h-3 rounded-[3px] eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#0071e3]/40 eosa-skeleton"></div>
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#0071e3] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-          </div>
-        </div>
-
-        <!-- Módulo Inferior Izq (Despacho / COM) -->
-        <div class="absolute left-3 sm:left-10 bottom-14 w-44 sm:w-56 h-12 rounded-[10px] eosa-skeleton-pill border border-[#30d158]/50 flex items-center justify-between px-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_6px_#30d158]"></span>
-            <div class="w-24 sm:w-32 h-3 rounded-[3px] eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#30d158]/40 eosa-skeleton"></div>
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#30d158] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-          </div>
-        </div>
-
-        <!-- MÓDULOS DERECHA (PASTILLAS AUTÉNTICAS EO/SA) -->
-        <!-- Módulo Superior Der (App Móvil) -->
-        <div class="absolute right-3 sm:right-10 top-14 w-44 sm:w-56 h-12 rounded-[10px] eosa-skeleton-pill border border-[#ee6018]/60 flex items-center justify-between px-3">
-          <div class="flex items-center gap-1.5">
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#ee6018] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#ee6018]/40 eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-24 sm:w-32 h-3 rounded-[3px] eosa-skeleton"></div>
-            <span class="w-2 h-2 rounded-full bg-[#ee6018] shadow-[0_0_6px_#ee6018]"></span>
-          </div>
-        </div>
-
-        <!-- Módulo Centro Der (Terminal / Portal) -->
-        <div class="absolute right-1 sm:right-6 top-[256px] w-48 sm:w-60 h-12 rounded-[10px] eosa-skeleton-pill border border-[#a855f7]/60 flex items-center justify-between px-3">
-          <div class="flex items-center gap-1.5">
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#a855f7] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#a855f7]/40 eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-28 sm:w-36 h-3 rounded-[3px] eosa-skeleton"></div>
-            <span class="w-2 h-2 rounded-full bg-[#a855f7] shadow-[0_0_6px_#a855f7]"></span>
-          </div>
-        </div>
-
-        <!-- Módulo Inferior Der (Liquidación / STOM) -->
-        <div class="absolute right-3 sm:right-10 bottom-14 w-44 sm:w-56 h-12 rounded-[10px] eosa-skeleton-pill border border-[#ef4444]/60 flex items-center justify-between px-3">
-          <div class="flex items-center gap-1.5">
-            <div class="w-4 h-4 rounded-full bg-[#101010] border border-[#ef4444] flex items-center justify-center text-[9px] text-[#8a8380]">+</div>
-            <div class="w-12 h-4 rounded-[3px] bg-[#101010] border border-[#ef4444]/40 eosa-skeleton"></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-24 sm:w-32 h-3 rounded-[3px] eosa-skeleton"></div>
-            <span class="w-2 h-2 rounded-full bg-[#ef4444] shadow-[0_0_6px_#ef4444]"></span>
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
     
     <!-- TABLERO KANBAN DE PRIORIDADES A PANTALLA COMPLETA (VISTA PRIORIDADES) -->
@@ -3865,7 +3713,7 @@
       </div>
   </div>
 
-  <script type="module" src="app.js?v=20261028_v1020"></script>
+  <script type="module" src="app.js?v=20261029_v1024"></script>
 
 </body>
 </html>

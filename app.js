@@ -561,8 +561,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         if (localAuthor) { 
             const overlay = document.getElementById('loginOverlay');
             if (overlay) overlay.classList.add('hidden');
-            const loader = document.getElementById('cloudLoader');
-            if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 400); }
             finishInit(); 
         } else { 
             showLoginScreen(); 
@@ -2053,12 +2051,16 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
     };
 
     function finishInit() {
-        document.getElementById('cloudLoader').style.display = 'none';
         if (typeof window.updateUserProfilePill === 'function') window.updateUserProfilePill();
         try { ensureDataStructure(); window.applyRolePermissions(); refreshUI(); } catch (e) { console.error('Error al renderizar la interfaz:', e); }
-        setTimeout(() => { try { window.recenterCanvas(0); } catch (e) { console.error(e); } }, 20);
-        if (typeof window.hideMapSkeleton === 'function') {
-            requestAnimationFrame(() => window.hideMapSkeleton());
+        // Arranque limpio: el mapa ya está dibujado y encuadrado (0ms) antes de revelar; un único fundido del loader
+        try { window.recenterCanvas(0); } catch (e) { console.error(e); }
+        const bootLoader = document.getElementById('cloudLoader');
+        if (bootLoader && bootLoader.style.display !== 'none') {
+            requestAnimationFrame(() => {
+                bootLoader.style.opacity = '0';
+                setTimeout(() => { bootLoader.style.display = 'none'; }, 220);
+            });
         }
         resetInactivityTimeout(); // Iniciar temporizador de inactividad
         if (typeof window.initPushNotificationSystem === 'function') {
@@ -9136,26 +9138,9 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
     };
 
-    window.hideMapSkeleton = function() {
-        const skel = document.getElementById('mapSkeleton');
-        if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
-            skel.style.transition = 'opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1)';
-            skel.classList.add('opacity-0');
-            setTimeout(() => {
-                try { skel.style.display = 'none'; } catch (_) {}
-            }, 240);
-        }
-    };
-
-    window.showMapSkeleton = function() {
-        const skel = document.getElementById('mapSkeleton');
-        if (skel) {
-            skel.style.display = 'flex';
-            requestAnimationFrame(() => {
-                skel.classList.remove('opacity-0');
-            });
-        }
-    };
+    // Skeleton retirado: el mapa se hidrata desde caché local de forma síncrona
+    window.hideMapSkeleton = function() {};
+    window.showMapSkeleton = function() {};
 
     window.renderMindMap = function() {
       if (!canvasGroup) window.ensureDomReferences();
@@ -10812,27 +10797,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
       lastExpandedModuleId = null;
       if (typeof window.updateActiveFilterPill === 'function') window.updateActiveFilterPill();
 
-      // SINCRONIZACIÓN ATÓMICA Y CROSS-FADE IMPERCEPTIBLE ENTRE ESQUELETO Y MAPA
-      if (!window._initialMapPositioned) {
-          window._initialMapPositioned = true;
-          // Colocar el mapa real exactamente en sus coordenadas de reposo sin demora (0ms)
-          if (typeof window.recenterCanvas === 'function') {
-              window.recenterCanvas(0);
-          }
-          // Iniciar desvanecimiento suave del esqueleto en el siguiente frame sin saltos
-          requestAnimationFrame(() => {
-              if (typeof window.hideMapSkeleton === 'function') {
-                  window.hideMapSkeleton();
-              }
-          });
-      } else {
-          const skel = document.getElementById('mapSkeleton');
-          if (skel && !skel.classList.contains('opacity-0') && skel.style.display !== 'none') {
-              if (typeof window.hideMapSkeleton === 'function') {
-                  window.hideMapSkeleton();
-              }
-          }
-      }
     };
 
     let currentHistoryCategory = 'all'; // 'all' | 'validaciones' | 'tareas' | 'proyectos'
