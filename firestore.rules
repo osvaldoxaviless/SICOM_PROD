@@ -59,6 +59,10 @@ service cloud.firestore {
       allow delete: if isSupremo();
     }
 
+    match /artifacts/{appId}/public/data/sicom_pdfs/{pdfKey} {
+      allow read, write: if isAuthenticated();
+    }
+
     match /sicom_data/{docId} {
       allow read: if isAuthenticated();
       allow create: if isAuthorizedWriter();
