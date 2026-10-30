@@ -639,7 +639,6 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
                     _uiRaf = requestAnimationFrame(() => { _uiRaf = 0; try { refreshUI(); } catch (e) { console.error('refreshUI', e); } });
                 };
                 unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
-                    if (snapshot.metadata && snapshot.metadata.hasPendingWrites) return; // eco de mi propia escritura
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         
