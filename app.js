@@ -4544,7 +4544,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         try {
-            const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            const reg = await (navigator.serviceWorker.ready || navigator.serviceWorker.register('/sw.js', { scope: '/' }));
             console.log('✅ [EO/SA Push] Service Worker registrado en scope:', reg.scope);
             await navigator.serviceWorker.ready;
 

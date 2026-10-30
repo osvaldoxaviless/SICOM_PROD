@@ -14,23 +14,10 @@
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          try {
-            if (typeof mainWorkspaceViewMode !== 'undefined') {
-              sessionStorage.setItem('sicom_active_view_mode', mainWorkspaceViewMode);
-            }
-          } catch(e) {}
-          window.location.reload();
-        }
-      });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=20261028_v1020', { scope: '/' })
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
           .then(reg => {
             console.log('✅ [PWA] Service Worker registrado en scope:', reg.scope);
-            reg.update();
           })
           .catch(err => console.warn('⚠️ [PWA] Fallo al registrar Service Worker:', err));
       });
