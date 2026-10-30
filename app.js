@@ -3564,6 +3564,99 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         window.animateCameraTo(targetTx, targetTy, targetScale, 520);
     };
 
+    window.focusModuleProjects = function(modId, duration = 480) {
+        if (!svgElem || !canvasGroup) window.ensureDomReferences();
+        if (!svgElem || !canvasGroup) return;
+        const rect = svgElem.getBoundingClientRect();
+        const isDesktop = window.innerWidth >= 768;
+        const isMobilePortrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
+
+        const cleanModId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
+        const projs = Array.from(canvasGroup.querySelectorAll('.mindmap-project-node[data-parent-mod="' + modId + '"]'));
+        const modEl = canvasGroup.querySelector('.mod-node-' + cleanModId);
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+        if (projs.length > 0) {
+            projs.forEach(el => {
+                const tr = el.getAttribute('transform') || '';
+                const m = tr.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+                if (m) {
+                    const px = parseFloat(m[1]);
+                    const py = parseFloat(m[2]);
+                    minX = Math.min(minX, px);
+                    maxX = Math.max(maxX, px + 320);
+                    minY = Math.min(minY, py);
+                    maxY = Math.max(maxY, py + 56);
+                }
+            });
+            if (modEl) {
+                const trM = modEl.getAttribute('transform') || '';
+                const mm = trM.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+                if (mm) {
+                    const mx = parseFloat(mm[1]);
+                    const my = parseFloat(mm[2]);
+                    minX = Math.min(minX, mx);
+                    maxX = Math.max(maxX, mx + 330);
+                    minY = Math.min(minY, my);
+                    maxY = Math.max(maxY, my + 50);
+                }
+            }
+        } else if (modEl) {
+            const trM = modEl.getAttribute('transform') || '';
+            const mm = trM.match(/translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/);
+            if (mm) {
+                const mx = parseFloat(mm[1]);
+                const my = parseFloat(mm[2]);
+                minX = mx; maxX = mx + 330;
+                minY = my; maxY = my + 50;
+            }
+        }
+
+        if (!isFinite(minX) || !isFinite(maxX)) return;
+
+        const clusterW = Math.max(120, maxX - minX);
+        const clusterH = Math.max(80, maxY - minY);
+        const clusterCenterX = (minX + maxX) / 2;
+        const clusterCenterY = (minY + maxY) / 2;
+
+        let availW = rect.width;
+        let availH = rect.height;
+        let offsetLeft = 0;
+
+        if (isDesktop) {
+            if (typeof isDailyDrawerOpen !== 'undefined' && isDailyDrawerOpen) {
+                offsetLeft += 420;
+                availW -= 420;
+            }
+            if ((typeof isDrawerOpen !== 'undefined' && isDrawerOpen) || 
+                (typeof isPriorityDrawerOpen !== 'undefined' && isPriorityDrawerOpen) || 
+                (typeof isFilterDrawerOpen !== 'undefined' && isFilterDrawerOpen)) {
+                availW -= 420;
+            }
+            availW = Math.max(320, availW);
+        } else {
+            availH = Math.max(260, availH - 70);
+        }
+
+        const padX = isMobilePortrait ? 20 : 60;
+        const padY = isMobilePortrait ? 25 : 55;
+        const fitScaleX = (availW - padX * 2) / clusterW;
+        const fitScaleY = (availH - padY * 2) / clusterH;
+        let targetScale = Math.min(fitScaleX, fitScaleY);
+
+        if (isMobilePortrait) {
+            targetScale = Math.min(0.85, Math.max(0.48, targetScale));
+        } else {
+            targetScale = Math.min(1.0, Math.max(0.58, targetScale));
+        }
+
+        const targetTx = offsetLeft + (availW / 2) - (clusterCenterX * targetScale);
+        const targetTy = (availH / 2) - (clusterCenterY * targetScale);
+
+        window.animateCameraTo(targetTx, targetTy, targetScale, duration);
+    };
+
     window.recenterCanvas = function(customDuration = 480) {
         if(!svgElem || !canvasGroup) window.ensureDomReferences();
         if(!svgElem || !canvasGroup) return; 
@@ -3600,11 +3693,14 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         let targetTx, targetTy, targetScale;
 
         if (isAllCollapsed) {
-            // Forma original limpia y centrada exactamente en el Hub
             targetTx = offsetLeft + (availW / 2);
             targetTy = (availH / 2);
-            const fitScale = Math.min((availW - 60) / contentW, (availH - 60) / contentH);
-            targetScale = isSmallScreen ? Math.min(0.70, fitScale) : Math.min(0.85, Math.max(0.65, fitScale));
+            if (window.innerWidth < 768 && window.innerHeight > window.innerWidth) {
+                targetScale = 0.85;
+            } else {
+                const fitScale = Math.min((availW - 60) / contentW, (availH - 60) / contentH);
+                targetScale = isSmallScreen ? Math.min(0.70, fitScale) : Math.min(0.85, Math.max(0.65, fitScale));
+            }
         } else {
             // Previsualización panorámica con proyectos legibles en encuadre seguro
             const padX = isSmallScreen ? 20 : 60;
@@ -9335,8 +9431,22 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
           return ordered;
       }
 
-      const lNodes = arrangeFromCenterOutward(leftRaw);
-      const rNodes = arrangeFromCenterOutward(rightRaw);
+      const isMobilePortrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
+      let lNodes, rNodes;
+      if (isMobilePortrait) {
+          // Layout Bipolar Vertical: Polo Norte (Arriba) y Polo Sur (Abajo)
+          const topRaw = [], bottomRaw = [];
+          allNodes.forEach((n, idx) => {
+              if (idx % 2 === 0) topRaw.push(n);
+              else bottomRaw.push(n);
+          });
+          lNodes = topRaw;     // Polo Norte (Arriba del Hub)
+          rNodes = bottomRaw;  // Polo Sur (Abajo del Hub)
+      } else {
+          // Layout Panorámico Horizontal Desktop (Oeste y Este)
+          lNodes = arrangeFromCenterOutward(leftRaw);
+          rNodes = arrangeFromCenterOutward(rightRaw);
+      }
 
       // Helper para saber si un módulo está activo bajo el filtro actual
       const isModuleMatchedByFilter = (modId, n) => {
@@ -9570,7 +9680,175 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
               });
           });
       }
-      procSide(lNodes, true); procSide(rNodes, false);
+      function procBipolarPole(nodes, isTop) {
+          const mx = 0; // Centrado en X = 0 (ancho de tarjeta 330px -> de -165 a +165)
+          const px = 350; // Proyectos desplegados a la derecha
+          const mSlotH = 68; // Altura entre módulos colapsados
+          const pSlotH = 62; // Altura entre proyectos desplegados
+
+          let curY = isTop ? -120 : 120;
+
+          nodes.forEach((n, modIdx) => {
+              const pCount = (n.projects || []).length;
+              const modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+              const nItemId = String(modId).replace(/[^a-zA-Z0-9_-]/g, '');
+              const nItemColor = (n.item && n.item.color) ? n.item.color : '#0071e3';
+              const isCollapsed = isModuleCollapsed(modId, n);
+
+              const my = curY;
+              
+              if (!isCollapsed && pCount > 0) {
+                  const startProjY = my - ((pCount - 1) * pSlotH / 2);
+                  n.projects.forEach((p, idx) => {
+                      const cN = getProjectConsultants(p);
+                      const col = generateJointGradient(cN);
+                      const strictType = p._strictType || (n.type === 'direct-hub' ? 'direct-project' : 'project');
+                      p._modId = n.type === 'direct-hub' ? 'hub-direct' : (n.item ? n.item.id : 'mod');
+                      const py = startProjY + idx * pSlotH;
+                      p._renderData = { x: px, y: py, color: col, type: strictType, realId: p.id, parentModColor: nItemColor };
+                      if (p._isLinkedCopy && p._origProj && !p._origProj._renderData) {
+                          p._origProj._renderData = p._renderData;
+                      }
+                  });
+                  const span = Math.max(mSlotH, pCount * pSlotH + 24);
+                  if (isTop) curY -= span;
+                  else curY += span;
+              } else {
+                  (n.projects || []).forEach(p => { p._renderData = null; });
+                  if (isTop) curY -= mSlotH;
+                  else curY += mSlotH;
+              }
+
+              n._renderData = { x: mx, y: my, isLeft: false, isTop };
+              if (n.item) n.item._renderData = n._renderData;
+
+              const modMatches = isModuleMatchedByFilter(modId, n);
+              const lineOpacity = modMatches ? '1' : '0.12';
+
+              const pC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              pC.classList.add('mindmap-connector');
+
+              const coreStartX = 0;
+              const coreStartY = isTop ? -60 : 60;
+              const modEndX = -165;
+              const modEndY = my;
+
+              const dy = Math.abs(modEndY - coreStartY);
+              const cp1CoreX = -25;
+              const cp1CoreY = isTop ? coreStartY - Math.max(20, dy * 0.40) : coreStartY + Math.max(20, dy * 0.40);
+              const cp2CoreX = modEndX - 35;
+              const cp2CoreY = modEndY;
+
+              const newCorePathD = `M ${coreStartX} ${coreStartY} C ${cp1CoreX} ${cp1CoreY}, ${cp2CoreX} ${cp2CoreY}, ${modEndX} ${modEndY}`;
+              pC.setAttribute('d', newCorePathD);
+              pC.setAttribute('fill', 'none');
+
+              const coreGradId = `grad-c-${nItemId}`;
+              const cGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+              cGrad.setAttribute('id', coreGradId);
+              cGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              cGrad.setAttribute('x1', `${coreStartX}`);
+              cGrad.setAttribute('y1', `${coreStartY}`);
+              cGrad.setAttribute('x2', `${modEndX}`);
+              cGrad.setAttribute('y2', `${modEndY}`);
+
+              const cs1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+              cs1.setAttribute('offset', '0%');
+              cs1.setAttribute('stop-color', nItemColor);
+              cs1.setAttribute('stop-opacity', '0.38');
+              cGrad.appendChild(cs1);
+
+              const cs2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+              cs2.setAttribute('offset', '100%');
+              cs2.setAttribute('stop-color', nItemColor);
+              cs2.setAttribute('stop-opacity', '0.85');
+              cGrad.appendChild(cs2);
+
+              dynamicDefs.appendChild(cGrad);
+
+              pC.setAttribute('stroke', `url(#${coreGradId})`);
+              pC.setAttribute('stroke-width', '1.8');
+              pC.setAttribute('opacity', lineOpacity);
+              mapFrag.appendChild(pC);
+
+              if (!isCollapsed && pCount > 0) (n.projects || []).forEach((p, idx) => {
+                  if (!p._renderData) return;
+                  const pMatches = isDefaultState || isFiltered(p);
+                  const isSynergyMatch = !activeFilterConsultants.includes('ALL') && activeFilterConsultants.length >= 2 && activeFilterConsultants.every(c => getProjectConsultants(p).includes(c));
+                  const isModCorrMatch = isProjectModCorrelated(p);
+                  let isOver = false;
+                  if(p.deadline && !isCompletedStatus(p.status)) {
+                      const [dy, dm, dd] = p.deadline.split('-');
+                      if(new Date(dy, dm-1, dd) < new Date(new Date().setHours(0,0,0,0))) isOver = true;
+                  }
+
+                  const pP = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                  pP.classList.add('mindmap-connector');
+                  pP.setAttribute('pathLength', '1');
+                  pP.setAttribute('data-parent-mod', String(modId));
+                  pP.style.setProperty('--target-opacity', pMatches ? '1' : '0.12');
+                  const solidColor = (getProjectConsultants(p).length > 0 && consultants[getProjectConsultants(p)[0]]) ? consultants[getProjectConsultants(p)[0]].color : '#48484a';
+                  const endCol = isOver ? '#ee6018' : solidColor;
+
+                  const startX = mx + 165 + 11;
+                  const endX = p._renderData.x - 160;
+                  const dx = Math.abs(endX - startX);
+                  const cpDist = Math.max(30, Math.min(80, dx * 0.45));
+                  const cp1X = startX + cpDist;
+                  const cp2X = endX - cpDist;
+
+                  pP.setAttribute('d', `M ${startX} ${my} C ${cp1X} ${my}, ${cp2X} ${p._renderData.y}, ${endX} ${p._renderData.y}`);
+                  pP.setAttribute('fill', 'none');
+
+                  const pIdClean = String(p.id || Math.random().toString(36).slice(2, 7)).replace(/[^a-zA-Z0-9_-]/g, '');
+                  const pGradId = `grad-p-${nItemId}-${pIdClean}`;
+                  const pGrad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                  pGrad.setAttribute('id', pGradId);
+                  pGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                  pGrad.setAttribute('x1', `${startX}`);
+                  pGrad.setAttribute('y1', `${my}`);
+                  pGrad.setAttribute('x2', `${endX}`);
+                  pGrad.setAttribute('y2', `${p._renderData.y}`);
+
+                  const ps1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  ps1.setAttribute('offset', '0%');
+                  ps1.setAttribute('stop-color', nItemColor);
+                  ps1.setAttribute('stop-opacity', '0.50');
+                  pGrad.appendChild(ps1);
+
+                  const ps2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                  ps2.setAttribute('offset', '100%');
+                  ps2.setAttribute('stop-color', endCol);
+                  ps2.setAttribute('stop-opacity', '0.85');
+                  pGrad.appendChild(ps2);
+
+                  dynamicDefs.appendChild(pGrad);
+
+                  if (isSynergyMatch || isModCorrMatch) {
+                      pP.removeAttribute('pathLength');
+                      pP.classList.add('synergy-connector-line');
+                      pP.setAttribute('stroke', isSynergyMatch ? generateJointGradient(activeFilterConsultants) : `url(#${pGradId})`);
+                  } else {
+                      pP.setAttribute('stroke', `url(#${pGradId})`);
+                  }
+                  pP.setAttribute('stroke-width', '1.5');
+                  pP.setAttribute('opacity', pMatches ? '1' : '0.12');
+                  if (lastExpandedModuleId === modId && !isSynergyMatch && !isModCorrMatch) {
+                      pP.classList.add('connector-animate-in');
+                      pP.style.animationDelay = `${idx * 15}ms`;
+                  }
+                  mapFrag.appendChild(pP);
+              });
+          });
+      }
+
+      if (isMobilePortrait) {
+          procBipolarPole(lNodes, true);   // Polo Norte (Arriba)
+          procBipolarPole(rNodes, false);  // Polo Sur (Abajo)
+      } else {
+          procSide(lNodes, true);          // Oeste (Izquierda)
+          procSide(rNodes, false);         // Este (Derecha)
+      }
 
       // Mapa de nodos de módulo para resolución rápida de conectores secundarios
       const moduleNodeMap = new Map();
@@ -13122,6 +13400,13 @@ window.renderDailyTasks = function() {
             lastExpandedModuleId = modId;
             window.updateCollapseAllButtonState();
             window.renderMindMap();
+            setTimeout(() => {
+                try {
+                    if (typeof window.focusModuleProjects === 'function') {
+                        window.focusModuleProjects(modId, 480);
+                    }
+                } catch (e) { console.error('focusModuleProjects error:', e); }
+            }, 40);
         } else {
             const projs = canvasGroup.querySelectorAll('.mindmap-project-node[data-parent-mod="' + modId + '"]');
             const conns = canvasGroup.querySelectorAll('.mindmap-connector[data-parent-mod="' + modId + '"]');
@@ -13141,6 +13426,13 @@ window.renderDailyTasks = function() {
                     collapsedModules.add(modId);
                     window.updateCollapseAllButtonState();
                     window.renderMindMap();
+                    setTimeout(() => {
+                        try {
+                            if (typeof window.recenterCanvas === 'function') {
+                                window.recenterCanvas(420);
+                            }
+                        } catch (_) {}
+                    }, 30);
                 } catch (e) {
                     console.error('[SICOM] toggleModuleCollapse', e);
                     if (canvasGroup) canvasGroup.querySelectorAll('.proj-animate-out,.connector-animate-out')
