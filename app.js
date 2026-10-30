@@ -11729,67 +11729,15 @@ window.setDailyCockpitTab = function(tab) {
 
 window.setCockpitWorkFilter = function(filter) {
     currentCockpitWorkFilter = filter;
+    isCockpitProjectsOpen = false; // Al elegir un filtro de tareas, regresar a vista de tareas
     window.updateCockpitUI();
     window.renderDailyTasks();
 };
 
 window.toggleCockpitProjectsSection = function() {
     isCockpitProjectsOpen = !isCockpitProjectsOpen;
-    const box = document.getElementById('cockpitAssignedProjectsBox');
-    if (box) {
-        if (isCockpitProjectsOpen) {
-            box.classList.remove('hidden');
-            window.renderCockpitProjectsList();
-        } else {
-            box.classList.add('hidden');
-        }
-    }
-};
-
-window.renderCockpitProjectsList = function() {
-    const listCont = document.getElementById('cockpitProjectsList');
-    if (!listCont) return;
-
-    let myProjects = [];
-    const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
-
-    const scanProj = (p, pType) => {
-        const cList = getProjectConsultants(p);
-        if (cList.some(c => isSameUser(c, localAuthor))) {
-            myProjects.push({ ...p, pType });
-        }
-    };
-
-    (appData.directProjects || []).forEach(p => scanProj(p, 'direct-project'));
-    (appData.modules || []).forEach(m => (m.projects || []).forEach(p => scanProj(p, 'project')));
-
-    if (myProjects.length === 0) {
-        listCont.innerHTML = `<p class="p-3 text-center text-xs text-[#8a8380] font-mono">No tienes proyectos asignados actualmente.</p>`;
-        return;
-    }
-
-    listCont.innerHTML = myProjects.map(p => {
-        const tasks = p.tasks || [];
-        const pendingCount = tasks.filter(t => t.done === false).length;
-        const progress = p.progress || 0;
-        return `
-        <div onclick="window.navigateToProjectFromNotif('${p.pType}', '${p.id}')" class="p-2.5 rounded-[6px] bg-[#101010] border border-[#3d3a39] hover:border-[#ee6018] cursor-pointer transition flex items-center justify-between gap-2.5">
-            <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#30d158] shrink-0"></span>
-                    <h5 class="text-xs text-[#eeeeee] font-medium truncate">${escapeHtml(p.name)}</h5>
-                </div>
-                <div class="flex items-center gap-2 mt-1 font-mono text-[9px] text-[#8a8380]">
-                    <span>${p.parentName || 'Directo'}</span>
-                    <span>·</span>
-                    <span>${progress}% avance</span>
-                    <span>·</span>
-                    <span class="${pendingCount > 0 ? 'text-[#ee6018]' : 'text-[#a0ca92]'}">${pendingCount} pendientes</span>
-                </div>
-            </div>
-            <span class="font-mono text-[9px] text-[#8a8380] hover:text-[#eeeeee]">VER ↗</span>
-        </div>`;
-    }).join('');
+    window.updateCockpitUI();
+    window.renderDailyTasks();
 };
 
 window.updateCockpitUI = function() {
@@ -11816,19 +11764,37 @@ window.updateCockpitUI = function() {
 
     const subNav = document.getElementById('cockpitWorkSubNav');
     const quickBox = document.getElementById('cockpitQuickTaskBox');
-    const projBox = document.getElementById('cockpitAssignedProjectsBox');
 
     if (subNav) {
         if (!isInbox) subNav.classList.remove('hidden');
         else subNav.classList.add('hidden');
     }
     if (quickBox) {
-        if (!isInbox && currentUserRole !== 'Lector') quickBox.classList.remove('hidden');
+        // En Mi Trabajo ocultar captura rápida cuando se está explorando la lista de proyectos para dar 100% de espacio
+        if (!isInbox && !isCockpitProjectsOpen && currentUserRole !== 'Lector') quickBox.classList.remove('hidden');
         else quickBox.classList.add('hidden');
     }
-    if (projBox && isInbox) {
-        projBox.classList.add('hidden');
+    if (isInbox) {
         isCockpitProjectsOpen = false;
+    }
+
+    const chevron = document.getElementById('cockpitProjectsChevron');
+    const toggleText = document.getElementById('cockpitProjectsToggleText');
+    const btnProj = document.getElementById('btnToggleCockpitProjects');
+
+    if (chevron) {
+        if (isCockpitProjectsOpen) chevron.classList.add('rotate-180');
+        else chevron.classList.remove('rotate-180');
+    }
+    if (toggleText) {
+        toggleText.textContent = isCockpitProjectsOpen ? 'OCULTAR' : 'DESPLEGAR';
+    }
+    if (btnProj) {
+        if (isCockpitProjectsOpen) {
+            btnProj.className = 'w-full py-1.5 px-3 rounded-[5px] bg-[#1a1715] border border-[#30d158]/50 flex items-center justify-between transition cursor-pointer select-none group shadow-sm';
+        } else {
+            btnProj.className = 'w-full py-1.5 px-3 rounded-[5px] bg-[#171514] hover:bg-[#1d1a18] border border-[#2d2a28] hover:border-[#3d3a39] flex items-center justify-between transition cursor-pointer select-none group';
+        }
     }
 
     const chips = ['pending', 'validation', 'completed', 'all'];
@@ -12035,7 +12001,9 @@ window.renderDailyTasks = function() {
     if (chipAll) chipAll.textContent = workAllCount;
 
     const projBadgeEl = document.getElementById('cockpitProjectsCount');
-    if (projBadgeEl) projBadgeEl.textContent = myProjectsCount;
+    const projBadgeBadgeEl = document.getElementById('cockpitProjectsCountBadge');
+    if (projBadgeEl) projBadgeEl.textContent = `${myProjectsCount} PROYECTOS`;
+    if (projBadgeBadgeEl) projBadgeBadgeEl.textContent = `${myProjectsCount} ACTIVO${myProjectsCount === 1 ? '' : 'S'}`;
 
     // Globo general flotante y en barra móvil
     const globalAttentionTotal = inboxCount + workPendingCount;
@@ -12199,6 +12167,69 @@ window.renderDailyTasks = function() {
     // ==========================================
     // PILAR 2: ⚡ MI TRABAJO
     // ==========================================
+    // Si la pestañita de proyectos asignados está desplegada, mostrar la lista completa a pantalla completa sin cortes
+    if (isCockpitProjectsOpen) {
+        let myProjects = [];
+        const isSameUser = (a, b) => (typeof window.isSameUserOrAlias === 'function' ? window.isSameUserOrAlias(a, b) : a === b);
+
+        const scanProj = (p, pType) => {
+            const cList = getProjectConsultants(p);
+            if (cList.some(c => isSameUser(c, localAuthor))) {
+                myProjects.push({ ...p, pType });
+            }
+        };
+
+        (appData.directProjects || []).forEach(p => scanProj(p, 'direct-project'));
+        (appData.modules || []).forEach(m => (m.projects || []).forEach(p => scanProj(p, 'project')));
+
+        if (myProjects.length === 0) {
+            container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center bg-[#141211] border border-[#2d2a28] rounded-[10px] space-y-2">
+                <div class="w-9 h-9 rounded-full bg-[#101010] border border-[#3d3a39] flex items-center justify-center text-xs text-[#8a8380]">📁</div>
+                <h4 class="font-mono text-xs uppercase text-[#eeeeee] font-medium">Sin proyectos asignados</h4>
+                <p class="font-mono text-[10px] text-[#8a8380] max-w-[220px]">Actualmente no tienes proyectos donde figures como consultor titular.</p>
+                <button type="button" onclick="toggleCockpitProjectsSection()" class="mt-2 px-3 py-1 bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#eeeeee] font-mono text-[9.5px] uppercase rounded-[3px] transition cursor-pointer">← Volver a Mis Tareas</button>
+            </div>`;
+            return;
+        }
+
+        let projHtml = `
+        <div class="space-y-2 pb-6">
+            <div class="flex items-center justify-between px-1 mb-1 font-mono text-[9.5px] text-[#8a8380]">
+                <span>Tus proyectos (${myProjects.length}) · Toca para abrir en el mapa</span>
+                <button type="button" onclick="toggleCockpitProjectsSection()" class="text-[#ee6018] hover:underline font-bold cursor-pointer">← Volver a Tareas</button>
+            </div>`;
+
+        projHtml += myProjects.map(p => {
+            const tasks = p.tasks || [];
+            const pendingCount = tasks.filter(t => t.done === false).length;
+            const progress = p.progress || 0;
+            const pMod = p.parentName || 'Directo';
+
+            return `
+            <div onclick="window.navigateToProjectFromNotif('${p.pType}', '${p.id}')" class="h-[76px] p-2.5 rounded-[6px] bg-[#141211] border border-[#2d2a28] hover:border-[#3d3a39] cursor-pointer transition flex flex-col justify-between shadow-sm select-none group">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
+                        <h5 class="text-xs text-[#fafafa] font-medium truncate group-hover:text-[#ffffff] leading-tight">${escapeHtml(p.name)}</h5>
+                    </div>
+                    <span class="font-mono text-[9px] text-[#8a8380] group-hover:text-[#eeeeee] shrink-0">VER MAPA ↗</span>
+                </div>
+                <div class="flex items-center justify-between gap-2 pt-1 border-t border-[#1d1a18] font-mono text-[9px] text-[#8a8380]">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="px-1.5 py-0.2 rounded-[2px] bg-[#101010] border border-[#2d2a28] text-[#8a8380] uppercase truncate max-w-[130px] sm:max-w-[170px]">${escapeHtml(pMod)}</span>
+                        <span>${progress}% avance</span>
+                    </div>
+                    <span class="${pendingCount > 0 ? 'text-[#ee6018] font-semibold' : 'text-[#a0ca92]'}">${pendingCount} pendiente${pendingCount === 1 ? '' : 's'}</span>
+                </div>
+            </div>`;
+        }).join('');
+
+        projHtml += '</div>';
+        container.innerHTML = projHtml;
+        return;
+    }
+
     let tasksToDisplay = [];
     if (currentCockpitWorkFilter === 'pending') {
         tasksToDisplay = isSuper ? pendingTasks : myOwnPending;

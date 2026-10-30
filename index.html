@@ -1856,13 +1856,17 @@
         </button>
       </div>
 
-      <!-- BOTÓN PROYECTOS ACTIVOS DE ANCHO COMPLETO Y ALTURA CALIBRADA -->
-      <button type="button" onclick="toggleCockpitProjectsSection()" id="btnToggleCockpitProjects" class="w-full h-6 px-2.5 rounded-[4px] font-mono text-[9.5px] uppercase text-[#8a8380] hover:text-[#eeeeee] bg-[#161413] hover:bg-[#1d1a18] border border-[#2d2a28] flex items-center justify-between transition cursor-pointer" title="Ver proyectos asignados">
-        <span class="flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#30d158]"></span>
-          <span>Proyectos Asignados</span>
-        </span>
-        <span id="cockpitProjectsCount" class="text-[9px] font-mono text-[#30d158] font-bold">0 PROYECTOS</span>
+      <!-- PESTAÑITA DESPLEGABLE HACIA ABAJO PARA PROYECTOS ASIGNADOS -->
+      <button type="button" onclick="toggleCockpitProjectsSection()" id="btnToggleCockpitProjects" class="w-full py-1.5 px-3 rounded-[5px] bg-[#171514] hover:bg-[#1d1a18] border border-[#2d2a28] hover:border-[#3d3a39] flex items-center justify-between transition cursor-pointer select-none group" title="Ver proyectos donde colaboras">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-[#30d158] shrink-0"></span>
+          <span class="font-mono text-[10px] uppercase font-bold text-[#fafafa] truncate">Mis Proyectos Asignados</span>
+          <span id="cockpitProjectsCountBadge" class="font-mono text-[8.5px] px-1.5 py-0.2 rounded-[2px] bg-[#30d158]/15 text-[#30d158] border border-[#30d158]/30 shrink-0 font-bold">0 ACTIVOS</span>
+        </div>
+        <div class="flex items-center gap-1.5 font-mono text-[9px] text-[#8a8380] group-hover:text-[#eeeeee] shrink-0">
+          <span id="cockpitProjectsToggleText">DESPLEGAR</span>
+          <svg id="cockpitProjectsChevron" class="w-3.5 h-3.5 transition-transform duration-200 text-[#8a8380] group-hover:text-[#eeeeee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
       </button>
     </div>
 
@@ -1884,18 +1888,6 @@
           </span>
           <span class="text-[9px] text-[#6d6865] hidden sm:inline">Enter para guardar</span>
         </div>
-      </div>
-
-      <!-- SECCIÓN COLAPSABLE DE PROYECTOS ASIGNADOS (DENTRO DE "MI TRABAJO") -->
-      <div id="cockpitAssignedProjectsBox" class="hidden shrink-0 bg-[#141211] border border-[#3d3a39] rounded-[8px] overflow-hidden">
-        <div class="p-2.5 bg-[#1d1a18] border-b border-[#3d3a39] flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#30d158]"></span>
-            <span class="font-mono text-[10.5px] uppercase font-bold text-[#fafafa]">Proyectos Donde Colaboras</span>
-          </div>
-          <button type="button" onclick="toggleCockpitProjectsSection()" class="text-[#8a8380] hover:text-[#fafafa] text-xs font-mono cursor-pointer">✕ Ocultar</button>
-        </div>
-        <div id="cockpitProjectsList" class="p-2 space-y-2 max-h-56 overflow-y-auto"></div>
       </div>
 
       <!-- LISTA DINÁMICA DE ITEMS (INBOX o MI TRABAJO) -->
