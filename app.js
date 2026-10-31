@@ -797,6 +797,7 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         }
 
         if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
         if (!appData.attendance["2026-10-Q1"]) {
             appData.attendance["2026-10-Q1"] = {
                 "Manuel Gutierrez": {
@@ -1768,11 +1769,13 @@ const escapeHtml = (u) => { if (!u) return ''; return u.toString().replace(/&/g,
         document.addEventListener('DOMContentLoaded', () => { 
             if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
             if (typeof window.initInfoCardSwipeDown === 'function') window.initInfoCardSwipeDown();
+            if (typeof window.updateVacationPendingBadge === 'function') window.updateVacationPendingBadge();
         });
     } else {
         setTimeout(() => { 
             if (typeof window.syncSessionTimeoutUI === 'function') window.syncSessionTimeoutUI(); 
             if (typeof window.initInfoCardSwipeDown === 'function') window.initInfoCardSwipeDown();
+            if (typeof window.updateVacationPendingBadge === 'function') window.updateVacationPendingBadge();
         }, 150);
     }
 
@@ -13931,6 +13934,7 @@ window.renderDailyTasks = function() {
     };
 
     window.openAttendanceModal = function() {
+        if (typeof window.updateVacationPendingBadge === 'function') window.updateVacationPendingBadge();
         const m = document.getElementById('attendanceModal');
         if (!m) return;
         
@@ -14124,6 +14128,7 @@ window.renderDailyTasks = function() {
         // 1. Si selecciona Home Office (A distancia)
         if (st.includes('home') || st.includes('distancia') || st.includes('remoto')) {
             if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
             if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
             if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
 
@@ -14143,6 +14148,7 @@ window.renderDailyTasks = function() {
         // 2. Si selecciona Asiste a oficina STGT
         if (st.includes('stgt') || st.includes('oficina stgt') || st === 'oficina') {
             if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
             if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
             if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
 
@@ -14179,6 +14185,7 @@ window.renderDailyTasks = function() {
         }
 
         if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
         if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
         if (!appData.attendance[periodKey][currentCellConsultant]) appData.attendance[periodKey][currentCellConsultant] = {};
 
@@ -14219,6 +14226,7 @@ window.renderDailyTasks = function() {
         const endDay = q === 'Q1' ? 15 : new Date(y, m, 0).getDate();
 
         if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
         if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
 
         // Si es Osvaldo o Jefatura llena a todos; si es consultor regular solo llena su propia fila
@@ -14255,7 +14263,7 @@ window.renderDailyTasks = function() {
 
     window.setAttendanceViewTab = function(tab) {
         activeAttendanceTab = tab;
-        ['matrix', 'consultant', 'daily'].forEach(t => {
+        ['matrix', 'consultant', 'daily', 'vacations'].forEach(t => {
             const btn = document.getElementById(`attTabBtn-${t}`);
             if (btn) {
                 if (t === tab) {
@@ -14801,6 +14809,8 @@ window.renderDailyTasks = function() {
             renderAttendanceConsultantView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead);
         } else if (activeAttendanceTab === 'daily') {
             renderAttendanceDailyView(container, workDays, list, periodData, periodKey, monthName, isLocked, isPast, isMaster, isLead);
+        } else if (activeAttendanceTab === 'vacations') {
+            window.renderVacationRequestsTab(container, isMaster, isLead);
         }
     };
 
@@ -15008,6 +15018,7 @@ window.renderDailyTasks = function() {
                 const dateStr = formatLocalDate(cur);
 
                 if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
                 if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
                 if (!appData.attendance[periodKey][consultant]) appData.attendance[periodKey][consultant] = {};
 
@@ -15060,6 +15071,306 @@ window.renderDailyTasks = function() {
         window.showToast(`🚗 Comisión a "${client}" registrada (${count} día${count > 1 ? 's' : ''}). Notificado a ${lead}.`, false);
     };
 
+    // --- MÓDULO INTEGRAL DE VACACIONES (FOPR-RHU-02-03 VER. 4): CIRCUITO AUTOMATIZADO DE FIRMA DIGITAL ---
+    // SEGURIDAD & RBAC: Exclusividad estricta de firma (Nadie puede firmar en nombre de otro)
+    // LFT: Art. 76, 78 & 81 (Regla de 18 meses, cálculo FIFO por aniversario)
+
+    window.getOfficialFullName = function(shortName) {
+        const map = {
+            'Manuel Gutierrez': 'Jose Manuel Gutierrez López',
+            'Carlos Islas': 'Carlos Islas Gutierrez',
+            'Rafael Romero': 'Rafael Romero Romero',
+            'Miguel Muñoz': 'Miguel Ángel Muñoz Solis',
+            'Óscar González': 'Oscar Hugo González Rubio',
+            'Ricardo Lira': 'Ricardo Lira Martínez',
+            'Emmanuel Sánchez': 'Emmanuel Luis Sánchez',
+            'Osvaldo Avilés': 'Emmanuel Osvaldo Sánchez Avilés',
+            'Diego Cristobal': 'Diego Cristobal Reyes',
+            'Sue Oyuqui': 'Sue Karol Oyuqui García',
+            'Miguel Barbosa': 'Miguel Ángel Barbosa López'
+        };
+        return map[shortName] || shortName;
+    };
+
+    window.getOfficialJobTitle = function(name) {
+        const meta = (consultants && consultants[name]) || (typeof defaultConsultantMetadata !== 'undefined' && defaultConsultantMetadata[name]) || {};
+        if (meta.jobTitle && meta.jobTitle !== 'Consultor') return meta.jobTitle;
+        if (name.includes('Barbosa')) return 'Gerente de Aplicaciones';
+        if (name.includes('Romero') || name.includes('Islas') || name.includes('Gutierrez')) return 'Coordinador';
+        return 'Consultor de aplicaciones';
+    };
+
+    window.calculateVacationPeriods = function(hireDateStr, currentBalance, requestedCount = 0) {
+        const now = new Date();
+        let hire = hireDateStr ? new Date(hireDateStr) : new Date(now.getFullYear() - 3, now.getMonth(), now.getDate());
+        if (isNaN(hire.getTime())) hire = new Date(now.getFullYear() - 3, 0, 1);
+        
+        const hireMonth = hire.getMonth();
+        const hireDay = hire.getDate();
+        const curYear = now.getFullYear();
+        
+        let lastAnniversary = new Date(curYear, hireMonth, hireDay);
+        if (lastAnniversary > now) {
+            lastAnniversary = new Date(curYear - 1, hireMonth, hireDay);
+        }
+        const prevAnniversary = new Date(lastAnniversary.getFullYear() - 1, hireMonth, hireDay);
+        const nextAnniversary = new Date(lastAnniversary.getFullYear() + 1, hireMonth, hireDay);
+
+        const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        
+        const p1Start = `${monthNames[prevAnniversary.getMonth()]}-${prevAnniversary.getFullYear()}`;
+        const p1End = `${monthNames[lastAnniversary.getMonth()]}-${lastAnniversary.getFullYear()}`;
+        
+        const p2Start = `${monthNames[lastAnniversary.getMonth()]}-${lastAnniversary.getFullYear()}`;
+        const p2End = `${monthNames[nextAnniversary.getMonth()]}-${nextAnniversary.getFullYear()}`;
+
+        const seniorityYears = Math.max(1, Math.floor((now - hire) / (365.25 * 24 * 3600 * 1000)));
+        let lftDays = 12;
+        if (seniorityYears >= 6) lftDays = 22;
+        else if (seniorityYears >= 5) lftDays = 20;
+        else if (seniorityYears >= 4) lftDays = 18;
+        else if (seniorityYears >= 3) lftDays = 16;
+        else if (seniorityYears >= 2) lftDays = 14;
+
+        let p1Days = 0;
+        let p2Days = 0;
+        if (currentBalance > lftDays) {
+            p1Days = currentBalance - lftDays;
+            p2Days = lftDays;
+        } else {
+            p1Days = 0;
+            p2Days = currentBalance;
+        }
+
+        let p1Deduct = Math.min(p1Days, requestedCount);
+        let remRequested = requestedCount - p1Deduct;
+        let p2Deduct = Math.min(p2Days, remRequested);
+
+        let p1After = p1Days - p1Deduct;
+        let p2After = p2Days - p2Deduct;
+        let totalAfter = p1After + p2After;
+
+        return {
+            p1: { labelStart: p1Start, labelEnd: p1End, previousDays: p1Days, deducted: p1Deduct, remainingDays: p1After },
+            p2: { labelStart: p2Start, labelEnd: p2End, previousDays: p2Days, deducted: p2Deduct, remainingDays: p2After },
+            totalPendingBefore: p1Days + p2Days,
+            requestedDays: requestedCount,
+            totalBalanceAfter: totalAfter
+        };
+    };
+
+    window._cachedVacationTemplateBytes = null;
+    window.getVacationPdfTemplateBytes = async function() {
+        if (window._cachedVacationTemplateBytes) return window._cachedVacationTemplateBytes;
+        try {
+            const resp = await fetch('./fopr_rhu_02_03_vacaciones_template.pdf');
+            if (!resp.ok) throw new Error(`HTTP ${resp.status} al descargar plantilla de vacaciones`);
+            const buf = await resp.arrayBuffer();
+            window._cachedVacationTemplateBytes = new Uint8Array(buf);
+            return window._cachedVacationTemplateBytes;
+        } catch (e) {
+            console.error("Error al obtener plantilla PDF de vacaciones:", e);
+            return null;
+        }
+    };
+
+    window.generateVacationPdf = async function(req) {
+        await window.ensurePdfLibReady();
+        if (typeof PDFLib === 'undefined' || !PDFLib.PDFDocument) {
+            throw new Error("PDFLib no está disponible");
+        }
+
+        let templateBytes = await window.getVacationPdfTemplateBytes();
+        if (!templateBytes) {
+            throw new Error("No se pudo cargar la plantilla base FOPR-RHU-02-03");
+        }
+
+        const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+        const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+        const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+        const page = pdfDoc.getPages()[0];
+
+        const dark = PDFLib.rgb(0.12, 0.12, 0.12);
+        const white = PDFLib.rgb(1, 1, 1);
+        const greyBox = PDFLib.rgb(0.94, 0.94, 0.94);
+
+        const blank = (x, y, w, h, col = white) => {
+            page.drawRectangle({ x, y, width: w, height: h, color: col });
+        };
+
+        // Limpiar placeholders del machote
+        blank(445, 245, 50, 14, greyBox);
+        blank(445, 220, 50, 14, greyBox);
+        blank(445, 195, 50, 14, PDFLib.rgb(0.24, 0.38, 0.65));
+
+        blank(50, 39, 130, 12, white);
+        blank(50, 27, 130, 11, white);
+        blank(185, 39, 130, 12, white);
+        blank(185, 27, 130, 11, white);
+        blank(410, 39, 130, 12, white);
+        blank(410, 27, 130, 11, white);
+
+        const fontSize = 8.5;
+
+        // Encabezado y Datos Generales
+        page.drawText(req.requestDate || new Date().toLocaleDateString('es-MX'), { x: 466, y: 697, size: fontSize, font: helvetica, color: dark });
+        page.drawText(String(req.employeeNo || '25053773'), { x: 148, y: 664, size: fontSize, font: helvetica, color: dark });
+        page.drawText(window.getOfficialFullName(req.consultant || ''), { x: 363, y: 664, size: fontSize, font: helvetica, color: dark });
+        page.drawText(req.department || 'Gerencia de Aplicaciones', { x: 149, y: 640, size: fontSize, font: helvetica, color: dark });
+        page.drawText(req.jobTitle || 'Consultor de aplicaciones', { x: 385, y: 640, size: fontSize, font: helvetica, color: dark });
+        page.drawText(req.hireDate || '02/07/2018', { x: 145, y: 616, size: fontSize, font: helvetica, color: dark });
+
+        // Bloque Vacaciones: Días pendientes totales
+        page.drawText(String(req.totalPendingBefore || 0), { x: 456, y: 256, size: fontSize, font: helvetica, color: dark });
+
+        // Periodo 1 (Por vencer en 18 meses)
+        if (req.period1) {
+            page.drawText(req.period1.labelStart || '', { x: 98, y: 231, size: fontSize, font: helvetica, color: dark });
+            page.drawText(req.period1.labelEnd || '', { x: 167, y: 231, size: fontSize, font: helvetica, color: dark });
+            page.drawText(String(req.period1.previousDays || 0), { x: 246, y: 231, size: fontSize, font: helvetica, color: dark });
+        }
+        page.drawText(String(req.requestedDays || 0), { x: 458, y: 231, size: fontSize, font: helvetica, color: dark });
+
+        // Periodo 2 (Nuevo ciclo anual)
+        if (req.period2) {
+            page.drawText(req.period2.labelStart || '', { x: 100, y: 207, size: fontSize, font: helvetica, color: dark });
+            page.drawText(req.period2.labelEnd || '', { x: 167, y: 207, size: fontSize, font: helvetica, color: dark });
+            page.drawText(String(req.period2.previousDays || 0), { x: 244, y: 207, size: fontSize, font: helvetica, color: dark });
+        }
+        // Saldo final en blanco sobre caja azul institucional
+        page.drawText(String(req.totalBalanceAfter !== undefined ? req.totalBalanceAfter : 0), { x: 456, y: 207, size: fontSize, font: helveticaBold, color: white });
+
+        // Días de disfrute
+        page.drawText(req.startDateFormatted || req.startDate || '', { x: 195, y: 176, size: fontSize, font: helvetica, color: dark });
+        page.drawText(req.endDateFormatted || req.endDate || '', { x: 263, y: 176, size: fontSize, font: helvetica, color: dark });
+        page.drawText(req.returnDateFormatted || req.returnDate || '', { x: 449, y: 176, size: fontSize, font: helvetica, color: dark });
+
+        // Nombres y Puestos en Firmas de conformidad
+        page.drawText(window.getOfficialFullName(req.consultant || ''), { x: 65, y: 41, size: 8, font: helvetica, color: dark });
+        page.drawText(req.jobTitle || 'Consultor de Aplicaciones', { x: 60, y: 29, size: 7.5, font: helvetica, color: dark });
+
+        page.drawText(window.getOfficialFullName(req.leadName || 'Miguel Barbosa'), { x: 201, y: 41, size: 8, font: helvetica, color: dark });
+        page.drawText(req.leadJobTitle || window.getOfficialJobTitle(req.leadName || 'Miguel Barbosa'), { x: 199, y: 29, size: 7.5, font: helvetica, color: dark });
+
+        page.drawText(req.rhName || 'José Luis Bautista Cuchillo', { x: 419, y: 41, size: 8, font: helvetica, color: dark });
+        page.drawText(req.rhTitle || 'Recursos Humanos', { x: 429, y: 29, size: 7.5, font: helvetica, color: dark });
+
+        // Estampado de Firma Colaborador (Columna 1)
+        if (req.colaboradorSignature && req.colaboradorSignature.dataUrl) {
+            try {
+                const b64 = req.colaboradorSignature.dataUrl.includes(',') ? req.colaboradorSignature.dataUrl.split(',')[1] : req.colaboradorSignature.dataUrl;
+                const rawBin = base64ToUint8(b64);
+                const img = await pdfDoc.embedPng(rawBin);
+                page.drawImage(img, { x: 65, y: 52, width: 80, height: 35 });
+            } catch (errSig) {
+                console.warn("No se pudo estampar firma del colaborador:", errSig);
+            }
+        }
+
+        // Estampado de Firma Jefe Inmediato (Columna 2)
+        if (req.jefeSignature && req.jefeSignature.dataUrl) {
+            try {
+                const b64 = req.jefeSignature.dataUrl.includes(',') ? req.jefeSignature.dataUrl.split(',')[1] : req.jefeSignature.dataUrl;
+                const rawBin = base64ToUint8(b64);
+                const img = await pdfDoc.embedPng(rawBin);
+                page.drawImage(img, { x: 201, y: 52, width: 80, height: 35 });
+            } catch (errSigLead) {
+                console.warn("No se pudo estampar firma del jefe:", errSigLead);
+            }
+        }
+
+        const outBytes = await pdfDoc.save({ useObjectStreams: false });
+        return new Uint8Array(outBytes);
+    };
+
+    // --- PAD DE FIRMA DIGITAL DEL COLABORADOR SOLICITANTE ---
+    let collabSigCanvas = null;
+    let collabSigCtx = null;
+    let hasCollabSignature = false;
+
+    window.initVacationCollabSignaturePad = function() {
+        collabSigCanvas = document.getElementById('vacationCollabSignCanvas');
+        if (!collabSigCanvas) return;
+        collabSigCtx = collabSigCanvas.getContext('2d');
+        collabSigCtx.strokeStyle = '#0055cc'; // Azul oficial de firma STGT
+        collabSigCtx.lineWidth = 2.2;
+        collabSigCtx.lineCap = 'round';
+        collabSigCtx.lineJoin = 'round';
+        window.clearVacationCollabSignaturePad();
+
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+
+        const getPos = (e) => {
+            const r = collabSigCanvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: (e.touches[0].clientX - r.left) * (collabSigCanvas.width / r.width),
+                    y: (e.touches[0].clientY - r.top) * (collabSigCanvas.height / r.height)
+                };
+            }
+            return {
+                x: (e.clientX - r.left) * (collabSigCanvas.width / r.width),
+                y: (e.clientY - r.top) * (collabSigCanvas.height / r.height)
+            };
+        };
+
+        const startDraw = (e) => {
+            if (collabSigCanvas.dataset.locked === 'true') return;
+            isDrawing = true;
+            const p = getPos(e);
+            lastX = p.x;
+            lastY = p.y;
+            e.preventDefault();
+        };
+
+        const drawMove = (e) => {
+            if (!isDrawing) return;
+            const p = getPos(e);
+            collabSigCtx.beginPath();
+            collabSigCtx.moveTo(lastX, lastY);
+            collabSigCtx.lineTo(p.x, p.y);
+            collabSigCtx.stroke();
+            lastX = p.x;
+            lastY = p.y;
+            hasCollabSignature = true;
+            e.preventDefault();
+        };
+
+        const stopDraw = () => { isDrawing = false; };
+
+        collabSigCanvas.onmousedown = startDraw;
+        collabSigCanvas.onmousemove = drawMove;
+        window.addEventListener('mouseup', stopDraw);
+
+        collabSigCanvas.ontouchstart = startDraw;
+        collabSigCanvas.ontouchmove = drawMove;
+        window.addEventListener('touchend', stopDraw);
+    };
+
+    window.clearVacationCollabSignaturePad = function() {
+        if (!collabSigCanvas || !collabSigCtx) return;
+        collabSigCtx.clearRect(0, 0, collabSigCanvas.width, collabSigCanvas.height);
+        hasCollabSignature = false;
+    };
+
+    window.useProfileSignatureForCollabVacation = function() {
+        const cName = document.getElementById('vacConsultant')?.value || localAuthor;
+        const saved = localStorage.getItem('sicom_user_sig_' + encodeURIComponent(cName)) || localStorage.getItem('sicom_user_sig_' + encodeURIComponent(localAuthor));
+        if (!saved) {
+            window.showToast("⚠️ No tienes una firma guardada en tu perfil. Traza tu firma en el recuadro blanco.", true);
+            return;
+        }
+        const img = new Image();
+        img.onload = () => {
+            window.clearVacationCollabSignaturePad();
+            collabSigCtx.drawImage(img, 10, 10, collabSigCanvas.width - 20, collabSigCanvas.height - 20);
+            hasCollabSignature = true;
+            window.showToast("✍️ Firma de perfil cargada en el recuadro.", false);
+        };
+        img.src = saved;
+    };
+
     // --- MODAL DE VACACIONES (FOPR-RHU-02-03) ---
     window.openVacationModal = function(defaultConsultant, defaultDate) {
         const m = document.getElementById('vacationModal');
@@ -15090,6 +15401,7 @@ window.renderDailyTasks = function() {
 
         window.updateVacationConsultantInfo();
         window.calculateVacationDays();
+        window.initVacationCollabSignaturePad();
 
         m.classList.remove('hidden');
         if (typeof window.pushNavigationState === 'function') window.pushNavigationState('vacationModal');
@@ -15107,14 +15419,30 @@ window.renderDailyTasks = function() {
         const cName = document.getElementById('vacConsultant')?.value || localAuthor || '';
         const meta = consultants[cName] || defaultConsultantMetadata[cName] || {};
         
-        document.getElementById('vacEmployeeNo').value = meta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25950064';
-        document.getElementById('vacJobTitle').value = meta.jobTitle || defaultConsultantMetadata[cName]?.jobTitle || meta.title || 'Consultor';
-        document.getElementById('vacLeadName').value = meta.lead || defaultConsultantMetadata[cName]?.lead || 'Manuel Gutiérrez';
-        
-        const pending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[cName]?.pendingVacations || 4);
-        document.getElementById('vacPendingDaysBadge').textContent = pending;
+        const empNoInp = document.getElementById('vacEmployeeNo');
+        if (empNoInp) empNoInp.value = meta.employeeNo || defaultConsultantMetadata[cName]?.employeeNo || '25053773';
 
-        const hireDate = meta.hireDate || defaultConsultantMetadata[cName]?.hireDate;
+        const deptInp = document.getElementById('vacDepartment');
+        if (deptInp) deptInp.value = meta.department || 'Gerencia de Aplicaciones';
+
+        const jobInp = document.getElementById('vacJobTitle');
+        if (jobInp) jobInp.value = window.getOfficialJobTitle(cName);
+
+        const leadInp = document.getElementById('vacLeadName');
+        if (leadInp) leadInp.value = meta.lead || defaultConsultantMetadata[cName]?.lead || 'Miguel Barbosa';
+        
+        let hireDate = meta.hireDate || defaultConsultantMetadata[cName]?.hireDate || '2018-07-02';
+        if (hireDate.includes('/')) {
+            const p = hireDate.split('/');
+            if (p.length === 3) hireDate = `${p[2]}-${String(p[1]).padStart(2, '0')}-${String(p[0]).padStart(2, '0')}`;
+        }
+        const hireInp = document.getElementById('vacHireDate');
+        if (hireInp) hireInp.value = hireDate;
+
+        const pending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[cName]?.pendingVacations || 4);
+        const pBadge = document.getElementById('vacPendingDaysBadge');
+        if (pBadge) pBadge.textContent = pending;
+
         const lftBadge = document.getElementById('vacLftBadge');
         if (lftBadge) {
             if (hireDate && typeof window.calculateLftVacationDays === 'function') {
@@ -15123,6 +15451,30 @@ window.renderDailyTasks = function() {
                 lftBadge.classList.remove('hidden');
             } else {
                 lftBadge.classList.add('hidden');
+            }
+        }
+
+        // CANDADO DE SEGURIDAD ESTRICTO (RBAC):
+        // Nadie puede firmar en nombre de otro. Solo el titular puede firmar su solicitud.
+        const isMaster = window.isAttendanceMasterAdmin();
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const isSelf = norm(localAuthor) === norm(cName);
+        const lockNotice = document.getElementById('vacCollabLockNotice');
+        const padCanvas = document.getElementById('vacationCollabSignCanvas');
+        if (padCanvas) {
+            if (!isSelf && !isMaster) {
+                padCanvas.dataset.locked = 'true';
+                padCanvas.style.opacity = '0.35';
+                padCanvas.style.pointerEvents = 'none';
+                if (lockNotice) {
+                    lockNotice.textContent = `🔒 Candado de Seguridad: Solo ${cName} puede estampar su firma digital de solicitud. Nadie puede firmar en nombre de otro.`;
+                    lockNotice.classList.remove('hidden');
+                }
+            } else {
+                padCanvas.dataset.locked = 'false';
+                padCanvas.style.opacity = '1';
+                padCanvas.style.pointerEvents = 'auto';
+                if (lockNotice) lockNotice.classList.add('hidden');
             }
         }
 
@@ -15159,7 +15511,9 @@ window.renderDailyTasks = function() {
         const pending = parseInt(document.getElementById('vacPendingDaysBadge')?.textContent || '4', 10);
         const balance = pending - requested;
 
-        document.getElementById('vacRequestedDaysBadge').textContent = requested;
+        const reqBadge = document.getElementById('vacRequestedDaysBadge');
+        if (reqBadge) reqBadge.textContent = requested;
+
         const bBadge = document.getElementById('vacBalanceBadge');
         if (bBadge) {
             bBadge.textContent = balance;
@@ -15169,17 +15523,46 @@ window.renderDailyTasks = function() {
                 bBadge.className = 'text-sm font-normal text-[#a0ca92]';
             }
         }
+
+        // Desglose de periodos 18 meses (Art. 76 & 81 LFT)
+        const hireStr = document.getElementById('vacHireDate')?.value || '2018-07-02';
+        const periods = window.calculateVacationPeriods(hireStr, pending, requested);
+        const p1El = document.getElementById('vacPeriod1Badge');
+        if (p1El) {
+            p1El.textContent = `${periods.p1.labelStart} al ${periods.p1.labelEnd} (${periods.p1.previousDays}d disp. - ${periods.p1.deducted}d desc. = ${periods.p1.remainingDays}d)`;
+        }
+        const p2El = document.getElementById('vacPeriod2Badge');
+        if (p2El) {
+            p2El.textContent = `${periods.p2.labelStart} al ${periods.p2.labelEnd} (${periods.p2.previousDays}d disp. - ${periods.p2.deducted}d desc. = ${periods.p2.remainingDays}d)`;
+        }
     };
 
-    window.saveVacation = function() {
+    window.saveVacation = async function() {
         let consultant = document.getElementById('vacConsultant')?.value;
         if (!consultant && localAuthor) consultant = localAuthor;
         const startDate = document.getElementById('vacStartDate')?.value;
         const endDate = document.getElementById('vacEndDate')?.value;
         const returnDate = document.getElementById('vacReturnDate')?.value;
+        const department = document.getElementById('vacDepartment')?.value || 'Gerencia de Aplicaciones';
+        const jobTitle = document.getElementById('vacJobTitle')?.value || window.getOfficialJobTitle(consultant);
+        const employeeNo = document.getElementById('vacEmployeeNo')?.value || '25053773';
+        const lead = document.getElementById('vacLeadName')?.value || 'Miguel Barbosa';
+        const hireDate = document.getElementById('vacHireDate')?.value || '2018-07-02';
 
         if (!consultant || !startDate || !endDate) {
             window.showToast("⚠️ Selecciona el colaborador y las fechas de vacaciones", true);
+            return;
+        }
+
+        const isMaster = window.isAttendanceMasterAdmin();
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        if (norm(localAuthor) !== norm(consultant) && !isMaster) {
+            window.showToast("🔒 Seguridad de Firma: Solo el titular registrado puede generar y firmar su solicitud.", true);
+            return;
+        }
+
+        if (!hasCollabSignature) {
+            window.showToast("✍️ Por favor traza tu firma digital en el recuadro blanco para autorizar el formato FOPR.", true);
             return;
         }
 
@@ -15195,32 +15578,9 @@ window.renderDailyTasks = function() {
             return;
         }
 
-        // Validación previa de permisos para todos los días
-        let testCur = new Date(startDt.getTime());
-        while (testCur <= endDt) {
-            const dow = testCur.getDay();
-            if (dow !== 0 && dow !== 6) {
-                const y = testCur.getFullYear();
-                const m = testCur.getMonth() + 1;
-                const d = testCur.getDate();
-                const q = d <= 15 ? 'Q1' : 'Q2';
-                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = formatLocalDate(testCur);
-
-                const check = window.canUserEditAttendanceCell(consultant, dateStr, periodKey);
-                if (!check.allowed) {
-                    window.showToast(check.reason, true);
-                    return;
-                }
-            }
-            testCur.setDate(testCur.getDate() + 1);
-        }
-
         const meta = consultants[consultant] || defaultConsultantMetadata[consultant] || {};
-        const lead = meta.lead || defaultConsultantMetadata[consultant]?.lead || 'Coordinación';
         const currentPending = meta.pendingVacations !== undefined ? meta.pendingVacations : (defaultConsultantMetadata[consultant]?.pendingVacations || 4);
 
-        // Pre-conteo de días hábiles no festivos y blindaje estricto contra sobregiros (LOG-05)
         let testCountCur = new Date(startDt.getTime());
         let preCount = 0;
         while (testCountCur <= endDt) {
@@ -15231,102 +15591,719 @@ window.renderDailyTasks = function() {
         }
 
         if (preCount === 0) {
-            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana o días de descanso oficial", true);
+            window.showToast("⚠️ El rango seleccionado comprende únicamente fines de semana o días festivos", true);
             return;
         }
 
         if (preCount > currentPending) {
-            window.showToast(`⚠️ Saldo insuficiente: ${consultant} cuenta con ${currentPending} día(s) disponible(s) e intenta solicitar ${preCount} día(s) hábiles.`, true);
+            window.showToast(`⚠️ Saldo insuficiente: ${consultant} cuenta con ${currentPending} día(s) e intenta solicitar ${preCount} día(s).`, true);
             return;
         }
 
-        let cur = new Date(startDt.getTime());
-        let count = 0;
-        const targetMonth = startDt.getMonth() + 1;
-        const targetYear = startDt.getFullYear();
-        const targetQuincena = startDt.getDate() <= 15 ? 'Q1' : 'Q2';
+        const periods = window.calculateVacationPeriods(hireDate, currentPending, preCount);
+        const signatureDataUrl = collabSigCanvas.toDataURL('image/png');
 
-        while (cur <= endDt) {
-            const dow = cur.getDay();
-            const isHoliday = typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(cur);
-            if (dow !== 0 && dow !== 6) {
-                const y = cur.getFullYear();
-                const m = cur.getMonth() + 1;
-                const d = cur.getDate();
-                const q = d <= 15 ? 'Q1' : 'Q2';
-                const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
-                const dateStr = formatLocalDate(cur);
+        // Guardar firma en perfil local para comodidad futura del usuario
+        try {
+            localStorage.setItem('sicom_user_sig_' + encodeURIComponent(consultant), signatureDataUrl);
+        } catch(e) {}
 
-                if (!appData.attendance) appData.attendance = {};
-                if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
-                if (!appData.attendance[periodKey][consultant]) appData.attendance[periodKey][consultant] = {};
+        const now = new Date();
+        const monthNamesEs = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const formatHumanDate = (dt) => `${String(dt.getDate()).padStart(2, '0')}-${monthNamesEs[dt.getMonth()]}-${dt.getFullYear()}`;
 
-                if (isHoliday) {
-                    appData.attendance[periodKey][consultant][dateStr] = {
-                        status: 'Día Festivo',
-                        code: 'DF',
-                        loggedBy: localAuthor || 'Sistema',
-                        loggedAt: new Date().toISOString()
-                    };
-                } else {
-                    appData.attendance[periodKey][consultant][dateStr] = {
-                        status: 'Vacaciones',
-                        code: 'VA',
-                        returnDate: returnDate,
-                        loggedBy: localAuthor || 'Sistema',
-                        loggedAt: new Date().toISOString()
-                    };
-                    count++;
-                }
-            }
-            cur.setDate(cur.getDate() + 1);
-        }
-
-        const newBalance = currentPending - count;
-        if (!consultants[consultant]) consultants[consultant] = {};
-        consultants[consultant].pendingVacations = newBalance;
-
-        // Trazabilidad contable en libro mayor de vacaciones (vacationLedger)
-        if (!Array.isArray(consultants[consultant].vacationLedger)) {
-            consultants[consultant].vacationLedger = [];
-        }
-        consultants[consultant].vacationLedger.push({
-            startDate: startDate,
-            endDate: endDate,
-            daysDeducted: count,
-            previousBalance: currentPending,
-            newBalance: newBalance,
-            returnDate: returnDate,
-            timestamp: new Date().toISOString(),
-            registeredBy: localAuthor || 'Sistema'
-        });
-
-        window.sendExternalAlert('VACATION_REQUESTED', {
+        const reqId = 'vac_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const vacRequest = {
+            id: reqId,
+            requestDate: formatHumanDate(now),
             consultant: consultant,
+            employeeNo: employeeNo,
+            department: department,
+            jobTitle: jobTitle,
+            hireDate: hireDate,
             startDate: startDate,
             endDate: endDate,
-            days: count,
-            balance: newBalance,
             returnDate: returnDate,
-            lead: lead
-        });
+            startDateFormatted: formatHumanDate(startDt),
+            endDateFormatted: formatHumanDate(endDt),
+            returnDateFormatted: formatHumanDate(parseLocalDate(returnDate) || endDt),
+            requestedDays: preCount,
+            leadName: lead,
+            leadJobTitle: window.getOfficialJobTitle(lead),
+            totalPendingBefore: periods.totalPendingBefore,
+            totalBalanceAfter: periods.totalBalanceAfter,
+            period1: periods.p1,
+            period2: periods.p2,
+            status: 'PENDIENTE_JEFE',
+            colaboradorSignature: {
+                signerName: consultant,
+                signedAt: now.toISOString(),
+                dataUrl: signatureDataUrl
+            },
+            jefeSignature: null,
+            rhName: 'José Luis Bautista Cuchillo',
+            rhTitle: 'Recursos Humanos',
+            pdfKey: `vac_pdf_${reqId}`,
+            createdAt: now.toISOString()
+        };
+
+        window.showToast("📄 Generando formato oficial FOPR-RHU-02-03 con tu firma...", false);
+
+        try {
+            const pdfBytes = await window.generateVacationPdf(vacRequest);
+            if (window.SICOM_IDB) {
+                await window.SICOM_IDB.save(vacRequest.pdfKey, pdfBytes);
+            }
+
+            if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
+            appData.vacationRequests.unshift(vacRequest);
+
+            // Sincronizar binario a Firestore para respaldo permanente si hay conexión
+            if (isFirebaseReady && db && globalDoc && globalSetDoc && pdfBytes.byteLength < 850000) {
+                try {
+                    const pdfRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', vacRequest.pdfKey);
+                    globalSetDoc(pdfRef, {
+                        pdfKey: vacRequest.pdfKey,
+                        fileName: `FOPR-RHU-02-03_Vacaciones_${consultant}_${startDate}.pdf`,
+                        base64: uint8ToBase64(pdfBytes),
+                        pageCount: 1,
+                        uploadedAt: Date.now()
+                    }, { merge: false }).catch(err => console.warn("Firestore PDF sync warning:", err));
+                } catch(e) {}
+            }
+
+            window.sendExternalAlert('VACATION_REQUESTED', {
+                consultant: consultant,
+                startDate: startDate,
+                endDate: endDate,
+                days: preCount,
+                balance: periods.totalBalanceAfter,
+                returnDate: returnDate,
+                lead: lead
+            });
+
+            window.saveData(false);
+            window.closeVacationModal();
+            window.updateVacationPendingBadge();
+
+            if (activeAttendanceTab === 'vacations') {
+                window.renderAttendanceTable();
+            }
+
+            window.showToast(`✅ Solicitud foliada FOPR-RHU-02-03 (${preCount} días). Notificado a tu jefe (${lead}) para su firma.`, false);
+        } catch (errPdf) {
+            console.error("Error al generar PDF de vacaciones:", errPdf);
+            window.showToast("⚠️ Error al generar el formato PDF de vacaciones.", true);
+        }
+    };
+
+    // --- REVISIÓN Y FIRMA DE VACACIONES PARA EL JEFE INMEDIATO ---
+    let currentReviewVacRequestId = null;
+    let leadSigCanvas = null;
+    let leadSigCtx = null;
+    let hasLeadSignature = false;
+
+    window.initVacationLeadSignaturePad = function() {
+        leadSigCanvas = document.getElementById('vacationLeadSignCanvas');
+        if (!leadSigCanvas) return;
+        leadSigCtx = leadSigCanvas.getContext('2d');
+        leadSigCtx.strokeStyle = '#0055cc';
+        leadSigCtx.lineWidth = 2.4;
+        leadSigCtx.lineCap = 'round';
+        leadSigCtx.lineJoin = 'round';
+        window.clearVacationLeadSignaturePad();
+
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+
+        const getPos = (e) => {
+            const r = leadSigCanvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: (e.touches[0].clientX - r.left) * (leadSigCanvas.width / r.width),
+                    y: (e.touches[0].clientY - r.top) * (leadSigCanvas.height / r.height)
+                };
+            }
+            return {
+                x: (e.clientX - r.left) * (leadSigCanvas.width / r.width),
+                y: (e.clientY - r.top) * (leadSigCanvas.height / r.height)
+            };
+        };
+
+        const startDraw = (e) => {
+            if (leadSigCanvas.dataset.locked === 'true') return;
+            isDrawing = true;
+            const p = getPos(e);
+            lastX = p.x;
+            lastY = p.y;
+            e.preventDefault();
+        };
+
+        const drawMove = (e) => {
+            if (!isDrawing) return;
+            const p = getPos(e);
+            leadSigCtx.beginPath();
+            leadSigCtx.moveTo(lastX, lastY);
+            leadSigCtx.lineTo(p.x, p.y);
+            leadSigCtx.stroke();
+            lastX = p.x;
+            lastY = p.y;
+            hasLeadSignature = true;
+            e.preventDefault();
+        };
+
+        const stopDraw = () => { isDrawing = false; };
+
+        leadSigCanvas.onmousedown = startDraw;
+        leadSigCanvas.onmousemove = drawMove;
+        window.addEventListener('mouseup', stopDraw);
+
+        leadSigCanvas.ontouchstart = startDraw;
+        leadSigCanvas.ontouchmove = drawMove;
+        window.addEventListener('touchend', stopDraw);
+    };
+
+    window.clearVacationLeadSignaturePad = function() {
+        if (!leadSigCanvas || !leadSigCtx) return;
+        leadSigCtx.clearRect(0, 0, leadSigCanvas.width, leadSigCanvas.height);
+        hasLeadSignature = false;
+    };
+
+    window.useProfileSignatureForLeadVacation = function() {
+        const saved = localStorage.getItem('sicom_user_sig_' + encodeURIComponent(localAuthor));
+        if (!saved) {
+            window.showToast("⚠️ No tienes una firma guardada en tu perfil. Traza tu firma en el recuadro.", true);
+            return;
+        }
+        const img = new Image();
+        img.onload = () => {
+            window.clearVacationLeadSignaturePad();
+            leadSigCtx.drawImage(img, 10, 10, leadSigCanvas.width - 20, leadSigCanvas.height - 20);
+            hasLeadSignature = true;
+            window.showToast("✍️ Firma de perfil cargada para autorización.", false);
+        };
+        img.src = saved;
+    };
+
+    window.openVacationReviewSignModal = async function(reqId) {
+        const m = document.getElementById('vacationReviewSignModal');
+        if (!m) return;
+
+        const req = (appData.vacationRequests || []).find(r => r.id === reqId);
+        if (!req) {
+            window.showToast("⚠️ Solicitud de vacaciones no encontrada.", true);
+            return;
+        }
+
+        currentReviewVacRequestId = reqId;
+
+        document.getElementById('vacReviewConsultant').textContent = req.consultant;
+        document.getElementById('vacReviewJobTitle').textContent = `${req.jobTitle} • ${req.department || 'Operaciones'}`;
+        document.getElementById('vacReviewDates').textContent = `Del ${req.startDateFormatted || req.startDate} al ${req.endDateFormatted || req.endDate}`;
+        document.getElementById('vacReviewDays').textContent = `${req.requestedDays} día${req.requestedDays > 1 ? 's' : ''} hábiles`;
+        document.getElementById('vacReviewReturn').textContent = req.returnDateFormatted || req.returnDate;
+        document.getElementById('vacReviewLeadName').textContent = window.getOfficialFullName(req.leadName);
+        document.getElementById('vacReviewCurrentSessionUser').textContent = localAuthor || 'Invitado';
+
+        const p18Box = document.getElementById('vacReviewPeriod18Box');
+        if (p18Box && req.period1 && req.period2) {
+            p18Box.innerHTML = `
+                <span><strong>Periodo P1 (18m):</strong> ${req.period1.labelStart} a ${req.period1.labelEnd} (-${req.period1.deducted}d)</span>
+                <span><strong>Periodo P2:</strong> ${req.period2.labelStart} a ${req.period2.labelEnd} (Saldo: ${req.totalBalanceAfter}d)</span>
+            `;
+        }
+
+        // VERIFICACIÓN ESTRICTA DE ACCESO (RBAC CANDADO DE SEGURIDAD):
+        // Nadie puede firmar en nombre de otro.
+        const isMaster = window.isAttendanceMasterAdmin();
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const isAuthorizedLead = norm(localAuthor) === norm(req.leadName) || isMaster;
+
+        const lockNotice = document.getElementById('vacReviewSecurityLockNotice');
+        const expectedEl = document.getElementById('vacReviewExpectedLeadName');
+        const btnAuth = document.getElementById('btnAuthorizeVacation');
+        const padWrap = document.getElementById('vacReviewSignaturePadWrapper');
+
+        window.initVacationLeadSignaturePad();
+
+        if (!isAuthorizedLead) {
+            if (expectedEl) expectedEl.textContent = req.leadName;
+            if (lockNotice) lockNotice.classList.remove('hidden');
+            if (padWrap) padWrap.classList.add('opacity-40', 'pointer-events-none');
+            if (leadSigCanvas) leadSigCanvas.dataset.locked = 'true';
+            if (btnAuth) btnAuth.disabled = true;
+        } else {
+            if (lockNotice) lockNotice.classList.add('hidden');
+            if (padWrap) padWrap.classList.remove('opacity-40', 'pointer-events-none');
+            if (leadSigCanvas) leadSigCanvas.dataset.locked = 'false';
+            if (btnAuth) btnAuth.disabled = (req.status === 'AUTORIZADO');
+        }
+
+        // Renderizar vista previa del PDF
+        const previewContainer = document.getElementById('vacReviewPdfCanvasContainer');
+        if (previewContainer) {
+            previewContainer.innerHTML = '<span class="text-xs font-mono text-[#8a8380]">Cargando vista previa del documento oficial...</span>';
+            try {
+                let bytes = null;
+                if (window.SICOM_IDB) {
+                    bytes = await window.SICOM_IDB.get(req.pdfKey);
+                }
+                if (!bytes) {
+                    bytes = await window.generateVacationPdf(req);
+                }
+                if (bytes) {
+                    await window.ensurePdfJsReady();
+                    if (typeof pdfjsLib !== 'undefined') {
+                        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes) });
+                        const doc = await loadingTask.promise;
+                        const page = await doc.getPage(1);
+                        const viewport = page.getViewport({ scale: 1.15 });
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        canvas.className = 'max-w-full rounded shadow-md border border-[#3d3a39] bg-white';
+                        const renderCtx = {
+                            canvasContext: canvas.getContext('2d'),
+                            viewport: viewport
+                        };
+                        await page.render(renderCtx).promise;
+                        previewContainer.innerHTML = '';
+                        previewContainer.appendChild(canvas);
+                    }
+                }
+            } catch (errPreview) {
+                console.warn("Fallo al renderizar vista previa de vacaciones:", errPreview);
+                previewContainer.innerHTML = '<span class="text-xs font-mono text-[#ee6018]">Vista previa no disponible, pero el PDF está íntegro y listo para firmar.</span>';
+            }
+        }
+
+        m.classList.remove('hidden');
+        if (typeof window.pushNavigationState === 'function') window.pushNavigationState('vacationReviewSignModal');
+        setTimeout(() => m.classList.remove('opacity-0'), 10);
+    };
+
+    window.closeVacationReviewSignModal = function() {
+        const m = document.getElementById('vacationReviewSignModal');
+        if (!m) return;
+        m.classList.add('opacity-0');
+        setTimeout(() => m.classList.add('hidden'), 200);
+    };
+
+    window.confirmAuthorizeVacationByLead = async function() {
+        if (!currentReviewVacRequestId) return;
+        const req = (appData.vacationRequests || []).find(r => r.id === currentReviewVacRequestId);
+        if (!req) return;
+
+        const isMaster = window.isAttendanceMasterAdmin();
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        if (norm(localAuthor) !== norm(req.leadName) && !isMaster) {
+            window.showToast(`🔒 Acceso denegado: Solo el Jefe Inmediato asignado (${req.leadName}) o Dirección pueden autorizar esta solicitud.`, true);
+            return;
+        }
+
+        if (!hasLeadSignature) {
+            window.showToast("✍️ Por favor traza tu firma de autorización en el recuadro blanco.", true);
+            return;
+        }
+
+        const leadSignatureDataUrl = leadSigCanvas.toDataURL('image/png');
+        try {
+            localStorage.setItem('sicom_user_sig_' + encodeURIComponent(localAuthor), leadSignatureDataUrl);
+        } catch(e) {}
+
+        const now = new Date();
+        req.status = 'AUTORIZADO';
+        req.authorizedAt = now.toISOString();
+        req.jefeSignature = {
+            signerName: localAuthor || req.leadName,
+            signedAt: now.toISOString(),
+            dataUrl: leadSignatureDataUrl
+        };
+
+        window.showToast("🖋️ Estampando firma del Jefe Inmediato en FOPR-RHU-02-03...", false);
+
+        try {
+            const finalPdfBytes = await window.generateVacationPdf(req);
+            if (window.SICOM_IDB) {
+                await window.SICOM_IDB.save(req.pdfKey, finalPdfBytes);
+            }
+
+            if (isFirebaseReady && db && globalDoc && globalSetDoc && finalPdfBytes.byteLength < 850000) {
+                try {
+                    const pdfRef = globalDoc(db, 'artifacts', appId, 'public', 'data', 'sicom_pdfs', req.pdfKey);
+                    globalSetDoc(pdfRef, {
+                        pdfKey: req.pdfKey,
+                        fileName: `FOPR-RHU-02-03_Vacaciones_${req.consultant}_${req.startDate}_FIRMADO.pdf`,
+                        base64: uint8ToBase64(finalPdfBytes),
+                        pageCount: 1,
+                        uploadedAt: Date.now()
+                    }, { merge: false }).catch(err => console.warn("Firestore PDF sync warning:", err));
+                } catch(e) {}
+            }
+
+            // Aplicar vacaciones en la matriz de asistencia y descontar saldo
+            const startDt = parseLocalDate(req.startDate);
+            const endDt = parseLocalDate(req.endDate);
+            let cur = new Date(startDt.getTime());
+            let appliedCount = 0;
+
+            while (cur <= endDt) {
+                const dow = cur.getDay();
+                const isHoliday = typeof window.isOfficialLftHoliday === 'function' && window.isOfficialLftHoliday(cur);
+                if (dow !== 0 && dow !== 6) {
+                    const y = cur.getFullYear();
+                    const m = cur.getMonth() + 1;
+                    const d = cur.getDate();
+                    const q = d <= 15 ? 'Q1' : 'Q2';
+                    const periodKey = `${y}-${String(m).padStart(2, '0')}-${q}`;
+                    const dateStr = formatLocalDate(cur);
+
+                    if (!appData.attendance) appData.attendance = {};
+        if (!Array.isArray(appData.vacationRequests)) appData.vacationRequests = [];
+                    if (!appData.attendance[periodKey]) appData.attendance[periodKey] = {};
+                    if (!appData.attendance[periodKey][req.consultant]) appData.attendance[periodKey][req.consultant] = {};
+
+                    if (isHoliday) {
+                        appData.attendance[periodKey][req.consultant][dateStr] = {
+                            status: 'Día Festivo',
+                            code: 'DF',
+                            loggedBy: localAuthor || 'Sistema',
+                            loggedAt: now.toISOString()
+                        };
+                    } else {
+                        appData.attendance[periodKey][req.consultant][dateStr] = {
+                            status: 'Vacaciones',
+                            code: 'VA',
+                            returnDate: req.returnDate,
+                            vacationRequestId: req.id,
+                            loggedBy: localAuthor || 'Jefe Inmediato',
+                            loggedAt: now.toISOString()
+                        };
+                        appliedCount++;
+                    }
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            if (!consultants[req.consultant]) consultants[req.consultant] = {};
+            const prevPending = consultants[req.consultant].pendingVacations !== undefined ? consultants[req.consultant].pendingVacations : (defaultConsultantMetadata[req.consultant]?.pendingVacations || 4);
+            const newBal = prevPending - appliedCount;
+            consultants[req.consultant].pendingVacations = newBal;
+
+            if (!Array.isArray(consultants[req.consultant].vacationLedger)) {
+                consultants[req.consultant].vacationLedger = [];
+            }
+            consultants[req.consultant].vacationLedger.push({
+                requestId: req.id,
+                startDate: req.startDate,
+                endDate: req.endDate,
+                daysDeducted: appliedCount,
+                previousBalance: prevPending,
+                newBalance: newBal,
+                returnDate: req.returnDate,
+                timestamp: now.toISOString(),
+                registeredBy: localAuthor || 'Jefe Inmediato',
+                verifiedByLead: true
+            });
+
+            window.saveData(false);
+            window.closeVacationReviewSignModal();
+            window.updateVacationPendingBadge();
+            window.renderAttendanceTable();
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+            }
+
+            window.showToast(`🎉 Vacaciones de ${req.consultant} autorizadas y selladas digitalmente. Se aplicaron ${appliedCount} días en el rol.`, false);
+        } catch (e) {
+            console.error("Error al autorizar vacaciones:", e);
+            window.showToast("⚠️ Ocurrió un error al autorizar la solicitud.", true);
+        }
+    };
+
+    window.rejectVacationByLead = function() {
+        if (!currentReviewVacRequestId) return;
+        const req = (appData.vacationRequests || []).find(r => r.id === currentReviewVacRequestId);
+        if (!req) return;
+
+        const reason = prompt("Indica el motivo del rechazo para notificación al colaborador:", "Cobertura operativa indispensable en el proyecto");
+        if (!reason || !reason.trim()) return;
+
+        req.status = 'RECHAZADO';
+        req.rejectedAt = new Date().toISOString();
+        req.rejectionReason = reason.trim();
+        req.rejectedBy = localAuthor || 'Jefe Inmediato';
 
         window.saveData(false);
-        window.closeVacationModal();
+        window.closeVacationReviewSignModal();
+        window.updateVacationPendingBadge();
+        window.renderAttendanceTable();
+        window.showToast(`❌ Solicitud de vacaciones de ${req.consultant} rechazada.`, true);
+    };
 
-        // Sincronizar automáticamente la vista de la prenómina a la quincena registrada para visibilidad inmediata
-        const selM = document.getElementById('attSelMonth');
-        const selY = document.getElementById('attSelYear');
-        const selQ = document.getElementById('attSelQuincena');
-        if (selM && selY && selQ) {
-            selM.value = String(targetMonth);
-            selY.value = String(targetYear);
-            selQ.value = targetQuincena;
+    window.downloadVacationPdf = async function(reqId) {
+        const req = (appData.vacationRequests || []).find(r => r.id === reqId);
+        if (!req) return;
+
+        window.showToast("📄 Preparando descarga de formato oficial FOPR-RHU-02-03...", false);
+        try {
+            let bytes = null;
+            if (window.SICOM_IDB) {
+                bytes = await window.SICOM_IDB.get(req.pdfKey);
+            }
+            if (!bytes) {
+                bytes = await window.generateVacationPdf(req);
+            }
+            const blob = new Blob([bytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const cleanName = (req.consultant || 'Consultor').replace(/\s+/g, '_');
+            a.download = `FOPR-RHU-02-03_Vacaciones_${cleanName}_${req.startDate || '2026'}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 15000);
+            window.showToast("✅ Archivo PDF descargado correctamente.", false);
+        } catch (e) {
+            console.error("Error al descargar PDF:", e);
+            window.showToast("⚠️ No se pudo generar la descarga del PDF.", true);
+        }
+    };
+
+    window.downloadCurrentReviewVacationPdf = function() {
+        if (currentReviewVacRequestId) {
+            window.downloadVacationPdf(currentReviewVacRequestId);
+        }
+    };
+
+    // --- PESTAÑA DE FORMATOS FOPR-RHU-02-03 EN LA TORRE DE ASISTENCIA ---
+    window.renderVacationRequestsTab = function(container, isMaster, isLead) {
+        const requests = appData.vacationRequests || [];
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+        let pendingCount = 0;
+        let authCount = 0;
+        requests.forEach(r => {
+            if (r.status === 'PENDIENTE_JEFE') pendingCount++;
+            if (r.status === 'AUTORIZADO') authCount++;
+        });
+
+        const aux = document.getElementById('attTabAuxControls');
+        if (aux) {
+            aux.innerHTML = `
+                <button type="button" onclick="exportAllVacationPdfsZip()" class="px-2 py-0.5 rounded-[3px] bg-[#1d1a18] hover:bg-[#252220] border border-[#3d3a39] text-[#eeeeee] font-mono text-[9px] uppercase flex items-center gap-1 transition" title="Descargar paquete de todos los formatos firmados en .ZIP">
+                    <svg class="w-3 h-3 text-[#ee6018]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Descargar Expediente (.ZIP)</span>
+                </button>
+            `;
         }
 
-        window.renderAttendanceTable();
-        window.showToast(`🏖️ Solicitud de vacaciones de "${consultant}" guardada (${count} día${count > 1 ? 's' : ''}). Saldo: ${newBalance} días.`, false);
+        let html = `
+            <div class="space-y-3 p-2 font-sans">
+                <!-- Header Stats Card -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 font-mono text-xs">
+                    <div class="p-3 bg-[#171514] border border-[#3d3a39] rounded-[4px] flex items-center justify-between">
+                        <span class="text-[#8a8380] uppercase text-[10px]">Total Solicitudes</span>
+                        <span class="text-base font-bold text-[#eeeeee]">${requests.length}</span>
+                    </div>
+                    <div class="p-3 bg-[#171514] border border-[#3d3a39] rounded-[4px] flex items-center justify-between">
+                        <span class="text-[#ee6018] uppercase text-[10px]">Pendientes Firma Jefe</span>
+                        <span class="text-base font-bold text-[#ee6018]">${pendingCount}</span>
+                    </div>
+                    <div class="p-3 bg-[#171514] border border-[#3d3a39] rounded-[4px] flex items-center justify-between">
+                        <span class="text-[#10b981] uppercase text-[10px]">Autorizadas & Firmadas</span>
+                        <span class="text-base font-bold text-[#10b981]">${authCount}</span>
+                    </div>
+                </div>
+
+                <!-- Tabla de Solicitudes -->
+                <div class="bg-[#171514] border border-[#3d3a39] rounded-[4px] overflow-hidden">
+                    <div class="px-3 py-2 bg-[#12100f] border-b border-[#252220] flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#a0ca92]"></span>
+                            <span class="font-mono text-[10px] text-[#eeeeee] uppercase font-bold tracking-tight">Expedientes FOPR-RHU-02-03 (Solicitudes de Vacaciones)</span>
+                        </div>
+                        <button type="button" onclick="openVacationModal()" class="px-2 py-0.5 bg-[#fafafa] hover:bg-[#eeeeee] text-[#101010] font-mono text-[9.5px] uppercase font-bold rounded-[3px] transition">
+                            + Nueva Solicitud
+                        </button>
+                    </div>
+        `;
+
+        if (requests.length === 0) {
+            html += `
+                <div class="py-12 text-center text-[#8a8380] font-mono text-xs space-y-2">
+                    <svg class="w-8 h-8 mx-auto text-[#3d3a39]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <p>No se han registrado solicitudes de vacaciones aún.</p>
+                    <p class="text-[10px] text-[#555]">Crea una nueva solicitud con tu firma digital para iniciar el circuito automático.</p>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-mono">
+                        <thead class="bg-[#101010] border-b border-[#252220] text-[9.5px] text-[#8a8380] uppercase">
+                            <tr>
+                                <th class="py-2 px-3">Fecha / Folio</th>
+                                <th class="py-2 px-3">Colaborador</th>
+                                <th class="py-2 px-3">Periodo Solicitado</th>
+                                <th class="py-2 px-3 text-center">Días LFT</th>
+                                <th class="py-2 px-3">Jefe Inmediato</th>
+                                <th class="py-2 px-3 text-center">Estatus</th>
+                                <th class="py-2 px-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#252220]">
+            `;
+
+            requests.forEach(req => {
+                const isPending = req.status === 'PENDIENTE_JEFE';
+                const isAuth = req.status === 'AUTORIZADO';
+                const isMyTeamLead = norm(localAuthor) === norm(req.leadName) || isMaster;
+
+                let statusBadge = '';
+                if (isAuth) {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-[3px] bg-[#10b981]/15 border border-[#10b981]/40 text-[#10b981] text-[9px] font-bold">AUTORIZADO</span>';
+                } else if (isPending) {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-[3px] bg-[#ee6018]/15 border border-[#ee6018]/40 text-[#ee6018] text-[9px] font-bold">PENDIENTE JEFE</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-[3px] bg-[#ff453a]/15 border border-[#ff453a]/40 text-[#ff453a] text-[9px] font-bold">RECHAZADO</span>';
+                }
+
+                html += `
+                    <tr class="hover:bg-[#1d1a18] transition">
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <span class="text-[#eeeeee] font-semibold block">${escapeHtml(req.requestDate || '')}</span>
+                            <span class="text-[9px] text-[#8a8380]">${req.id.slice(0, 12)}</span>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <span class="text-[#eeeeee] font-medium block font-sans text-xs">${escapeHtml(req.consultant)}</span>
+                            <span class="text-[9.5px] text-[#8a8380]">${escapeHtml(req.jobTitle || 'Consultor')}</span>
+                        </td>
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <span class="text-[#eeeeee] block">${escapeHtml(req.startDateFormatted || req.startDate)} al ${escapeHtml(req.endDateFormatted || req.endDate)}</span>
+                            <span class="text-[9px] text-[#a0ca92]">Retorno: ${escapeHtml(req.returnDateFormatted || req.returnDate)}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                            <span class="px-1.5 py-0.5 bg-[#101010] border border-[#3d3a39] rounded-[3px] text-[#ee6018] font-bold text-xs">${req.requestedDays} d</span>
+                        </td>
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <span class="text-[#eeeeee] block font-sans text-xs">${escapeHtml(req.leadName)}</span>
+                            <span class="text-[9px] text-[#8a8380]">${isMyTeamLead ? '⭐ Tu autorización' : 'Jefe asignado'}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                            ${statusBadge}
+                        </td>
+                        <td class="py-2.5 px-3 text-right whitespace-nowrap space-x-1">
+                            <button type="button" onclick="downloadVacationPdf('${req.id}')" class="px-2 py-1 bg-[#101010] hover:bg-[#1d1a18] border border-[#3d3a39] text-[#b8b3b0] hover:text-[#eeeeee] rounded-[3px] text-[9.5px] transition" title="Descargar Formato Oficial PDF">
+                                📄 PDF
+                            </button>
+                            <button type="button" onclick="openVacationReviewSignModal('${req.id}')" class="px-2 py-1 ${(isPending && isMyTeamLead) ? 'bg-[#10b981] text-[#101010] font-bold hover:bg-[#059669]' : 'bg-[#1d1a18] text-[#eeeeee] hover:bg-[#252220] border border-[#3d3a39]'} rounded-[3px] text-[9.5px] transition" title="Revisar y Estampar Firma de Jefe">
+                                ${(isPending && isMyTeamLead) ? '✍️ Firmar Ahora' : 'Ver Detalle'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        html += '</div></div>';
+        container.innerHTML = html;
     };
+
+    window.exportAllVacationPdfsZip = async function() {
+        const requests = appData.vacationRequests || [];
+        if (requests.length === 0) {
+            window.showToast("⚠️ No hay formatos de vacaciones registrados para exportar.", true);
+            return;
+        }
+
+        if (typeof JSZip === 'undefined') {
+            window.showToast("⚠️ Cargando compresor ZIP, reintenta en un momento...", true);
+            return;
+        }
+
+        window.showToast(`📦 Generando archivo ZIP con ${requests.length} formatos oficiales FOPR-RHU-02-03...`, false);
+        try {
+            const zip = new JSZip();
+            const folder = zip.folder("Formatos_FOPR-RHU-02-03_Vacaciones");
+
+            for (let i = 0; i < requests.length; i++) {
+                const req = requests[i];
+                let bytes = null;
+                if (window.SICOM_IDB) {
+                    bytes = await window.SICOM_IDB.get(req.pdfKey);
+                }
+                if (!bytes) {
+                    bytes = await window.generateVacationPdf(req);
+                }
+                if (bytes) {
+                    const cleanC = (req.consultant || 'Consultor').replace(/\s+/g, '_');
+                    const cleanDate = (req.startDate || '2026').replace(/[^a-zA-Z0-9_-]/g, '_');
+                    folder.file(`FOPR-RHU-02-03_${cleanC}_${cleanDate}.pdf`, bytes);
+                }
+            }
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            const now = new Date();
+            a.download = `FOPR-RHU-02-03_Expediente_Vacaciones_${now.getFullYear()}_${now.getMonth() + 1}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 15000);
+            window.showToast("✅ Paquete de expedientes ZIP descargado exitosamente.", false);
+        } catch (e) {
+            console.error("Error al exportar ZIP de vacaciones:", e);
+            window.showToast("⚠️ Fallo al comprimir los archivos de vacaciones.", true);
+        }
+    };
+
+    window.updateVacationPendingBadge = function() {
+        const requests = appData.vacationRequests || [];
+        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const isMaster = window.isAttendanceMasterAdmin ? window.isAttendanceMasterAdmin() : false;
+
+        let pendingCount = 0;
+        requests.forEach(r => {
+            if (r.status === 'PENDIENTE_JEFE') {
+                if (norm(localAuthor) === norm(r.leadName) || isMaster) {
+                    pendingCount++;
+                }
+            }
+        });
+
+        const topBadge = document.getElementById('topVacationPendingBadge');
+        if (topBadge) {
+            if (pendingCount > 0) {
+                topBadge.textContent = String(pendingCount);
+                topBadge.classList.remove('hidden');
+            } else {
+                topBadge.classList.add('hidden');
+            }
+        }
+
+        const tabBadge = document.getElementById('attVacationTabBadge');
+        if (tabBadge) {
+            if (pendingCount > 0) {
+                tabBadge.textContent = String(pendingCount);
+                tabBadge.classList.remove('hidden');
+            } else {
+                tabBadge.classList.add('hidden');
+            }
+        }
+    };
+
 
     // --- GENERADOR DINÁMICO DE PRENÓMINA INSTITUCIONAL EXCEL (.XLSX) FOPR-RHU-02-02 ---
     window.exportPrenominaXLSX = async function() {

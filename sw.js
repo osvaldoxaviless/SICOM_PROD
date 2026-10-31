@@ -3,7 +3,7 @@
  * EO/SA — Enterprise Operations & Systems Architecture // STGT
  */
 
-const SW_VERSION = '20261028_v1030';
+const SW_VERSION = '20261031_v1031';
 const STATIC_CACHE_NAME = `eosa-cache-${SW_VERSION}`;
 
 // Recursos esenciales para instalación PWA (solo estáticos propios del origen)
@@ -16,7 +16,8 @@ const PRECACHE_ASSETS = [
     '/icon-512.png',
     '/icon-maskable-192.png',
     '/icon-maskable-512.png',
-    '/icon.svg'
+    '/icon.svg',
+    '/fopr_rhu_02_03_vacaciones_template.pdf'
 ];
 
 self.addEventListener('install', (event) => {
